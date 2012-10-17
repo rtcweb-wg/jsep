@@ -96,9 +96,9 @@ Javascript Session Establishment Protocol
       </address>
     </author>
 
-    <date day="14" month="October" year="2012" />
+    <date day="17" month="October" year="2012" />
 
-    <area>APPS</area>
+    <area>RAI</area>
 
 <!-- 
 
@@ -220,19 +220,31 @@ Table of Contents
 The thinking behind WebRTC call setup has been to fully specify and control the media plane, but to leave the signaling plane up to the application as much as possible. The rationale is that different applications may prefer to use different protocols, such as the existing SIP or Jingle call signaling protocols, or something custom to the particular application, perhaps for a novel use case. In this approach, the key information that needs to be exchanged is the multimedia session description, which specifies the necessary transport and media configuration information necessary to establish the media plane.
 </t>
 
-<!--
+<t>
 The original spec for WebRTC attempted to implement this protocol-agnostic signaling by providing a mechanism to exchange session descriptions in the form of SDP blobs. Upon starting a session, the browser would generate a SDP blob, which would be passed to the application for transport over its preferred signaling protocol. On the remote side, this blob would be passed into the browser from the application, and the browser would then generate a blob of its own in response. Upon transmission back to the initiator, this blob would be plugged into their browser, and the handshake would be complete.
+</t>
 
+<t>
 Experimentation with this mechanism turned up several shortcomings, which generally stemmed from there being insufficient context at the browser to fully determine the meaning of a SDP blob. For example, determining whether a blob is an offer or an answer, or differentiating a new offer from a retransmit.
+</t>
 
+<t>
 The ROAP proposal, specified in [I-D.draft-jennings-rtcweb-signaling-01], attempted to resolve these issues by providing additional structure in the messaging - in essence, to create a generic signaling protocol that specifies how the browser signaling state machine should operate. However, even though the protocol is abstracted, the state machine forces a least-common-denominator approach on the signaling interactions. For example, in Jingle, the call initiator can provide additional ICE candidates even after the initial offer has been sent, which allows the offer to be sent immediately for quicker call startup. However, in the browser state machine, there is no notion of sending an updated offer before the initial offer has been responded to, rendering this functionality impossible.
+</t>
 
+<t>
 While specific concerns like this could be addressed by modifying the generic protocol, others would likely be discovered later. The main reason this mechanism is inflexible is because it embeds a signaling state machine within the browser. Since the browser generates the session descriptions on its own, and fully controls the possible states and advancement of the signaling state machine, modification of the session descriptions or use of alternate state machines becomes difficult or impossible.
+</t>
 
+<t>
 The browser environment also has its own challenges that cause problems for an embedded signaling state machine. One of these is that the user may reload the web page at any time. If this happens, and the state machine is being run at a server, the server can simply push the current state back down to the page and resume the call where it left off.
+</t>
 
+<t>
 If instead the state machine is run at the browser end, and is instantiated within, for example, the PeerConnection object, that state machine will be reinitialized when the page is reloaded and the JavaScript re-executed. This actually complicates the design of any interoperability service, as all cases where an offer or answer has already been generated but is now "forgotten" must now be handled by trying to move the client state machine forward to the same state it had been in previously in order to match what has already been delivered to and/or answered by the far side, or handled by ensuring that aborts are cleanly handled from every state and the negotiation rapidly restarted.
+</t>
 
+<t>
 .ti 0
 1.1. Terminology
 
@@ -243,15 +255,27 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 .fi
 To resolve the issues mentioned above, this document proposes the Javascript Session Establishment Protocol (JSEP) that pulls the signaling state machine out of the browser and into Javascript. This mechanism effectively removes the browser almost completely from the core signaling flow; the only interface needed is a way for the application to pass in the local and remote session descriptions negotiated by whatever signaling mechanism is used, and a way to interact with the ICE state machine. 
+</t>
 
+<!-- 
+
+<t>
 JSEP's handling of session descriptions is simple and straightforward. Whenever an offer/answer exchange is needed, the initiating side creates an offer by calling a createOffer() API. The application can do massaging of that offer, if it wants to, and then uses it to set up its local config via a setLocalDescription() API. The offer is then sent off to the remote side over its preferred signaling mechanism (e.g. WebSockets); upon receipt of that offer, the remote party installs it using a setRemoteDescription() API. 
+</t>
 
+<t>
 When the call is accepted, the callee uses a createAnswer() API to generate an appropriate answer, applies it using setLocalDescription(), and sends the answer back to the initiator over the signaling channel. When the offerer gets that answer, it installs it using setRemoteDescription(), and initial setup is complete. This process can be repeated for additional offer/answer exchanges. 
+</t>
 
+<t>
 Regarding ICE, JSEP decouples the ICE state machine from the overall signaling state machine, as the ICE state machine must remain in the browser, since only the browser has the necessary knowledge of candidates and other transport info. Performing this separation it provides additional flexibility; in protocols that decouple session descriptions from transport, such as Jingle, the transport information can be sent separately; in protocols that don't, such as SIP, the information can be easily aggregated and recombined. Sending transport information separately can allow for faster ICE and DTLS startup, since the necessary roundtrips can occur while waiting for the remote side to accept the session.
+</t>
 
+<t>
 The JSEP approach does come with a minor downside. As the application now is responsible for driving the signaling state machine, slightly more application code is necessary to perform call setup; the application must call the right APIs at the right times, and convert the session descriptions and ICE information into the defined messages of its chosen signaling protocol, instead of simply forwarding the messages emitted from the browser. 
+</t>
 
+<t>
 One way to mitigate this is to provide a Javascript library that hides this complexity from the developer, which would implement the state machine and serialization of the desired signaling protocol. For example, this library could convert easily adapt the JSEP API into the exact ROAP API, thereby implementing the ROAP signaling protocol. Such a library could of course also implement other popular signaling protocols, including SIP or Jingle. In this fashion we can enable greater control for the experienced developer without forcing any additional complexity on the novice developer.
 
 .ti 0
@@ -259,7 +283,9 @@ One way to mitigate this is to provide a Javascript library that hides this comp
 
 .fi
 Another approach that was considered for JSEP was to move the mechanism for generating offers and answers out of the browser as well. Instead of providing createOffer/createAnswer methods within the browser, this approach would instead expose a getCapabilities API which would provide the application with the information it needed in order to generate its own session descriptions. This increases the amount of work that the application needs to do; it needs to know how to generate session descriptions from capabilities, and especially how to generate the correct answer from an arbitrary offer and the supported capabilities. While this could certainly be addressed by using a library like the one mentioned above, it basically forces the use of said library even for a simple example. Exposing createOffer/createAnswer avoids that problem, but still allows applications to generate their own offers/answers if they choose, using the description generated by createOffer as an indication of the browser's capabilities.
+</t>
 
+<t>
 Note also that while JSEP transfers more control to Javascript, it is not intended to be an example of a "low-level" API. The general argument against a low-level API is that there are too many necessary API points, and they can be called in any order, leading to something that is hard to specify and test. In the approach proposed here, control is performed via session descriptions; this requires only a few APIs to handle these descriptions, and they are evaluated in a specific fashion, which reduces the number of possible states and interactions.
 
 .ti 0
@@ -288,13 +314,21 @@ JSEP does not specify a particular signaling model or state machine, other than 
 4.2. Session Descriptions and State Machine
 
 In order to establish the media plane, the user agent needs specific parameters to indicate what to transmit to the remote side, as well as how to handle the media that is received. These parameters are determined by the exchange of session descriptions in offers and answers, and there are certain details to this process that must be handled in the JSEP APIs.
+</t>
 
+<t>
 Whether a session description was sent or received affects the meaning of that description. For example, the list of codecs sent to a remote party indicates what the local side is willing to decode, and what the remote party should send. Not all parameters follow this rule; for example, the SRTP parameters [RFC4568] sent to a remote party indicate what the local side will use to encrypt, and thereby how the remote party should expect to receive. 
+</t>
 
+<t>
 In addition, various RFCs put different conditions on the format of offers versus answers. For example, a offer may propose multiple SRTP configurations, but an answer may only contain a single SRTP configuration. 
+</t>
 
+<t>
 Lastly, while the exact media parameters are only known only after a offer and an answer have been exchanged, it is possible for the offerer to receive media after they have sent an offer and before they have received an answer. To properly process incoming media in this case, the offerer's media handler must be aware of the details of the offerer before the answer arrives.
+</t>
 
+<t>
 Therefore, in order to handle session descriptions properly, the user agent needs:
 
 .in 6
@@ -306,9 +340,15 @@ Therefore, in order to handle session descriptions properly, the user agent need
 .in 3
 
 JSEP addresses this by adding both a setLocalDescription and a setRemoteDescription method, and both these methods take a parameter to indicate the type of session description being supplied. This satisfies the requirements listed above for both the offerer, who first calls setLocalDescription("offer", sdp) and then later setRemoteDescription("answer", sdp), as well as for the answerer, who first calls setRemoteDescription("offer", sdp) and then later setLocalDescription("answer", sdp). While it could be possible to implicitly determine the value of the offer/answer argument, requiring it to be specified explicitly is more robust, allowing invalid combinations (i.e. an answer before an offer) to generate an appropriate error.
+</t>
 
+<t>
 It also allows for an answer to be treated as provisional by the application. Provisional answers provide a way for an answerer to communicate session parameters back to the offerer, in order for the session to begin, while allowing a final answer to be specified later. This concept of a final answer is important to the offer/answer model; when such an answer is received, any extra resources allocated by the caller can be released, now that the exact session configuration is known. These "resources" can include things like extra ICE components, TURN candidates, or video decoders. Provisional answers, on the other hand, do no such deallocation; as a result, multiple dissimilar provisional answers can be received and applied during call setup.
+</t>
 
+
+
+<t>
 As in [RFC3264], an offerer can send an offer, and update it as long as it has not been answered. The answerer can send back zero or more provisional answers, and finally end the offer-answer exchange by sending a final answer. The state machine for this is as follows:
 
 .nf
@@ -326,7 +366,7 @@ As in [RFC3264], an offerer can send an offer, and update it as long as it has n
       +-----------+          +-----------+
       |           |          |           |
       |           | PRANSWER |           |
-      |   Offer   |--------->| Pranswer  |
+      |   Offer   |-------- >| Pranswer  |
       |           |          |           |
       |           |----\\     |           |----\\
       +-----------+    |     +-----------+    |
@@ -344,32 +384,44 @@ Aside from these state transitions, there is no other difference between the han
 4.3. Session Description Format
 
 In the current WebRTC specification, session descriptions are formatted as SDP messages. While this format is not optimal for manipulation from Javascript, it is widely accepted, and frequently updated with new features. Any alternate encoding of session descriptions would have to keep pace with the changes to SDP, at least until the time that this new encoding eclipsed SDP in popularity. As a result, JSEP continues to use SDP as the internal representation for its session descriptions.
+</t>
 
+<t>
 However, to simplify Javascript processing, and provide for future flexibility, the SDP syntax is encapsulated within a SessionDescription object, which can be constructed from SDP, and be serialized out to SDP. If we were able to agree on a JSON format for session descriptions, we could easily enable this object to generate/expect JSON.
+</t>
 
+<t>
 Other methods may be added to SessionDescription in the future to simplify handling of SessionDescriptions from Javascript.
 
 .ti 0
 4.4. Separation of Signaling and ICE State Machines
 
 JSEP does away with the SDP Agent within the browser, and this functionality is now controlled directly by the application, which uses the setLocalDescription and setRemoteDescription APIs to tell the browser what SDP has been negotiated. The ICE Agent remains in the browser, as it still needs to drive the process of gathering candidates, connectivity checks, and related ICE functionality.
+</t>
 
+<t>
 When a new ICE candidate is available, the ICE Agent will notify the application via a callback; these candidates will automatically be added to the local session description. When all candidates have been gathered, the callback will also be invoked to signal that the gathering process is complete.
 
 .ti 0
 4.5. ICE Candidate Trickling
 
 Candidate trickling is a technique through which a caller may incrementally provide candidates to the callee after the initial offer has been dispatched. This allows the callee to begin acting upon the call and setting up the ICE (and perhaps DTLS) connections immediately, without having to wait for the caller to allocate all possible candidates, resulting in faster call startup in many cases.
+</t>
 
+<t>
 JSEP supports optional candidate trickling by providing APIs that provide control and feedback on the ICE candidate gathering process. Applications that support candidate trickling can send the initial offer immediately and send individual candidates when they get the onicecandidate callback with a new candidate; applications that do not support this feature can simply wait for the final onicecandidate callback that indicates gathering is complete, and create and send their offer, with all the candidates, at this time.
+</t>
 
+<t>
 Upon receipt of trickled candidates, the receiving application can supply them to its ICE Agent by calling an addIceCandidate method. This triggers the ICE Agent to start using this remote candidate for connectivity checks. Applications that do not make use of candidate tricking can ignore addIceCandidate entirely, and use the onicecandidate callback solely to indicate when candidate gathering is complete.
 
 .ti 0
 4.6. ICE Candidate Format
 
 As with session descriptions, we choose to provide an IceCandidate object that provides some abstraction, but can be easily converted to/from SDP a=candidate lines.
+</t>
 
+<t>
 The IceCandidate object has fields to indicate which m= line it should be associated with, and a method to convert to a SDP representation, ex:
 
 .ti 6
@@ -384,31 +436,47 @@ Currently, a=candidate lines are the only SDP information that is contained with
 4.7.1. Serial Forking
 
 Serial forking involves a call being dispatched to multiple remote callees, where each callee can accept the call, but only one active session ever exists at a time; no mixing of received media is performed.
+</t>
 
+<t>
 JSEP handles serial forking well, allowing the application to easily control the policy for selecting the desired remote endpoint. When an answer arrives from one of the callees, the application can choose to apply it either as a provisional answer, leaving open the possibility of using a different answer in the future, or apply it as a final answer, ending the setup flow.
+</t>
 
+<t>
 In a "first-one-wins" situation, the first answer will be applied as a final answer, and the application will send a terminate message to any subsequent answers. In SIP parlance, this would be ACK + BYE.
+</t>
 
+<t>
 In a "last-one-wins" situation, all answers would be applied as provisional answers, and any previous call leg will be terminated. At some point, the application will end the setup process, perhaps with a timer; At this point, the application could reapply the existing remote description as a final answer.
 
 .ti 0
 4.7.2. Parallel Forking
 
 Parallel forking involves a call being dispatched to multiple remote callees, where each callee can accept the call, and multiple simultaneous active sessions can be established as a result. If multiple callees send media, this media is mixed and played out at the caller side.
+</t>
 
+<t>
 JSEP can handle parallel forking by "cloning" the session when needed to create multiple parallel sessions. When the first answer is received, the caller can clone the existing session, and then apply the answer as a final answer to the original session. Upon receiving the next answer, the cloned session is cloned again, and the received answer is applied as a final answer to the first clone. This process repeats until the caller decides to end the setup flow, and closes the final cloned session. 
+</t>
 
+<t>
 Cloned sessions inherit the local session description and candidates from their parent, and an empty remote description; only sessions that have not yet applied an answer can be cloned. Each cloned session may discover new peer-reflexive candidates; these candidates will be supplied via the onicecandidate callback to that specific session. Since the clone uses the same local description as its parent, creating a clone will fail if it is not possible to reserve the same resources for the clone as have already been reserved by the parent.
+</t>
 
+<t>
 As a result of this cloning, the application will end up with N parallel sessions, each with a local and remote description and their own local and remote addresses. The media flow from these sessions can be managed by specifying SDP direction attributes in the descriptions, or the application can choose to play out the media from all sessions mixed together. Of course, if the application wants to only keep a single session, it can simply terminate the sessions that it no longer needs.
 
 .ti 0
 4.8. Session Rehydration
 
 In the event that the local application state is reinitialized, either due to a user reload of the page, or a decision within the application to reload itself (perhaps to update to a new version), it is possible to keep an existing session alive via a process called "rehydration".
+</t>
 
+<t>
 With rehydration, the current local session description is persisted somewhere outside of the page, perhaps on the application server, or in browser local storage. The page is then reloaded, and a new session object is created in Javascript. The saved local session is now retrieved, but the previous ICE candidates will no longer be valid in this case, so we will need to perform an ICE restart; to do so, we simply generate a new ICE ufrag/pwd combo for the local description. 
+</t>
 
+<t>
 The modified local description is then installed via setLocalDescription, and sent off as an offer to the remote side, who will reply with an answer that can be supplied to setRemoteDescription. ICE processing proceeds as usual, and as soon as connectivity is established, the session will be back up and running again.
 
 .ti 0
@@ -423,42 +491,64 @@ This section details the basic operations that must be present to implement JSEP
 5.1.1. createOffer
 
 The createOffer method generates a blob of SDP that contains a RFC 3264 offer with the supported configurations for the session, including descriptions of the local MediaStreams attached to this PeerConnection, the codec/RTP/RTCP options supported by this implementation, and any candidates that have been gathered by the ICE Agent. A constraints parameters may be supplied to provide additional control over the generated offer, e.g. to get a full set of session capabilities, or to request a new set of ICE credentials.
+</t>
 
+<t>
 In the initial offer, the generated SDP will contain all desired functionality for the session (certain parts that are supported but not desired by default may be omitted); for each SDP line, the generation of the SDP must follow the appropriate process for generating an offer. In the event createOffer is called after the session is established, createOffer will generate an offer that is compatible with the current session, incorporating any changes that have been made to the session since the last complete offer-answer exchange, such as addition or removal of streams. If no changes have been made, the offer will be identical to the current local description.
+</t>
 
+<t>
 Session descriptions generated by createOffer must be immediately usable by setLocalDescription; if a system has limited resources (e.g. a finite number of decoders), createOffer should return an offer that reflects the current state of the system, so that setLocalDescription will succeed when it attempts to acquire those resources. Because this method may need to inspect the system state to determine the currently available resources, it may be implemented as an async operation.
+</t>
 
+<t>
 Calling this method does not change state; its use is not required.
 
 .ti 0
 5.1.2. createAnswer
 
 The createAnswer method generates a blob of SDP that contains a RFC 3264 SDP answer with the supported configuration for the session that is compatible with the parameters supplied in |offer|. Like createOffer, the returned blob contains descriptions of the local MediaStreams attached to this PeerConnection, the codec/RTP/RTCP options negotiated for this session, and any candidates that have been gathered by the ICE Agent. A constraints parameter may be supplied to provide additional control over the generated answer.
+</t>
 
+<t>
 As an answer, the generated SDP will contain a specific configuration that specifies how the media plane should be established. For each SDP line, the generation of the SDP must follow the appropriate process for generating an answer.
+</t>
 
+<t>
 Session descriptions generated by createAnswer must be immediately usable by setLocalDescription; like createOffer, the returned description should reflect the current state of the system. Because this method may need to inspect the system state to determine the currently available resources, it may need to be implemented as an async operation.
+</t>
 
+<t>
 Calling this method does not change state; its use is not required.
 
 .ti 0
 5.1.3. SessionDescriptionType
 
 The strings "offer", "pranswer", and "answer" serve as type arguments to setLocalDescription and setRemoteDescription. They provide information as to how the description parameter should be parsed, and how the media state should be changed.
+</t>
 
+<t>
 "offer" indicates that a description should be parsed as an offer; said description may include many possible media configurations. A description used as an "offer" may be applied anytime the PeerConnection is in a stable state, or as an update to a previously sent but unanswered "offer". 
+</t>
 
+<t>
 "pranswer" indicates that a description should be parsed as an answer, but not a final answer, and so should not result in the freeing of allocated resources. It may result in the start of media transmission, if the answer does not specify an inactive media direction. A description used as a "pranswer" may be applied as a response to an "offer", or an update to a previously sent "answer".
+</t>
 
+<t>
 "answer" indicates that a description should be parsed as an answer, the offer-answer exchange should be considered complete, and any resources (decoders, candidates) that are no longer needed can be released. A description used as an "answer" may be applied as a response to a "offer", or an update to a previously sent "pranswer".
+</t>
 
+<t>
 The application can use some discretion on whether an answer should be applied as provisional or final. For example, in a serial forking scenario, an application may receive multiple "final" answers, one from each remote endpoint. The application could accept the initial answers as provisional answers, and only apply an answer as final when it receives one that meets its criteria (e.g. a live user instead of voicemail).
 
 .ti 0
 5.1.4. setLocalDescription
 
 The setLocalDescription method instructs the PeerConnection to apply the supplied SDP blob as its local configuration. The type parameter indicates whether the blob should be processed as an offer, provisional answer, or final answer; offers and answers are checked differently, using the various rules that exist for each SDP line.
+</t>
 
+<t>
 This API changes the local media state; among other things, it sets up local resources for receiving and decoding media. In order to successfully handle
 scenarios where the application wants to offer to change from one
 media format to a different, incompatible format, the PeerConnection
@@ -467,46 +557,62 @@ local descriptions (e.g. support codecs that exist in both
 descriptions) until a final answer is received, at which point the
 PeerConnection can fully adopt the new local description, or roll
 back to the old description if the remote side denied the change.
+</t>
 
+<t>
 If setRemoteDescription was previous called with an offer, and setLocalDescription is called with an answer (provisional or final), and the media directions are compatible, this will result in the starting of media transmission.
 
 .ti 0
 5.1.5. setRemoteDescription
 
 The setRemoteDescription method instructs the PeerConnection to apply the supplied SDP blob as the desired remote configuration. As in setLocalDescription, the |type| parameter indicates how the blob should be processed.
+</t>
 
+<t>
 This API changes the local media state; among other things, it sets up local resources for sending and encoding media.
+</t>
 
+<t>
 If setRemoteDescription was previous called with an offer, and setLocalDescription is called with an answer (provisional or final), and the media directions are compatible, this will result in the starting of media transmission.
 
 .ti 0
 5.1.6. localDescription
 
 The localDescription method returns a copy of the current local configuration, i.e. what was most recently passed to setLocalDescription, plus any local candidates that have been generated by the ICE Agent.
+</t>
 
+<t>
 A null object will be returned if the local description has not yet been established.
 
 .ti 0
 5.1.7. remoteDescription
 
 The remoteDescription method returns a copy of the current remote configuration, i.e. what was most recently passed to setRemoteDescription, plus any remote candidates that have been supplied via processIceMessage.
+</t>
 
+<t>
 A null object will be returned if the remote description has not yet been established.
 
 .ti 0
 5.1.8. updateIce
 
 The updateIce method allows the configuration of the ICE Agent to be changed during the session, primarily for changing which types of local candidates are provided to the application and used for connectivity checks. A callee may initially configure the ICE Agent to use only relay candidates, to avoid leaking location information, but update this configuration to use all candidates once the call is accepted.
+</t>
 
+<t>
 Regardless of the configuration, the gathering process collects all available candidates, but excluded candidates will not be surfaced in onicecallback or used for connectivity checks.
+</t>
 
+<t>
 This call may result in a change to the state of the ICE Agent, and may result in a change to media state if it results in connectivity being established.
 
 .ti 0
 5.1.9. addIceCandidate
 
 The addIceCandidate method provides a remote candidate to the ICE Agent, which will be added to the remote description. Connectivity checks will be sent to the new candidate.
+</t>
 
+<t>
 This call will result in a change to the state of the ICE Agent, and may result in a change to media state if it results in connectivity being established. 
 
 .ti 0
@@ -563,7 +669,9 @@ OffererJS->OffererUA: var offer = pc.createOffer(null);
 6.1.2. Applying the Offer
 
 The initiator then instructs the PeerConnection to use this offer as the local description for this session, i.e. what codecs it will use for received media, what SRTP keys it will use for sending media (if using SDES), etc. In order that the UA handle the description properly, the initiator marks it as an offer when calling setLocalDescription; this indicates to the UA that multiple capabilities have been offered, but this set may be pared back later, when the answer arrives.
+</t>
 
+<t>
 Since the local user agent must be prepared to receive media upon applying the offer, this operation will cause local decoder resources to be allocated, based on the codecs indicated in the offer.
 
 OffererJS->OffererUA: pc.setLocalDescription("offer", offer);
@@ -646,7 +754,9 @@ OffererUA->AnswererUA: < media >
 6.4. Updates to the Session
 
 Updates to the session are handled with a new offer/answer exchange. However, since media will already be flowing at this point, the new offerer needs to support both its old session description as well as the new one it has offered, until the change is accepted by the remote side.
+</t>
 
+<t>
 Note also that in an update scenario, the roles may be reversed, i.e. the update offerer can be different than the original offerer.
 
 .ti 0
