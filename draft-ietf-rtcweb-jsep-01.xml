@@ -331,13 +331,13 @@ Lastly, while the exact media parameters are only known only after a offer and a
 <t>
 Therefore, in order to handle session descriptions properly, the user agent needs:
 
-.in 6
-1. To know if a session description pertains to the local or remote side.
+<list style="numbers">
+<t> To know if a session description pertains to the local or remote side. </t>
 
-2. To know if a session description is an offer or an answer.
+<t> To know if a session description is an offer or an answer. </t>
 
-3. To allow the offer to be specified independently of the answer.
-.in 3
+<t> To allow the offer to be specified independently of the answer. </t>
+</list>
 
 JSEP addresses this by adding both a setLocalDescription and a setRemoteDescription method, and both these methods take a parameter to indicate the type of session description being supplied. This satisfies the requirements listed above for both the offerer, who first calls setLocalDescription("offer", sdp) and then later setRemoteDescription("answer", sdp), as well as for the answerer, who first calls setRemoteDescription("offer", sdp) and then later setLocalDescription("answer", sdp). While it could be possible to implicitly determine the value of the offer/answer argument, requiring it to be specified explicitly is more robust, allowing invalid combinations (i.e. an answer before an offer) to generate an appropriate error.
 </t>
@@ -507,11 +507,9 @@ The modified local description is then installed via setLocalDescription, and se
 <t>
 This section details the basic operations that must be present to implement JSEP functionality. The actual API exposed in the W3C API may have somewhat different syntax, but should map easily to these concepts.
 </t>
- </section>
 
 <section title="Methods">
 
-</section>
 
 <section title="createOffer">
 
@@ -668,6 +666,8 @@ This call will result in a change to the state of the ICE Agent, and may result 
 </t>
 </section>
 
+</section>
+
 <section title="Configurable SDP Parameters">
 
 <t>
@@ -699,6 +699,7 @@ The following is a partial list of SDP parameters that an application may want t
 For example, an application could implement call hold by adding an a=inactive attribute to its local description, and then applying and signaling that description.
 </t>
 </section>
+ </section>
 
 <section title="Media Setup Overview">
 
@@ -722,7 +723,6 @@ OffererJS->OffererUA: pc.addStream(stream);
 .fi 
 
 </t>
-</section>
 
 <section title="Generating An Offer">
 
@@ -772,6 +772,8 @@ At this point, the offerer is ready to send its offer to the callee using its pr
 </t>
 </section>
 
+</section>
+
 <section title="Receiving the Session">
 
 <t>
@@ -782,7 +784,6 @@ AnswererJS->AnswererUA: var pc = new PeerConnection(config, null);
 AnswererJS->AnswererUA: pc.onicecandidate = onIceCandidate;
 
 </t>
-</section>
 
 <section title="Receiving the Offer">
 
@@ -845,10 +846,11 @@ As with the offer, the answer (with or without candidates) is now converted to t
 </t>
 </section>
 
+</section>
+
 <section title="Completing the Session">
 
 
-</section>
 
 <section title="Receiving the Answer">
 
@@ -860,6 +862,7 @@ OffererJS->OffererUA:  pc.setRemoteDescription("answer", answer);
 OffererUA->AnswererUA: < media >
 
 </t>
+</section>
 </section>
 
 <section title="Updates to the Session">
