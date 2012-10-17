@@ -1,3 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt" ?>
+<?rfc toc="yes" ?>
+<?rfc symrefs="yes" ?>
+<?rfc iprnotified="yes" ?>
+<?rfc strict="no" ?> <!-- todo fix -->
+<?rfc compact="yes" ?>
+<?rfc sortrefs="yes" ?>
+<?rfc colonspace="yes" ?>
+<?rfc rfcedstyle="no" ?>
+<?rfc tocdepth="4"?>
+
+
+<!-- 
+
 .\" Auto generated Nroff by NroffEdit on January 23, 2012
 .pl 10.0i
 .po 0
@@ -30,13 +46,76 @@
 Javascript Session Establishment Protocol
 \%draft-ietf-rtcweb-jsep-01
 
+-->
+
+<rfc category="std"
+     docName="draft-ietf-rtcweb-jsep-01."
+     ipr="trust200902">
+  <front>
+    <title abbrev="JSEP">Javascript Session Establishment Protocol</title>
+
+  
+ <author fullname="Justin Uberti" initials="J." surname="Uberti">
+      <organization>Google</organization>
+
+      <address>
+        <postal>
+          <street>5 Cambridge Center</street>
+
+          <city>Cambridge</city>
+
+          <region>MA</region>
+
+          <code>02142</code>
+
+          <country>USA</country>
+        </postal>
+
+        <email>justin@uberti.name</email>
+      </address>
+    </author>
+
+  <author fullname="Cullen Jennings" initials="C." surname="Jennings">
+      <organization>Cisco</organization>
+
+      <address>
+        <postal>
+          <street>170 West Tasman Drive</street>
+
+          <city>San Jose</city>
+
+          <region>CA</region>
+
+          <code>95134</code>
+
+          <country>USA</country>
+        </postal>
+
+ 
+        <email>fluffy@iii.ca</email>
+      </address>
+    </author>
+
+    <date day="14" month="October" year="2012" />
+
+    <area>APPS</area>
+
+<!-- 
+
 .ti 0
 Abstract
+-->
 
-This document proposes a mechanism for allowing a Javascript application to fully control the signaling plane of a multimedia session, and discusses how this would work with existing signaling protocols.
-
+ <abstract>
+      <t>
+This document proposes a mechanism for allowing a Javascript application to fully control the signaling plane of a multimedia session, and discusses how this would work with existing signaling protocols. </t>
+<t>
 This document is an input document for discussion.  It should be discussed in the RTCWEB WG list, rtcweb@ietf.org.
+</t> 
+    </abstract>
+  </front>
 
+<!--
 .ti 0
 Status of this Memo
 
@@ -128,11 +207,20 @@ Table of Contents
 .\" \# ETC -- End of auto updated Table of Contents
 .bp
 .ti 0
+
 1. Introduction
+-->
+
+<middle>
+  <section title="Introduction">
+<t>
+
 
 .fi
 The thinking behind WebRTC call setup has been to fully specify and control the media plane, but to leave the signaling plane up to the application as much as possible. The rationale is that different applications may prefer to use different protocols, such as the existing SIP or Jingle call signaling protocols, or something custom to the particular application, perhaps for a novel use case. In this approach, the key information that needs to be exchanged is the multimedia session description, which specifies the necessary transport and media configuration information necessary to establish the media plane.
+</t>
 
+<!--
 The original spec for WebRTC attempted to implement this protocol-agnostic signaling by providing a mechanism to exchange session descriptions in the form of SDP blobs. Upon starting a session, the browser would generate a SDP blob, which would be passed to the application for transport over its preferred signaling protocol. On the remote side, this blob would be passed into the browser from the application, and the browser would then generate a blob of its own in response. Upon transmission back to the initiator, this blob would be plugged into their browser, and the handshake would be complete.
 
 Experimentation with this mechanism turned up several shortcomings, which generally stemmed from there being insufficient context at the browser to fully determine the meaning of a SDP blob. For example, determining whether a blob is an offer or an answer, or differentiating a new offer from a retransmit.
@@ -183,15 +271,15 @@ Note also that while JSEP transfers more control to Javascript, it is not intend
 JSEP does not specify a particular signaling model or state machine, other than the generic need to exchange RFC 3264 offers and answers in order for both sides of the session to know how to conduct the session. JSEP provides mechanisms to create offers and answers, as well as to apply them to a session. However, the actual mechanism by which these offers and answers are communicated to the remote side, including addressing, retransmission, forking, and glare handling, is left entirely up to the application.
 
 .nf
-    +-----------+                                +-----------+ 
-    |  Web App  |<--- App-Specific Signaling --->|  Web App  |
-    +-----------+                                +-----------+
-          |                                            |
-          |  SDP                                       |  SDP 
-          V                                            V
-    +-----------+                                +-----------+ 
-    |  Browser  |<----------- Media ------------>|  Browser  |
-    +-----------+                                +-----------+
+    +-----------+                                 +-----------+ 
+    |  Web App  |< --- App-Specific Signaling -- >|  Web App  |
+    +-----------+                                 +-----------+
+          |                                             |
+          |  SDP                                        |  SDP 
+          V                                             V
+    +-----------+                                 +-----------+ 
+    |  Browser  |< ----------- Media ----------- >|  Browser  |
+    +-----------+                                 +-----------+
 
                   Figure 1: JSEP Signaling Model
 .fi
@@ -227,7 +315,7 @@ As in [RFC3264], an offerer can send an offer, and update it as long as it has n
       +-----------+
       |           |
       |           |
-      |  Stable   |<---------------\\
+      |  Stable   |< --------------\\
       |           |                |
       |           |                |
       +-----------+                |
@@ -451,7 +539,7 @@ For example, an application could implement call hold by adding an a=inactive at
 
 The example here shows a typical call setup using the JSEP model, indicating the functions that are called and the state changes that occur. We assume the following architecture in this example, where UA is synonymous with "browser", and JS is synonymous with "web application":
 
-OffererUA <-> OffererJS <-> WebServer <-> AnswererJS <-> AnswererUA
+OffererUA < -> OffererJS < -> WebServer < -> AnswererJS < -> AnswererUA
 
 .ti 0
 6.1. Initiating the Session
@@ -535,7 +623,7 @@ The recipient then instructs the PeerConnection to use the answer as its local d
 
 .nf
 AnswererJS->AnswererUA: pc.setLocalDescription("answer", answer);
-AnswererUA->OffererUA:  <media>
+AnswererUA->OffererUA:  < media >
 .fi
 
 .ti 0
@@ -552,7 +640,7 @@ As with the offer, the answer (with or without candidates) is now converted to t
 The initiator converts the answer from the signaling protocol and applies it as the remote description, marking it as an answer. This causes the PeerConnection to move to the ACTIVE state, and transmission of media by the offerer to start (assuming both sides have indicated this in their descriptions).
 
 OffererJS->OffererUA:  pc.setRemoteDescription("answer", answer);
-OffererUA->AnswererUA: <media>
+OffererUA->AnswererUA: < media >
 
 .ti 0
 6.4. Updates to the Session
@@ -755,12 +843,12 @@ OffererJS->OffererUA:   pc.addStream(localStream, null);
 OffererJS->OffererUA:   offer = pc.createOffer(null);
 OffererJS->OffererUA:   pc.setLocalDescription("offer", offer);
 OffererJS:              xmpp = createSessionInitiate(offer);
-OffererJS->AnswererJS:  <jingle action="session-initiate"/>
+OffererJS->AnswererJS:  < jingle action="session-initiate"/>
 
 OffererJS->OffererUA:   pc.startIce();
 OffererUA->OffererJS:   onicecandidate(cand);
 OffererJS:              createTransportInfo(cand);
-OffererJS->AnswererJS:  <jingle action="transport-info"/>
+OffererJS->AnswererJS:  < jingle action="transport-info"/>
 
 // session-initiate arrives at Answerer
 AnswererJS->AnswererUA: pc = new PeerConnection();
@@ -773,7 +861,7 @@ AnswererJS->AnswererUA: candidate = parseTransportInfo(xmpp);
 AnswererJS->AnswererUA: pc.addIceCandidate(candidate);
 AnswererUA->AnswererJS: onicecandidate(cand)
 AnswererJS:             createTransportInfo(cand);
-AnswererJS->OffererJS:  <jingle action="transport-info"/>
+AnswererJS->OffererJS:  < jingle action="transport-info"/>
 
 // transport-infos arrive at Offerer
 OffererJS->OffererUA:   candidates = parseTransportInfo(xmpp);
@@ -784,7 +872,7 @@ AnswererJS->AnswererUA: peer.addStream(localStream, null);
 AnswererJS->AnswererUA: answer = peer.createAnswer(offer, null);
 AnswererJS:             xmpp = createSessionAccept(answer);
 AnswererJS->AnswererUA: pc.setLocalDescription("answer", answer);
-AnswererJS->OffererJS:  <jingle action="session-accept"/>
+AnswererJS->OffererJS:  < jingle action="session-accept"/>
 
 // session-accept arrives at Offerer
 OffererJS:              answer = parseSessionAccept(xmpp);
@@ -813,7 +901,7 @@ OffererJS->OffererUA:   pc.addStream(videoStream)
 OffererJS->OffererUA:   offer = pc.createOffer(null);
 OffererJS:              xmpp = createContentAdd(offer);
 OffererJS->OffererUA:   pc.setLocalDescription("offer", offer);
-OffererJS->AnswererJS:  <jingle action="content-add"/>
+OffererJS->AnswererJS:  < jingle action="content-add"/>
 
 // content-add arrives at Answerer
 AnswererJS:             offer = parseContentAdd(xmpp);
@@ -821,7 +909,7 @@ AnswererJS->AnswererUA: pc.setRemoteDescription("offer", offer);
 AnswererJS->AnswererUA: answer = pc.createAnswer(offer, null);
 AnswererJS->AnswererUA: pc.setLocalDescription("answer", answer);
 AnswererJS:             xmpp = createContentAccept(answer);
-AnswererJS->OffererJS:  <jingle action="content-accept"/>
+AnswererJS->OffererJS:  < jingle action="content-accept"/>
 
 // content-accept arrives at Offerer
 OffererJS:              answer = parseContentAccept(xmpp);
@@ -840,21 +928,21 @@ OffererJS->OffererUA:   pc.addStream(offererVideoStream2)
 OffererJS->OffererUA:   offer = pc.createOffer(null);
 OffererJS:              xmpp = createDescriptionInfo(offer);
 OffererJS->OffererUA:   pc.setLocalDescription("offer", offer);
-OffererJS->AnswererJS:  <jingle action="description-info"/>
+OffererJS->AnswererJS:  < jingle action="description-info"/>
 
 AnswererJS->AnswererUA: pc.addStream(answererVideoStream2)
 AnswererJS->AnswererUA: offer = pc.createOffer(null);
 AnswererJS:             xmpp = createDescriptionInfo(offer);
 AnswererJS->AnswererUA: pc.setLocalDescription("offer", offer);
-AnswererJS->OffererJS:  <jingle action="description-info"/>
+AnswererJS->OffererJS:  < jingle action="description-info"/>
 
 // description-info arrives at "Answerer", and is acked
 AnswererJS:             offer = parseDescriptionInfo(xmpp);
-AnswererJS->OffererJS:  <iq type="result/>  // ack
+AnswererJS->OffererJS:  < iq type="result"/>  // ack
 
 // description-info arrives at Offerer, and is acked
 OffererJS:              offer = parseDescriptionInfo(xmpp);
-OffererJS->AnswererJS:  <iq type="result/>  // ack
+OffererJS->AnswererJS:  < iq type="result"/>  // ack
 
 // ack arrives at Offerer; remote offer is used as an answer
 OffererJS->OffererUA:   pc.setRemoteDescription("answer", offer);
@@ -1051,6 +1139,13 @@ Appendix B. Change log
 .ti 0
 Authors' Addresses
 
+-->
+
+</section>
+</middle>
+
+<!--
+
 .nf
 Justin Uberti
 Google
@@ -1069,3 +1164,18 @@ USA
 
 Email:  fluffy@cisco.com
 .fi
+-->
+
+
+  <back>
+<!--
+    <references title="Normative References">
+
+   </references>
+
+    <references title="Informative References">
+  
+    </references>
+-->
+  </back>
+</rfc>
