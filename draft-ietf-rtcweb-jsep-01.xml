@@ -308,10 +308,11 @@ JSEP does not specify a particular signaling model or state machine, other than 
 ]]></artwork>
 </figure>
 
-<t>
-.ti 0
-4.2. Session Descriptions and State Machine
+</section>
 
+<section title="Session Descriptions and State Machine">
+
+<t>
 In order to establish the media plane, the user agent needs specific parameters to indicate what to transmit to the remote side, as well as how to handle the media that is received. These parameters are determined by the exchange of session descriptions in offers and answers, and there are certain details to this process that must be handled in the JSEP APIs.
 </t>
 
@@ -378,10 +379,12 @@ As in [RFC3264], an offerer can send an offer, and update it as long as it has n
 
 
 Aside from these state transitions, there is no other difference between the handling of provisional ("pranswer") and final ("answer") answers.
+</t>
+</section>
 
-.ti 0
-4.3. Session Description Format
+<section title="Session Description Format">
 
+<t>
 In the current WebRTC specification, session descriptions are formatted as SDP messages. While this format is not optimal for manipulation from Javascript, it is widely accepted, and frequently updated with new features. Any alternate encoding of session descriptions would have to keep pace with the changes to SDP, at least until the time that this new encoding eclipsed SDP in popularity. As a result, JSEP continues to use SDP as the internal representation for its session descriptions.
 </t>
 
@@ -391,19 +394,23 @@ However, to simplify Javascript processing, and provide for future flexibility, 
 
 <t>
 Other methods may be added to SessionDescription in the future to simplify handling of SessionDescriptions from Javascript.
+</t>
+</section>
 
-.ti 0
-4.4. Separation of Signaling and ICE State Machines
+<section title="Separation of Signaling and ICE State Machines">
 
+<t>
 JSEP does away with the SDP Agent within the browser, and this functionality is now controlled directly by the application, which uses the setLocalDescription and setRemoteDescription APIs to tell the browser what SDP has been negotiated. The ICE Agent remains in the browser, as it still needs to drive the process of gathering candidates, connectivity checks, and related ICE functionality.
 </t>
 
 <t>
 When a new ICE candidate is available, the ICE Agent will notify the application via a callback; these candidates will automatically be added to the local session description. When all candidates have been gathered, the callback will also be invoked to signal that the gathering process is complete.
+</t>
+</section>
 
-.ti 0
-4.5. ICE Candidate Trickling
+<section title="ICE Candidate Trickling">
 
+<t>
 Candidate trickling is a technique through which a caller may incrementally provide candidates to the callee after the initial offer has been dispatched. This allows the callee to begin acting upon the call and setting up the ICE (and perhaps DTLS) connections immediately, without having to wait for the caller to allocate all possible candidates, resulting in faster call startup in many cases.
 </t>
 
@@ -413,10 +420,12 @@ JSEP supports optional candidate trickling by providing APIs that provide contro
 
 <t>
 Upon receipt of trickled candidates, the receiving application can supply them to its ICE Agent by calling an addIceCandidate method. This triggers the ICE Agent to start using this remote candidate for connectivity checks. Applications that do not make use of candidate tricking can ignore addIceCandidate entirely, and use the onicecandidate callback solely to indicate when candidate gathering is complete.
+</t>
+</section>
 
-.ti 0
-4.6. ICE Candidate Format
+<section title="ICE Candidate Format">
 
+<t>
 As with session descriptions, we choose to provide an IceCandidate object that provides some abstraction, but can be easily converted to/from SDP a=candidate lines.
 </t>
 
@@ -430,13 +439,14 @@ a=candidate:1 1 UDP 1694498815 66.77.88.99 10000 typ host
 
 <t>
 Currently, a=candidate lines are the only SDP information that is contained within IceCandidate, as they represent the only information needed that is not present in the initial offer (i.e. for trickle candidates).
+</t>
+</section>
 
-.ti 0
-4.7. Interactions With Forking
+<section title="Interactions With Forking">
 
-.ti 0
-4.7.1. Serial Forking
+<section title="Serial Forking">
 
+<t>
 Serial forking involves a call being dispatched to multiple remote callees, where each callee can accept the call, but only one active session ever exists at a time; no mixing of received media is performed.
 </t>
 
@@ -450,9 +460,11 @@ In a "first-one-wins" situation, the first answer will be applied as a final ans
 
 <t>
 In a "last-one-wins" situation, all answers would be applied as provisional answers, and any previous call leg will be terminated. At some point, the application will end the setup process, perhaps with a timer; At this point, the application could reapply the existing remote description as a final answer.
+</t>
+</section>
 
-.ti 0
-4.7.2. Parallel Forking
+<section title="Parallel Forking">
+<t>
 
 Parallel forking involves a call being dispatched to multiple remote callees, where each callee can accept the call, and multiple simultaneous active sessions can be established as a result. If multiple callees send media, this media is mixed and played out at the caller side.
 </t>
@@ -469,6 +481,7 @@ Cloned sessions inherit the local session description and candidates from their 
 As a result of this cloning, the application will end up with N parallel sessions, each with a local and remote description and their own local and remote addresses. The media flow from these sessions can be managed by specifying SDP direction attributes in the descriptions, or the application can choose to play out the media from all sessions mixed together. Of course, if the application wants to only keep a single session, it can simply terminate the sessions that it no longer needs.
 </t>
 
+</section>
 </section>
 
 <section title="Session Rehydration">
@@ -493,12 +506,16 @@ The modified local description is then installed via setLocalDescription, and se
 
 <t>
 This section details the basic operations that must be present to implement JSEP functionality. The actual API exposed in the W3C API may have somewhat different syntax, but should map easily to these concepts.
+</t>
+ </section>
 
-.ti 0
-5.1. Methods
+<section title="Methods">
 
-.ti 0
-5.1.1. createOffer
+</section>
+
+<section title="createOffer">
+
+<t>
 
 The createOffer method generates a blob of SDP that contains a RFC 3264 offer with the supported configurations for the session, including descriptions of the local MediaStreams attached to this PeerConnection, the codec/RTP/RTCP options supported by this implementation, and any candidates that have been gathered by the ICE Agent. A constraints parameters may be supplied to provide additional control over the generated offer, e.g. to get a full set of session capabilities, or to request a new set of ICE credentials.
 </t>
@@ -513,9 +530,12 @@ Session descriptions generated by createOffer must be immediately usable by setL
 
 <t>
 Calling this method does not change state; its use is not required.
+</t>
+</section>
 
-.ti 0
-5.1.2. createAnswer
+<section title="createAnswer">
+
+<t>
 
 The createAnswer method generates a blob of SDP that contains a RFC 3264 SDP answer with the supported configuration for the session that is compatible with the parameters supplied in |offer|. Like createOffer, the returned blob contains descriptions of the local MediaStreams attached to this PeerConnection, the codec/RTP/RTCP options negotiated for this session, and any candidates that have been gathered by the ICE Agent. A constraints parameter may be supplied to provide additional control over the generated answer.
 </t>
@@ -530,9 +550,12 @@ Session descriptions generated by createAnswer must be immediately usable by set
 
 <t>
 Calling this method does not change state; its use is not required.
+</t>
+</section>
 
-.ti 0
-5.1.3. SessionDescriptionType
+<section title="SessionDescriptionType">
+
+<t>
 
 The strings "offer", "pranswer", and "answer" serve as type arguments to setLocalDescription and setRemoteDescription. They provide information as to how the description parameter should be parsed, and how the media state should be changed.
 </t>
@@ -551,9 +574,12 @@ The strings "offer", "pranswer", and "answer" serve as type arguments to setLoca
 
 <t>
 The application can use some discretion on whether an answer should be applied as provisional or final. For example, in a serial forking scenario, an application may receive multiple "final" answers, one from each remote endpoint. The application could accept the initial answers as provisional answers, and only apply an answer as final when it receives one that meets its criteria (e.g. a live user instead of voicemail).
+</t>
+</section>
 
-.ti 0
-5.1.4. setLocalDescription
+<section title="setLocalDescription">
+
+<t>
 
 The setLocalDescription method instructs the PeerConnection to apply the supplied SDP blob as its local configuration. The type parameter indicates whether the blob should be processed as an offer, provisional answer, or final answer; offers and answers are checked differently, using the various rules that exist for each SDP line.
 </t>
@@ -571,9 +597,12 @@ back to the old description if the remote side denied the change.
 
 <t>
 If setRemoteDescription was previous called with an offer, and setLocalDescription is called with an answer (provisional or final), and the media directions are compatible, this will result in the starting of media transmission.
+</t>
+</section>
 
-.ti 0
-5.1.5. setRemoteDescription
+<section title="setRemoteDescription">
+
+<t>
 
 The setRemoteDescription method instructs the PeerConnection to apply the supplied SDP blob as the desired remote configuration. As in setLocalDescription, the |type| parameter indicates how the blob should be processed.
 </t>
@@ -584,27 +613,36 @@ This API changes the local media state; among other things, it sets up local res
 
 <t>
 If setRemoteDescription was previous called with an offer, and setLocalDescription is called with an answer (provisional or final), and the media directions are compatible, this will result in the starting of media transmission.
+</t>
+</section>
 
-.ti 0
-5.1.6. localDescription
+<section title="localDescription">
+
+<t>
 
 The localDescription method returns a copy of the current local configuration, i.e. what was most recently passed to setLocalDescription, plus any local candidates that have been generated by the ICE Agent.
 </t>
 
 <t>
 A null object will be returned if the local description has not yet been established.
+</t>
+</section>
 
-.ti 0
-5.1.7. remoteDescription
+<section title="remoteDescription">
+
+<t>
 
 The remoteDescription method returns a copy of the current remote configuration, i.e. what was most recently passed to setRemoteDescription, plus any remote candidates that have been supplied via processIceMessage.
 </t>
 
 <t>
 A null object will be returned if the remote description has not yet been established.
+</t>
+</section>
 
-.ti 0
-5.1.8. updateIce
+<section title="updateIce">
+
+<t>
 
 The updateIce method allows the configuration of the ICE Agent to be changed during the session, primarily for changing which types of local candidates are provided to the application and used for connectivity checks. A callee may initially configure the ICE Agent to use only relay candidates, to avoid leaking location information, but update this configuration to use all candidates once the call is accepted.
 </t>
@@ -615,18 +653,24 @@ Regardless of the configuration, the gathering process collects all available ca
 
 <t>
 This call may result in a change to the state of the ICE Agent, and may result in a change to media state if it results in connectivity being established.
+</t>
+</section>
 
-.ti 0
-5.1.9. addIceCandidate
+<section title="addIceCandidate">
+
+<t>
 
 The addIceCandidate method provides a remote candidate to the ICE Agent, which will be added to the remote description. Connectivity checks will be sent to the new candidate.
 </t>
 
 <t>
 This call will result in a change to the state of the ICE Agent, and may result in a change to media state if it results in connectivity being established. 
+</t>
+</section>
 
-.ti 0
-5.2. Configurable SDP Parameters
+<section title="Configurable SDP Parameters">
+
+<t>
 
 The following is a partial list of SDP parameters that an application may want to control, in either local or remote descriptions, using this API.
 </t>
