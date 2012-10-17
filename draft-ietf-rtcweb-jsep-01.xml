@@ -707,20 +707,20 @@ For example, an application could implement call hold by adding an a=inactive at
 The example here shows a typical call setup using the JSEP model, indicating the functions that are called and the state changes that occur. We assume the following architecture in this example, where UA is synonymous with "browser", and JS is synonymous with "web application":
 </t>
 
-<!--
-OffererUA < -> OffererJS < -> WebServer < -> AnswererJS < -> AnswererUA
--->
+<figure><artwork><![CDATA[
+OffererUA <-> OffererJS <-> WebServer <-> AnswererJS <-> AnswererUA
+]]></artwork></figure>
 
 <section title="Initiating the Session">
 
 <t>
 The initiator creates a PeerConnection, hooks up to its ICE callback, and adds the desired MediaStreams (presumably obtained via getUserMedia). The ICE gathering process begins to gather candidates for a default number of streams, as the exact number will not be known until the local description is applied. The PeerConnection is in the NEW state. 
 
-.nf
+<figure><artwork><![CDATA[
 OffererJS->OffererUA: var pc = new PeerConnection(config, null);
 OffererJS->OffererUA: pc.onicecandidate = onIceCandidate;
 OffererJS->OffererUA: pc.addStream(stream);
-.fi 
+]]></artwork></figure> 
 
 </t>
 
@@ -756,9 +756,9 @@ OffererJS->OffererUA: pc.setLocalDescription("offer", offer);
 
 The initiator starts to receive callbacks on its onicecandidate handler. Candidates are provided to the IceCallback as they are allocated; when the last allocation completes or times out, this callback will be invoked with a null argument.
 
-.nf
+<figure><artwork><![CDATA[
 OffererUA->OffererJS: onIceCandidate(candidate);
-.fi
+]]></artwork></figure>
 
 </t>
 </section>
@@ -793,10 +793,10 @@ The recipient converts the received offer from its signaling protocol into SDP f
 
 This step will also cause encoder resources to be allocated, based on the codecs specified in |offer|.
 
-.nf
+<figure><artwork><![CDATA[
 AnswererJS->AnswererUA: pc.setRemoteDescription("offer", offer);
 AnswererUA->AnswererJS: onAddStream(stream);
-.fi
+]]></artwork></figure>
 
 </t>
 </section>
@@ -807,7 +807,9 @@ AnswererUA->AnswererJS: onAddStream(stream);
 
 If ICE candidates from the remote site were included in the offer, the ICE Agent will automatically start trying to use them. Otherwise, if ICE candidates are sent separately, they are passed into the PeerConnection when they arrive.
 
+<figure><artwork><![CDATA[
 AnswererJS->AnswererUA: pc.addIceCandidate(candidate);
+]]></artwork></figure>
 
 </t>
 </section>
@@ -818,7 +820,9 @@ AnswererJS->AnswererUA: pc.addIceCandidate(candidate);
 
 Once the recipient has decided to accept the session, it generates an answer session description. This process performs the appropriate intersection of codecs and other parameters to generate the correct answer. As with the offer, MediaConstraints can be provided to influence the answer that is generated, and/or the application can post-process the answer manually.
 
+<figure><artwork><![CDATA[
 AnswererJS->AnswererUA: pc.createAnswer(offer, null);
+]]></artwork></figure>
 
 </t>
 </section>
@@ -829,10 +833,10 @@ AnswererJS->AnswererUA: pc.createAnswer(offer, null);
 
 The recipient then instructs the PeerConnection to use the answer as its local description for this session, i.e. what codecs it will use to receive media, etc. It also marks the description as an answer, which tells the UA that these parameters are final. This causes the PeerConnection to move to the ACTIVE state, and transmission of media by the answerer to start (assuming both sides have indicated this in their descriptions).
 
-.nf
+<figure><artwork><![CDATA[
 AnswererJS->AnswererUA: pc.setLocalDescription("answer", answer);
 AnswererUA->OffererUA:  < media >
-.fi
+]]></artwork></figure>
 
 </t>
 </section>
@@ -858,8 +862,10 @@ As with the offer, the answer (with or without candidates) is now converted to t
 
 The initiator converts the answer from the signaling protocol and applies it as the remote description, marking it as an answer. This causes the PeerConnection to move to the ACTIVE state, and transmission of media by the offerer to start (assuming both sides have indicated this in their descriptions).
 
+<figure><artwork><![CDATA[
 OffererJS->OffererUA:  pc.setRemoteDescription("answer", answer);
 OffererUA->AnswererUA: < media >
+]]></artwork></figure>
 
 </t>
 </section>
@@ -1096,7 +1102,7 @@ A.1. Example API
 
 The interface below shows a basic Javascript API that could be used to expose the functionality discussed in this document. This API is used for the examples in the following parts of this Appendix.
  
-.nf
+<figure><artwork><![CDATA[
 // actions, for setLocalDescription/setRemoteDescription
 enum SessionDescriptionType { "offer", "pranswer", "answer" }
 
@@ -1170,7 +1176,7 @@ interface PeerConnection {
     // notifies the application of a new local ICE candidate
     attribute Function?          onicecandidate;
 };
-.fi
+]]></artwork></figure>
 
 .ti 0
 A.2. Example API Flows
@@ -1182,7 +1188,7 @@ A.2.1. Call using ROAP
 
 This example demonstrates a ROAP call, without the use of trickle candidates.
 
-.nf
+<figure><artwork><![CDATA[
 // Call is initiated toward Answerer
 OffererJS->OffererUA:   pc = new PeerConnection();
 OffererJS->OffererUA:   pc.addStream(localStream, null);
@@ -1215,14 +1221,14 @@ AnswererUA->OffererUA:  Media
 OffererUA->OffererJS:   onopen();
 OffererJS->AnswererJS:  {"type":"OK" }
 OffererUA->AnswererUA:  Media
-.fi
+]]></artwork></figure>
 
 .ti 0
 A.2.2 Call using XMPP
 
 This example demonstrates an XMPP call, making use of trickle candidates.
 
-.nf
+<figure><artwork><![CDATA[
 // Call is initiated toward Answerer
 OffererJS->OffererUA:   pc = new PeerConnection();
 OffererJS->OffererUA:   pc.addStream(localStream, null);
@@ -1272,7 +1278,7 @@ AnswererUA->OffererUA:  Media
 // ICE Completes (at Offerer)
 OffererUA->OffererJS:   onopen();
 OffererUA->AnswererUA:  Media
-.fi 
+]]></artwork></figure> 
 
 .ti 0
 A.2.3. Adding video to a call, using XMPP
@@ -1281,7 +1287,7 @@ This example demonstrates an XMPP call, where the XMPP content-add mechanism is 
 
 Note that the offerer for the change to the session may be different than the original call offerer.
 
-.nf
+<figure><artwork><![CDATA[
 // Offerer adds video stream
 OffererJS->OffererUA:   pc.addStream(videoStream)
 OffererJS->OffererUA:   offer = pc.createOffer(null);
@@ -1300,7 +1306,7 @@ AnswererJS->OffererJS:  < jingle action="content-accept"/>
 // content-accept arrives at Offerer
 OffererJS:              answer = parseContentAccept(xmpp);
 OffererJS->OffererUA:   pc.setRemoteDescription("answer", answer);
-.fi
+]]></artwork></figure>
 
 
 .ti 0
@@ -1308,7 +1314,7 @@ A.2.4. Simultaneous add of video streams, using XMPP
 
 This example demonstrates an XMPP call, where new video sources are added at the same time to a call that already has video; since adding these sources only affects one side of the call, there is no conflict. The XMPP description-info mechanism is used to indicate the new sources to the remote side.
 
-.nf
+<figure><artwork><![CDATA[
 // Offerer and "Answerer" add video streams at the same time
 OffererJS->OffererUA:   pc.addStream(offererVideoStream2)
 OffererJS->OffererUA:   offer = pc.createOffer(null);
@@ -1335,14 +1341,14 @@ OffererJS->OffererUA:   pc.setRemoteDescription("answer", offer);
 
 // ack arrives at "Answerer"; remote offer is used as an answer
 AnswererJS->AnswererUA: pc.setRemoteDescription("answer", offer);
-.fi
+]]></artwork></figure>
 
 .ti 0
 A.2.5. Call using SIP
 
 This example demonstrates a simple SIP call (e.g. where the client talks to a SIP proxy over WebSockets).
 
-.nf
+<figure><artwork><![CDATA[
 // Call is initiated toward Answerer
 OffererJS->OffererUA:   pc = new PeerConnection();
 OffererJS->OffererUA:   pc.addStream(localStream, null);
@@ -1379,14 +1385,14 @@ AnswererUA->OffererUA:  Media
 // ICE Completes (at Offerer)
 OffererUA->OffererJS:   onopen();
 OffererUA->AnswererUA:  Media
-.fi 
+]]></artwork></figure> 
 
 .ti 0
 A.2.6. Handling early media (e.g. 1-800-FEDEX), using SIP
 
 This example demonstrates how early media could be handled; for simplicity, only the offerer side of the call is shown.
 
-.nf
+<figure><artwork><![CDATA[
 // Call is initiated toward Answerer
 OffererJS->OffererUA:   pc = new PeerConnection();
 OffererJS->OffererUA:   pc.addStream(localStream, null);
@@ -1409,14 +1415,14 @@ OffererUA->AnswererUA:  Media
 OffererJS:              answer = parseResponse(sip);
 OffererJS->OffererUA:   pc.setRemoteDescription("answer", answer);
 OffererJS->AnswererJS:  ACK
-.fi
+]]></artwork></figure>
 
 .ti 0
 A.3. Full Example Application
 
 The following example demonstrates a simple video calling application, using both trickle candidates and provisional answers to speed up call setup.
 
-.nf
+<figure><artwork><![CDATA[
 // Usage:
 // Caller calls start(true)
 // Callee calls start(false) to prepare the call/start connecting,
@@ -1506,7 +1512,7 @@ function handleMessage(str) {
       break;
   }
 }
-.fi
+]]></artwork></figure>
 
 -->
 
