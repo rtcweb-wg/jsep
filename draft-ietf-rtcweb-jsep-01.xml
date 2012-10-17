@@ -213,10 +213,8 @@ Table of Contents
 
 <middle>
   <section title="Introduction">
+
 <t>
-
-
-.fi
 The thinking behind WebRTC call setup has been to fully specify and control the media plane, but to leave the signaling plane up to the application as much as possible. The rationale is that different applications may prefer to use different protocols, such as the existing SIP or Jingle call signaling protocols, or something custom to the particular application, perhaps for a novel use case. In this approach, the key information that needs to be exchanged is the multimedia session description, which specifies the necessary transport and media configuration information necessary to establish the media plane.
 </t>
 
@@ -257,8 +255,6 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 To resolve the issues mentioned above, this document proposes the Javascript Session Establishment Protocol (JSEP) that pulls the signaling state machine out of the browser and into Javascript. This mechanism effectively removes the browser almost completely from the core signaling flow; the only interface needed is a way for the application to pass in the local and remote session descriptions negotiated by whatever signaling mechanism is used, and a way to interact with the ICE state machine. 
 </t>
 
-
-
 <t>
 JSEP's handling of session descriptions is simple and straightforward. Whenever an offer/answer exchange is needed, the initiating side creates an offer by calling a createOffer() API. The application can do massaging of that offer, if it wants to, and then uses it to set up its local config via a setLocalDescription() API. The offer is then sent off to the remote side over its preferred signaling mechanism (e.g. WebSockets); upon receipt of that offer, the remote party installs it using a setRemoteDescription() API. 
 </t>
@@ -297,22 +293,22 @@ Note also that while JSEP transfers more control to Javascript, it is not intend
 
 <t>
 JSEP does not specify a particular signaling model or state machine, other than the generic need to exchange RFC 3264 offers and answers in order for both sides of the session to know how to conduct the session. JSEP provides mechanisms to create offers and answers, as well as to apply them to a session. However, the actual mechanism by which these offers and answers are communicated to the remote side, including addressing, retransmission, forking, and glare handling, is left entirely up to the application.
-<!--
-.nf
-    +-----------+                                 +-----------+ 
-    |  Web App  |< --- App-Specific Signaling -- >|  Web App  |
-    +-----------+                                 +-----------+
-          |                                             |
-          |  SDP                                        |  SDP 
-          V                                             V
-    +-----------+                                 +-----------+ 
-    |  Browser  |< ----------- Media ----------- >|  Browser  |
-    +-----------+                                 +-----------+
+</t>
 
-                  Figure 1: JSEP Signaling Model
-.fi
--->
+<figure anchor="fig:sigModel" title="JSEP Signaling Model"><artwork><![CDATA[
+    +-----------+                                 +-----------+ 
+    |  Web App  |<--- App-Specific Signaling -->|  Web App  |
+    +-----------+                                +-----------+
+          |                                            |
+          |  SDP                                       |  SDP 
+          V                                            V
+    +-----------+                                +-----------+ 
+    |  Browser  |<----------- Media ------------>|  Browser  |
+    +-----------+                                +-----------+
+]]></artwork>
+</figure>
 
+<t>
 .ti 0
 4.2. Session Descriptions and State Machine
 
@@ -1412,16 +1408,8 @@ function handleMessage(str) {
 
 -->
 
-<section title="Appendix B. Change log" >
-<t> foo 
-</t>
-</section>
-
-<!--
-.ti 0
-Appendix B. Change log
-
-.nf
+<section title="Change log" >
+<t>  
 01: Added diagrams for architecture and state machine.
     Added sections on forking and rehydration.
     Clarified meaning of "pranswer" and "answer".
@@ -1430,6 +1418,10 @@ Appendix B. Change log
     Updated suggested API and examples to match latest thinking.
     Suggested API and examples have been moved to an appendix.
 00: Migrated from draft-uberti-rtcweb-jsep-02.
+</t>
+</section>
+
+<!--
 .fi
 
 .ti 0
