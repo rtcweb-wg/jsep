@@ -4,49 +4,13 @@
 <?rfc toc="yes" ?>
 <?rfc symrefs="yes" ?>
 <?rfc iprnotified="yes" ?>
-<?rfc strict="yes" ?> <!-- todo fix -->
+<?rfc strict="yes" ?> 
 <?rfc compact="no" ?>
 <?rfc sortrefs="yes" ?>
 <?rfc colonspace="yes" ?>
 <?rfc rfcedstyle="no" ?>
 <?rfc tocdepth="4"?>
 
-
-<!-- 
-
-.\" Auto generated Nroff by NroffEdit on January 23, 2012
-.pl 10.0i
-.po 0
-.ll 7.2i
-.lt 7.2i
-.nr LL 7.2i
-.nr LT 7.2i
-.ds LF Uberti
-.ds RF FORMFEED[Page %]
-.ds LH Internet-Draft
-.ds RH June 4, 2012
-.ds CH JSEP
-.ds CF Expires December 6, 2012
-.hy 0
-.nh
-.ad l
-.in 0
-
-.nf
-.tl 'Network Working Group''J. Uberti'
-.tl '\%Internet-Draft''Google'
-.tl 'Intended status: Standards Track''C. Jennings'
-.tl 'Expires: December 6, 2012''Cisco Systems, Inc.'
-.tl '''June 4, 2012'
-.fi
-.in 3
-
-
-.ce 2
-Javascript Session Establishment Protocol
-\%draft-ietf-rtcweb-jsep-01
-
--->
 
 <rfc category="std"
      docName="draft-ietf-rtcweb-jsep-01."
@@ -100,12 +64,6 @@ Javascript Session Establishment Protocol
 
     <area>RAI</area>
 
-<!-- 
-
-.ti 0
-Abstract
--->
-
  <abstract>
       <t>
 This document proposes a mechanism for allowing a Javascript application to fully control the signaling plane of a multimedia session, and discusses how this would work with existing signaling protocols. </t>
@@ -114,102 +72,6 @@ This document is an input document for discussion.  It should be discussed in th
 </t> 
     </abstract>
   </front>
-
-<!--
-.ti 0
-Status of this Memo
-
-This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.
-
-Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet- Drafts is at http://datatracker.ietf.org/drafts/current/.
-
-Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."
-
-This Internet-Draft will expire on July 26, 2012.
-
-.ti 0
-Copyright Notice
-
-Copyright (c) 2012 IETF Trust and the persons identified as the document authors.  All rights reserved.
-
-This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents \%(http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.
-
-
-.nf
-.\" \# TOC  -- Beginning of auto updated Table of Contents
-.in 0
-Table of Contents
-
-.nf
-   1. Introduction  . . . . . . . . . . . . . . . . . . . . . . . . .  4
-     1.1. Terminology . . . . . . . . . . . . . . . . . . . . . . . .  5
-   2. JSEP Approach . . . . . . . . . . . . . . . . . . . . . . . . .  5
-   3. Other Approaches Considered . . . . . . . . . . . . . . . . . .  6
-   4. Semantics and Syntax  . . . . . . . . . . . . . . . . . . . . .  7
-     4.1. Signaling Model . . . . . . . . . . . . . . . . . . . . . .  7
-     4.2. Session Descriptions and State Machine  . . . . . . . . . .  7
-     4.3. Session Description Format  . . . . . . . . . . . . . . . .  9
-     4.4. Separation of Signaling and ICE State Machines  . . . . . . 10
-     4.5. ICE Candidate Trickling . . . . . . . . . . . . . . . . . . 10
-     4.6. ICE Candidate Format  . . . . . . . . . . . . . . . . . . . 11
-     4.7. Interactions With Forking . . . . . . . . . . . . . . . . . 11
-       4.7.1. Serial Forking  . . . . . . . . . . . . . . . . . . . . 11
-       4.7.2. Parallel Forking  . . . . . . . . . . . . . . . . . . . 12
-     4.8. Session Rehydration . . . . . . . . . . . . . . . . . . . . 12
-   5. Interface . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
-     5.1. Methods . . . . . . . . . . . . . . . . . . . . . . . . . . 13
-       5.1.1. createOffer . . . . . . . . . . . . . . . . . . . . . . 13
-       5.1.2. createAnswer  . . . . . . . . . . . . . . . . . . . . . 14
-       5.1.3. SessionDescriptionType  . . . . . . . . . . . . . . . . 14
-       5.1.4. setLocalDescription . . . . . . . . . . . . . . . . . . 15
-       5.1.5. setRemoteDescription  . . . . . . . . . . . . . . . . . 15
-       5.1.6. localDescription  . . . . . . . . . . . . . . . . . . . 16
-       5.1.7. remoteDescription . . . . . . . . . . . . . . . . . . . 16
-       5.1.8. updateIce . . . . . . . . . . . . . . . . . . . . . . . 16
-       5.1.9. addIceCandidate . . . . . . . . . . . . . . . . . . . . 17
-     5.2. Configurable SDP Parameters . . . . . . . . . . . . . . . . 17
-   6. Media Setup Overview  . . . . . . . . . . . . . . . . . . . . . 17
-     6.1. Initiating the Session  . . . . . . . . . . . . . . . . . . 18
-       6.1.1. Generating An Offer . . . . . . . . . . . . . . . . . . 18
-       6.1.2. Applying the Offer  . . . . . . . . . . . . . . . . . . 18
-       6.1.3. Handling ICE Callbacks  . . . . . . . . . . . . . . . . 18
-       6.1.4. Serializing the Offer and Candidates  . . . . . . . . . 19
-     6.2. Receiving the Session . . . . . . . . . . . . . . . . . . . 19
-       6.2.1. Receiving the Offer . . . . . . . . . . . . . . . . . . 19
-       6.2.2. Handling ICE Messages . . . . . . . . . . . . . . . . . 19
-       6.2.3. Generating the Answer . . . . . . . . . . . . . . . . . 20
-       6.2.4. Applying the Answer . . . . . . . . . . . . . . . . . . 20
-       6.2.5. Serializing the Answer  . . . . . . . . . . . . . . . . 20
-     6.3. Completing the Session  . . . . . . . . . . . . . . . . . . 20
-       6.3.1. Receiving the Answer  . . . . . . . . . . . . . . . . . 20
-     6.4. Updates to the Session  . . . . . . . . . . . . . . . . . . 20
-   7. Security Considerations . . . . . . . . . . . . . . . . . . . . 21
-   8. IANA Considerations . . . . . . . . . . . . . . . . . . . . . . 21
-   9. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . 21
-   10. References . . . . . . . . . . . . . . . . . . . . . . . . . . 21
-     10.1. Normative References . . . . . . . . . . . . . . . . . . . 21
-     10.2. Informative References . . . . . . . . . . . . . . . . . . 21
-   Appendix A. JSEP Implementation Examples . . . . . . . . . . . . . 22
-     A.1. Example API . . . . . . . . . . . . . . . . . . . . . . . . 22
-     A.2. Example API Flows . . . . . . . . . . . . . . . . . . . . . 23
-       A.2.1. Call using ROAP . . . . . . . . . . . . . . . . . . . . 23
-       A.2.2 Call using XMPP  . . . . . . . . . . . . . . . . . . . . 24
-       A.2.3. Adding video to a call, using XMPP  . . . . . . . . . . 25
-       A.2.4. Simultaneous add of video streams, using XMPP . . . . . 26
-       A.2.5. Call using SIP  . . . . . . . . . . . . . . . . . . . . 27
-       A.2.6. Handling early media (e.g. 1-800-FEDEX), using SIP  . . 28
-     A.3. Full Example Application  . . . . . . . . . . . . . . . . . 28
-   Appendix B. Change log . . . . . . . . . . . . . . . . . . . . . . 30
-   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 30
-.fi
-.in 3
-
-.\" \# ETC -- End of auto updated Table of Contents
-.bp
-.ti 0
-
-1. Introduction
--->
 
 <middle>
   <section title="Introduction">
@@ -914,28 +776,8 @@ Harald Alvestrand, Dan Burnett, Neil Stratford, Eric Rescorla, Anant Narayanan, 
 </middle>
 
 <back>
-<!--
-  
- 
-  
--->
 
-
-<!-- 
-.ti 0
-10. References
--->
   <references title="Normative References">
-
-<!--
-.ti 0
-10.1. Normative References
-
-.\" \# REF  -- Managed reference list. Syntax: [RFC]nnnn[;Label], ... ,[RFC]nnnn[;Label]
-.\" \# 2119, 3264, 4566
-.ti 3
-[RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate Requirement Levels", BCP\014, RFC\02119, March 1997.
--->
 
 <reference anchor='RFC2119'>
 
@@ -962,10 +804,6 @@ Harald Alvestrand, Dan Burnett, Neil Stratford, Eric Rescorla, Anant Narayanan, 
 <format type='XML' octets='5777' target='http://xml.resource.org/public/rfc/xml/rfc2119.xml' />
 </reference>
 
-<!--
-.ti 3
-[RFC3264]  Rosenberg, J. and H. Schulzrinne, "An Offer/Answer Model with Session Description Protocol (SDP)", RFC\03264, June 2002.
--->
 
 <reference anchor='RFC3264'>
 
@@ -982,10 +820,6 @@ Harald Alvestrand, Dan Burnett, Neil Stratford, Eric Rescorla, Anant Narayanan, 
 <format type='TXT' octets='60854' target='http://www.rfc-editor.org/rfc/rfc3264.txt' />
 </reference>
 
-<!--
-.ti 3
-[RFC4566]  Handley, M., Jacobson, V., and C. Perkins, "SDP: Session Description Protocol", RFC\04566, July 2006.
--->
 
 <reference anchor='RFC4566'>
 
@@ -1004,23 +838,9 @@ Harald Alvestrand, Dan Burnett, Neil Stratford, Eric Rescorla, Anant Narayanan, 
 <format type='TXT' octets='108820' target='http://www.rfc-editor.org/rfc/rfc4566.txt' />
 </reference>
 
-<!--
-.\" \# ERF -- End of managed reference list
--->
-
   </references>
 
     <references title="Informative References">
-
-<!--
-.ti 0
-10.2. Informative References
-
-.\" \# REF  -- Managed reference list. Syntax: [RFC]nnnn[;Label], ... ,[RFC]nnnn[;Label]
-.\" \# 4568, 5245, draft-jennings-rtcweb-signaling-01
-.ti 3
-[RFC4568]  Andreasen, F., Baugher, M., and D. Wing, "Session Description Protocol (SDP) Security Descriptions for Media Streams", RFC\04568, July 2006.
--->
 
 <reference anchor='RFC4568'>
 
@@ -1039,10 +859,6 @@ Harald Alvestrand, Dan Burnett, Neil Stratford, Eric Rescorla, Anant Narayanan, 
 <format type='TXT' octets='107881' target='http://www.rfc-editor.org/rfc/rfc4568.txt' />
 </reference>
 
-<!--
-.ti 3
-[RFC5245]  Rosenberg, J., "Interactive Connectivity Establishment (ICE): A Protocol for Network Address Translator (NAT) Traversal for Offer/Answer Protocols", RFC\05245, April 2010.
--->
 
 <reference anchor='RFC5245'>
 
@@ -1057,15 +873,6 @@ Harald Alvestrand, Dan Burnett, Neil Stratford, Eric Rescorla, Anant Narayanan, 
 <format type='TXT' octets='285120' target='http://www.rfc-editor.org/rfc/rfc5245.txt' />
 </reference>
 
-<!--
-.\" \# ERF -- End of managed reference list
-.ti 3
-[webrtc-api]
-Bergkvist, Burnett, Jennings, Narayanan, "WebRTC 1.0:
-Real-time Communication Between Browsers", May 2011.
-
-Available at http://dev.w3.org/2012/webrtc/editor/webrtc.html
--->
 
 <reference anchor='W3C.WD-webrtc-20111027'
            target='http://www.w3.org/TR/2011/WD-webrtc-20111027'>
@@ -1576,36 +1383,6 @@ Changes in draft -00:
 </list>
 </t>
 </section>
-
-<!--
-.fi
-
-.ti 0
-Authors' Addresses
-
--->
-
-<!--
-
-.nf
-Justin Uberti
-Google
-5 Cambridge Center
-Cambridge, MA 02142
-
-Email: justin@uberti.name
-.fi
-
-.nf
-Cullen Jennings
-Cisco
-170 West Tasman Drive
-San Jose, CA  95134
-USA
-
-Email:  fluffy@cisco.com
-.fi
--->
 
   </back>
 </rfc>
