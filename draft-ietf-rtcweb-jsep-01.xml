@@ -4,8 +4,8 @@
 <?rfc toc="yes" ?>
 <?rfc symrefs="yes" ?>
 <?rfc iprnotified="yes" ?>
-<?rfc strict="no" ?> <!-- todo fix -->
-<?rfc compact="yes" ?>
+<?rfc strict="yes" ?> <!-- todo fix -->
+<?rfc compact="no" ?>
 <?rfc sortrefs="yes" ?>
 <?rfc colonspace="yes" ?>
 <?rfc rfcedstyle="no" ?>
@@ -355,7 +355,7 @@ As in [RFC3264], an offerer can send an offer, and update it as long as it has n
       +-----------+
       |           |
       |           |
-      |  Stable   |< --------------\
+      |  Stable   |<---------------\
       |           |                |
       |           |                |
       +-----------+                |
@@ -841,7 +841,7 @@ The recipient then instructs the PeerConnection to use the answer as its local d
 
 <figure><artwork><![CDATA[
 AnswererJS->AnswererUA: pc.setLocalDescription("answer", answer);
-AnswererUA->OffererUA:  < media >
+AnswererUA->OffererUA:  <media>
 ]]></artwork></figure>
 
 </t>
@@ -870,7 +870,7 @@ The initiator converts the answer from the signaling protocol and applies it as 
 
 <figure><artwork><![CDATA[
 OffererJS->OffererUA:  pc.setRemoteDescription("answer", answer);
-OffererUA->AnswererUA: < media >
+OffererUA->AnswererUA: <media>
 ]]></artwork></figure>
 
 </t>
@@ -1249,12 +1249,12 @@ OffererJS->OffererUA:   pc.addStream(localStream, null);
 OffererJS->OffererUA:   offer = pc.createOffer(null);
 OffererJS->OffererUA:   pc.setLocalDescription("offer", offer);
 OffererJS:              xmpp = createSessionInitiate(offer);
-OffererJS->AnswererJS:  < jingle action="session-initiate"/>
+OffererJS->AnswererJS:  <jingle action="session-initiate"/>
 
 OffererJS->OffererUA:   pc.startIce();
 OffererUA->OffererJS:   onicecandidate(cand);
 OffererJS:              createTransportInfo(cand);
-OffererJS->AnswererJS:  < jingle action="transport-info"/>
+OffererJS->AnswererJS:  <jingle action="transport-info"/>
 
 // session-initiate arrives at Answerer
 AnswererJS->AnswererUA: pc = new PeerConnection();
@@ -1267,7 +1267,7 @@ AnswererJS->AnswererUA: candidate = parseTransportInfo(xmpp);
 AnswererJS->AnswererUA: pc.addIceCandidate(candidate);
 AnswererUA->AnswererJS: onicecandidate(cand)
 AnswererJS:             createTransportInfo(cand);
-AnswererJS->OffererJS:  < jingle action="transport-info"/>
+AnswererJS->OffererJS:  <jingle action="transport-info"/>
 
 // transport-infos arrive at Offerer
 OffererJS->OffererUA:   candidates = parseTransportInfo(xmpp);
@@ -1278,7 +1278,7 @@ AnswererJS->AnswererUA: peer.addStream(localStream, null);
 AnswererJS->AnswererUA: answer = peer.createAnswer(offer, null);
 AnswererJS:             xmpp = createSessionAccept(answer);
 AnswererJS->AnswererUA: pc.setLocalDescription("answer", answer);
-AnswererJS->OffererJS:  < jingle action="session-accept"/>
+AnswererJS->OffererJS:  <jingle action="session-accept"/>
 
 // session-accept arrives at Offerer
 OffererJS:              answer = parseSessionAccept(xmpp);
@@ -1311,7 +1311,7 @@ OffererJS->OffererUA:   pc.addStream(videoStream)
 OffererJS->OffererUA:   offer = pc.createOffer(null);
 OffererJS:              xmpp = createContentAdd(offer);
 OffererJS->OffererUA:   pc.setLocalDescription("offer", offer);
-OffererJS->AnswererJS:  < jingle action="content-add"/>
+OffererJS->AnswererJS:  <jingle action="content-add"/>
 
 // content-add arrives at Answerer
 AnswererJS:             offer = parseContentAdd(xmpp);
@@ -1319,7 +1319,7 @@ AnswererJS->AnswererUA: pc.setRemoteDescription("offer", offer);
 AnswererJS->AnswererUA: answer = pc.createAnswer(offer, null);
 AnswererJS->AnswererUA: pc.setLocalDescription("answer", answer);
 AnswererJS:             xmpp = createContentAccept(answer);
-AnswererJS->OffererJS:  < jingle action="content-accept"/>
+AnswererJS->OffererJS:  <jingle action="content-accept"/>
 
 // content-accept arrives at Offerer
 OffererJS:              answer = parseContentAccept(xmpp);
@@ -1339,21 +1339,21 @@ OffererJS->OffererUA:   pc.addStream(offererVideoStream2)
 OffererJS->OffererUA:   offer = pc.createOffer(null);
 OffererJS:              xmpp = createDescriptionInfo(offer);
 OffererJS->OffererUA:   pc.setLocalDescription("offer", offer);
-OffererJS->AnswererJS:  < jingle action="description-info"/>
+OffererJS->AnswererJS:  <jingle action="description-info"/>
 
 AnswererJS->AnswererUA: pc.addStream(answererVideoStream2)
 AnswererJS->AnswererUA: offer = pc.createOffer(null);
 AnswererJS:             xmpp = createDescriptionInfo(offer);
 AnswererJS->AnswererUA: pc.setLocalDescription("offer", offer);
-AnswererJS->OffererJS:  < jingle action="description-info"/>
+AnswererJS->OffererJS:  <jingle action="description-info"/>
 
 // description-info arrives at "Answerer", and is acked
 AnswererJS:             offer = parseDescriptionInfo(xmpp);
-AnswererJS->OffererJS:  < iq type="result"/>  // ack
+AnswererJS->OffererJS:  <iq type="result"/>  // ack
 
 // description-info arrives at Offerer, and is acked
 OffererJS:              offer = parseDescriptionInfo(xmpp);
-OffererJS->AnswererJS:  < iq type="result"/>  // ack
+OffererJS->AnswererJS:  <iq type="result"/>  // ack
 
 // ack arrives at Offerer; remote offer is used as an answer
 OffererJS->OffererUA:   pc.setRemoteDescription("answer", offer);
