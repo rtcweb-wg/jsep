@@ -513,21 +513,28 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         is possible to keep an existing session alive via a process called
         "rehydration".</t>
 
-        <t>With rehydration, the current local session description is
+        <t>With rehydration, the current local and remote session description is
         persisted somewhere outside of the page, perhaps on the application
         server, or in browser local storage. The page is then reloaded, and a
-        new session object is created in Javascript. The saved local session
-        is now retrieved, but the previous ICE candidates will no longer be
-        valid in this case, so we will need to perform an ICE restart; to do
-        so, we simply generate a new ICE ufrag/pwd combo for the local
-        description.</t>
-
-        <t>The modified local description is then installed via
-        setLocalDescription, and sent off as an offer to the remote side, who
+        new session object is created in Javascript. The saved local session is
+        now retrieved, but the previous ICE candidates will no longer be valid
+        in this case, the ports may have changed, the DTLS fingerprint may be
+        different, the capabilities of the browser may have changed due to
+        camera being unplugged and so on. In the case of SDES, there is a
+        problem knowing sequence numbers and SSRC.
+        The application can create a new offer, the modify it be consistent with
+        the old offer before calling setLocalDescription and sending it
+        as an offer to the remote side, who
         will reply with an answer that can be supplied to
         setRemoteDescription. ICE processing proceeds as usual, and as soon as
         connectivity is established, the session will be back up and running
         again.</t>
+
+        <t> Open Issue: EKR proposed an alternative rehydration approach where
+        the the actual internal PeerConnection object in the browser was kept
+        alive for some time after the web page was killed and provided some way
+        for a new page to acquire the old PeerConnection object. </t>
+
       </section>
     </section>
 
