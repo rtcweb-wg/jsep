@@ -85,10 +85,7 @@
       current state back down to the page and resume the call where it left
       off.</t>
 
-    </section>
-
-    <section title="JSEP Approach">
-      <t>To resolve the issues mentioned above, this document proposes the
+      <t> This document proposes the
       Javascript Session Establishment Protocol (JSEP) that pulls the
       signaling state machine out of the browser and into Javascript. This
       mechanism effectively removes the browser almost completely from the
@@ -100,7 +97,7 @@
       <t>JSEP's handling of session descriptions is simple and
       straightforward. Whenever an offer/answer exchange is needed, the
       initiating side creates an offer by calling a createOffer() API. The
-      application can do massaging of that offer, if it wants to, and then
+      application modify that offer, if it wants to, and then
       uses it to set up its local config via a setLocalDescription() API. The
       offer is then sent off to the remote side over its preferred signaling
       mechanism (e.g. WebSockets); upon receipt of that offer, the remote
@@ -120,7 +117,7 @@
       provides additional flexibility; in protocols that decouple session
       descriptions from transport, such as Jingle, the transport information
       can be sent separately; in protocols that don't, such as SIP, the
-      information can be easily aggregated and recombined. Sending transport
+      information can be used in the aggregated form. Sending transport
       information separately can allow for faster ICE and DTLS startup, since
       the necessary roundtrips can occur while waiting for the remote side to
       accept the session.</t>
@@ -133,15 +130,15 @@
       its chosen signaling protocol, instead of simply forwarding the messages
       emitted from the browser.</t>
 
-      <t>One way to mitigate this is to provide a Javascript library that
-      hides this complexity from the developer, which would implement the
-      state machine and serialization of the desired signaling protocol. For
-      example, this library could convert easily adapt the JSEP API into the
-      exact ROAP API, thereby implementing the ROAP signaling protocol. Such a
-      library could of course also implement other popular signaling
-      protocols, including SIP or Jingle. In this fashion we can enable
-      greater control for the experienced developer without forcing any
-      additional complexity on the novice developer.</t>
+      <t>One way to mitigate this is to provide a Javascript library that hides
+      this complexity from the developer, which would implement the state
+      machine and serialization of the desired signaling protocol. For example,
+      this library could convert easily adapt the JSEP API into the exact ROAP
+      API <xref target="I-D.jennings-rtcweb-signaling" />, thereby implementing
+      the ROAP signaling protocol. Such a library could of course also implement
+      other popular signaling protocols, including SIP or Jingle. In this
+      fashion we can enable greater control for the experienced developer
+      without forcing any additional complexity on the novice developer.</t>
     </section>
 
     <section title="Other Approaches Considered">
@@ -1014,6 +1011,37 @@ OffererUA->AnswererUA: <media>
     </references>
 
     <references title="Informative References">
+
+
+<reference anchor='I-D.jennings-rtcweb-signaling'>
+<front>
+<title>RTCWeb Offer/Answer Protocol (ROAP)</title>
+
+<author initials='C' surname='Jennings' fullname='Cullen Jennings'>
+    <organization />
+</author>
+
+<author initials='J' surname='Rosenberg' fullname='Jonathan Rosenberg'>
+    <organization />
+</author>
+
+<author initials='R' surname='Jesup' fullname='Randell Jesup'>
+    <organization />
+</author>
+
+<date month='October' day='30' year='2011' />
+
+<abstract><t>This document describes an protocol used to negotiate media between browsers or other compatible devices.  This protocol provides the state machinery needed to implement the offer/answer model (RFC 3264), and defines the semantics and necessary attributes of messages that must be exchanged.  The protocol uses an abstract transport in that it does not actually define how these messages are exchanged. Rather, such exchanges are handled through web-based transports like HTTP or WebSockets.  The protocol focuses solely on media negotiation and does not handle call control, call processing, or other functions.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-jennings-rtcweb-signaling-01' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.txt' />
+<format type='PDF'
+        target='http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.pdf' />
+</reference>
+
       <reference anchor="RFC4568">
         <front>
           <title>Session Description Protocol (SDP) Security Descriptions for
