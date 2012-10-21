@@ -238,7 +238,7 @@
         including addressing, retransmission, forking, and glare handling, is
         left entirely up to the application.</t>
 
-        <figure anchor="fig:sigModel" title="JSEP Signaling Model">
+        <figure anchor="fig-sigModel" title="JSEP Signaling Model">
           <artwork><![CDATA[
     +-----------+                               +-----------+ 
     |  Web App  |<--- App-Specific Signaling -->|  Web App  |
@@ -319,7 +319,7 @@
         long as it has not been answered. The answerer can send back zero or
         more provisional answers, and finally end the offer-answer exchange by
         sending a final answer. The state machine for this is as follows:
-        <figure anchor="fig:state-machine" title="JSEP State Machine">
+        <figure anchor="fig-state-machine" title="JSEP State Machine">
             <artwork><![CDATA[
       +-----------+
       |           |
@@ -399,28 +399,26 @@
         provide control and feedback on the ICE candidate gathering process.
         Applications that support candidate trickling can send the initial
         offer immediately and send individual candidates when they get the
-        onicecandidate callback with a new candidate; applications that do not
-        support this feature can simply wait for the final onicecandidate
-        callback that indicates gathering is complete, and create and send
+        notified of a new candidate; applications that do not
+        support this feature can simply wait for the indication 
+        gathering is complete, and create and send
         their offer, with all the candidates, at this time.</t>
 
         <t>Upon receipt of trickled candidates, the receiving application can
-        supply them to its ICE Agent by calling an addIceCandidate method.
+        supply them to its ICE Agent.
         This triggers the ICE Agent to start using this remote candidate for
-        connectivity checks. Applications that do not make use of candidate
-        tricking can ignore addIceCandidate entirely, and use the
-        onicecandidate callback solely to indicate when candidate gathering is
-        complete.</t>
-      </section>
+        connectivity checks. </t>
 
-      <section title="ICE Candidate Format">
-        <t>As with session descriptions, we choose to provide an IceCandidate
-        object that provides some abstraction, but can be easily converted
-        to/from SDP a=candidate lines.</t>
+       <section title="ICE Candidate Format">
+        <t>As with session descriptions, they syntax of the IceCandidate
+        object provides some abstraction, but can be easily converted
+        to and from the SDP a=candidate lines.</t>
 
-        <t>The IceCandidate object has fields to indicate which m= line it
-        should be associated with, and a method to convert to a SDP
-        representation, ex:</t>
+         <t> The a=candidate lines are the only SDP information that is
+        contained within IceCandidate, as they represent the only information
+        needed that is not present in the initial offer (i.e. for trickle
+        candidates). This information is carried with the same syntax as the "a=candiate" line in SDP.
+         For example: </t>
 
         <figure>
           <artwork><![CDATA[
@@ -428,11 +426,19 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 ]]></artwork>
         </figure>
 
-        <t>Currently, a=candidate lines are the only SDP information that is
-        contained within IceCandidate, as they represent the only information
-        needed that is not present in the initial offer (i.e. for trickle
-        candidates).</t>
+      <t>The IceCandidate object also fields to indicate which m= line it should
+      be associated with. The m line can be identified in one of two
+      ways. Either by a m-line index, or a MID. An m-line index of n, refers to
+      the n&sbquo;th m-line in the SDP starting with zero. The MID uses the "media
+      stream identification" as defined in [RFC 3388] to identify the
+      m-line. WebRTC devices creating an ICE Candidate object MUST create both of
+      these. Devices receiving an ICE Candidate object SHOULD use the MID if they
+      implement that and otherwise use the m-line index. </t>
+
       </section>
+
+     </section>
+
 
       <section title="Interactions With Forking">
         <section title="Serial Forking">
