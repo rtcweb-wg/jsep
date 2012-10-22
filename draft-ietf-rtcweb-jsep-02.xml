@@ -382,12 +382,34 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       </section>
 
+      </section>
      </section>
 
-     <section title="Interactions With Forking">
+      <section title="Interactions With Forking">
+        
+        <t> Some call signaling systems allow various types of forking where an
+        SDP Offer may be provided to more than one device. For example, SIP RFC
+        3261 defines both a "Parallel Search" and "Sequential Search". Although
+        these are primarily a signaling level issues that is outside the scope
+        of JSEP, they do have some impact on the configuration of the RTP and
+        media engine which is in the scope of JSEP. When forking is happening at
+        the signaling layer, the Javascript application responsible for the
+        signaling needs to make the decisions about what media should be sent or
+        received at any point of time and to which remote it should communicate
+        with. The JSEP is used to make sure the media engine can make the RTP
+        and media perform as required by the application. The basic operations
+        that the applications can have the media engine do are:
+        <list>
+          <t> Start exchanging media to a given remote peer but keep all the
+          resources reserved in the offer. </t>
 
-        <section title="Serial Forking">
-          <t>Serial forking involves a call being dispatched to multiple
+          <t> Start exchanging media with a given remote peer and free any
+          resources in the offer that are not being used. </t>
+        </list>
+        </t>
+
+        <section title="Sequential Forking">
+          <t>Sequential forking involves a call being dispatched to multiple
           remote callees, where each callee can accept the call, but only one
           active session ever exists at a time; no mixing of received media is
           performed.</t>
@@ -400,8 +422,8 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           as a final answer, ending the setup flow.</t>
 
           <t>In a "first-one-wins" situation, the first answer will be applied
-          as a final answer, and the application will send a terminate message
-          to any subsequent answers. In SIP parlance, this would be ACK +
+          as a final answer, and the application will reject
+          any subsequent answers. In SIP parlance, this would be ACK +
           BYE.</t>
 
           <t>In a "last-one-wins" situation, all answers would be applied as
@@ -412,39 +434,44 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
 
         <section title="Parallel Forking">
+
           <t>Parallel forking involves a call being dispatched to multiple
           remote callees, where each callee can accept the call, and multiple
-          simultaneous active sessions can be established as a result. If
-          multiple callees send media, this media is mixed and played out at
-          the caller side.</t>
+          simultaneous active signaling sessions can be established as a
+          result. If multiple callees send media at the same time, the
+          possibilities for handling this are described in Section 3.1 or RFC
+          3960. Most SIP devices today only support exchanging media with a
+          single device at a time and do not try to mix multiple early media
+          audio sources as that is very confusing to the user. Imagine having
+          European ring tone mixed with north american ringtone - the resulting
+          sound would not be like either and would confuse the user. If the
+          signaling application wishes to only exchange media from one of the
+          remote at a time, then from a media engine point of view, this is exactly like
+          the sequential forking case.</t>
 
-          <t>JSEP can handle parallel forking by "cloning" the session when
-          needed to create multiple parallel sessions. When the first answer
-          is received, the caller can clone the existing session, and then
-          apply the answer as a final answer to the original session. Upon
-          receiving the next answer, the cloned session is cloned again, and
-          the received answer is applied as a final answer to the first clone.
-          This process repeats until the caller decides to end the setup flow,
-          and closes the final cloned session.</t>
+          <t> In the parallel forking case where the Javascript application
+          wishes to simultaneously exchange media with multiple peers is
+          slightly more complex but once again the Javascript application can
+          follow the strategy that RFC 3960 describes using UPDATE. It is worth
+          noting that use cases where this is the desired behavior are very
+          unusual. The UPDATE approach allows the signaling to set up a separate
+          media flow for each peer that it wises to exchange media with. In
+          JSEP, this offer used in the UPDATE would be formed by simply forming
+          a new PeerConnection and making sure that the same microphone and
+          video camera media streams had been "cloned" into this new
+          PeerConnection. Then the new PeerConnection object would be used to
+          get an the SDP offer that was being used by the signaling to perform
+          the UPDATE type strategy discussed in RFC 3690. </t>
 
-          <t>Cloned sessions inherit the local session description and
-          candidates from their parent, and an empty remote description; only
-          sessions that have not yet applied an answer can be cloned. Each
-          cloned session may discover new peer-reflexive candidates; these
-          candidates will be supplied via the onicecandidate callback to that
-          specific session. Since the clone uses the same local description as
-          its parent, creating a clone will fail if it is not possible to
-          reserve the same resources for the clone as have already been
-          reserved by the parent.</t>
-
-          <t>As a result of this cloning, the application will end up with N
-          parallel sessions, each with a local and remote description and
+          <t>As a result of cloning the media streams, the application will end up with N
+          parallel PeerConnection sessions, each with a local and remote description and
           their own local and remote addresses. The media flow from these
           sessions can be managed by specifying SDP direction attributes in
           the descriptions, or the application can choose to play out the
           media from all sessions mixed together. Of course, if the
           application wants to only keep a single session, it can simply
           terminate the sessions that it no longer needs.</t>
+
         </section>
 
       </section>
@@ -682,8 +709,6 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
 
     </section>
-
-  </section>
 
       <section title="Configurable SDP Parameters">
 
@@ -1303,6 +1328,7 @@ OffererJS->AnswererJS:  ACK
           <!-- D --> 
           <t> Align SDP handling with W3C draft </t>
           <!-- E --> 
+          <t> Clarified section on forking. </t>
           <!-- F --> 
           <!-- G --> 
           <!-- H --> 
