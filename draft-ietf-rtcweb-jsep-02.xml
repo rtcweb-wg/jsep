@@ -1117,89 +1117,7 @@ OffererUA->AnswererUA: <media>
     </references>
 
     <section title="JSEP Implementation Examples">
-      <section title="Example API">
-        <t>The interface below shows a basic Javascript API that could be used
-        to expose the functionality discussed in this document. This API is
-        used for the examples in the following parts of this Appendix. <figure>
-            <artwork><![CDATA[
-// actions, for setLocalDescription/setRemoteDescription
-enum SessionDescriptionType { "offer", "pranswer", "answer" }
 
-// constraints that can be supplied to the ctor or createXXXX
-enum MediaConstraints {
-    "offerConfig",    // controls the kind of offer created;
-                      //   "default"    (normal offer)
-                      //   "caps"       (all capabilities)
-                      //   "new"        (brand new description)
-                      //   "iceRestart" (new ICE creds)
- 
-    "iceTransports",  // controls ICE candidates; can be
-                      //   "none"  (no candidates)
-                      //   "relay" (only relay candidates)
-                      //   "all"   (all available candidates)
-}
-
-[Constructor (int index, DOMString id, in DOMString candidateLine)]
-interface IceCandidate {
-    // the m= line index for this candidate
-    readonly attribute int mLineIndex
-    // the mid for the m= line for this candidate
-    readonly attribute DOMString mLineId;
-    // creates a SDP-ized form of this candidate
-    stringifier DOMString ();
-};
-
-[Constructor (DOMString sdp)]
-interface SessionDescription {
-    // adds the specified candidate to the description
-    void addCandidate(IceCandidate candidate);
-    // serializes the description to SDP
-    stringifier DOMString ();
-};
-
-[Constructor (DOMString configuration, 
-              optional MediaConstraints constraints)]
-interface PeerConnection {
-    // creates a blob of SDP to be provided as an offer.    
-    SessionDescription createOffer (
-        SessionDescriptionCallback successCb,
-        optional ErrorCallback errorCb,
-        optional MediaContraints constraints);
-    // creates a blob of SDP to be provided as an answer.
-    SessionDescription createAnswer (
-        SessionDescription offer,
-        SessionDescriptionCallback successCb,
-        optional ErrorCallback errorCb,
-        optional MediaContraints constraints);
-
-    // sets the local session description 
-    void setLocalDescription (
-        SessionDescriptionType action, 
-        SessionDescription desc);
-    // sets the remote session description
-    void setRemoteDescription (
-        SessionDescriptionType action, 
-        SessionDescription desc)
-    // returns the current local session description
-    readonly attribute SessionDescription localDescription;
-    // returns the current remote session description
-    readonly attribute SessionDescription remoteDescription;
-    
-    // updates the constraints for ICE processing 
-    void updateIce (
-      optional DOMString configuration,
-      optional MediaConstraints constraints);
-    // starts using a received remote ICE candidate
-    void addIceCandidate (
-      IceCandidate candidate);
-    // notifies the application of a new local ICE candidate
-    attribute Function?          onicecandidate;
-};
-]]></artwork>
-          </figure></t>
-
-        <t>A.2.</t>
-      </section>
 
       <section title="Example API Flows">
         <t>Below are several sample flows for the new PeerConnection and
@@ -1416,7 +1334,7 @@ OffererUA->AnswererUA:  Media
             </figure></t>
         </section>
 
-        <section title="Handling early media (e.g. 1-800-FEDEX), using SIP">
+        <section title="Handling early media (e.g. 1-800-GO FEDEX), using SIP">
           <t>This example demonstrates how early media could be handled; for
           simplicity, only the offerer side of the call is shown. <figure>
               <artwork><![CDATA[
@@ -1447,103 +1365,6 @@ OffererJS->AnswererJS:  ACK
         </section>
       </section>
 
-      <section title="Full Example Application">
-        <t>The following example demonstrates a simple video calling
-        application, using both trickle candidates and provisional answers to
-        speed up call setup. <figure>
-            <artwork><![CDATA[
-// Usage:
-// Caller calls start(true)
-// Callee calls start(false) to prepare the call/start connecting,
-// and then accept() to start transmitting.
-
-var signalingChannel = createSignalingChannel();
-var pc = null;
-var localStream = null;
-signalingChannel.onmessage = handleMessage;
-
-// Set up the call, get access to local media,
-// and establish connectivity.
-function start(isCaller) {
-  // Create a PeerConnection and hook up the IceCallback.
-  pc = new webkitPeerConnection(null, null);
-  pc.onicecandidate = function(evt) {
-    sendMessage("candidate", evt.candidate);
-  };
-
-  // Get the local stream and show it in the local video element;
-  // if we're the caller, ship off an offer once we get the stream.
-  navigator.webkitGetUserMedia(
-      {"audio": true, "video": true}, function (stream) {
-    selfView.src = webkitURL.createObjectURL(stream);
-    localStream = stream;
-    if (isCaller) {
-      pc.addStream(stream);
-      pc.createOffer(function(sdp) {
-          setLocalAndSendMessage("offer", sdp);
-      });
-  });
-
-  // When the remote stream arrives, show it in the remote
-  // video element.
-  pc.onaddstream = function(evt) {
-    remoteView.src = webkitURL.createObjectURL(evt.stream);
-  };
-}
- 
-// The callee has accepted the call, attach their media
-// and send a final answer.
-function accept() {
-  // The addStream could also be done for the pranswer,
-  // although that would delay the pranswer
-  // (due to the need for user consent)
-  pc.addStream(localStream);  // assumes we have the stream already
-  pc.createAnswer(msg.sdp, function(sdp) {
-    setLocalAndSendMessage("answer", sdp);
-  });
-}
-
-// -- internal methods --
-
-// Apply SDP locally and send it to the remote side.
-function setLocalAndSendMessage(type, sdp) { 
-  pc.setLocalDescription(type, sdp);
-  sendMessage(type, sdp);
-}
-
-// Send a signaling message to the remote side.
-function sendMessage(type, obj) {
-  signalingChannel.send(
-       JSON.stringify({ "type": type, "sdp": obj }));
-}
-     
-// Handle incoming signaling messages.
-function handleMessage(str) {
-  var msg = JSON.parse(str);
-  switch (msg.type) {
-    case "offer":
-      // create the PeerConnection
-      start(false);
-      // feed the received offer into the PeerConnection
-      pc.setRemoteDescription(msg.type, msg.sdp);
-      // create provisional answer to allow ICE/DTLS to start
-      pc.createAnswer(msg.sdp, function(sdp) {
-        setDirection(sdp, "recvonly");
-        setLocalAndSendMessage("pranswer", sdp);
-      });
-      break;       
-    case "pranswer":
-    case "answer":      
-      pc.setRemoteDescription(msg.type, msg.sdp);
-      break;
-    case "candidate":
-      pc.addIceCandidate(msg.sdp);
-      break;
-  }
-}
-]]></artwork>
-          </figure></t>
-      </section>
     </section>
 
     <section title="Change log">
@@ -1554,6 +1375,7 @@ function handleMessage(str) {
           <!-- B --> 
           <t>Removed comparisons to old approaches abandoned by the working group</t>
           <!-- C --> 
+          <t>Removed stuff that has moved to W3C specificaiton</t>
           <!-- D --> 
           <!-- E --> 
           <!-- F --> 
