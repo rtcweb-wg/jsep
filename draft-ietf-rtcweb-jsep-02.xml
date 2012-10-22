@@ -186,7 +186,7 @@
         including addressing, retransmission, forking, and glare handling, is
         left entirely up to the application.</t>
 
-        <figure anchor="fig:sigModel" title="JSEP Signaling Model">
+        <figure anchor="fig-sigModel" title="JSEP Signaling Model">
           <artwork><![CDATA[
     +-----------+                               +-----------+ 
     |  Web App  |<--- App-Specific Signaling -->|  Web App  |
@@ -267,7 +267,7 @@
         long as it has not been answered. The answerer can send back zero or
         more provisional answers, and finally end the offer-answer exchange by
         sending a final answer. The state machine for this is as follows:
-        <figure anchor="fig:state-machine" title="JSEP State Machine">
+        <figure anchor="fig-state-machine" title="JSEP State Machine">
             <artwork><![CDATA[
       +-----------+
       |           |
@@ -298,7 +298,7 @@
       </section>
 
       <section title="Session Description Format">
-        <t>In the current WebRTC specification, session descriptions are
+        <t>In the WebRTC specification, session descriptions are
         formatted as SDP messages. While this format is not optimal for
         manipulation from Javascript, it is widely accepted, and frequently
         updated with new features. Any alternate encoding of session
@@ -315,7 +315,10 @@
         generate and consume that JSON.</t>
 
         <t>Other methods may be added to SessionDescription in the future to
-        simplify handling of SessionDescriptions from Javascript.</t>
+        simplify handling of SessionDescriptions from Javascript. 
+        Thought it is unclear what manipulations developer commonly want to
+        do to SDP, it would be simple to write a Javascript library to preform
+        theses manipulations. </t>
       </section>
 
       <section title="ICE">
@@ -330,38 +333,37 @@
       <section title="ICE Candidate Trickling">
         <t>Candidate trickling is a technique through which a caller may
         incrementally provide candidates to the callee after the initial offer
-        has been dispatched. This allows the callee to begin acting upon the
+        has been dispatched. Trickle ICE is defined in <xref target="I-D.rescorla-mmusic-ice-trickle" />
+        This allows the callee to begin acting upon the
         call and setting up the ICE (and perhaps DTLS) connections
-        immediately, without having to wait for the caller to allocate all
-        possible candidates, resulting in faster call startup in many
-        cases.</t>
+        immediately, without having to wait for the caller to gather all
+        possible candidates, resulting in faster call startup in 
+        cases where the gather does not happen before initiation of the the communications.</t>
 
         <t>JSEP supports optional candidate trickling by providing APIs that
         provide control and feedback on the ICE candidate gathering process.
         Applications that support candidate trickling can send the initial
         offer immediately and send individual candidates when they get the
-        onicecandidate callback with a new candidate; applications that do not
-        support this feature can simply wait for the final onicecandidate
-        callback that indicates gathering is complete, and create and send
+        notified of a new candidate; applications that do not
+        support this feature can simply wait for the indication 
+        gathering is complete, and create and send
         their offer, with all the candidates, at this time.</t>
 
         <t>Upon receipt of trickled candidates, the receiving application can
-        supply them to its ICE Agent by calling an addIceCandidate method.
+        supply them to its ICE Agent.
         This triggers the ICE Agent to start using this remote candidate for
-        connectivity checks. Applications that do not make use of candidate
-        tricking can ignore addIceCandidate entirely, and use the
-        onicecandidate callback solely to indicate when candidate gathering is
-        complete.</t>
-      </section>
+        connectivity checks. </t>
 
-      <section title="ICE Candidate Format">
-        <t>As with session descriptions, we choose to provide an IceCandidate
-        object that provides some abstraction, but can be easily converted
-        to/from SDP a=candidate lines.</t>
+       <section title="ICE Candidate Format">
+        <t>As with session descriptions, they syntax of the IceCandidate
+        object provides some abstraction, but can be easily converted
+        to and from the SDP a=candidate lines.</t>
 
-        <t>The IceCandidate object has fields to indicate which m= line it
-        should be associated with, and a method to convert to a SDP
-        representation, ex:</t>
+         <t> The a=candidate lines are the only SDP information that is
+        contained within IceCandidate, as they represent the only information
+        needed that is not present in the initial offer (i.e. for trickle
+        candidates). This information is carried with the same syntax as the "a=candiate" line in SDP.
+         For example: </t>
 
         <figure>
           <artwork><![CDATA[
@@ -369,15 +371,21 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 ]]></artwork>
         </figure>
 
-        <t>Currently, a=candidate lines are the only SDP information that is
-        contained within IceCandidate, as they represent the only information
-        needed that is not present in the initial offer (i.e. for trickle
-        candidates).</t>
+      <t>The IceCandidate object also fields to indicate which m= line it should
+      be associated with. The m line can be identified in one of two
+      ways. Either by a m-line index, or a MID. An m-line index of n, refers to
+      the n&sbquo;th m-line in the SDP starting with zero. The MID uses the "media
+      stream identification" as defined in [RFC 3388] to identify the
+      m-line. WebRTC devices creating an ICE Candidate object MUST create both of
+      these. Devices receiving an ICE Candidate object SHOULD use the MID if they
+      implement that and otherwise use the m-line index. </t>
+
       </section>
 
      </section>
 
      <section title="Interactions With Forking">
+
         <section title="Serial Forking">
           <t>Serial forking involves a call being dispatched to multiple
           remote callees, where each callee can accept the call, but only one
@@ -438,6 +446,7 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           application wants to only keep a single session, it can simply
           terminate the sessions that it no longer needs.</t>
         </section>
+
       </section>
 
       <section title="Session Rehydration">
@@ -447,21 +456,34 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         is possible to keep an existing session alive via a process called
         "rehydration".</t>
 
-        <t>With rehydration, the current local session description is
+        <t>With rehydration, the current local and remote session description is
         persisted somewhere outside of the page, perhaps on the application
         server, or in browser local storage. The page is then reloaded, and a
-        new session object is created in Javascript. The saved local session
-        is now retrieved, but the previous ICE candidates will no longer be
-        valid in this case, so we will need to perform an ICE restart; to do
-        so, we simply generate a new ICE ufrag/pwd combo for the local
-        description.</t>
-
-        <t>The modified local description is then installed via
-        setLocalDescription, and sent off as an offer to the remote side, who
+        new session object is created in Javascript. The saved local session is
+        now retrieved, but the previous ICE candidates will no longer be valid
+        in this case, the ports may have changed, the DTLS fingerprint may be
+        different, the capabilities of the browser may have changed due to
+        camera being unplugged and so on. In the case of SDES, there is a
+        problem knowing sequence numbers and SSRC.
+        The application can create a new offer, the modify it be consistent with
+        the old offer before calling setLocalDescription and sending it
+        as an offer to the remote side, who
         will reply with an answer that can be supplied to
         setRemoteDescription. ICE processing proceeds as usual, and as soon as
         connectivity is established, the session will be back up and running
         again.</t>
+
+        <t> Open Issue: EKR proposed an alternative rehydration approach where
+        the actual internal PeerConnection object in the browser was kept
+        alive for some time after the web page was killed and provided some way
+        for a new page to acquire the old PeerConnection object. </t>
+
+        <t> Note: One of the issues that impacts the rehydration hard is the security
+        model requires that the browser, not the Javascript applications chooses
+        the ICE passwords. This in turns means that if a new ICE password is
+        choose, it needs to be communicated to the remote side before
+        rehydration can complete. </t>
+
       </section>
     </section>
 
@@ -504,14 +526,14 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           to determine the currently available resources, it may be
           implemented as an async operation.</t>
 
-          <t>Calling this method does not change state; its use is not
-          required.</t>
+          <t>Calling this method may do things such as allocate new ports or generate new ICE credentials.</t>
+
         </section>
 
         <section title="createAnswer">
           <t>The createAnswer method generates a blob of SDP that contains a
           RFC 3264 SDP answer with the supported configuration for the session
-          that is compatible with the parameters supplied in |offer|. Like
+          that is compatible with the parameters supplied in the offer. Like
           createOffer, the returned blob contains descriptions of the local
           MediaStreams attached to this PeerConnection, the codec/RTP/RTCP
           options negotiated for this session, and any candidates that have
@@ -521,8 +543,7 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>As an answer, the generated SDP will contain a specific
           configuration that specifies how the media plane should be
-          established. For each SDP line, the generation of the SDP must
-          follow the appropriate process for generating an answer.</t>
+          established.</t>
 
           <t>Session descriptions generated by createAnswer must be
           immediately usable by setLocalDescription; like createOffer, the
@@ -531,8 +552,8 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           determine the currently available resources, it may need to be
           implemented as an async operation.</t>
 
-          <t>Calling this method does not change state; its use is not
-          required.</t>
+          <t>Calling this method may do things such as allocate new ports or generate new ICE credentials.</t>
+
         </section>
 
         <section title="SessionDescriptionType">
@@ -660,7 +681,17 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
       </section>
 
+    </section>
+
+  </section>
+
       <section title="Configurable SDP Parameters">
+
+        <t> Note: This section is still very early and is likely to
+        significantly change as we get a better understanding of the a) the use
+        cases for this b) the implications at the protocol level c) feedback
+        from implementors on what they can do. </t>
+
         <t>The following is a partial list of SDP parameters that an
         application may want to control, in either local or remote
         descriptions, using this API.</t>
@@ -674,9 +705,11 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>enable/disable RTCP mux (a=rtcp-mux)</t>
 
+     <!--
             <t>remove or reorder SRTP crypto-suites (a=crypto)</t>
 
             <t>change SRTP parameters or keys (a=crypto)</t>
+     -->
 
             <t>change send resolution or framerate (TBD)</t>
 
@@ -702,7 +735,6 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         a=inactive attribute to its local description, and then applying and
         signaling that description.</t>
       </section>
-    </section>
 
     <section title="Security Considerations">
       <t>TODO</t>
@@ -730,6 +762,7 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <!-- ACK 7 --> 
       </t>
     </section>
+
   </middle>
 
   <back>
@@ -753,7 +786,36 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <!-- NORM 16 -->
 <!-- NORM 17 -->
 <!-- NORM 18 -->
+
+<reference anchor='I-D.rescorla-mmusic-ice-trickle'>
+<front>
+<title>Trickle ICE: Incremental Provisioning of Candidates for the Interactive Connectivity Establishment (ICE) Protocol</title>
+
+<author initials='E' surname='Rescorla' fullname='Eric Rescorla'>
+    <organization />
+</author>
+
+<author initials='J' surname='Uberti' fullname='Justin Uberti'>
+    <organization />
+</author>
+
+<author initials='E' surname='Ivov' fullname='Emil Ivov'>
+    <organization />
+</author>
+
+<date month='October' day='10' year='2012' />
+
+<abstract><t>This document describes an extension to the Interactive Connectivity Establishment (ICE) protocol that allows ICE agents to send and receive candidates incrementally rather than exchanging complete lists.  With such incremental provisioning, ICE agents can begin connectivity checks while they are still gathering candidates and considerably shorten the time necessary for ICE processing to complete.  The above mechanism is also referred to as "trickle ICE".</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-rescorla-mmusic-ice-trickle-00' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-rescorla-mmusic-ice-trickle-00.txt' />
+</reference>
+
 <!-- NORM 19 -->
+
 
       <reference anchor="RFC2119">
         <front>
@@ -1239,6 +1301,7 @@ OffererJS->AnswererJS:  ACK
           <!-- C --> 
           <t>Removed stuff that has moved to W3C specificaiton</t>
           <!-- D --> 
+          <t> Align SDP handling with W3C draft </t>
           <!-- E --> 
           <!-- F --> 
           <!-- G --> 
