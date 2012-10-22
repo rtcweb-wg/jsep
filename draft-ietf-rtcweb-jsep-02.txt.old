@@ -822,7 +822,7 @@ Internet-Draft                    JSEP                      October 2012
    as an async operation.
 
    Calling this method may do things such as generate new ICE
-   credentials.
+   credentials, but does not change media state.
 
 5.2.2.  createAnswer
 
@@ -854,7 +854,7 @@ Internet-Draft                    JSEP                      October 2012
    async operation.
 
    Calling this method may do things such as generate new ICE
-   credentials.
+   credentials, but does not change media state.
 
 5.2.3.  SessionDescriptionType
 
@@ -900,24 +900,24 @@ Internet-Draft                    JSEP                      October 2012
 5.2.3.1.  Creating Answers
 
    Most web applications will not need to create answers using the
-   "pranswer" type.  The general recommendation for a web applications
+   "pranswer" type.  The general recommendation for a web application
    would be to create an answer more or less immediately after receiving
-   the offer instead of waiting for a human user to provide input.
+   the offer, instead of waiting for a human user to provide input.
    Later when the human input is received, the applications can create a
-   new offer to update the previos offer/answer pair.  Some application
-   may not be able to do this, particular ones that are attempting to
-   gateway to other signaling protocols.
+   new offer to update the previous offer/answer pair.  Some
+   applications may not be able to do this, particularly ones that are
+   attempting to gateway to other signaling protocols.
 
    Consider a typical web application that will set up a data channel,
-   an audio channel, and a video channel.  When a device received an
-   offer with this, it could send an answer accepting the data channel
-   for two way data, and accepting the audio and video tracks as receive
-   only.  Then it could ask the user if they wanted to transmit audio
-   and video to the far end, acquire the local media sources, and send a
-   new offer to the remote side moving the audio and video to be two way
-   media.  By the time the human has decided to send media, it is
-   possible that the ICE signaling and DTLS channel will already be set
-   up to the remote side.
+   an audio channel, and a video channel.  When an endpoint receives an
+   offer with these channels, it could send an answer accepting the data
+   channel for two-way data, and accepting the audio and video tracks as
+   receive-only.  It could then ask the user if they wanted to transmit
+   audio and video to the far end, acquire the local media streams, and
+   send a new offer to the remote side moving the audio and video to be
+   two-way media.  By the time the human has authorized sending media,
+   it is likely that the ICE and DTLS handshaking with the remote side
+   will already be set up.
 
 5.2.4.  setLocalDescription
 

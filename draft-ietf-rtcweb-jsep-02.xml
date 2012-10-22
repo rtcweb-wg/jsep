@@ -85,7 +85,7 @@
       current state back down to the page and resume the call where it left
       off.</t>
 
-      <t>This document proposes the Javascript Session Establishment Protocol
+      <t>This document describes the Javascript Session Establishment Protocol
       (JSEP) that pulls the signaling state machine out of the browser and
       into Javascript. This mechanism effectively removes the browser almost
       completely from the core signaling flow; the only interface needed is a
@@ -96,13 +96,13 @@
       <t>JSEP's handling of session descriptions is simple and
       straightforward. Whenever an offer/answer exchange is needed, the
       initiating side creates an offer by calling a createOffer() API. The
-      application modify that offer, if it wants to, and then uses it to set
-      up its local config via a setLocalDescription() API. The offer is then
-      sent off to the remote side over its preferred signaling mechanism (e.g.
+      application optionally modifies that offer, and then uses it to set
+      up its local config via the setLocalDescription() API. The offer is then
+      sent off to the remote side over its preferred signaling mechanism (e.g.,
       WebSockets); upon receipt of that offer, the remote party installs it
-      using a setRemoteDescription() API.</t>
+      using the setRemoteDescription() API.</t>
 
-      <t>When the call is accepted, the callee uses a createAnswer() API to
+      <t>When the call is accepted, the callee uses the createAnswer() API to
       generate an appropriate answer, applies it using setLocalDescription(),
       and sends the answer back to the initiator over the signaling channel.
       When the offerer gets that answer, it installs it using
@@ -111,8 +111,8 @@
 
       <t>Regarding ICE, JSEP decouples the ICE state machine from the overall
       signaling state machine, as the ICE state machine must remain in the
-      browser, since only the browser has the necessary knowledge of
-      candidates and other transport info. Performing this separation it
+      browser, because only the browser has the necessary knowledge of
+      candidates and other transport info. Performing this separation also
       provides additional flexibility; in protocols that decouple session
       descriptions from transport, such as Jingle, the transport information
       can be sent separately; in protocols that don't, such as SIP, the
@@ -190,7 +190,7 @@
     +-----------+                               +-----------+ 
     |  Web App  |<--- App-Specific Signaling -->|  Web App  |
     +-----------+                               +-----------+
-          |                                            |
+          ^                                            ^
           |  SDP                                       |  SDP 
           V                                            V
     +-----------+                                +-----------+ 
@@ -238,28 +238,30 @@
             <t>To allow the offer to be specified independently of the
             answer.</t>
           </list> JSEP addresses this by adding both a setLocalDescription and
-        a setRemoteDescription method, and both these methods take a parameter
-        to indicate the type of session description being supplied. This
+        a setRemoteDescription method and having session description objects
+	contain a type field indicating
+        the type of session description being supplied. This
         satisfies the requirements listed above for both the offerer, who
-        first calls setLocalDescription("offer", sdp) and then later
-        setRemoteDescription("answer", sdp), as well as for the answerer, who
-        first calls setRemoteDescription("offer", sdp) and then later
-        setLocalDescription("answer", sdp). While it could be possible to
+        first calls setLocalDescription(sdp [offer]) and then later
+        setRemoteDescription(sdp [answer]), as well as for the answerer, who
+        first calls setRemoteDescription(sdp [offer]) and then later
+        setLocalDescription(sdp [answer]). While it could be possible to
         implicitly determine the value of the offer/answer argument, requiring
         it to be specified explicitly is more robust, allowing invalid
         combinations (i.e. an answer before an offer) to generate an
         appropriate error.</t>
 
-        <t>It also allows for an answer to be treated as provisional by the
+        <t>JSEP also allows for an answer to be treated as provisional by the
         application. Provisional answers provide a way for an answerer to
-        communicate session parameters back to the offerer, in order for the
+        communicate initial session parameters back to the offerer, in order
+	to allow the
         session to begin, while allowing a final answer to be specified later.
         This concept of a final answer is important to the offer/answer model;
         when such an answer is received, any extra resources allocated by the
         caller can be released, now that the exact session configuration is
         known. These "resources" can include things like extra ICE components,
         TURN candidates, or video decoders. Provisional answers, on the other
-        hand, do no such deallocation; as a result, multiple dissimilar
+        hand, do no such deallocation results; as a result, multiple dissimilar
         provisional answers can be received and applied during call setup.</t>
 
         <t>As in [RFC3264], an offerer can send an offer, and update it as
@@ -524,7 +526,7 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             RTCP.</t>
 
             <t>RFC5245 MUST be implemented for signaling the ICE candidate
-            lines corresponding to media stream.</t>
+            lines corresponding to each media stream.</t>
 
             <t>RFC3264 MUST be implemented to signal information about media
             direction.</t>
@@ -543,6 +545,9 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             bit-rate boundaries.</t>
           </list></t>
 
+       <t>As required by RFC 4566 Section 5.13 JSEP implementations MUST
+	  ignore unknown attributes (a=) lines.
+       </t>
         <t>Example SDP for RTCWeb call flows can be found in <xref
         target="I-D.nandakumar-rtcweb-sdp"></xref>.</t>
       </section>
@@ -611,8 +616,9 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
 
         <section title="SessionDescriptionType">
-          <t>The strings "offer", "pranswer", and "answer" serve as type
-          arguments to setLocalDescription and setRemoteDescription. They
+          <t>Session description objects (RTCSessionDescription)
+	  may be of type "offer", "pranswer", and "answer".
+	  These types
           provide information as to how the description parameter should be
           parsed, and how the media state should be changed.</t>
 
@@ -653,6 +659,7 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             input. Later when the human input is received, the applications
             can create a new offer to update the previous offer/answer pair.
             Some applications may not be able to do this, particularly ones that
+            Some application may not be able to do this, particular ones that
             are attempting to gateway to other signaling protocols.</t>
 
             <t>Consider a typical web application that will set up a data
@@ -671,7 +678,7 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="setLocalDescription">
           <t>The setLocalDescription method instructs the PeerConnection to
           apply the supplied SDP blob as its local configuration. The type
-          parameter indicates whether the blob should be processed as an
+          field indicates whether the blob should be processed as an
           offer, provisional answer, or final answer; offers and answers are
           checked differently, using the various rules that exist for each SDP
           line.</t>
@@ -696,7 +703,7 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="setRemoteDescription">
           <t>The setRemoteDescription method instructs the PeerConnection to
           apply the supplied SDP blob as the desired remote configuration. As
-          in setLocalDescription, the |type| parameter indicates how the blob
+          in setLocalDescription, the type field of the indicates how the blob
           should be processed.</t>
 
           <t>This API changes the local media state; among other things, it
