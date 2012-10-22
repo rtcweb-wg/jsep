@@ -19,13 +19,13 @@
 
       <address>
         <postal>
-          <street>5 Cambridge Center</street>
+          <street>747 6th Ave S</street>
 
-          <city>Cambridge</city>
+          <city>Kirkland</city>
 
-          <region>MA</region>
+          <region>WA</region>
 
-          <code>02142</code>
+          <code>98033</code>
 
           <country>USA</country>
         </postal>
@@ -314,9 +314,9 @@
         generate and consume that JSON.</t>
 
         <t>Other methods may be added to SessionDescription in the future to
-        simplify handling of SessionDescriptions from Javascript. Thought it
-        is unclear what manipulations developer commonly want to do to SDP, it
-        would be simple to write a Javascript library to preform theses
+        simplify handling of SessionDescriptions from Javascript. Though it
+        is unclear exactly what manipulations developer will commonly want to do to SDP, it
+        would be simple to write a Javascript library to perform these
         manipulations.</t>
       </section>
 
@@ -330,29 +330,28 @@
         <section title="ICE Candidate Trickling">
           <t>Candidate trickling is a technique through which a caller may
           incrementally provide candidates to the callee after the initial
-          offer has been dispatched. Trickle ICE is defined in <xref
-          target="I-D.rescorla-mmusic-ice-trickle"></xref> This allows the
+          offer has been dispatched; the semantics of "Trickle ICE" are defined in <xref
+          target="I-D.rescorla-mmusic-ice-trickle"></xref>. This process allows the
           callee to begin acting upon the call and setting up the ICE (and
           perhaps DTLS) connections immediately, without having to wait for
-          the caller to gather all possible candidates, resulting in faster
-          call startup in cases where the gather does not happen before
-          initiation of the the communications.</t>
+          the caller to gather all possible candidates. This results in faster
+          call startup in cases where gathering is not performed prior to initating the call.</t>
 
           <t>JSEP supports optional candidate trickling by providing APIs that
           provide control and feedback on the ICE candidate gathering process.
           Applications that support candidate trickling can send the initial
           offer immediately and send individual candidates when they get the
           notified of a new candidate; applications that do not support this
-          feature can simply wait for the indication gathering is complete,
-          and create and send their offer, with all the candidates, at this
+          feature can simply wait for the indication that gathering is complete,
+          and then create and send their offer, with all the candidates, at this
           time.</t>
 
           <t>Upon receipt of trickled candidates, the receiving application
-          can supply them to its ICE Agent. This triggers the ICE Agent to
-          start using this remote candidate for connectivity checks.</t>
+          will supply them to its ICE Agent. This triggers the ICE Agent to
+          start using the new remote candidates for connectivity checks.</t>
 
           <section title="ICE Candidate Format">
-            <t>As with session descriptions, they syntax of the IceCandidate
+            <t>As with session descriptions, the syntax of the IceCandidate
             object provides some abstraction, but can be easily converted to
             and from the SDP a=candidate lines.</t>
 
@@ -360,7 +359,7 @@
             contained within IceCandidate, as they represent the only
             information needed that is not present in the initial offer (i.e.
             for trickle candidates). This information is carried with the same
-            syntax as the "a=candiate" line in SDP. For example:</t>
+            syntax as the "a=candidate" line in SDP. For example:</t>
 
             <figure>
               <artwork><![CDATA[
@@ -368,15 +367,15 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 ]]></artwork>
             </figure>
 
-            <t>The IceCandidate object also fields to indicate which m= line
+            <t>The IceCandidate object also contains fields to indicate which m= line
             it should be associated with. The m line can be identified in one
-            of two ways. Either by a m-line index, or a MID. An m-line index
-            of n, refers to the n&sbquo;th m-line in the SDP starting with
-            zero. The MID uses the "media stream identification" as defined in
-            [RFC 3388] to identify the m-line. WebRTC devices creating an ICE
-            Candidate object MUST create both of these. Devices receiving an
-            ICE Candidate object SHOULD use the MID if they implement that and
-            otherwise use the m-line index.</t>
+            of two ways; either by a m-line index, or a MID. The m-line index is a zero-based
+            index, referring to the Nth m-line in the SDP.
+            The MID uses the "media stream identification", as defined in
+            [RFC 3388], to identify the m-line. WebRTC implementations creating an ICE
+            Candidate object MUST populate both of these fields. Implementations receiving an
+            ICE Candidate object SHOULD use the MID if they implement that functionality,
+            or the m-line index, if not.</t>
           </section>
         </section>
       </section>
@@ -385,13 +384,13 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <t>Some call signaling systems allow various types of forking where an
         SDP Offer may be provided to more than one device. For example, SIP
         RFC 3261 defines both a "Parallel Search" and "Sequential Search".
-        Although these are primarily a signaling level issues that is outside
+        Although these are primarily signaling level issues that are outside
         the scope of JSEP, they do have some impact on the configuration of
-        the RTP and media engine which is in the scope of JSEP. When forking
+        the media plane, which is relevant. When forking
         is happening at the signaling layer, the Javascript application
         responsible for the signaling needs to make the decisions about what
-        media should be sent or received at any point of time and to which
-        remote it should communicate with. The JSEP is used to make sure the
+        media should be sent or received at any point of time and which
+        remote endpoint it should communicate with. JSEP is used to make sure the
         media engine can make the RTP and media perform as required by the
         application. The basic operations that the applications can have the
         media engine do are: <list>
@@ -422,7 +421,7 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>In a "last-one-wins" situation, all answers would be applied as
           provisional answers, and any previous call leg will be terminated.
           At some point, the application will end the setup process, perhaps
-          with a timer; At this point, the application could reapply the
+          with a timer; at this point, the application could reapply the
           existing remote description as a final answer.</t>
         </section>
 
@@ -431,31 +430,31 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           remote callees, where each callee can accept the call, and multiple
           simultaneous active signaling sessions can be established as a
           result. If multiple callees send media at the same time, the
-          possibilities for handling this are described in Section 3.1 or RFC
+          possibilities for handling this are described in Section 3.1 of RFC
           3960. Most SIP devices today only support exchanging media with a
-          single device at a time and do not try to mix multiple early media
-          audio sources as that is very confusing to the user. Imagine having
-          European ring tone mixed with north american ringtone - the
-          resulting sound would not be like either and would confuse the user.
-          If the signaling application wishes to only exchange media from one
-          of the remote at a time, then from a media engine point of view,
+          single device at a time, and do not try to mix multiple early media
+          audio sources, as that could result in a confusing situation. For example.
+          consider having a European ringback tone mixed together with the North American ringback tone - the
+          resulting sound would not be like either tone, and would confuse the user.
+          If the signaling application wishes to only exchange media with one
+          of the remote endpoints at a time, then from a media engine point of view,
           this is exactly like the sequential forking case.</t>
 
           <t>In the parallel forking case where the Javascript application
-          wishes to simultaneously exchange media with multiple peers is
-          slightly more complex but once again the Javascript application can
-          follow the strategy that RFC 3960 describes using UPDATE. It is
+          wishes to simultaneously exchange media with multiple peers, the flow is
+          slightly more complex, but the Javascript application can
+          follow the strategy that RFC 3960 describes using UPDATE. (It is
           worth noting that use cases where this is the desired behavior are
-          very unusual. The UPDATE approach allows the signaling to set up a
-          separate media flow for each peer that it wises to exchange media
+          very unusual.) The UPDATE approach allows the signaling to set up a
+          separate media flow for each peer that it wishes to exchange media
           with. In JSEP, this offer used in the UPDATE would be formed by
-          simply forming a new PeerConnection and making sure that the same
-          microphone and video camera media streams had been "cloned" into
-          this new PeerConnection. Then the new PeerConnection object would be
-          used to get an the SDP offer that was being used by the signaling to
-          perform the UPDATE type strategy discussed in RFC 3690.</t>
+          simply creating a new PeerConnection and making sure that the same
+          local media streams have been added into 
+          this new PeerConnection. Then the new PeerConnection object would produce
+          a SDP offer that could be used by the signaling to
+          perform the UPDATE strategy discussed in RFC 3690.</t>
 
-          <t>As a result of cloning the media streams, the application will
+          <t>As a result of sharing the media streams, the application will
           end up with N parallel PeerConnection sessions, each with a local
           and remote description and their own local and remote addresses. The
           media flow from these sessions can be managed by specifying SDP
@@ -473,18 +472,15 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         is possible to keep an existing session alive via a process called
         "rehydration".</t>
 
-        <t>With rehydration, the current local and remote session description
+        <t>With rehydration, the current signaling state
         is persisted somewhere outside of the page, perhaps on the application
         server, or in browser local storage. The page is then reloaded, and a
-        new session object is created in Javascript. The saved local session
-        is now retrieved, but the previous ICE candidates will no longer be
-        valid in this case, the ports may have changed, the DTLS fingerprint
-        may be different, the capabilities of the browser may have changed due
-        to camera being unplugged and so on. In the case of SDES, there is a
-        problem knowing sequence numbers and SSRC. The application can create
-        a new offer, the modify it be consistent with the old offer before
-        calling setLocalDescription and sending it as an offer to the remote
-        side, who will reply with an answer that can be supplied to
+        new session object is created in Javascript. The saved signaling state
+        is now retrieved, and a new PeerConnection object is created for the 
+        session. At this point a new offer can be generated by the new PeerConnection,
+        with new ICE and SDES credentials. This can then be used to re-initiate the
+        session with the existing remote endpoint, who simply sees the new offer as
+        an in-call renegotiation, and will reply with an answer that can be supplied to
         setRemoteDescription. ICE processing proceeds as usual, and as soon as
         connectivity is established, the session will be back up and running
         again.</t>
@@ -493,12 +489,6 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         the actual internal PeerConnection object in the browser was kept
         alive for some time after the web page was killed and provided some
         way for a new page to acquire the old PeerConnection object.</t>
-
-        <t>Note: One of the issues that impacts the rehydration hard is the
-        security model requires that the browser, not the Javascript
-        applications chooses the ICE passwords. This in turns means that if a
-        new ICE password is choose, it needs to be communicated to the remote
-        side before rehydration can complete.</t>
       </section>
     </section>
 
@@ -512,10 +502,14 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <t>Note: The text in this section may not represent working group
         consensus and is put here so that the working group can discuss it and
         find out how to change it such that it does have consensus.</t>
+        <!-- TODO - refer to RTP usage I-D -->
 
-        <t>The SDP generate by the WebRTC client needs to conform to the
-        following specification and implementations need to implement the
-        factionally to receive SDP that meets the following specifications.
+        <t>When generating SDP blobs, either for offers or answers, the generated SDP
+        needs to conform to the following specifications. Similarly, in order to properly process
+        received SDP blobs, implementations need to implement the
+        functionality described in the following specifications. 
+        This list is derived from <xref
+        target="I-D.rtcweb-rtp-usage-05"></xref>.
         <list>
             <!-- TODO - fix the refs in here -->
 
