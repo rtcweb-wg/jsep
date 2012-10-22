@@ -10,6 +10,7 @@
 <?rfc colonspace="yes" ?>
 <?rfc rfcedstyle="no" ?>
 <?rfc tocdepth="4"?>
+
 <rfc category="std" docName="draft-ietf-rtcweb-jsep-02" ipr="trust200902">
   <front>
     <title abbrev="JSEP">Javascript Session Establishment Protocol</title>
@@ -78,45 +79,6 @@
       description, which specifies the necessary transport and media
       configuration information necessary to establish the media plane.</t>
 
-      <t>The original spec for WebRTC attempted to implement this
-      protocol-agnostic signaling by providing a mechanism to exchange session
-      descriptions in the form of SDP blobs. Upon starting a session, the
-      browser would generate a SDP blob, which would be passed to the
-      application for transport over its preferred signaling protocol. On the
-      remote side, this blob would be passed into the browser from the
-      application, and the browser would then generate a blob of its own in
-      response. Upon transmission back to the initiator, this blob would be
-      plugged into their browser, and the handshake would be complete.</t>
-
-      <t>Experimentation with this mechanism turned up several shortcomings,
-      which generally stemmed from there being insufficient context at the
-      browser to fully determine the meaning of a SDP blob. For example,
-      determining whether a blob is an offer or an answer, or differentiating
-      a new offer from a retransmit.</t>
-
-      <t>The ROAP proposal, specified in
-      [I-D.draft-jennings-rtcweb-signaling-01], attempted to resolve these
-      issues by providing additional structure in the messaging - in essence,
-      to create a generic signaling protocol that specifies how the browser
-      signaling state machine should operate. However, even though the
-      protocol is abstracted, the state machine forces a
-      least-common-denominator approach on the signaling interactions. For
-      example, in Jingle, the call initiator can provide additional ICE
-      candidates even after the initial offer has been sent, which allows the
-      offer to be sent immediately for quicker call startup. However, in the
-      browser state machine, there is no notion of sending an updated offer
-      before the initial offer has been responded to, rendering this
-      functionality impossible.</t>
-
-      <t>While specific concerns like this could be addressed by modifying the
-      generic protocol, others would likely be discovered later. The main
-      reason this mechanism is inflexible is because it embeds a signaling
-      state machine within the browser. Since the browser generates the
-      session descriptions on its own, and fully controls the possible states
-      and advancement of the signaling state machine, modification of the
-      session descriptions or use of alternate state machines becomes
-      difficult or impossible.</t>
-
       <t>The browser environment also has its own challenges that cause
       problems for an embedded signaling state machine. One of these is that
       the user may reload the web page at any time. If this happens, and the
@@ -124,27 +86,7 @@
       current state back down to the page and resume the call where it left
       off.</t>
 
-      <t>If instead the state machine is run at the browser end, and is
-      instantiated within, for example, the PeerConnection object, that state
-      machine will be reinitialized when the page is reloaded and the
-      JavaScript re-executed. This actually complicates the design of any
-      interoperability service, as all cases where an offer or answer has
-      already been generated but is now "forgotten" must now be handled by
-      trying to move the client state machine forward to the same state it had
-      been in previously in order to match what has already been delivered to
-      and/or answered by the far side, or handled by ensuring that aborts are
-      cleanly handled from every state and the negotiation rapidly
-      restarted.</t>
-
-      <section title="Terminology">
-        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-        document are to be interpreted as described in RFC 2119 [RFC2119].</t>
-      </section>
-    </section>
-
-    <section title="JSEP Approach">
-      <t>To resolve the issues mentioned above, this document proposes the
+      <t> This document proposes the
       Javascript Session Establishment Protocol (JSEP) that pulls the
       signaling state machine out of the browser and into Javascript. This
       mechanism effectively removes the browser almost completely from the
@@ -156,7 +98,7 @@
       <t>JSEP's handling of session descriptions is simple and
       straightforward. Whenever an offer/answer exchange is needed, the
       initiating side creates an offer by calling a createOffer() API. The
-      application can do massaging of that offer, if it wants to, and then
+      application modify that offer, if it wants to, and then
       uses it to set up its local config via a setLocalDescription() API. The
       offer is then sent off to the remote side over its preferred signaling
       mechanism (e.g. WebSockets); upon receipt of that offer, the remote
@@ -176,7 +118,7 @@
       provides additional flexibility; in protocols that decouple session
       descriptions from transport, such as Jingle, the transport information
       can be sent separately; in protocols that don't, such as SIP, the
-      information can be easily aggregated and recombined. Sending transport
+      information can be used in the aggregated form. Sending transport
       information separately can allow for faster ICE and DTLS startup, since
       the necessary roundtrips can occur while waiting for the remote side to
       accept the session.</t>
@@ -189,15 +131,15 @@
       its chosen signaling protocol, instead of simply forwarding the messages
       emitted from the browser.</t>
 
-      <t>One way to mitigate this is to provide a Javascript library that
-      hides this complexity from the developer, which would implement the
-      state machine and serialization of the desired signaling protocol. For
-      example, this library could convert easily adapt the JSEP API into the
-      exact ROAP API, thereby implementing the ROAP signaling protocol. Such a
-      library could of course also implement other popular signaling
-      protocols, including SIP or Jingle. In this fashion we can enable
-      greater control for the experienced developer without forcing any
-      additional complexity on the novice developer.</t>
+      <t>One way to mitigate this is to provide a Javascript library that hides
+      this complexity from the developer, which would implement the state
+      machine and serialization of the desired signaling protocol. For example,
+      this library could convert easily adapt the JSEP API into the exact ROAP
+      API <xref target="I-D.jennings-rtcweb-signaling" />, thereby implementing
+      the ROAP signaling protocol. Such a library could of course also implement
+      other popular signaling protocols, including SIP or Jingle. In this
+      fashion we can enable greater control for the experienced developer
+      without forcing any additional complexity on the novice developer.</t>
     </section>
 
     <section title="Other Approaches Considered">
@@ -226,6 +168,12 @@
       descriptions, and they are evaluated in a specific fashion, which
       reduces the number of possible states and interactions.</t>
     </section>
+
+      <section title="Terminology">
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        document are to be interpreted as described in RFC 2119 [RFC2119].</t>
+      </section>
 
     <section title="Semantics and Syntax">
       <section title="Signaling Model">
@@ -362,28 +310,22 @@
         <t>However, to simplify Javascript processing, and provide for future
         flexibility, the SDP syntax is encapsulated within a
         SessionDescription object, which can be constructed from SDP, and be
-        serialized out to SDP. If we were able to agree on a JSON format for
+        serialized out to SDP. If future specifications agree on a JSON format for
         session descriptions, we could easily enable this object to
-        generate/expect JSON.</t>
+        generate and consume that JSON.</t>
 
         <t>Other methods may be added to SessionDescription in the future to
         simplify handling of SessionDescriptions from Javascript.</t>
       </section>
 
-      <section title="Separation of Signaling and ICE State Machines">
-        <t>JSEP does away with the SDP Agent within the browser, and this
-        functionality is now controlled directly by the application, which
-        uses the setLocalDescription and setRemoteDescription APIs to tell the
-        browser what SDP has been negotiated. The ICE Agent remains in the
-        browser, as it still needs to drive the process of gathering
-        candidates, connectivity checks, and related ICE functionality.</t>
-
+      <section title="ICE">
+     
         <t>When a new ICE candidate is available, the ICE Agent will notify
         the application via a callback; these candidates will automatically be
         added to the local session description. When all candidates have been
         gathered, the callback will also be invoked to signal that the
         gathering process is complete.</t>
-      </section>
+
 
       <section title="ICE Candidate Trickling">
         <t>Candidate trickling is a technique through which a caller may
@@ -433,7 +375,9 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         candidates).</t>
       </section>
 
-      <section title="Interactions With Forking">
+     </section>
+
+     <section title="Interactions With Forking">
         <section title="Serial Forking">
           <t>Serial forking involves a call being dispatched to multiple
           remote callees, where each callee can accept the call, but only one
@@ -875,6 +819,37 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </references>
 
     <references title="Informative References">
+
+
+<reference anchor='I-D.jennings-rtcweb-signaling'>
+<front>
+<title>RTCWeb Offer/Answer Protocol (ROAP)</title>
+
+<author initials='C' surname='Jennings' fullname='Cullen Jennings'>
+    <organization />
+</author>
+
+<author initials='J' surname='Rosenberg' fullname='Jonathan Rosenberg'>
+    <organization />
+</author>
+
+<author initials='R' surname='Jesup' fullname='Randell Jesup'>
+    <organization />
+</author>
+
+<date month='October' day='30' year='2011' />
+
+<abstract><t>This document describes an protocol used to negotiate media between browsers or other compatible devices.  This protocol provides the state machinery needed to implement the offer/answer model (RFC 3264), and defines the semantics and necessary attributes of messages that must be exchanged.  The protocol uses an abstract transport in that it does not actually define how these messages are exchanged. Rather, such exchanges are handled through web-based transports like HTTP or WebSockets.  The protocol focuses solely on media negotiation and does not handle call control, call processing, or other functions.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-jennings-rtcweb-signaling-01' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.txt' />
+<format type='PDF'
+        target='http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.pdf' />
+</reference>
+
       <reference anchor="RFC4568">
         <front>
           <title>Session Description Protocol (SDP) Security Descriptions for
@@ -953,89 +928,7 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </references>
 
     <section title="JSEP Implementation Examples">
-      <section title="Example API">
-        <t>The interface below shows a basic Javascript API that could be used
-        to expose the functionality discussed in this document. This API is
-        used for the examples in the following parts of this Appendix. <figure>
-            <artwork><![CDATA[
-// actions, for setLocalDescription/setRemoteDescription
-enum SessionDescriptionType { "offer", "pranswer", "answer" }
 
-// constraints that can be supplied to the ctor or createXXXX
-enum MediaConstraints {
-    "offerConfig",    // controls the kind of offer created;
-                      //   "default"    (normal offer)
-                      //   "caps"       (all capabilities)
-                      //   "new"        (brand new description)
-                      //   "iceRestart" (new ICE creds)
- 
-    "iceTransports",  // controls ICE candidates; can be
-                      //   "none"  (no candidates)
-                      //   "relay" (only relay candidates)
-                      //   "all"   (all available candidates)
-}
-
-[Constructor (int index, DOMString id, in DOMString candidateLine)]
-interface IceCandidate {
-    // the m= line index for this candidate
-    readonly attribute int mLineIndex
-    // the mid for the m= line for this candidate
-    readonly attribute DOMString mLineId;
-    // creates a SDP-ized form of this candidate
-    stringifier DOMString ();
-};
-
-[Constructor (DOMString sdp)]
-interface SessionDescription {
-    // adds the specified candidate to the description
-    void addCandidate(IceCandidate candidate);
-    // serializes the description to SDP
-    stringifier DOMString ();
-};
-
-[Constructor (DOMString configuration, 
-              optional MediaConstraints constraints)]
-interface PeerConnection {
-    // creates a blob of SDP to be provided as an offer.    
-    SessionDescription createOffer (
-        SessionDescriptionCallback successCb,
-        optional ErrorCallback errorCb,
-        optional MediaContraints constraints);
-    // creates a blob of SDP to be provided as an answer.
-    SessionDescription createAnswer (
-        SessionDescription offer,
-        SessionDescriptionCallback successCb,
-        optional ErrorCallback errorCb,
-        optional MediaContraints constraints);
-
-    // sets the local session description 
-    void setLocalDescription (
-        SessionDescriptionType action, 
-        SessionDescription desc);
-    // sets the remote session description
-    void setRemoteDescription (
-        SessionDescriptionType action, 
-        SessionDescription desc)
-    // returns the current local session description
-    readonly attribute SessionDescription localDescription;
-    // returns the current remote session description
-    readonly attribute SessionDescription remoteDescription;
-    
-    // updates the constraints for ICE processing 
-    void updateIce (
-      optional DOMString configuration,
-      optional MediaConstraints constraints);
-    // starts using a received remote ICE candidate
-    void addIceCandidate (
-      IceCandidate candidate);
-    // notifies the application of a new local ICE candidate
-    attribute Function?          onicecandidate;
-};
-]]></artwork>
-          </figure></t>
-
-        <t>A.2.</t>
-      </section>
 
       <section title="Example API Flows">
         <t>Below are several sample flows for the new PeerConnection and
@@ -1252,7 +1145,7 @@ OffererUA->AnswererUA:  Media
             </figure></t>
         </section>
 
-        <section title="Handling early media (e.g. 1-800-FEDEX), using SIP">
+        <section title="Handling early media (e.g. 1-800-GO FEDEX), using SIP">
           <t>This example demonstrates how early media could be handled; for
           simplicity, only the offerer side of the call is shown. <figure>
               <artwork><![CDATA[
@@ -1283,103 +1176,6 @@ OffererJS->AnswererJS:  ACK
         </section>
       </section>
 
-      <section title="Full Example Application">
-        <t>The following example demonstrates a simple video calling
-        application, using both trickle candidates and provisional answers to
-        speed up call setup. <figure>
-            <artwork><![CDATA[
-// Usage:
-// Caller calls start(true)
-// Callee calls start(false) to prepare the call/start connecting,
-// and then accept() to start transmitting.
-
-var signalingChannel = createSignalingChannel();
-var pc = null;
-var localStream = null;
-signalingChannel.onmessage = handleMessage;
-
-// Set up the call, get access to local media,
-// and establish connectivity.
-function start(isCaller) {
-  // Create a PeerConnection and hook up the IceCallback.
-  pc = new webkitPeerConnection(null, null);
-  pc.onicecandidate = function(evt) {
-    sendMessage("candidate", evt.candidate);
-  };
-
-  // Get the local stream and show it in the local video element;
-  // if we're the caller, ship off an offer once we get the stream.
-  navigator.webkitGetUserMedia(
-      {"audio": true, "video": true}, function (stream) {
-    selfView.src = webkitURL.createObjectURL(stream);
-    localStream = stream;
-    if (isCaller) {
-      pc.addStream(stream);
-      pc.createOffer(function(sdp) {
-          setLocalAndSendMessage("offer", sdp);
-      });
-  });
-
-  // When the remote stream arrives, show it in the remote
-  // video element.
-  pc.onaddstream = function(evt) {
-    remoteView.src = webkitURL.createObjectURL(evt.stream);
-  };
-}
- 
-// The callee has accepted the call, attach their media
-// and send a final answer.
-function accept() {
-  // The addStream could also be done for the pranswer,
-  // although that would delay the pranswer
-  // (due to the need for user consent)
-  pc.addStream(localStream);  // assumes we have the stream already
-  pc.createAnswer(msg.sdp, function(sdp) {
-    setLocalAndSendMessage("answer", sdp);
-  });
-}
-
-// -- internal methods --
-
-// Apply SDP locally and send it to the remote side.
-function setLocalAndSendMessage(type, sdp) { 
-  pc.setLocalDescription(type, sdp);
-  sendMessage(type, sdp);
-}
-
-// Send a signaling message to the remote side.
-function sendMessage(type, obj) {
-  signalingChannel.send(
-       JSON.stringify({ "type": type, "sdp": obj }));
-}
-     
-// Handle incoming signaling messages.
-function handleMessage(str) {
-  var msg = JSON.parse(str);
-  switch (msg.type) {
-    case "offer":
-      // create the PeerConnection
-      start(false);
-      // feed the received offer into the PeerConnection
-      pc.setRemoteDescription(msg.type, msg.sdp);
-      // create provisional answer to allow ICE/DTLS to start
-      pc.createAnswer(msg.sdp, function(sdp) {
-        setDirection(sdp, "recvonly");
-        setLocalAndSendMessage("pranswer", sdp);
-      });
-      break;       
-    case "pranswer":
-    case "answer":      
-      pc.setRemoteDescription(msg.type, msg.sdp);
-      break;
-    case "candidate":
-      pc.addIceCandidate(msg.sdp);
-      break;
-  }
-}
-]]></artwork>
-          </figure></t>
-      </section>
     </section>
 
     <section title="Change log">
@@ -1388,7 +1184,9 @@ function handleMessage(str) {
           <!-- A --> 
           <t>Converted from nroff</t>
           <!-- B --> 
+          <t>Removed comparisons to old approaches abandoned by the working group</t>
           <!-- C --> 
+          <t>Removed stuff that has moved to W3C specificaiton</t>
           <!-- D --> 
           <!-- E --> 
           <!-- F --> 
