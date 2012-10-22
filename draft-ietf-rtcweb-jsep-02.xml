@@ -262,8 +262,16 @@
         hand, do no such deallocation; as a result, multiple dissimilar
         provisional answers can be received and applied during call setup.</t>
 
-        <t>As in [RFC3264], an offerer can send an offer, and update it as
-        long as it has not been answered. The answerer can send back zero or
+        <t>
+          In [RFC3264], the constraints at the signaling level is that only one
+          offer can be outstanding for a given session but from the media stack
+          level, a new offer can be generated at any point. For example, when
+          using SIP for signaling, if one offer is sent, then cancelled using a
+          SIP CANCEL, another offer can be generated even though no answer was
+          received for the first offer. To support this, the JSEP media layer
+          can provide an offer whenever the Javascript application needs one for
+          the signaling.
+        The answerer can send back zero or
         more provisional answers, and finally end the offer-answer exchange by
         sending a final answer. The state machine for this is as follows:
         <figure anchor="fig-state-machine" title="JSEP State Machine">
