@@ -512,6 +512,30 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         rehydration can complete. </t>
 
       </section>
+
+     <section title="Creating Answers">
+
+       <t> Most web applications will not need to create answers using the
+       "pranswer" type. The general recommendation for a web applications would
+       be to create an answer more or less immediately after receiving the offer
+       instead of waiting for a human user to provide input. Later when the
+       human input is received, the applications can create a new offer to
+       update the previos offer/answer pair. Some application may not be able to
+       do this, particular ones that are attempting to gateway to other
+       signaling protocols. </t>
+
+       <t> Consider a typical web application that will set up a data channel,
+       an audio channel, and a video channel. When a device received an offer
+       with this, it could send an answer accepting the data channel for two way
+       data, and accepting the audio and video tracks as receive only. Then it
+       could ask the user if they wanted to transmit audio and video to the far
+       end, acquire the local media sources, and send a new offer to the remote
+       side moving the audio and video to be two way media. By the time the
+       human has decided to send media, it is possible that the ICE signaling
+       and DTLS channel will already be set up to the remote side. </t>
+
+     </section>
+
     </section>
 
     <section title="Interface">
