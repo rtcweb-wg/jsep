@@ -59,112 +59,56 @@ Internet-Draft                    JSEP                      October 2012
 
 Table of Contents
 
-   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  4
-   2.  Other Approaches Considered  . . . . . . . . . . . . . . . . .  6
-   3.  Terminology  . . . . . . . . . . . . . . . . . . . . . . . . .  7
-   4.  Semantics and Syntax . . . . . . . . . . . . . . . . . . . . .  8
-     4.1.  Signaling Model  . . . . . . . . . . . . . . . . . . . . .  8
-     4.2.  Session Descriptions and State Machine . . . . . . . . . .  8
-     4.3.  Session Description Format . . . . . . . . . . . . . . . . 10
-     4.4.  ICE  . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
-       4.4.1.  ICE Candidate Trickling  . . . . . . . . . . . . . . . 11
-       4.4.2.  ICE Candidate Format . . . . . . . . . . . . . . . . . 11
-     4.5.  Interactions With Forking  . . . . . . . . . . . . . . . . 12
-       4.5.1.  Serial Forking . . . . . . . . . . . . . . . . . . . . 12
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  3
+   2.  Other Approaches Considered  . . . . . . . . . . . . . . . . .  5
+   3.  Terminology  . . . . . . . . . . . . . . . . . . . . . . . . .  6
+   4.  Semantics and Syntax . . . . . . . . . . . . . . . . . . . . .  7
+     4.1.  Signaling Model  . . . . . . . . . . . . . . . . . . . . .  7
+     4.2.  Session Descriptions and State Machine . . . . . . . . . .  7
+     4.3.  Session Description Format . . . . . . . . . . . . . . . .  9
+     4.4.  ICE  . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+       4.4.1.  ICE Candidate Trickling  . . . . . . . . . . . . . . . 10
+         4.4.1.1.  ICE Candidate Format . . . . . . . . . . . . . . . 10
+     4.5.  Interactions With Forking  . . . . . . . . . . . . . . . . 11
+       4.5.1.  Sequential Forking . . . . . . . . . . . . . . . . . . 11
        4.5.2.  Parallel Forking . . . . . . . . . . . . . . . . . . . 12
      4.6.  Session Rehydration  . . . . . . . . . . . . . . . . . . . 13
    5.  Interface  . . . . . . . . . . . . . . . . . . . . . . . . . . 14
-     5.1.  Methods  . . . . . . . . . . . . . . . . . . . . . . . . . 14
-       5.1.1.  createOffer  . . . . . . . . . . . . . . . . . . . . . 14
-       5.1.2.  createAnswer . . . . . . . . . . . . . . . . . . . . . 14
-       5.1.3.  SessionDescriptionType . . . . . . . . . . . . . . . . 15
-       5.1.4.  setLocalDescription  . . . . . . . . . . . . . . . . . 16
-       5.1.5.  setRemoteDescription . . . . . . . . . . . . . . . . . 16
-       5.1.6.  localDescription . . . . . . . . . . . . . . . . . . . 16
-       5.1.7.  remoteDescription  . . . . . . . . . . . . . . . . . . 17
-       5.1.8.  updateIce  . . . . . . . . . . . . . . . . . . . . . . 17
-       5.1.9.  addIceCandidate  . . . . . . . . . . . . . . . . . . . 17
-     5.2.  Configurable SDP Parameters  . . . . . . . . . . . . . . . 17
-   6.  Media Setup Overview . . . . . . . . . . . . . . . . . . . . . 19
-     6.1.  Initiating the Session . . . . . . . . . . . . . . . . . . 19
-       6.1.1.  Generating An Offer  . . . . . . . . . . . . . . . . . 19
-       6.1.2.  Applying the Offer . . . . . . . . . . . . . . . . . . 19
-       6.1.3.  Handling ICE Callbacks . . . . . . . . . . . . . . . . 20
-       6.1.4.  Serializing the Offer and Candidates . . . . . . . . . 20
-     6.2.  Receiving the Session  . . . . . . . . . . . . . . . . . . 20
-       6.2.1.  Receiving the Offer  . . . . . . . . . . . . . . . . . 20
-       6.2.2.  Handling ICE Messages  . . . . . . . . . . . . . . . . 21
-       6.2.3.  Generating the Answer  . . . . . . . . . . . . . . . . 21
-       6.2.4.  Applying the Answer  . . . . . . . . . . . . . . . . . 21
-       6.2.5.  Serializing the Answer . . . . . . . . . . . . . . . . 21
-     6.3.  Completing the Session . . . . . . . . . . . . . . . . . . 21
-       6.3.1.  Receiving the Answer . . . . . . . . . . . . . . . . . 21
-     6.4.  Updates to the Session . . . . . . . . . . . . . . . . . . 22
-   7.  Security Considerations  . . . . . . . . . . . . . . . . . . . 23
-   8.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 24
-   9.  Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 25
-   10. References . . . . . . . . . . . . . . . . . . . . . . . . . . 26
-     10.1. Normative References . . . . . . . . . . . . . . . . . . . 26
+     5.1.  SDP Requirements . . . . . . . . . . . . . . . . . . . . . 14
+     5.2.  Methods  . . . . . . . . . . . . . . . . . . . . . . . . . 15
+       5.2.1.  createOffer  . . . . . . . . . . . . . . . . . . . . . 15
+       5.2.2.  createAnswer . . . . . . . . . . . . . . . . . . . . . 15
+       5.2.3.  SessionDescriptionType . . . . . . . . . . . . . . . . 16
+         5.2.3.1.  Creating Answers . . . . . . . . . . . . . . . . . 17
+       5.2.4.  setLocalDescription  . . . . . . . . . . . . . . . . . 17
+       5.2.5.  setRemoteDescription . . . . . . . . . . . . . . . . . 18
+       5.2.6.  localDescription . . . . . . . . . . . . . . . . . . . 18
+       5.2.7.  remoteDescription  . . . . . . . . . . . . . . . . . . 18
+       5.2.8.  updateIce  . . . . . . . . . . . . . . . . . . . . . . 18
+       5.2.9.  addIceCandidate  . . . . . . . . . . . . . . . . . . . 19
+   6.  Configurable SDP Parameters  . . . . . . . . . . . . . . . . . 20
+   7.  Security Considerations  . . . . . . . . . . . . . . . . . . . 21
+   8.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 22
+   9.  Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 23
+   10. References . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+     10.1. Normative References . . . . . . . . . . . . . . . . . . . 24
+     10.2. Informative References . . . . . . . . . . . . . . . . . . 24
+   Appendix A.  JSEP Implementation Examples  . . . . . . . . . . . . 26
+     A.1.  Example API Flows  . . . . . . . . . . . . . . . . . . . . 26
+       A.1.1.  Call using ROAP  . . . . . . . . . . . . . . . . . . . 26
+       A.1.2.  Call using XMPP  . . . . . . . . . . . . . . . . . . . 27
+       A.1.3.  Adding video to a call, using XMPP . . . . . . . . . . 28
+       A.1.4.  Simultaneous add of video streams, using XMPP  . . . . 28
+       A.1.5.  Call using SIP . . . . . . . . . . . . . . . . . . . . 29
+       A.1.6.  Handling early media (e.g. 1-800-GO FEDEX), using
+               SIP  . . . . . . . . . . . . . . . . . . . . . . . . . 30
+   Appendix B.  Change log  . . . . . . . . . . . . . . . . . . . . . 32
+   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 33
+
 
 
 
 Uberti & Jennings        Expires April 25, 2013                 [Page 2]
-
-Internet-Draft                    JSEP                      October 2012
-
-
-     10.2. Informative References . . . . . . . . . . . . . . . . . . 26
-   Appendix A.  JSEP Implementation Examples  . . . . . . . . . . . . 27
-     A.1.  Example API Flows  . . . . . . . . . . . . . . . . . . . . 27
-       A.1.1.  Call using ROAP  . . . . . . . . . . . . . . . . . . . 27
-       A.1.2.  Call using XMPP  . . . . . . . . . . . . . . . . . . . 28
-       A.1.3.  Adding video to a call, using XMPP . . . . . . . . . . 29
-       A.1.4.  Simultaneous add of video streams, using XMPP  . . . . 29
-       A.1.5.  Call using SIP . . . . . . . . . . . . . . . . . . . . 30
-       A.1.6.  Handling early media (e.g. 1-800-GO FEDEX), using
-               SIP  . . . . . . . . . . . . . . . . . . . . . . . . . 31
-   Appendix B.  Change log  . . . . . . . . . . . . . . . . . . . . . 33
-   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 34
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Uberti & Jennings        Expires April 25, 2013                 [Page 3]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -220,7 +164,7 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-Uberti & Jennings        Expires April 25, 2013                 [Page 4]
+Uberti & Jennings        Expires April 25, 2013                 [Page 3]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -276,7 +220,7 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-Uberti & Jennings        Expires April 25, 2013                 [Page 5]
+Uberti & Jennings        Expires April 25, 2013                 [Page 4]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -332,7 +276,7 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-Uberti & Jennings        Expires April 25, 2013                 [Page 6]
+Uberti & Jennings        Expires April 25, 2013                 [Page 5]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -388,7 +332,7 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-Uberti & Jennings        Expires April 25, 2013                 [Page 7]
+Uberti & Jennings        Expires April 25, 2013                 [Page 6]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -444,7 +388,7 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-Uberti & Jennings        Expires April 25, 2013                 [Page 8]
+Uberti & Jennings        Expires April 25, 2013                 [Page 7]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -500,7 +444,7 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-Uberti & Jennings        Expires April 25, 2013                 [Page 9]
+Uberti & Jennings        Expires April 25, 2013                 [Page 8]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -536,14 +480,14 @@ Internet-Draft                    JSEP                      October 2012
 
 4.3.  Session Description Format
 
-   In the current WebRTC specification, session descriptions are
-   formatted as SDP messages.  While this format is not optimal for
-   manipulation from Javascript, it is widely accepted, and frequently
-   updated with new features.  Any alternate encoding of session
-   descriptions would have to keep pace with the changes to SDP, at
-   least until the time that this new encoding eclipsed SDP in
-   popularity.  As a result, JSEP continues to use SDP as the internal
-   representation for its session descriptions.
+   In the WebRTC specification, session descriptions are formatted as
+   SDP messages.  While this format is not optimal for manipulation from
+   Javascript, it is widely accepted, and frequently updated with new
+   features.  Any alternate encoding of session descriptions would have
+   to keep pace with the changes to SDP, at least until the time that
+   this new encoding eclipsed SDP in popularity.  As a result, JSEP
+   continues to use SDP as the internal representation for its session
+   descriptions.
 
    However, to simplify Javascript processing, and provide for future
    flexibility, the SDP syntax is encapsulated within a
@@ -556,12 +500,15 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 10]
+Uberti & Jennings        Expires April 25, 2013                 [Page 9]
 
 Internet-Draft                    JSEP                      October 2012
 
 
-   simplify handling of SessionDescriptions from Javascript.
+   simplify handling of SessionDescriptions from Javascript.  Thought it
+   is unclear what manipulations developer commonly want to do to SDP,
+   it would be simple to write a Javascript library to preform theses
+   manipulations.
 
 4.4.  ICE
 
@@ -575,60 +522,84 @@ Internet-Draft                    JSEP                      October 2012
 
    Candidate trickling is a technique through which a caller may
    incrementally provide candidates to the callee after the initial
-   offer has been dispatched.  This allows the callee to begin acting
-   upon the call and setting up the ICE (and perhaps DTLS) connections
-   immediately, without having to wait for the caller to allocate all
-   possible candidates, resulting in faster call startup in many cases.
+   offer has been dispatched.  Trickle ICE is defined in
+   [I-D.rescorla-mmusic-ice-trickle] This allows the callee to begin
+   acting upon the call and setting up the ICE (and perhaps DTLS)
+   connections immediately, without having to wait for the caller to
+   gather all possible candidates, resulting in faster call startup in
+   cases where the gather does not happen before initiation of the the
+   communications.
 
    JSEP supports optional candidate trickling by providing APIs that
    provide control and feedback on the ICE candidate gathering process.
    Applications that support candidate trickling can send the initial
    offer immediately and send individual candidates when they get the
-   onicecandidate callback with a new candidate; applications that do
-   not support this feature can simply wait for the final onicecandidate
-   callback that indicates gathering is complete, and create and send
-   their offer, with all the candidates, at this time.
+   notified of a new candidate; applications that do not support this
+   feature can simply wait for the indication gathering is complete, and
+   create and send their offer, with all the candidates, at this time.
 
    Upon receipt of trickled candidates, the receiving application can
-   supply them to its ICE Agent by calling an addIceCandidate method.
-   This triggers the ICE Agent to start using this remote candidate for
-   connectivity checks.  Applications that do not make use of candidate
-   tricking can ignore addIceCandidate entirely, and use the
-   onicecandidate callback solely to indicate when candidate gathering
-   is complete.
+   supply them to its ICE Agent.  This triggers the ICE Agent to start
+   using this remote candidate for connectivity checks.
 
-4.4.2.  ICE Candidate Format
+4.4.1.1.  ICE Candidate Format
 
-   As with session descriptions, we choose to provide an IceCandidate
-   object that provides some abstraction, but can be easily converted
-   to/from SDP a=candidate lines.
+   As with session descriptions, they syntax of the IceCandidate object
+   provides some abstraction, but can be easily converted to and from
+   the SDP a=candidate lines.
 
-   The IceCandidate object has fields to indicate which m= line it
-   should be associated with, and a method to convert to a SDP
-   representation, ex:
-
-   a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
+   The a=candidate lines are the only SDP information that is contained
+   within IceCandidate, as they represent the only information needed
+   that is not present in the initial offer (i.e. for trickle
+   candidates).  This information is carried with the same syntax as the
+   "a=candiate" line in SDP.  For example:
 
 
 
-
-Uberti & Jennings        Expires April 25, 2013                [Page 11]
+Uberti & Jennings        Expires April 25, 2013                [Page 10]
 
 Internet-Draft                    JSEP                      October 2012
 
 
-   Currently, a=candidate lines are the only SDP information that is
-   contained within IceCandidate, as they represent the only information
-   needed that is not present in the initial offer (i.e. for trickle
-   candidates).
+   a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
+
+   The IceCandidate object also fields to indicate which m= line it
+   should be associated with.  The m line can be identified in one of
+   two ways.  Either by a m-line index, or a MID.  An m-line index of n,
+   refers to the n'th m-line in the SDP starting with zero.  The MID
+   uses the "media stream identification" as defined in [RFC 3388] to
+   identify the m-line.  WebRTC devices creating an ICE Candidate object
+   MUST create both of these.  Devices receiving an ICE Candidate object
+   SHOULD use the MID if they implement that and otherwise use the
+   m-line index.
 
 4.5.  Interactions With Forking
 
-4.5.1.  Serial Forking
+   Some call signaling systems allow various types of forking where an
+   SDP Offer may be provided to more than one device.  For example, SIP
+   RFC 3261 defines both a "Parallel Search" and "Sequential Search".
+   Although these are primarily a signaling level issues that is outside
+   the scope of JSEP, they do have some impact on the configuration of
+   the RTP and media engine which is in the scope of JSEP.  When forking
+   is happening at the signaling layer, the Javascript application
+   responsible for the signaling needs to make the decisions about what
+   media should be sent or received at any point of time and to which
+   remote it should communicate with.  The JSEP is used to make sure the
+   media engine can make the RTP and media perform as required by the
+   application.  The basic operations that the applications can have the
+   media engine do are:
 
-   Serial forking involves a call being dispatched to multiple remote
-   callees, where each callee can accept the call, but only one active
-   session ever exists at a time; no mixing of received media is
+      Start exchanging media to a given remote peer but keep all the
+      resources reserved in the offer.
+
+      Start exchanging media with a given remote peer and free any
+      resources in the offer that are not being used.
+
+4.5.1.  Sequential Forking
+
+   Sequential forking involves a call being dispatched to multiple
+   remote callees, where each callee can accept the call, but only one
+   active session ever exists at a time; no mixing of received media is
    performed.
 
    JSEP handles serial forking well, allowing the application to easily
@@ -638,9 +609,17 @@ Internet-Draft                    JSEP                      October 2012
    possibility of using a different answer in the future, or apply it as
    a final answer, ending the setup flow.
 
+
+
+
+Uberti & Jennings        Expires April 25, 2013                [Page 11]
+
+Internet-Draft                    JSEP                      October 2012
+
+
    In a "first-one-wins" situation, the first answer will be applied as
-   a final answer, and the application will send a terminate message to
-   any subsequent answers.  In SIP parlance, this would be ACK + BYE.
+   a final answer, and the application will reject any subsequent
+   answers.  In SIP parlance, this would be ACK + BYE.
 
    In a "last-one-wins" situation, all answers would be applied as
    provisional answers, and any previous call leg will be terminated.
@@ -652,19 +631,40 @@ Internet-Draft                    JSEP                      October 2012
 
    Parallel forking involves a call being dispatched to multiple remote
    callees, where each callee can accept the call, and multiple
-   simultaneous active sessions can be established as a result.  If
-   multiple callees send media, this media is mixed and played out at
-   the caller side.
+   simultaneous active signaling sessions can be established as a
+   result.  If multiple callees send media at the same time, the
+   possibilities for handling this are described in Section 3.1 or RFC
+   3960.  Most SIP devices today only support exchanging media with a
+   single device at a time and do not try to mix multiple early media
+   audio sources as that is very confusing to the user.  Imagine having
+   European ring tone mixed with north american ringtone - the resulting
+   sound would not be like either and would confuse the user.  If the
+   signaling application wishes to only exchange media from one of the
+   remote at a time, then from a media engine point of view, this is
+   exactly like the sequential forking case.
 
-   JSEP can handle parallel forking by "cloning" the session when needed
-   to create multiple parallel sessions.  When the first answer is
-   received, the caller can clone the existing session, and then apply
-   the answer as a final answer to the original session.  Upon receiving
-   the next answer, the cloned session is cloned again, and the received
-   answer is applied as a final answer to the first clone.  This process
-   repeats until the caller decides to end the setup flow, and closes
-   the final cloned session.
+   In the parallel forking case where the Javascript application wishes
+   to simultaneously exchange media with multiple peers is slightly more
+   complex but once again the Javascript application can follow the
+   strategy that RFC 3960 describes using UPDATE.  It is worth noting
+   that use cases where this is the desired behavior are very unusual.
+   The UPDATE approach allows the signaling to set up a separate media
+   flow for each peer that it wises to exchange media with.  In JSEP,
+   this offer used in the UPDATE would be formed by simply forming a new
+   PeerConnection and making sure that the same microphone and video
+   camera media streams had been "cloned" into this new PeerConnection.
+   Then the new PeerConnection object would be used to get an the SDP
+   offer that was being used by the signaling to perform the UPDATE type
+   strategy discussed in RFC 3690.
 
+   As a result of cloning the media streams, the application will end up
+   with N parallel PeerConnection sessions, each with a local and remote
+   description and their own local and remote addresses.  The media flow
+   from these sessions can be managed by specifying SDP direction
+   attributes in the descriptions, or the application can choose to play
+   out the media from all sessions mixed together.  Of course, if the
+   application wants to only keep a single session, it can simply
+   terminate the sessions that it no longer needs.
 
 
 
@@ -672,25 +672,6 @@ Uberti & Jennings        Expires April 25, 2013                [Page 12]
 
 Internet-Draft                    JSEP                      October 2012
 
-
-   Cloned sessions inherit the local session description and candidates
-   from their parent, and an empty remote description; only sessions
-   that have not yet applied an answer can be cloned.  Each cloned
-   session may discover new peer-reflexive candidates; these candidates
-   will be supplied via the onicecandidate callback to that specific
-   session.  Since the clone uses the same local description as its
-   parent, creating a clone will fail if it is not possible to reserve
-   the same resources for the clone as have already been reserved by the
-   parent.
-
-   As a result of this cloning, the application will end up with N
-   parallel sessions, each with a local and remote description and their
-   own local and remote addresses.  The media flow from these sessions
-   can be managed by specifying SDP direction attributes in the
-   descriptions, or the application can choose to play out the media
-   from all sessions mixed together.  Of course, if the application
-   wants to only keep a single session, it can simply terminate the
-   sessions that it no longer needs.
 
 4.6.  Session Rehydration
 
@@ -700,21 +681,40 @@ Internet-Draft                    JSEP                      October 2012
    is possible to keep an existing session alive via a process called
    "rehydration".
 
-   With rehydration, the current local session description is persisted
-   somewhere outside of the page, perhaps on the application server, or
-   in browser local storage.  The page is then reloaded, and a new
-   session object is created in Javascript.  The saved local session is
-   now retrieved, but the previous ICE candidates will no longer be
-   valid in this case, so we will need to perform an ICE restart; to do
-   so, we simply generate a new ICE ufrag/pwd combo for the local
-   description.
+   With rehydration, the current local and remote session description is
+   persisted somewhere outside of the page, perhaps on the application
+   server, or in browser local storage.  The page is then reloaded, and
+   a new session object is created in Javascript.  The saved local
+   session is now retrieved, but the previous ICE candidates will no
+   longer be valid in this case, the ports may have changed, the DTLS
+   fingerprint may be different, the capabilities of the browser may
+   have changed due to camera being unplugged and so on.  In the case of
+   SDES, there is a problem knowing sequence numbers and SSRC.  The
+   application can create a new offer, the modify it be consistent with
+   the old offer before calling setLocalDescription and sending it as an
+   offer to the remote side, who will reply with an answer that can be
+   supplied to setRemoteDescription.  ICE processing proceeds as usual,
+   and as soon as connectivity is established, the session will be back
+   up and running again.
 
-   The modified local description is then installed via
-   setLocalDescription, and sent off as an offer to the remote side, who
-   will reply with an answer that can be supplied to
-   setRemoteDescription.  ICE processing proceeds as usual, and as soon
-   as connectivity is established, the session will be back up and
-   running again.
+   Open Issue:  EKR proposed an alternative rehydration approach where
+   the actual internal PeerConnection object in the browser was kept
+   alive for some time after the web page was killed and provided some
+   way for a new page to acquire the old PeerConnection object.
+
+   Note:  One of the issues that impacts the rehydration hard is the
+   security model requires that the browser, not the Javascript
+   applications chooses the ICE passwords.  This in turns means that if
+   a new ICE password is choose, it needs to be communicated to the
+   remote side before rehydration can complete.
+
+
+
+
+
+
+
+
 
 
 
@@ -736,9 +736,58 @@ Internet-Draft                    JSEP                      October 2012
    may have somewhat different syntax, but should map easily to these
    concepts.
 
-5.1.  Methods
+5.1.  SDP Requirements
 
-5.1.1.  createOffer
+   Note:  The text in this section may not represent working group
+   consensus and is put here so that the working group can discuss it
+   and find out how to change it such that it does have consensus.
+
+   The SDP generate by the WebRTC client needs to conform to the
+   following specification and implementations need to implement the
+   factionally to receive SDP that meets the following specifications.
+
+      RFC4566 is the base SDP specification and MUST be implemented.
+
+      RFC5124 MUST be supported for signaling RTP/SAVPF RTP profile.
+
+      RFC5104 MUST be implemented to signal RTCP based feedback.
+
+      RFC5761 MUST be implemented to signal multiplexing of RTP and
+      RTCP.
+
+      RFC5245 MUST be implemented for signaling the ICE candidate lines
+      corresponding to media stream.
+
+      RFC3264 MUST be implemented to signal information about media
+      direction.
+
+      The RFC5888 grouping framework MUST be implemented for signaling
+      the grouping information.
+
+      RFC5506 MAY be implemented to signal Reduced-Size RTCP messages.
+
+      RFC5576 MAY be implemented to signal RTP SSRC values.
+
+      RFC3556 with bandwidth modifiers MAY be supported for specifying
+      RTCP bandwidth as a fraction of the media bandwidth, RTCP fraction
+      allocated to the senders and setting maximum media bit-rate
+      boundaries.
+
+   Example SDP for RTCWeb call flows can be found in
+   [I-D.nandakumar-rtcweb-sdp].
+
+
+
+
+
+Uberti & Jennings        Expires April 25, 2013                [Page 14]
+
+Internet-Draft                    JSEP                      October 2012
+
+
+5.2.  Methods
+
+5.2.1.  createOffer
 
    The createOffer method generates a blob of SDP that contains a RFC
    3264 offer with the supported configurations for the session,
@@ -770,31 +819,30 @@ Internet-Draft                    JSEP                      October 2012
    to determine the currently available resources, it may be implemented
    as an async operation.
 
-   Calling this method does not change state; its use is not required.
+   Calling this method may do things such as generate new ICE
+   credentials.
 
-5.1.2.  createAnswer
+5.2.2.  createAnswer
 
    The createAnswer method generates a blob of SDP that contains a RFC
    3264 SDP answer with the supported configuration for the session that
-   is compatible with the parameters supplied in |offer|.  Like
-
-
-
-Uberti & Jennings        Expires April 25, 2013                [Page 14]
-
-Internet-Draft                    JSEP                      October 2012
-
-
+   is compatible with the parameters supplied in the offer.  Like
    createOffer, the returned blob contains descriptions of the local
    MediaStreams attached to this PeerConnection, the codec/RTP/RTCP
    options negotiated for this session, and any candidates that have
    been gathered by the ICE Agent.  A constraints parameter may be
    supplied to provide additional control over the generated answer.
 
+
+
+
+Uberti & Jennings        Expires April 25, 2013                [Page 15]
+
+Internet-Draft                    JSEP                      October 2012
+
+
    As an answer, the generated SDP will contain a specific configuration
-   that specifies how the media plane should be established.  For each
-   SDP line, the generation of the SDP must follow the appropriate
-   process for generating an answer.
+   that specifies how the media plane should be established.
 
    Session descriptions generated by createAnswer must be immediately
    usable by setLocalDescription; like createOffer, the returned
@@ -803,9 +851,10 @@ Internet-Draft                    JSEP                      October 2012
    currently available resources, it may need to be implemented as an
    async operation.
 
-   Calling this method does not change state; its use is not required.
+   Calling this method may do things such as generate new ICE
+   credentials.
 
-5.1.3.  SessionDescriptionType
+5.2.3.  SessionDescriptionType
 
    The strings "offer", "pranswer", and "answer" serve as type arguments
    to setLocalDescription and setRemoteDescription.  They provide
@@ -833,21 +882,44 @@ Internet-Draft                    JSEP                      October 2012
 
    The application can use some discretion on whether an answer should
    be applied as provisional or final.  For example, in a serial forking
-
-
-
-Uberti & Jennings        Expires April 25, 2013                [Page 15]
-
-Internet-Draft                    JSEP                      October 2012
-
-
    scenario, an application may receive multiple "final" answers, one
    from each remote endpoint.  The application could accept the initial
    answers as provisional answers, and only apply an answer as final
    when it receives one that meets its criteria (e.g. a live user
    instead of voicemail).
 
-5.1.4.  setLocalDescription
+
+
+
+
+Uberti & Jennings        Expires April 25, 2013                [Page 16]
+
+Internet-Draft                    JSEP                      October 2012
+
+
+5.2.3.1.  Creating Answers
+
+   Most web applications will not need to create answers using the
+   "pranswer" type.  The general recommendation for a web applications
+   would be to create an answer more or less immediately after receiving
+   the offer instead of waiting for a human user to provide input.
+   Later when the human input is received, the applications can create a
+   new offer to update the previos offer/answer pair.  Some application
+   may not be able to do this, particular ones that are attempting to
+   gateway to other signaling protocols.
+
+   Consider a typical web application that will set up a data channel,
+   an audio channel, and a video channel.  When a device received an
+   offer with this, it could send an answer accepting the data channel
+   for two way data, and accepting the audio and video tracks as receive
+   only.  Then it could ask the user if they wanted to transmit audio
+   and video to the far end, acquire the local media sources, and send a
+   new offer to the remote side moving the audio and video to be two way
+   media.  By the time the human has decided to send media, it is
+   possible that the ICE signaling and DTLS channel will already be set
+   up to the remote side.
+
+5.2.4.  setLocalDescription
 
    The setLocalDescription method instructs the PeerConnection to apply
    the supplied SDP blob as its local configuration.  The type parameter
@@ -870,7 +942,18 @@ Internet-Draft                    JSEP                      October 2012
    and the media directions are compatible, this will result in the
    starting of media transmission.
 
-5.1.5.  setRemoteDescription
+
+
+
+
+
+
+Uberti & Jennings        Expires April 25, 2013                [Page 17]
+
+Internet-Draft                    JSEP                      October 2012
+
+
+5.2.5.  setRemoteDescription
 
    The setRemoteDescription method instructs the PeerConnection to apply
    the supplied SDP blob as the desired remote configuration.  As in
@@ -885,25 +968,17 @@ Internet-Draft                    JSEP                      October 2012
    and the media directions are compatible, this will result in the
    starting of media transmission.
 
-5.1.6.  localDescription
+5.2.6.  localDescription
 
    The localDescription method returns a copy of the current local
    configuration, i.e. what was most recently passed to
-
-
-
-Uberti & Jennings        Expires April 25, 2013                [Page 16]
-
-Internet-Draft                    JSEP                      October 2012
-
-
    setLocalDescription, plus any local candidates that have been
    generated by the ICE Agent.
 
    A null object will be returned if the local description has not yet
    been established.
 
-5.1.7.  remoteDescription
+5.2.7.  remoteDescription
 
    The remoteDescription method returns a copy of the current remote
    configuration, i.e. what was most recently passed to
@@ -913,7 +988,7 @@ Internet-Draft                    JSEP                      October 2012
    A null object will be returned if the remote description has not yet
    been established.
 
-5.1.8.  updateIce
+5.2.8.  updateIce
 
    The updateIce method allows the configuration of the ICE Agent to be
    changed during the session, primarily for changing which types of
@@ -927,11 +1002,18 @@ Internet-Draft                    JSEP                      October 2012
    available candidates, but excluded candidates will not be surfaced in
    onicecallback or used for connectivity checks.
 
+
+
+Uberti & Jennings        Expires April 25, 2013                [Page 18]
+
+Internet-Draft                    JSEP                      October 2012
+
+
    This call may result in a change to the state of the ICE Agent, and
    may result in a change to media state if it results in connectivity
    being established.
 
-5.1.9.  addIceCandidate
+5.2.9.  addIceCandidate
 
    The addIceCandidate method provides a remote candidate to the ICE
    Agent, which will be added to the remote description.  Connectivity
@@ -941,18 +1023,57 @@ Internet-Draft                    JSEP                      October 2012
    may result in a change to media state if it results in connectivity
    being established.
 
-5.2.  Configurable SDP Parameters
-
-   The following is a partial list of SDP parameters that an application
-   may want to control, in either local or remote descriptions, using
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 17]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Uberti & Jennings        Expires April 25, 2013                [Page 19]
 
 Internet-Draft                    JSEP                      October 2012
 
 
+6.  Configurable SDP Parameters
+
+   Note:  This section is still very early and is likely to
+   significantly change as we get a better understanding of the a) the
+   use cases for this b) the implications at the protocol level c)
+   feedback from implementors on what they can do.
+
+   The following is a partial list of SDP parameters that an application
+   may want to control, in either local or remote descriptions, using
    this API.
 
    o  remove or reorder codecs (m=)
@@ -962,10 +1083,6 @@ Internet-Draft                    JSEP                      October 2012
    o  enable/disable BUNDLE (a=group)
 
    o  enable/disable RTCP mux (a=rtcp-mux)
-
-   o  remove or reorder SRTP crypto-suites (a=crypto)
-
-   o  change SRTP parameters or keys (a=crypto)
 
    o  change send resolution or framerate (TBD)
 
@@ -980,8 +1097,6 @@ Internet-Draft                    JSEP                      October 2012
    o  add/change SSRC grouping (e.g.  FID, RTX, etc) (a=ssrc-group)
 
    o  add SSRC attributes (a=ssrc)
-
-   o  change ICE ufrag/password (a=ice-ufrag/pwd)
 
    o  change media send/recv state (a=sendonly/recvonly/inactive)
 
@@ -1001,234 +1116,7 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-
-
-
-Uberti & Jennings        Expires April 25, 2013                [Page 18]
-
-Internet-Draft                    JSEP                      October 2012
-
-
-6.  Media Setup Overview
-
-   The example here shows a typical call setup using the JSEP model,
-   indicating the functions that are called and the state changes that
-   occur.  We assume the following architecture in this example, where
-   UA is synonymous with "browser", and JS is synonymous with "web
-   application":
-
-   OffererUA <-> OffererJS <-> WebServer <-> AnswererJS <-> AnswererUA
-
-6.1.  Initiating the Session
-
-   The initiator creates a PeerConnection, hooks up to its ICE callback,
-   and adds the desired MediaStreams (presumably obtained via
-   getUserMedia).  The ICE gathering process begins to gather candidates
-   for a default number of streams, as the exact number will not be
-   known until the local description is applied.  The PeerConnection is
-   in the NEW state.
-
-   OffererJS->OffererUA: var pc = new PeerConnection(config, null);
-   OffererJS->OffererUA: pc.onicecandidate = onIceCandidate;
-   OffererJS->OffererUA: pc.addStream(stream);
-
-6.1.1.  Generating An Offer
-
-   The initiator then creates a session description to offer to the
-   callee.  This description includes the codecs and other necessary
-   session parameters, as well as information about each of the streams
-   that has been added (e.g.  SSRC, CNAME, etc.)  The created
-   description includes all parameters that the offerer's UA supports;
-   if the initiator wants to influence the created offer, they can pass
-   in a MediaConstraints object to createOffer that allows for
-   customization (e.g. if the initiator wants to receive but not send
-   video).  The initiator can also directly manipulate the created
-   session description as well, perhaps if it wants to change the
-   priority of the offered codecs.
-
-   OffererJS->OffererUA: var offer = pc.createOffer(null);
-
-6.1.2.  Applying the Offer
-
-   The initiator then instructs the PeerConnection to use this offer as
-   the local description for this session, i.e. what codecs it will use
-   for received media, what SRTP keys it will use for sending media (if
-   using SDES), etc.  In order that the UA handle the description
-   properly, the initiator marks it as an offer when calling
-   setLocalDescription; this indicates to the UA that multiple
-   capabilities have been offered, but this set may be pared back later,
-
-
-
-Uberti & Jennings        Expires April 25, 2013                [Page 19]
-
-Internet-Draft                    JSEP                      October 2012
-
-
-   when the answer arrives.
-
-   Since the local user agent must be prepared to receive media upon
-   applying the offer, this operation will cause local decoder resources
-   to be allocated, based on the codecs indicated in the offer.
-
-   OffererJS->OffererUA: pc.setLocalDescription("offer", offer);
-
-6.1.3.  Handling ICE Callbacks
-
-   The initiator starts to receive callbacks on its onicecandidate
-   handler.  Candidates are provided to the IceCallback as they are
-   allocated; when the last allocation completes or times out, this
-   callback will be invoked with a null argument.
-
-   OffererUA->OffererJS: onIceCandidate(candidate);
-
-6.1.4.  Serializing the Offer and Candidates
-
-   At this point, the offerer is ready to send its offer to the callee
-   using its preferred signaling protocol.  Depending on the protocol,
-   it can either send the initial session description first, and then
-   "trickle" the ICE candidates as they are given to the application, or
-   it can wait for all the ICE candidates to be collected, and then send
-   the offer and list of candidates all at once.
-
-6.2.  Receiving the Session
-
-   Through the chosen signaling protocol, the recipient is notified of
-   an incoming session request.  It creates a PeerConnection, and sets
-   up its own ICE callback.  The ICE gathering process begins to gather
-   candidates for a default number of streams.
-
-   AnswererJS->AnswererUA: var pc = new PeerConnection(config, null);
-   AnswererJS->AnswererUA: pc.onicecandidate = onIceCandidate;
-
-6.2.1.  Receiving the Offer
-
-   The recipient converts the received offer from its signaling protocol
-   into SDP format, and supplies it to its PeerConnection, again marking
-   it as an offer.  As a remote description, the offer indicates what
-   codecs the remote side wants to use for receiving, as well as what
-   SRTP keys it will use for sending.  The setting of the remote
-   description causes callbacks to be issued, informing the application
-   of what kinds of streams are present in the offer.  This step will
-   also cause encoder resources to be allocated, based on the codecs
-   specified in |offer|.
-
-
-
-
 Uberti & Jennings        Expires April 25, 2013                [Page 20]
-
-Internet-Draft                    JSEP                      October 2012
-
-
-   AnswererJS->AnswererUA: pc.setRemoteDescription("offer", offer);
-   AnswererUA->AnswererJS: onAddStream(stream);
-
-6.2.2.  Handling ICE Messages
-
-   If ICE candidates from the remote site were included in the offer,
-   the ICE Agent will automatically start trying to use them.
-   Otherwise, if ICE candidates are sent separately, they are passed
-   into the PeerConnection when they arrive.
-
-   AnswererJS->AnswererUA: pc.addIceCandidate(candidate);
-
-6.2.3.  Generating the Answer
-
-   Once the recipient has decided to accept the session, it generates an
-   answer session description.  This process performs the appropriate
-   intersection of codecs and other parameters to generate the correct
-   answer.  As with the offer, MediaConstraints can be provided to
-   influence the answer that is generated, and/or the application can
-   post-process the answer manually.
-
-   AnswererJS->AnswererUA: pc.createAnswer(offer, null);
-
-6.2.4.  Applying the Answer
-
-   The recipient then instructs the PeerConnection to use the answer as
-   its local description for this session, i.e. what codecs it will use
-   to receive media, etc.  It also marks the description as an answer,
-   which tells the UA that these parameters are final.  This causes the
-   PeerConnection to move to the ACTIVE state, and transmission of media
-   by the answerer to start (assuming both sides have indicated this in
-   their descriptions).
-
-   AnswererJS->AnswererUA: pc.setLocalDescription("answer", answer);
-   AnswererUA->OffererUA:  <media>
-
-6.2.5.  Serializing the Answer
-
-   As with the offer, the answer (with or without candidates) is now
-   converted to the desired signaling format and sent to the initiator.
-
-6.3.  Completing the Session
-
-6.3.1.  Receiving the Answer
-
-   The initiator converts the answer from the signaling protocol and
-   applies it as the remote description, marking it as an answer.  This
-   causes the PeerConnection to move to the ACTIVE state, and
-
-
-
-Uberti & Jennings        Expires April 25, 2013                [Page 21]
-
-Internet-Draft                    JSEP                      October 2012
-
-
-   transmission of media by the offerer to start (assuming both sides
-   have indicated this in their descriptions).
-
-   OffererJS->OffererUA:  pc.setRemoteDescription("answer", answer);
-   OffererUA->AnswererUA: <media>
-
-6.4.  Updates to the Session
-
-   Updates to the session are handled with a new offer/answer exchange.
-   However, since media will already be flowing at this point, the new
-   offerer needs to support both its old session description as well as
-   the new one it has offered, until the change is accepted by the
-   remote side.
-
-   Note also that in an update scenario, the roles may be reversed, i.e.
-   the update offerer can be different than the original offerer.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Uberti & Jennings        Expires April 25, 2013                [Page 22]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1284,7 +1172,7 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 23]
+Uberti & Jennings        Expires April 25, 2013                [Page 21]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1340,7 +1228,7 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 24]
+Uberti & Jennings        Expires April 25, 2013                [Page 22]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1349,10 +1237,122 @@ Internet-Draft                    JSEP                      October 2012
 
    Harald Alvestrand, Dan Burnett, Neil Stratford, Eric Rescorla, Anant
    Narayanan, and Adam Bergkvist all provided valuable feedback on this
-   proposal.  Matthew Kaufman provided the observation that keeping
+   proposal.  Suhas Nandakumar provided text and input for SDP
+   requirements.  Matthew Kaufman provided the observation that keeping
    state out of the browser allows a call to continue even if the page
-   is reloaded.  Richard Ejzak provided the specifics on session
-   cloning.
+   is reloaded.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Uberti & Jennings        Expires April 25, 2013                [Page 23]
+
+Internet-Draft                    JSEP                      October 2012
+
+
+10.  References
+
+10.1.  Normative References
+
+   [I-D.rescorla-mmusic-ice-trickle]
+              Rescorla, E., Uberti, J., and E. Ivov, "Trickle ICE:
+              Incremental Provisioning of Candidates for the Interactive
+              Connectivity Establishment (ICE) Protocol",
+              draft-rescorla-mmusic-ice-trickle-00 (work in progress),
+              October 2012.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC3264]  Rosenberg, J. and H. Schulzrinne, "An Offer/Answer Model
+              with Session Description Protocol (SDP)", RFC 3264,
+              June 2002.
+
+   [RFC4566]  Handley, M., Jacobson, V., and C. Perkins, "SDP: Session
+              Description Protocol", RFC 4566, July 2006.
+
+10.2.  Informative References
+
+   [I-D.jennings-rtcweb-signaling]
+              Jennings, C., Rosenberg, J., and R. Jesup, "RTCWeb Offer/
+              Answer Protocol (ROAP)",
+              draft-jennings-rtcweb-signaling-01 (work in progress),
+              October 2011.
+
+   [I-D.nandakumar-rtcweb-sdp]
+              Nandakumar, S. and C. Jennings, "SDP for the WebRTC",
+              draft-nandakumar-rtcweb-sdp-00 (work in progress),
+              October 2012.
+
+   [RFC4568]  Andreasen, F., Baugher, M., and D. Wing, "Session
+              Description Protocol (SDP) Security Descriptions for Media
+              Streams", RFC 4568, July 2006.
+
+   [RFC5245]  Rosenberg, J., "Interactive Connectivity Establishment
+              (ICE): A Protocol for Network Address Translator (NAT)
+              Traversal for Offer/Answer Protocols", RFC 5245,
+              April 2010.
+
+   [W3C.WD-webrtc-20111027]
+              Bergkvist, A., Burnett, D., Narayanan, A., and C.
+              Jennings, "WebRTC 1.0: Real-time Communication Between
+              Browsers", World Wide Web Consortium WD WD-webrtc-
+              20111027, October 2011,
+
+
+
+Uberti & Jennings        Expires April 25, 2013                [Page 24]
+
+Internet-Draft                    JSEP                      October 2012
+
+
+              <http://www.w3.org/TR/2011/WD-webrtc-20111027>.
+
+
+
+
+
+
+
 
 
 
@@ -1397,62 +1397,6 @@ Internet-Draft                    JSEP                      October 2012
 
 
 Uberti & Jennings        Expires April 25, 2013                [Page 25]
-
-Internet-Draft                    JSEP                      October 2012
-
-
-10.  References
-
-10.1.  Normative References
-
-   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119, March 1997.
-
-   [RFC3264]  Rosenberg, J. and H. Schulzrinne, "An Offer/Answer Model
-              with Session Description Protocol (SDP)", RFC 3264,
-              June 2002.
-
-   [RFC4566]  Handley, M., Jacobson, V., and C. Perkins, "SDP: Session
-              Description Protocol", RFC 4566, July 2006.
-
-10.2.  Informative References
-
-   [I-D.jennings-rtcweb-signaling]
-              Jennings, C., Rosenberg, J., and R. Jesup, "RTCWeb Offer/
-              Answer Protocol (ROAP)",
-              draft-jennings-rtcweb-signaling-01 (work in progress),
-              October 2011.
-
-   [RFC4568]  Andreasen, F., Baugher, M., and D. Wing, "Session
-              Description Protocol (SDP) Security Descriptions for Media
-              Streams", RFC 4568, July 2006.
-
-   [RFC5245]  Rosenberg, J., "Interactive Connectivity Establishment
-              (ICE): A Protocol for Network Address Translator (NAT)
-              Traversal for Offer/Answer Protocols", RFC 5245,
-              April 2010.
-
-   [W3C.WD-webrtc-20111027]
-              Bergkvist, A., Burnett, D., Narayanan, A., and C.
-              Jennings, "WebRTC 1.0: Real-time Communication Between
-              Browsers", World Wide Web Consortium WD WD-webrtc-
-              20111027, October 2011,
-              <http://www.w3.org/TR/2011/WD-webrtc-20111027>.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Uberti & Jennings        Expires April 25, 2013                [Page 26]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1508,7 +1452,7 @@ A.1.1.  Call using ROAP
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 27]
+Uberti & Jennings        Expires April 25, 2013                [Page 26]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1564,7 +1508,7 @@ A.1.2.  Call using XMPP
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 28]
+Uberti & Jennings        Expires April 25, 2013                [Page 27]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1620,7 +1564,7 @@ A.1.4.  Simultaneous add of video streams, using XMPP
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 29]
+Uberti & Jennings        Expires April 25, 2013                [Page 28]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1676,7 +1620,7 @@ A.1.5.  Call using SIP
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 30]
+Uberti & Jennings        Expires April 25, 2013                [Page 29]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1732,7 +1676,7 @@ A.1.6.  Handling early media (e.g. 1-800-GO FEDEX), using SIP
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 31]
+Uberti & Jennings        Expires April 25, 2013                [Page 30]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1788,7 +1732,7 @@ Internet-Draft                    JSEP                      October 2012
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 32]
+Uberti & Jennings        Expires April 25, 2013                [Page 31]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1803,6 +1747,10 @@ Appendix B.  Change log
       group
 
    o  Removed stuff that has moved to W3C specificaiton
+
+   o  Align SDP handling with W3C draft
+
+   o  Clarified section on forking.
 
    Changes in draft -01:
 
@@ -1840,11 +1788,7 @@ Appendix B.  Change log
 
 
 
-
-
-
-
-Uberti & Jennings        Expires April 25, 2013                [Page 33]
+Uberti & Jennings        Expires April 25, 2013                [Page 32]
 
 Internet-Draft                    JSEP                      October 2012
 
@@ -1900,5 +1844,5 @@ Authors' Addresses
 
 
 
-Uberti & Jennings        Expires April 25, 2013                [Page 34]
+Uberti & Jennings        Expires April 25, 2013                [Page 33]
 
