@@ -10,7 +10,6 @@
 <?rfc colonspace="yes" ?>
 <?rfc rfcedstyle="no" ?>
 <?rfc tocdepth="4"?>
-
 <rfc category="std" docName="draft-ietf-rtcweb-jsep-02" ipr="trust200902">
   <front>
     <title abbrev="JSEP">Javascript Session Establishment Protocol</title>
@@ -63,7 +62,7 @@
       <t>This document proposes a mechanism for allowing a Javascript
       application to fully control the signaling plane of a multimedia
       session, and discusses how this would work with existing signaling
-      protocols.</t>
+      protocols. </t>
     </abstract>
   </front>
 
@@ -86,23 +85,22 @@
       current state back down to the page and resume the call where it left
       off.</t>
 
-      <t> This document proposes the
-      Javascript Session Establishment Protocol (JSEP) that pulls the
-      signaling state machine out of the browser and into Javascript. This
-      mechanism effectively removes the browser almost completely from the
-      core signaling flow; the only interface needed is a way for the
-      application to pass in the local and remote session descriptions
-      negotiated by whatever signaling mechanism is used, and a way to
-      interact with the ICE state machine.</t>
+      <t>This document proposes the Javascript Session Establishment Protocol
+      (JSEP) that pulls the signaling state machine out of the browser and
+      into Javascript. This mechanism effectively removes the browser almost
+      completely from the core signaling flow; the only interface needed is a
+      way for the application to pass in the local and remote session
+      descriptions negotiated by whatever signaling mechanism is used, and a
+      way to interact with the ICE state machine.</t>
 
       <t>JSEP's handling of session descriptions is simple and
       straightforward. Whenever an offer/answer exchange is needed, the
       initiating side creates an offer by calling a createOffer() API. The
-      application modify that offer, if it wants to, and then
-      uses it to set up its local config via a setLocalDescription() API. The
-      offer is then sent off to the remote side over its preferred signaling
-      mechanism (e.g. WebSockets); upon receipt of that offer, the remote
-      party installs it using a setRemoteDescription() API.</t>
+      application modify that offer, if it wants to, and then uses it to set
+      up its local config via a setLocalDescription() API. The offer is then
+      sent off to the remote side over its preferred signaling mechanism (e.g.
+      WebSockets); upon receipt of that offer, the remote party installs it
+      using a setRemoteDescription() API.</t>
 
       <t>When the call is accepted, the callee uses a createAnswer() API to
       generate an appropriate answer, applies it using setLocalDescription(),
@@ -131,15 +129,16 @@
       its chosen signaling protocol, instead of simply forwarding the messages
       emitted from the browser.</t>
 
-      <t>One way to mitigate this is to provide a Javascript library that hides
-      this complexity from the developer, which would implement the state
-      machine and serialization of the desired signaling protocol. For example,
-      this library could convert easily adapt the JSEP API into the exact ROAP
-      API <xref target="I-D.jennings-rtcweb-signaling" />, thereby implementing
-      the ROAP signaling protocol. Such a library could of course also implement
-      other popular signaling protocols, including SIP or Jingle. In this
-      fashion we can enable greater control for the experienced developer
-      without forcing any additional complexity on the novice developer.</t>
+      <t>One way to mitigate this is to provide a Javascript library that
+      hides this complexity from the developer, which would implement the
+      state machine and serialization of the desired signaling protocol. For
+      example, this library could convert easily adapt the JSEP API into the
+      exact ROAP API <xref target="I-D.jennings-rtcweb-signaling"></xref>,
+      thereby implementing the ROAP signaling protocol. Such a library could
+      of course also implement other popular signaling protocols, including
+      SIP or Jingle. In this fashion we can enable greater control for the
+      experienced developer without forcing any additional complexity on the
+      novice developer.</t>
     </section>
 
     <section title="Other Approaches Considered">
@@ -169,11 +168,11 @@
       reduces the number of possible states and interactions.</t>
     </section>
 
-      <section title="Terminology">
-        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-        document are to be interpreted as described in RFC 2119 [RFC2119].</t>
-      </section>
+    <section title="Terminology">
+      <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+      "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+      document are to be interpreted as described in RFC 2119 [RFC2119].</t>
+    </section>
 
     <section title="Semantics and Syntax">
       <section title="Signaling Model">
@@ -298,115 +297,110 @@
       </section>
 
       <section title="Session Description Format">
-        <t>In the WebRTC specification, session descriptions are
-        formatted as SDP messages. While this format is not optimal for
-        manipulation from Javascript, it is widely accepted, and frequently
-        updated with new features. Any alternate encoding of session
-        descriptions would have to keep pace with the changes to SDP, at least
-        until the time that this new encoding eclipsed SDP in popularity. As a
-        result, JSEP continues to use SDP as the internal representation for
-        its session descriptions.</t>
+        <t>In the WebRTC specification, session descriptions are formatted as
+        SDP messages. While this format is not optimal for manipulation from
+        Javascript, it is widely accepted, and frequently updated with new
+        features. Any alternate encoding of session descriptions would have to
+        keep pace with the changes to SDP, at least until the time that this
+        new encoding eclipsed SDP in popularity. As a result, JSEP continues
+        to use SDP as the internal representation for its session
+        descriptions.</t>
 
         <t>However, to simplify Javascript processing, and provide for future
         flexibility, the SDP syntax is encapsulated within a
         SessionDescription object, which can be constructed from SDP, and be
-        serialized out to SDP. If future specifications agree on a JSON format for
-        session descriptions, we could easily enable this object to
+        serialized out to SDP. If future specifications agree on a JSON format
+        for session descriptions, we could easily enable this object to
         generate and consume that JSON.</t>
 
         <t>Other methods may be added to SessionDescription in the future to
-        simplify handling of SessionDescriptions from Javascript. 
-        Thought it is unclear what manipulations developer commonly want to
-        do to SDP, it would be simple to write a Javascript library to preform
-        theses manipulations. </t>
+        simplify handling of SessionDescriptions from Javascript. Thought it
+        is unclear what manipulations developer commonly want to do to SDP, it
+        would be simple to write a Javascript library to preform theses
+        manipulations.</t>
       </section>
 
       <section title="ICE">
-     
         <t>When a new ICE candidate is available, the ICE Agent will notify
         the application via a callback; these candidates will automatically be
         added to the local session description. When all candidates have been
         gathered, the callback will also be invoked to signal that the
         gathering process is complete.</t>
 
+        <section title="ICE Candidate Trickling">
+          <t>Candidate trickling is a technique through which a caller may
+          incrementally provide candidates to the callee after the initial
+          offer has been dispatched. Trickle ICE is defined in <xref
+          target="I-D.rescorla-mmusic-ice-trickle"></xref> This allows the
+          callee to begin acting upon the call and setting up the ICE (and
+          perhaps DTLS) connections immediately, without having to wait for
+          the caller to gather all possible candidates, resulting in faster
+          call startup in cases where the gather does not happen before
+          initiation of the the communications.</t>
 
-      <section title="ICE Candidate Trickling">
-        <t>Candidate trickling is a technique through which a caller may
-        incrementally provide candidates to the callee after the initial offer
-        has been dispatched. Trickle ICE is defined in <xref target="I-D.rescorla-mmusic-ice-trickle" />
-        This allows the callee to begin acting upon the
-        call and setting up the ICE (and perhaps DTLS) connections
-        immediately, without having to wait for the caller to gather all
-        possible candidates, resulting in faster call startup in 
-        cases where the gather does not happen before initiation of the the communications.</t>
+          <t>JSEP supports optional candidate trickling by providing APIs that
+          provide control and feedback on the ICE candidate gathering process.
+          Applications that support candidate trickling can send the initial
+          offer immediately and send individual candidates when they get the
+          notified of a new candidate; applications that do not support this
+          feature can simply wait for the indication gathering is complete,
+          and create and send their offer, with all the candidates, at this
+          time.</t>
 
-        <t>JSEP supports optional candidate trickling by providing APIs that
-        provide control and feedback on the ICE candidate gathering process.
-        Applications that support candidate trickling can send the initial
-        offer immediately and send individual candidates when they get the
-        notified of a new candidate; applications that do not
-        support this feature can simply wait for the indication 
-        gathering is complete, and create and send
-        their offer, with all the candidates, at this time.</t>
+          <t>Upon receipt of trickled candidates, the receiving application
+          can supply them to its ICE Agent. This triggers the ICE Agent to
+          start using this remote candidate for connectivity checks.</t>
 
-        <t>Upon receipt of trickled candidates, the receiving application can
-        supply them to its ICE Agent.
-        This triggers the ICE Agent to start using this remote candidate for
-        connectivity checks. </t>
+          <section title="ICE Candidate Format">
+            <t>As with session descriptions, they syntax of the IceCandidate
+            object provides some abstraction, but can be easily converted to
+            and from the SDP a=candidate lines.</t>
 
-       <section title="ICE Candidate Format">
-        <t>As with session descriptions, they syntax of the IceCandidate
-        object provides some abstraction, but can be easily converted
-        to and from the SDP a=candidate lines.</t>
+            <t>The a=candidate lines are the only SDP information that is
+            contained within IceCandidate, as they represent the only
+            information needed that is not present in the initial offer (i.e.
+            for trickle candidates). This information is carried with the same
+            syntax as the "a=candiate" line in SDP. For example:</t>
 
-         <t> The a=candidate lines are the only SDP information that is
-        contained within IceCandidate, as they represent the only information
-        needed that is not present in the initial offer (i.e. for trickle
-        candidates). This information is carried with the same syntax as the "a=candiate" line in SDP.
-         For example: </t>
-
-        <figure>
-          <artwork><![CDATA[
+            <figure>
+              <artwork><![CDATA[
 a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 ]]></artwork>
-        </figure>
+            </figure>
 
-      <t>The IceCandidate object also fields to indicate which m= line it should
-      be associated with. The m line can be identified in one of two
-      ways. Either by a m-line index, or a MID. An m-line index of n, refers to
-      the n&sbquo;th m-line in the SDP starting with zero. The MID uses the "media
-      stream identification" as defined in [RFC 3388] to identify the
-      m-line. WebRTC devices creating an ICE Candidate object MUST create both of
-      these. Devices receiving an ICE Candidate object SHOULD use the MID if they
-      implement that and otherwise use the m-line index. </t>
-
+            <t>The IceCandidate object also fields to indicate which m= line
+            it should be associated with. The m line can be identified in one
+            of two ways. Either by a m-line index, or a MID. An m-line index
+            of n, refers to the n&sbquo;th m-line in the SDP starting with
+            zero. The MID uses the "media stream identification" as defined in
+            [RFC 3388] to identify the m-line. WebRTC devices creating an ICE
+            Candidate object MUST create both of these. Devices receiving an
+            ICE Candidate object SHOULD use the MID if they implement that and
+            otherwise use the m-line index.</t>
+          </section>
+        </section>
       </section>
-
-      </section>
-     </section>
 
       <section title="Interactions With Forking">
-        
-        <t> Some call signaling systems allow various types of forking where an
-        SDP Offer may be provided to more than one device. For example, SIP RFC
-        3261 defines both a "Parallel Search" and "Sequential Search". Although
-        these are primarily a signaling level issues that is outside the scope
-        of JSEP, they do have some impact on the configuration of the RTP and
-        media engine which is in the scope of JSEP. When forking is happening at
-        the signaling layer, the Javascript application responsible for the
-        signaling needs to make the decisions about what media should be sent or
-        received at any point of time and to which remote it should communicate
-        with. The JSEP is used to make sure the media engine can make the RTP
-        and media perform as required by the application. The basic operations
-        that the applications can have the media engine do are:
-        <list>
-          <t> Start exchanging media to a given remote peer but keep all the
-          resources reserved in the offer. </t>
+        <t>Some call signaling systems allow various types of forking where an
+        SDP Offer may be provided to more than one device. For example, SIP
+        RFC 3261 defines both a "Parallel Search" and "Sequential Search".
+        Although these are primarily a signaling level issues that is outside
+        the scope of JSEP, they do have some impact on the configuration of
+        the RTP and media engine which is in the scope of JSEP. When forking
+        is happening at the signaling layer, the Javascript application
+        responsible for the signaling needs to make the decisions about what
+        media should be sent or received at any point of time and to which
+        remote it should communicate with. The JSEP is used to make sure the
+        media engine can make the RTP and media perform as required by the
+        application. The basic operations that the applications can have the
+        media engine do are: <list>
+            <t>Start exchanging media to a given remote peer but keep all the
+            resources reserved in the offer.</t>
 
-          <t> Start exchanging media with a given remote peer and free any
-          resources in the offer that are not being used. </t>
-        </list>
-        </t>
+            <t>Start exchanging media with a given remote peer and free any
+            resources in the offer that are not being used.</t>
+          </list></t>
 
         <section title="Sequential Forking">
           <t>Sequential forking involves a call being dispatched to multiple
@@ -422,9 +416,8 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           as a final answer, ending the setup flow.</t>
 
           <t>In a "first-one-wins" situation, the first answer will be applied
-          as a final answer, and the application will reject
-          any subsequent answers. In SIP parlance, this would be ACK +
-          BYE.</t>
+          as a final answer, and the application will reject any subsequent
+          answers. In SIP parlance, this would be ACK + BYE.</t>
 
           <t>In a "last-one-wins" situation, all answers would be applied as
           provisional answers, and any previous call leg will be terminated.
@@ -434,7 +427,6 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
 
         <section title="Parallel Forking">
-
           <t>Parallel forking involves a call being dispatched to multiple
           remote callees, where each callee can accept the call, and multiple
           simultaneous active signaling sessions can be established as a
@@ -443,37 +435,35 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           3960. Most SIP devices today only support exchanging media with a
           single device at a time and do not try to mix multiple early media
           audio sources as that is very confusing to the user. Imagine having
-          European ring tone mixed with north american ringtone - the resulting
-          sound would not be like either and would confuse the user. If the
-          signaling application wishes to only exchange media from one of the
-          remote at a time, then from a media engine point of view, this is exactly like
-          the sequential forking case.</t>
+          European ring tone mixed with north american ringtone - the
+          resulting sound would not be like either and would confuse the user.
+          If the signaling application wishes to only exchange media from one
+          of the remote at a time, then from a media engine point of view,
+          this is exactly like the sequential forking case.</t>
 
-          <t> In the parallel forking case where the Javascript application
+          <t>In the parallel forking case where the Javascript application
           wishes to simultaneously exchange media with multiple peers is
           slightly more complex but once again the Javascript application can
-          follow the strategy that RFC 3960 describes using UPDATE. It is worth
-          noting that use cases where this is the desired behavior are very
-          unusual. The UPDATE approach allows the signaling to set up a separate
-          media flow for each peer that it wises to exchange media with. In
-          JSEP, this offer used in the UPDATE would be formed by simply forming
-          a new PeerConnection and making sure that the same microphone and
-          video camera media streams had been "cloned" into this new
-          PeerConnection. Then the new PeerConnection object would be used to
-          get an the SDP offer that was being used by the signaling to perform
-          the UPDATE type strategy discussed in RFC 3690. </t>
+          follow the strategy that RFC 3960 describes using UPDATE. It is
+          worth noting that use cases where this is the desired behavior are
+          very unusual. The UPDATE approach allows the signaling to set up a
+          separate media flow for each peer that it wises to exchange media
+          with. In JSEP, this offer used in the UPDATE would be formed by
+          simply forming a new PeerConnection and making sure that the same
+          microphone and video camera media streams had been "cloned" into
+          this new PeerConnection. Then the new PeerConnection object would be
+          used to get an the SDP offer that was being used by the signaling to
+          perform the UPDATE type strategy discussed in RFC 3690.</t>
 
-          <t>As a result of cloning the media streams, the application will end up with N
-          parallel PeerConnection sessions, each with a local and remote description and
-          their own local and remote addresses. The media flow from these
-          sessions can be managed by specifying SDP direction attributes in
-          the descriptions, or the application can choose to play out the
-          media from all sessions mixed together. Of course, if the
-          application wants to only keep a single session, it can simply
-          terminate the sessions that it no longer needs.</t>
-
+          <t>As a result of cloning the media streams, the application will
+          end up with N parallel PeerConnection sessions, each with a local
+          and remote description and their own local and remote addresses. The
+          media flow from these sessions can be managed by specifying SDP
+          direction attributes in the descriptions, or the application can
+          choose to play out the media from all sessions mixed together. Of
+          course, if the application wants to only keep a single session, it
+          can simply terminate the sessions that it no longer needs.</t>
         </section>
-
       </section>
 
       <section title="Session Rehydration">
@@ -483,36 +473,33 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         is possible to keep an existing session alive via a process called
         "rehydration".</t>
 
-        <t>With rehydration, the current local and remote session description is
-        persisted somewhere outside of the page, perhaps on the application
+        <t>With rehydration, the current local and remote session description
+        is persisted somewhere outside of the page, perhaps on the application
         server, or in browser local storage. The page is then reloaded, and a
-        new session object is created in Javascript. The saved local session is
-        now retrieved, but the previous ICE candidates will no longer be valid
-        in this case, the ports may have changed, the DTLS fingerprint may be
-        different, the capabilities of the browser may have changed due to
-        camera being unplugged and so on. In the case of SDES, there is a
-        problem knowing sequence numbers and SSRC.
-        The application can create a new offer, the modify it be consistent with
-        the old offer before calling setLocalDescription and sending it
-        as an offer to the remote side, who
-        will reply with an answer that can be supplied to
+        new session object is created in Javascript. The saved local session
+        is now retrieved, but the previous ICE candidates will no longer be
+        valid in this case, the ports may have changed, the DTLS fingerprint
+        may be different, the capabilities of the browser may have changed due
+        to camera being unplugged and so on. In the case of SDES, there is a
+        problem knowing sequence numbers and SSRC. The application can create
+        a new offer, the modify it be consistent with the old offer before
+        calling setLocalDescription and sending it as an offer to the remote
+        side, who will reply with an answer that can be supplied to
         setRemoteDescription. ICE processing proceeds as usual, and as soon as
         connectivity is established, the session will be back up and running
         again.</t>
 
-        <t> Open Issue: EKR proposed an alternative rehydration approach where
+        <t>Open Issue: EKR proposed an alternative rehydration approach where
         the actual internal PeerConnection object in the browser was kept
-        alive for some time after the web page was killed and provided some way
-        for a new page to acquire the old PeerConnection object. </t>
+        alive for some time after the web page was killed and provided some
+        way for a new page to acquire the old PeerConnection object.</t>
 
-        <t> Note: One of the issues that impacts the rehydration hard is the security
-        model requires that the browser, not the Javascript applications chooses
-        the ICE passwords. This in turns means that if a new ICE password is
-        choose, it needs to be communicated to the remote side before
-        rehydration can complete. </t>
-
+        <t>Note: One of the issues that impacts the rehydration hard is the
+        security model requires that the browser, not the Javascript
+        applications chooses the ICE passwords. This in turns means that if a
+        new ICE password is choose, it needs to be communicated to the remote
+        side before rehydration can complete.</t>
       </section>
-
     </section>
 
     <section title="Interface">
@@ -522,56 +509,49 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       concepts.</t>
 
       <section title="SDP Requirements">
-        <t> Note: The text in this section may not represent working group
-        consensus and is put here so that the working group can discuss it and find out how to
-        change it such that it does have consensus. </t>
+        <t>Note: The text in this section may not represent working group
+        consensus and is put here so that the working group can discuss it and
+        find out how to change it such that it does have consensus.</t>
 
-        <t> 
-          The SDP generate by the WebRTC client needs to conform to the
-          following specification and implementations need to implement the
-          factionally to receive SDP that meets the following specifications.
-          
-          <list>
-            
+        <t>The SDP generate by the WebRTC client needs to conform to the
+        following specification and implementations need to implement the
+        factionally to receive SDP that meets the following specifications.
+        <list>
             <!-- TODO - fix the refs in here -->
 
-            <t> RFC4566 is the base SDP specification and MUST be
-            implemented. </t>
+            <t>RFC4566 is the base SDP specification and MUST be
+            implemented.</t>
 
-            <t> RFC5124 MUST be supported for signaling RTP/SAVPF RTP
-            profile. </t>
-            
-            <t> RFC5104 MUST be implemented to signal RTCP based feedback.</t>
-            
-            <t> RFC5761 MUST be implemented to signal multiplexing of RTP and
-            RTCP. </t>
-            
-           <t> RFC5245 MUST be implemented for signaling the ICE candidate
-            lines corresponding to media stream. </t>
-            
-            <t> RFC3264 MUST be implemented to signal information about media
+            <t>RFC5124 MUST be supported for signaling RTP/SAVPF RTP
+            profile.</t>
+
+            <t>RFC5104 MUST be implemented to signal RTCP based feedback.</t>
+
+            <t>RFC5761 MUST be implemented to signal multiplexing of RTP and
+            RTCP.</t>
+
+            <t>RFC5245 MUST be implemented for signaling the ICE candidate
+            lines corresponding to media stream.</t>
+
+            <t>RFC3264 MUST be implemented to signal information about media
             direction.</t>
 
-            <t> The RFC5888 grouping framework MUST be implemented for signaling the
-            grouping information. </t>
+            <t>The RFC5888 grouping framework MUST be implemented for
+            signaling the grouping information.</t>
 
-            <t> RFC5506 MAY be implemented to signal Reduced-Size RTCP
-            messages. </t>
-            
-            <t> RFC5576 MAY be implemented to signal RTP SSRC values.</t>
-            
-            <t> RFC3556 with bandwidth modifiers MAY be supported for specifying
-            RTCP bandwidth as a fraction of the media bandwidth, RTCP fraction
-            allocated to the senders and setting maximum media bit-rate
-            boundaries. </t>
-            
-          </list>
-        </t>
+            <t>RFC5506 MAY be implemented to signal Reduced-Size RTCP
+            messages.</t>
 
-        <t>
-          Example SDP for RTCWeb call flows can be found in <xref target="I-D.nandakumar-rtcweb-sdp"/>. 
-        </t>
+            <t>RFC5576 MAY be implemented to signal RTP SSRC values.</t>
 
+            <t>RFC3556 with bandwidth modifiers MAY be supported for
+            specifying RTCP bandwidth as a fraction of the media bandwidth,
+            RTCP fraction allocated to the senders and setting maximum media
+            bit-rate boundaries.</t>
+          </list></t>
+
+        <t>Example SDP for RTCWeb call flows can be found in <xref
+        target="I-D.nandakumar-rtcweb-sdp"></xref>.</t>
       </section>
 
       <section title="Methods">
@@ -607,8 +587,8 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           to determine the currently available resources, it may be
           implemented as an async operation.</t>
 
-          <t>Calling this method may do things such as generate new ICE credentials.</t>
-
+          <t>Calling this method may do things such as generate new ICE
+          credentials.</t>
         </section>
 
         <section title="createAnswer">
@@ -633,8 +613,8 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           determine the currently available resources, it may need to be
           implemented as an async operation.</t>
 
-          <t>Calling this method may do things such as generate new ICE credentials.</t>
-
+          <t>Calling this method may do things such as generate new ICE
+          credentials.</t>
         </section>
 
         <section title="SessionDescriptionType">
@@ -672,30 +652,27 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           as final when it receives one that meets its criteria (e.g. a live
           user instead of voicemail).</t>
 
-     <section title="Creating Answers">
+          <section title="Creating Answers">
+            <t>Most web applications will not need to create answers using the
+            "pranswer" type. The general recommendation for a web applications
+            would be to create an answer more or less immediately after
+            receiving the offer instead of waiting for a human user to provide
+            input. Later when the human input is received, the applications
+            can create a new offer to update the previos offer/answer pair.
+            Some application may not be able to do this, particular ones that
+            are attempting to gateway to other signaling protocols.</t>
 
-       <t> Most web applications will not need to create answers using the
-       "pranswer" type. The general recommendation for a web applications would
-       be to create an answer more or less immediately after receiving the offer
-       instead of waiting for a human user to provide input. Later when the
-       human input is received, the applications can create a new offer to
-       update the previos offer/answer pair. Some application may not be able to
-       do this, particular ones that are attempting to gateway to other
-       signaling protocols. </t>
-
-       <t> Consider a typical web application that will set up a data channel,
-       an audio channel, and a video channel. When a device received an offer
-       with this, it could send an answer accepting the data channel for two way
-       data, and accepting the audio and video tracks as receive only. Then it
-       could ask the user if they wanted to transmit audio and video to the far
-       end, acquire the local media sources, and send a new offer to the remote
-       side moving the audio and video to be two way media. By the time the
-       human has decided to send media, it is possible that the ICE signaling
-       and DTLS channel will already be set up to the remote side. </t>
-
-     </section>
-
-
+            <t>Consider a typical web application that will set up a data
+            channel, an audio channel, and a video channel. When a device
+            received an offer with this, it could send an answer accepting the
+            data channel for two way data, and accepting the audio and video
+            tracks as receive only. Then it could ask the user if they wanted
+            to transmit audio and video to the far end, acquire the local
+            media sources, and send a new offer to the remote side moving the
+            audio and video to be two way media. By the time the human has
+            decided to send media, it is possible that the ICE signaling and
+            DTLS channel will already be set up to the remote side.</t>
+          </section>
         </section>
 
         <section title="setLocalDescription">
@@ -786,61 +763,54 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           connectivity being established.</t>
         </section>
       </section>
-
     </section>
 
-      <section title="Configurable SDP Parameters">
+    <section title="Configurable SDP Parameters">
+      <t>Note: This section is still very early and is likely to significantly
+      change as we get a better understanding of the a) the use cases for this
+      b) the implications at the protocol level c) feedback from implementors
+      on what they can do.</t>
 
-        <t> Note: This section is still very early and is likely to
-        significantly change as we get a better understanding of the a) the use
-        cases for this b) the implications at the protocol level c) feedback
-        from implementors on what they can do. </t>
+      <t>The following is a partial list of SDP parameters that an application
+      may want to control, in either local or remote descriptions, using this
+      API.</t>
 
-        <t>The following is a partial list of SDP parameters that an
-        application may want to control, in either local or remote
-        descriptions, using this API.</t>
+      <t><list style="symbols">
+          <t>remove or reorder codecs (m=)</t>
 
-        <t><list style="symbols">
-            <t>remove or reorder codecs (m=)</t>
+          <t>change codec attributes (a=fmtp; ptime)</t>
 
-            <t>change codec attributes (a=fmtp; ptime)</t>
+          <t>enable/disable BUNDLE (a=group)</t>
 
-            <t>enable/disable BUNDLE (a=group)</t>
+          <t>enable/disable RTCP mux (a=rtcp-mux)</t>
 
-            <t>enable/disable RTCP mux (a=rtcp-mux)</t>
-
-     <!--
+          <!--
             <t>remove or reorder SRTP crypto-suites (a=crypto)</t>
 
             <t>change SRTP parameters or keys (a=crypto)</t>
-     -->
+           -->
 
-            <t>change send resolution or framerate (TBD)</t>
+          <t>change send resolution or framerate (TBD)</t>
 
-            <t>change desired recv resolution or framerate (TBD)</t>
+          <t>change desired recv resolution or framerate (TBD)</t>
 
-            <t>change total bandwidth (b=)</t>
+          <t>change total bandwidth (b=)</t>
 
-            <t>remove desired AVPF mechanisms (a=rtcp-fb)</t>
+          <t>remove desired AVPF mechanisms (a=rtcp-fb)</t>
 
-            <t>remove RTP header extensions (a=rtphdr-ext)</t>
+          <t>remove RTP header extensions (a=rtphdr-ext)</t>
 
-            <t>add/change SSRC grouping (e.g. FID, RTX, etc)
-            (a=ssrc-group)</t>
+          <t>add/change SSRC grouping (e.g. FID, RTX, etc) (a=ssrc-group)</t>
 
-            <t>add SSRC attributes (a=ssrc)</t>
+          <t>add SSRC attributes (a=ssrc)</t>
 
-<!--
-            <t>change ICE ufrag/password (a=ice-ufrag/pwd)</t>
--->
+          <t>change media send/recv state (a=sendonly/recvonly/inactive)</t>
+        </list></t>
 
-            <t>change media send/recv state (a=sendonly/recvonly/inactive)</t>
-          </list></t>
-
-        <t>For example, an application could implement call hold by adding an
-        a=inactive attribute to its local description, and then applying and
-        signaling that description.</t>
-      </section>
+      <t>For example, an application could implement call hold by adding an
+      a=inactive attribute to its local description, and then applying and
+      signaling that description.</t>
+    </section>
 
     <section title="Security Considerations">
       <t>TODO</t>
@@ -852,78 +822,114 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
     <section title="Acknowledgements">
       <t>
-        <!-- ACK 1 --> 
-        Harald Alvestrand, Dan Burnett, Neil Stratford, Eric Rescorla, Anant
-        Narayanan, 
-        <!-- ACK 2 --> 
-        <!-- ACK 3 --> 
-        <!-- ACK 4 --> 
-        and Adam Bergkvist all provided valuable feedback on this proposal. 
-        <!-- ACK 5 --> 
-        Suhas Nandakumar provided text and input for SDP requirements. 
-        <!-- ACK 5a --> 
-        <!-- ACK 5b --> 
+        <!-- ACK 1 -->
+        Harald Alvestrand, Dan Burnett, Neil Stratford, Eric
+        Rescorla, Anant Narayanan, 
+        <!-- ACK 2 -->
+        
+        <!-- ACK 3 -->
+        
+        <!-- ACK 4 -->
+        
+        and Adam Bergkvist all provided valuable feedback on this proposal.
+        
+        <!-- ACK 5 -->
+        
+        Suhas Nandakumar provided text and input for SDP requirements.
+        
+        <!-- ACK 5a -->
+        
+        <!-- ACK 5b -->
+        
         <!-- ACK 5c --> 
-        Matthew Kaufman provided the observation that keeping state
-        out of the browser allows a call to continue even if the page is
-        reloaded. 
-        <!-- ACK 6 --> 
-        <!-- ACK 7 --> 
+        
+        Matthew Kaufman provided the observation
+        that keeping state out of the browser allows a call to continue even if
+        the page is reloaded.
+        <!-- ACK 6 -->
+        
+        <!-- ACK 7 -->
       </t>
     </section>
-
   </middle>
 
   <back>
     <references title="Normative References">
+      <!-- NORM 1 -->
 
-<!-- NORM 1 -->
-<!-- NORM 2 -->
-<!-- NORM 3 -->
-<!-- NORM 4 -->
-<!-- NORM 5 -->
-<!-- NORM 6 -->
-<!-- NORM 7 -->
-<!-- NORM 8 -->
-<!-- NORM 9 -->
-<!-- NORM 10 -->
-<!-- NORM 11 -->
-<!-- NORM 12 -->
-<!-- NORM 13 -->
-<!-- NORM 14 -->
-<!-- NORM 15 -->
-<!-- NORM 16 -->
-<!-- NORM 17 -->
-<!-- NORM 18 -->
+      <!-- NORM 2 -->
 
-<reference anchor='I-D.rescorla-mmusic-ice-trickle'>
-<front>
-<title>Trickle ICE: Incremental Provisioning of Candidates for the Interactive Connectivity Establishment (ICE) Protocol</title>
+      <!-- NORM 3 -->
 
-<author initials='E' surname='Rescorla' fullname='Eric Rescorla'>
-    <organization />
-</author>
+      <!-- NORM 4 -->
 
-<author initials='J' surname='Uberti' fullname='Justin Uberti'>
-    <organization />
-</author>
+      <!-- NORM 5 -->
 
-<author initials='E' surname='Ivov' fullname='Emil Ivov'>
-    <organization />
-</author>
+      <!-- NORM 6 -->
 
-<date month='October' day='10' year='2012' />
+      <!-- NORM 7 -->
 
-<abstract><t>This document describes an extension to the Interactive Connectivity Establishment (ICE) protocol that allows ICE agents to send and receive candidates incrementally rather than exchanging complete lists.  With such incremental provisioning, ICE agents can begin connectivity checks while they are still gathering candidates and considerably shorten the time necessary for ICE processing to complete.  The above mechanism is also referred to as "trickle ICE".</t></abstract>
+      <!-- NORM 8 -->
 
-</front>
+      <!-- NORM 9 -->
 
-<seriesInfo name='Internet-Draft' value='draft-rescorla-mmusic-ice-trickle-00' />
-<format type='TXT'
-        target='http://www.ietf.org/internet-drafts/draft-rescorla-mmusic-ice-trickle-00.txt' />
-</reference>
+      <!-- NORM 10 -->
 
-<!-- NORM 19 -->
+      <!-- NORM 11 -->
+
+      <!-- NORM 12 -->
+
+      <!-- NORM 13 -->
+
+      <!-- NORM 14 -->
+
+      <!-- NORM 15 -->
+
+      <!-- NORM 16 -->
+
+      <!-- NORM 17 -->
+
+      <!-- NORM 18 -->
+
+      <reference anchor="I-D.rescorla-mmusic-ice-trickle">
+        <front>
+          <title>Trickle ICE: Incremental Provisioning of Candidates for the
+          Interactive Connectivity Establishment (ICE) Protocol</title>
+
+          <author fullname="Eric Rescorla" initials="E" surname="Rescorla">
+            <organization></organization>
+          </author>
+
+          <author fullname="Justin Uberti" initials="J" surname="Uberti">
+            <organization></organization>
+          </author>
+
+          <author fullname="Emil Ivov" initials="E" surname="Ivov">
+            <organization></organization>
+          </author>
+
+          <date day="10" month="October" year="2012" />
+
+          <abstract>
+            <t>This document describes an extension to the Interactive
+            Connectivity Establishment (ICE) protocol that allows ICE agents
+            to send and receive candidates incrementally rather than
+            exchanging complete lists. With such incremental provisioning, ICE
+            agents can begin connectivity checks while they are still
+            gathering candidates and considerably shorten the time necessary
+            for ICE processing to complete. The above mechanism is also
+            referred to as "trickle ICE".</t>
+          </abstract>
+        </front>
+
+        <seriesInfo name="Internet-Draft"
+                    value="draft-rescorla-mmusic-ice-trickle-00" />
+
+        <format target="http://www.ietf.org/internet-drafts/draft-rescorla-mmusic-ice-trickle-00.txt"
+                type="TXT" />
+      </reference>
+
+      <!-- NORM 19 -->
 
       <reference anchor="RFC2119">
         <front>
@@ -1021,79 +1027,118 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </references>
 
     <references title="Informative References">
+      <!-- INFORM 1 -->
 
-<!-- INFORM 1 -->
-<!-- INFORM 2 -->
-<!-- INFORM 3 -->
-<!-- INFORM 4 -->
-<!-- INFORM 5 -->
-<!-- INFORM 6 -->
-<!-- INFORM 7 -->
-<!-- INFORM 8 -->
-<!-- INFORM 9 -->
-<!-- INFORM 10 -->
-<!-- INFORM 11 -->
-<!-- INFORM 12 -->
-<!-- INFORM 13 -->
-<!-- INFORM 14 -->
-<!-- INFORM 15 -->
+      <!-- INFORM 2 -->
 
-<reference anchor='I-D.jennings-rtcweb-signaling'>
-<front>
-<title>RTCWeb Offer/Answer Protocol (ROAP)</title>
+      <!-- INFORM 3 -->
 
-<author initials='C' surname='Jennings' fullname='Cullen Jennings'>
-    <organization />
-</author>
+      <!-- INFORM 4 -->
 
-<author initials='J' surname='Rosenberg' fullname='Jonathan Rosenberg'>
-    <organization />
-</author>
+      <!-- INFORM 5 -->
 
-<author initials='R' surname='Jesup' fullname='Randell Jesup'>
-    <organization />
-</author>
+      <!-- INFORM 6 -->
 
-<date month='October' day='30' year='2011' />
+      <!-- INFORM 7 -->
 
-<abstract><t>This document describes an protocol used to negotiate media between browsers or other compatible devices.  This protocol provides the state machinery needed to implement the offer/answer model (RFC 3264), and defines the semantics and necessary attributes of messages that must be exchanged.  The protocol uses an abstract transport in that it does not actually define how these messages are exchanged. Rather, such exchanges are handled through web-based transports like HTTP or WebSockets.  The protocol focuses solely on media negotiation and does not handle call control, call processing, or other functions.</t></abstract>
+      <!-- INFORM 8 -->
 
-</front>
+      <!-- INFORM 9 -->
 
-<seriesInfo name='Internet-Draft' value='draft-jennings-rtcweb-signaling-01' />
-<format type='TXT'
-        target='http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.txt' />
-<format type='PDF'
-        target='http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.pdf' />
-</reference>
+      <!-- INFORM 10 -->
 
-<!-- INFORM 16 -->
+      <!-- INFORM 11 -->
 
-<reference anchor='I-D.nandakumar-rtcweb-sdp'>
-<front>
-<title>SDP for the WebRTC</title>
+      <!-- INFORM 12 -->
 
-<author initials='S' surname='Nandakumar' fullname='Suhas Nandakumar'>
-    <organization />
-</author>
+      <!-- INFORM 13 -->
 
-<author initials='C' surname='Jennings' fullname='Cullen Jennings'>
-    <organization />
-</author>
+      <!-- INFORM 14 -->
 
-<date month='October' day='15' year='2012' />
+      <!-- INFORM 15 -->
 
-<abstract><t>The Web Real-Time Communication (WebRTC) [WEBRTC] working group is charged to provide protocol support for direct interactive rich communication using audio, video and data between two peers' web browsers.  With in the WebRTC framework, Session Description protocol (SDP) [RFC4566] is used for negotiating session capabilities between the peers.  Such a negotiataion happens based on the SDP Offer/Answer exchange mechanism described in the RFC 3264 [RFC3264].  This document serves a introductory purpose in describing the role of SDP for the most common WebRTC use-cases.</t></abstract>
+      <reference anchor="I-D.jennings-rtcweb-signaling">
+        <front>
+          <title>RTCWeb Offer/Answer Protocol (ROAP)</title>
 
-</front>
+          <author fullname="Cullen Jennings" initials="C" surname="Jennings">
+            <organization></organization>
+          </author>
 
-<seriesInfo name='Internet-Draft' value='draft-nandakumar-rtcweb-sdp-00' />
-<format type='TXT'
-        target='http://www.ietf.org/internet-drafts/draft-nandakumar-rtcweb-sdp-00.txt' />
-</reference>
+          <author fullname="Jonathan Rosenberg" initials="J"
+                  surname="Rosenberg">
+            <organization></organization>
+          </author>
 
-<!-- INFORM 17 -->
+          <author fullname="Randell Jesup" initials="R" surname="Jesup">
+            <organization></organization>
+          </author>
 
+          <date day="30" month="October" year="2011" />
+
+          <abstract>
+            <t>This document describes an protocol used to negotiate media
+            between browsers or other compatible devices. This protocol
+            provides the state machinery needed to implement the offer/answer
+            model (RFC 3264), and defines the semantics and necessary
+            attributes of messages that must be exchanged. The protocol uses
+            an abstract transport in that it does not actually define how
+            these messages are exchanged. Rather, such exchanges are handled
+            through web-based transports like HTTP or WebSockets. The protocol
+            focuses solely on media negotiation and does not handle call
+            control, call processing, or other functions.</t>
+          </abstract>
+        </front>
+
+        <seriesInfo name="Internet-Draft"
+                    value="draft-jennings-rtcweb-signaling-01" />
+
+        <format target="http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.txt"
+                type="TXT" />
+
+        <format target="http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.pdf"
+                type="PDF" />
+      </reference>
+
+      <!-- INFORM 16 -->
+
+      <reference anchor="I-D.nandakumar-rtcweb-sdp">
+        <front>
+          <title>SDP for the WebRTC</title>
+
+          <author fullname="Suhas Nandakumar" initials="S"
+                  surname="Nandakumar">
+            <organization></organization>
+          </author>
+
+          <author fullname="Cullen Jennings" initials="C" surname="Jennings">
+            <organization></organization>
+          </author>
+
+          <date day="15" month="October" year="2012" />
+
+          <abstract>
+            <t>The Web Real-Time Communication (WebRTC) [WEBRTC] working group
+            is charged to provide protocol support for direct interactive rich
+            communication using audio, video and data between two peers' web
+            browsers. With in the WebRTC framework, Session Description
+            protocol (SDP) [RFC4566] is used for negotiating session
+            capabilities between the peers. Such a negotiataion happens based
+            on the SDP Offer/Answer exchange mechanism described in the RFC
+            3264 [RFC3264]. This document serves a introductory purpose in
+            describing the role of SDP for the most common WebRTC
+            use-cases.</t>
+          </abstract>
+        </front>
+
+        <seriesInfo name="Internet-Draft"
+                    value="draft-nandakumar-rtcweb-sdp-00" />
+
+        <format target="http://www.ietf.org/internet-drafts/draft-nandakumar-rtcweb-sdp-00.txt"
+                type="TXT" />
+      </reference>
+
+      <!-- INFORM 17 -->
 
       <reference anchor="RFC4568">
         <front>
@@ -1173,8 +1218,6 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </references>
 
     <section title="JSEP Implementation Examples">
-
-
       <section title="Example API Flows">
         <t>Below are several sample flows for the new PeerConnection and
         library APIs, demonstrating when the various APIs are called in
@@ -1420,30 +1463,44 @@ OffererJS->AnswererJS:  ACK
             </figure></t>
         </section>
       </section>
-
     </section>
 
     <section title="Change log">
       <t>Changes in draft -02: <list style="symbols">
+          <!-- A -->
 
-          <!-- A --> 
           <t>Converted from nroff</t>
-          <!-- B --> 
-          <t>Removed comparisons to old approaches abandoned by the working group</t>
-          <!-- C --> 
-          <t>Removed stuff that has moved to W3C specificaiton</t>
-          <!-- D --> 
-          <t> Align SDP handling with W3C draft </t>
-          <!-- E --> 
-          <t> Clarified section on forking. </t>
-          <!-- F --> 
-          <!-- G --> 
-          <!-- H --> 
-          <!-- I --> 
-          <!-- J --> 
-          <!-- K --> 
-          <!-- L --> 
 
+          <!-- B -->
+
+          <t>Removed comparisons to old approaches abandoned by the working
+          group</t>
+
+          <!-- C -->
+
+          <t>Removed stuff that has moved to W3C specificaiton</t>
+
+          <!-- D -->
+
+          <t>Align SDP handling with W3C draft</t>
+
+          <!-- E -->
+
+          <t>Clarified section on forking.</t>
+
+          <!-- F -->
+
+          <!-- G -->
+
+          <!-- H -->
+
+          <!-- I -->
+
+          <!-- J -->
+
+          <!-- K -->
+
+          <!-- L -->
         </list></t>
 
       <t>Changes in draft -01: <list style="symbols">
