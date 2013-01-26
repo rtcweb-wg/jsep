@@ -25,8 +25,8 @@ clean:
 %.txt: %.xml
 	xml2rfc --text $^ -o $@
 
-%.diff.html: %.txt
-	htmlwdiff  $^.old $^ >  $@
+%.diff.html: %.txt.old %.txt 
+	htmlwdiff  $^ >  $@
 
 %.pdf: %.html  $(SVG)
 	wkpdf -p letter -s $^ -o $@
