@@ -818,7 +818,7 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
     <section title="Configurable SDP Parameters">
       <t>Note: This section is still very early and is likely to significantly
-      change as we get a better understanding of the a) the use cases for this
+      change as we get a better understanding of a) the use cases for this
       b) the implications at the protocol level c) feedback from implementors
       on what they can do.</t>
 
@@ -841,8 +841,12 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <t><list style="symbols">
           <t>remove or reorder codecs (m=)</t>
+  </list></t>
 
-          <t>disable BUNDLE (a=group)</t>
+      <t> The following can be controlled by constraints passed into the CreateOffer or CreateAnswer.  </t>
+
+        <t><list style="symbols">
+         <t>disable BUNDLE (a=group)</t>
 
           <t>disable RTCP mux (a=rtcp-mux)</t>
 
@@ -850,20 +854,17 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>change desired recv resolution or framerate</t>
 
-          <t>reduce total bandwidth (b=)</t>
+          <t>reduce maximum total bandwidth (b=)</t>
 
           <t>remove desired AVPF mechanisms (a=rtcp-fb)</t>
 
           <t>remove RTP header extensions (a=rtphdr-ext)</t>
-
-          <t>reduce media send/recv state (a=sendonly/recvonly/inactive)</t>
         </list></t>
 
-      <t>For example, an application could implement call hold by adding an
-      a=inactive attribute to its local description, and then applying and
-      signaling that description. But if the browser has decided to use an
-      m-line in recvonly mode, the application cannot force it to use that
-      m-line for sending by removing the a=recvonly attribute.</t>
+        <t>The application can modify the SDP to reduce the capabilities in the
+        offer it sends to the far side in any ways the application see fits as
+        long as it is valid SDP offer and specifies a subset of what the browser
+        is expecting to do.  </t>
 
       <t>The application is, as always, solely responsible for what it sends to
       the other party, and all incoming SDP will be processed by the browser to
@@ -872,6 +873,8 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       of this specification will be able to process, as a remote offer or
       answer, unmodified SDP coming from any other implementation of this
       specification. </t>
+
+      
     </section>
 
     <section title="Security Considerations">
