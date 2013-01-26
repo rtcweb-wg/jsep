@@ -293,12 +293,12 @@
         results; as a result, multiple dissimilar provisional answers can be
         received and applied during call setup.</t>
 
-        <t>In <xref target="RFC3264"/> , the constraints at the signaling level is that only
-        one offer can be outstanding for a given session, but from the media
-        stack level, a new offer can be generated at any point. For example,
-        when using SIP for signaling, if one offer is sent, then cancelled
-        using a SIP CANCEL, another offer can be generated even though no
-        answer was received for the first offer. To support this, the JSEP
+        <t>In <xref target="RFC3264"/> , the constraints at the signaling level
+        is that only one offer can be outstanding for a given session, but from
+        the media stack level, a new offer can be generated at any point. For
+        example, when using SIP for signaling, if one offer is sent, then
+        cancelled using a SIP CANCEL, another offer can be generated even though
+        no answer was received for the first offer. To support this, the JSEP
         media layer can provide an offer whenever the Javascript application
         needs one for the signaling. The answerer can send back zero or more
         provisional answers, and finally end the offer-answer exchange by
@@ -405,16 +405,16 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 ]]></artwork>
             </figure>
 
-            <t>The IceCandidate object also contains fields to indicate which
-            m= line it should be associated with. The m line can be identified
-            in one of two ways; either by a m-line index, or a MID. The m-line
+            <t>The IceCandidate object also contains fields to indicate which m=
+            line it should be associated with. The m line can be identified in
+            one of two ways; either by a m-line index, or a MID. The m-line
             index is a zero-based index, referring to the Nth m-line in the
             SDP. The MID uses the "media stream identification", as defined in
-             <xref target="RFC3388"/> , to identify the m-line. WebRTC implementations
-            creating an ICE Candidate object MUST populate both of these
-            fields. Implementations receiving an ICE Candidate object SHOULD
-            use the MID if they implement that functionality, or the m-line
-            index, if not.</t>
+            <xref target="RFC3388"/> , to identify the m-line. WebRTC
+            implementations creating an ICE Candidate object MUST populate both
+            of these fields. Implementations receiving an ICE Candidate object
+            SHOULD use the MID if they implement that functionality, or the
+            m-line index, if not.</t>
           </section>
         </section>
       </section>
@@ -422,15 +422,15 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       <section title="Interactions With Forking">
         <t>Some call signaling systems allow various types of forking where an
         SDP Offer may be provided to more than one device. For example, SIP
-       <xref target="RFC3261"/> defines both a "Parallel Search" and "Sequential Search".
-        Although these are primarily signaling level issues that are outside
-        the scope of JSEP, they do have some impact on the configuration of
-        the media plane, which is relevant. When forking is happening at the
-        signaling layer, the Javascript application responsible for the
-        signaling needs to make the decisions about what media should be sent
-        or received at any point of time and which remote endpoint it should
-        communicate with. JSEP is used to make sure the media engine can make
-        the RTP and media perform as required by the application. The basic
+        <xref target="RFC3261"/> defines both a "Parallel Search" and
+        "Sequential Search".  Although these are primarily signaling level
+        issues that are outside the scope of JSEP, they do have some impact on
+        the configuration of the media plane, which is relevant. When forking is
+        happening at the signaling layer, the Javascript application responsible
+        for the signaling needs to make the decisions about what media should be
+        sent or received at any point of time and which remote endpoint it
+        should communicate with. JSEP is used to make sure the media engine can
+        make the RTP and media perform as required by the application. The basic
         operations that the applications can have the media engine do are:
         <list>
             <t>Start exchanging media to a given remote peer but keep all the
@@ -482,18 +482,18 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           this is exactly like the sequential forking case.</t>
 
           <t>In the parallel forking case where the Javascript application
-          wishes to simultaneously exchange media with multiple peers, the
-          flow is slightly more complex, but the Javascript application can
-          follow the strategy that <xref target="RFC3960"/> describes using UPDATE. (It is
-          worth noting that use cases where this is the desired behavior are
+          wishes to simultaneously exchange media with multiple peers, the flow
+          is slightly more complex, but the Javascript application can follow
+          the strategy that <xref target="RFC3960"/> describes using UPDATE. (It
+          is worth noting that use cases where this is the desired behavior are
           very unusual.) The UPDATE approach allows the signaling to set up a
           separate media flow for each peer that it wishes to exchange media
-          with. In JSEP, this offer used in the UPDATE would be formed by
-          simply creating a new PeerConnection and making sure that the same
-          local media streams have been added into this new PeerConnection.
-          Then the new PeerConnection object would produce a SDP offer that
-          could be used by the signaling to perform the UPDATE strategy
-          discussed in <xref target="RFC3960"/> .</t>
+          with. In JSEP, this offer used in the UPDATE would be formed by simply
+          creating a new PeerConnection and making sure that the same local
+          media streams have been added into this new PeerConnection.  Then the
+          new PeerConnection object would produce a SDP offer that could be used
+          by the signaling to perform the UPDATE strategy discussed in <xref
+          target="RFC3960"/> .</t>
 
           <t>As a result of sharing the media streams, the application will
           end up with N parallel PeerConnection sessions, each with a local
@@ -552,35 +552,37 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         target="I-D.ietf-rtcweb-rtp-usage"></xref>. <list style="format R-%d">
             <!-- TODO - fix the refs in here -->
 
-            <t><xref target="RFC4566"/> is the base SDP specification and MUST be
-            implemented.</t>
+            <t><xref target="RFC4566"/> is the base SDP specification and MUST
+            be implemented.</t>
 
-            <t><xref target="RFC5124"/> MUST be supported for signaling RTP/SAVPF RTP
-            profile.</t>
+            <t><xref target="RFC5124"/> MUST be supported for signaling
+            RTP/SAVPF RTP profile.</t>
 
-            <t><xref target="RFC4585"/> MUST be implemented to signal RTCP based feedback.</t>
+            <t><xref target="RFC4585"/> MUST be implemented to signal RTCP based
+            feedback.</t>
 
-            <t><xref target="RFC5761"/>  MUST be implemented to signal multiplexing of RTP and
-            RTCP.</t>
+            <t><xref target="RFC5761"/> MUST be implemented to signal
+            multiplexing of RTP and RTCP.</t>
 
-            <t><xref target="RFC5245"/>  MUST be implemented for signaling the ICE candidate
-            lines corresponding to each media stream.</t>
+            <t><xref target="RFC5245"/> MUST be implemented for signaling the
+            ICE candidate lines corresponding to each media stream.</t>
 
-            <t><xref target="RFC3264"/> MUST be implemented to signal information about media
-            direction.</t>
+            <t><xref target="RFC3264"/> MUST be implemented to signal
+            information about media direction.</t>
 
-            <t>The <xref target="RFC5888"/> grouping framework MUST be implemented for
-            signaling the grouping information.</t>
+            <t>The <xref target="RFC5888"/> grouping framework MUST be
+            implemented for signaling the grouping information.</t>
 
-            <t><xref target="RFC5506"/> MAY be implemented to signal Reduced-Size RTCP
-            messages.</t>
+            <t><xref target="RFC5506"/> MAY be implemented to signal
+            Reduced-Size RTCP messages.</t>
 
-            <t><xref target="RFC5576"/> MAY be implemented to signal RTP SSRC values.</t>
+            <t><xref target="RFC5576"/> MAY be implemented to signal RTP SSRC
+            values.</t>
 
-            <t><xref target="RFC3556"/> with bandwidth modifiers MAY be supported for
-            specifying RTCP bandwidth as a fraction of the media bandwidth,
-            RTCP fraction allocated to the senders and setting maximum media
-            bit-rate boundaries.</t>
+            <t><xref target="RFC3556"/> with bandwidth modifiers MAY be
+            supported for specifying RTCP bandwidth as a fraction of the media
+            bandwidth, RTCP fraction allocated to the senders and setting
+            maximum media bit-rate boundaries.</t>
 
             <t>A TBD-draft MUST be supported, in order to signal associations
             between RTP objects and W3C MediaStreams and MediaStreamTracks in a
@@ -596,8 +598,8 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           </list></t>
 
-        <t>As required by <xref target="RFC4566"/> Section 5.13 JSEP implementations MUST
-        ignore unknown attributes (a=) lines.</t>
+        <t>As required by <xref target="RFC4566"/> Section 5.13 JSEP
+        implementations MUST ignore unknown attributes (a=) lines.</t>
 
         <t>Example SDP for RTCWeb call flows can be found in <xref
         target="I-D.nandakumar-rtcweb-sdp"></xref>.</t>
@@ -606,14 +608,13 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       <section title="Methods">
         <section title="createOffer">
           <t>The createOffer method generates a blob of SDP that contains a
-          <xref target="RFC3264"/> offer with the supported configurations for the session,
-          including descriptions of the local MediaStreams attached to this
-          PeerConnection, the codec/RTP/RTCP options supported by this
-          implementation, and any candidates that have been gathered by the
-          ICE Agent. A constraints parameters may be supplied to provide
-          additional control over the generated offer, e.g. to get a full set
-          of session capabilities, or to request a new set of ICE
-          credentials.</t>
+          <xref target="RFC3264"/> offer with the supported configurations for
+          the session, including descriptions of the local MediaStreams attached
+          to this PeerConnection, the codec/RTP/RTCP options supported by this
+          implementation, and any candidates that have been gathered by the ICE
+          Agent. A constraints parameters may be supplied to provide additional
+          control over the generated offer, e.g. to get a full set of session
+          capabilities, or to request a new set of ICE credentials.</t>
 
           <t>In the initial offer, the generated SDP will contain all desired
           functionality for the session (certain parts that are supported but
@@ -642,13 +643,13 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <section title="createAnswer">
           <t>The createAnswer method generates a blob of SDP that contains a
-          <xref target="RFC3264"/>  SDP answer with the supported configuration for the session
-          that is compatible with the parameters supplied in the offer. Like
-          createOffer, the returned blob contains descriptions of the local
-          MediaStreams attached to this PeerConnection, the codec/RTP/RTCP
-          options negotiated for this session, and any candidates that have
-          been gathered by the ICE Agent. A constraints parameter may be
-          supplied to provide additional control over the generated
+          <xref target="RFC3264"/> SDP answer with the supported configuration
+          for the session that is compatible with the parameters supplied in the
+          offer. Like createOffer, the returned blob contains descriptions of
+          the local MediaStreams attached to this PeerConnection, the
+          codec/RTP/RTCP options negotiated for this session, and any candidates
+          that have been gathered by the ICE Agent. A constraints parameter may
+          be supplied to provide additional control over the generated
           answer.</t>
 
           <t>As an answer, the generated SDP will contain a specific
@@ -967,7 +968,8 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <reference anchor='RFC4585'>
 
 <front>
-<title>Extended RTP Profile for Real-time Transport Control Protocol (RTCP)-Based Feedback (RTP/AVPF)</title>
+<title>Extended RTP Profile for Real-time Transport Control Protocol
+(RTCP)-Based Feedback (RTP/AVPF)</title>
 <author initials='J.' surname='Ott' fullname='J. Ott'>
 <organization /></author>
 <author initials='S.' surname='Wenger' fullname='S. Wenger'>
@@ -980,7 +982,17 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <organization /></author>
 <date year='2006' month='July' />
 <abstract>
-<t>Real-time media streams that use RTP are, to some degree, resilient against packet losses.  Receivers may use the base mechanisms of the Real-time Transport Control Protocol (RTCP) to report packet reception statistics and thus allow a sender to adapt its transmission behavior in the mid-term.  This is the sole means for feedback and feedback-based error repair (besides a few codec-specific mechanisms).  This document defines an extension to the Audio-visual Profile (AVP) that enables receivers to provide, statistically, more immediate feedback to the senders and thus allows for short-term adaptation and efficient feedback-based repair mechanisms to be implemented.  This early feedback profile (AVPF) maintains the AVP bandwidth constraints for RTCP and preserves scalability to large groups. [STANDARDS-TRACK]</t></abstract></front>
+<t>Real-time media streams that use RTP are, to some degree, resilient against
+packet losses.  Receivers may use the base mechanisms of the Real-time Transport
+Control Protocol (RTCP) to report packet reception statistics and thus allow a
+sender to adapt its transmission behavior in the mid-term.  This is the sole
+means for feedback and feedback-based error repair (besides a few codec-specific
+mechanisms).  This document defines an extension to the Audio-visual Profile
+(AVP) that enables receivers to provide, statistically, more immediate feedback
+to the senders and thus allows for short-term adaptation and efficient
+feedback-based repair mechanisms to be implemented.  This early feedback profile
+(AVPF) maintains the AVP bandwidth constraints for RTCP and preserves
+scalability to large groups. [STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='4585' />
 <format type='TXT' octets='117762' target='http://www.rfc-editor.org/rfc/rfc4585.txt' />
@@ -997,7 +1009,11 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <organization /></author>
 <date year='2008' month='February' />
 <abstract>
-<t>An RTP profile (SAVP) for secure real-time communications and another profile (AVPF) to provide timely feedback from the receivers to a sender are defined in RFC 3711 and RFC 4585, respectively.  This memo specifies the combination of both profiles to enable secure RTP communications with feedback. [STANDARDS-TRACK]</t></abstract></front>
+<t>An RTP profile (SAVP) for secure real-time communications and another profile
+(AVPF) to provide timely feedback from the receivers to a sender are defined in
+RFC 3711 and RFC 4585, respectively.  This memo specifies the combination of
+both profiles to enable secure RTP communications with
+feedback. [STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='5124' />
 <format type='TXT' octets='37856' target='http://www.rfc-editor.org/rfc/rfc5124.txt' />
@@ -1013,7 +1029,11 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <organization /></author>
 <date year='2004' month='December' />
 <abstract>
-<t>This document describes how to manage early media in the Session Initiation Protocol (SIP) using two models: the gateway model and the application server model.  It also describes the inputs one needs to consider in defining local policies for ringing tone generation.  This memo provides information for the Internet community.</t></abstract></front>
+<t>This document describes how to manage early media in the Session Initiation
+Protocol (SIP) using two models: the gateway model and the application server
+model.  It also describes the inputs one needs to consider in defining local
+policies for ringing tone generation.  This memo provides information for the
+Internet community.</t></abstract></front>
 
 <seriesInfo name='RFC' value='3960' />
 <format type='TXT' octets='31692' target='http://www.rfc-editor.org/rfc/rfc3960.txt' />
@@ -1041,7 +1061,11 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <organization /></author>
 <date year='2002' month='June' />
 <abstract>
-<t>This document describes Session Initiation Protocol (SIP), an application-layer control (signaling) protocol for creating, modifying, and terminating sessions with one or more participants.  These sessions include Internet telephone calls, multimedia distribution, and multimedia conferences. [STANDARDS-TRACK]</t></abstract></front>
+<t>This document describes Session Initiation Protocol (SIP), an
+application-layer control (signaling) protocol for creating, modifying, and
+terminating sessions with one or more participants.  These sessions include
+Internet telephone calls, multimedia distribution, and multimedia
+conferences. [STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='3261' />
 <format type='TXT' octets='647976' target='http://www.rfc-editor.org/rfc/rfc3261.txt' />
@@ -1247,7 +1271,11 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <organization /></author>
 <date year='2003' month='July' />
 <abstract>
-<t>This document defines an extension to the Session Description Protocol (SDP) to specify two additional modifiers for the bandwidth attribute.  These modifiers may be used to specify the bandwidth allowed for RTP Control Protocol (RTCP) packets in a Real-time Transport Protocol (RTP) session. [STANDARDS-TRACK]</t></abstract></front>
+<t>This document defines an extension to the Session Description Protocol (SDP)
+to specify two additional modifiers for the bandwidth attribute.  These
+modifiers may be used to specify the bandwidth allowed for RTP Control Protocol
+(RTCP) packets in a Real-time Transport Protocol (RTP)
+session. [STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='3556' />
 <format type='TXT' octets='15310' target='http://www.rfc-editor.org/rfc/rfc3556.txt' />
@@ -1265,7 +1293,15 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <organization /></author>
 <date year='2009' month='June' />
 <abstract>
-<t>The Session Description Protocol (SDP) provides mechanisms to describe attributes of multimedia sessions and of individual media streams (e.g., Real-time Transport Protocol (RTP) sessions) within a multimedia session, but does not provide any mechanism to describe individual media sources within a media stream.  This document defines a mechanism to describe RTP media sources, which are identified by their synchronization source (SSRC) identifiers, in SDP, to associate attributes with these sources, and to express relationships among sources.  It also defines several source-level attributes that can be used to describe properties of media sources. [STANDARDS-TRACK]</t></abstract></front>
+<t>The Session Description Protocol (SDP) provides mechanisms to describe
+attributes of multimedia sessions and of individual media streams (e.g.,
+Real-time Transport Protocol (RTP) sessions) within a multimedia session, but
+does not provide any mechanism to describe individual media sources within a
+media stream.  This document defines a mechanism to describe RTP media sources,
+which are identified by their synchronization source (SSRC) identifiers, in SDP,
+to associate attributes with these sources, and to express relationships among
+sources.  It also defines several source-level attributes that can be used to
+describe properties of media sources. [STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='5576' />
 <format type='TXT' octets='40454' target='http://www.rfc-editor.org/rfc/rfc5576.txt' />
@@ -1274,14 +1310,23 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <reference anchor='RFC5506'>
 
 <front>
-<title>Support for Reduced-Size Real-Time Transport Control Protocol (RTCP): Opportunities and Consequences</title>
+<title>Support for Reduced-Size Real-Time Transport Control Protocol (RTCP):
+Opportunities and Consequences</title>
 <author initials='I.' surname='Johansson' fullname='I. Johansson'>
 <organization /></author>
 <author initials='M.' surname='Westerlund' fullname='M. Westerlund'>
 <organization /></author>
 <date year='2009' month='April' />
 <abstract>
-<t>This memo discusses benefits and issues that arise when allowing Real-time Transport Protocol (RTCP) packets to be transmitted with reduced size.  The size can be reduced if the rules on how to create compound packets outlined in RFC 3550 are removed or changed.  Based on that analysis, this memo defines certain changes to the rules to allow feedback messages to be sent as Reduced-Size RTCP packets under certain conditions when using the RTP/AVPF (Real-time Transport Protocol / Audio-Visual Profile with Feedback) profile (RFC 4585).  This document updates RFC 3550, RFC 3711, and RFC 4585. [STANDARDS-TRACK]</t></abstract></front>
+<t>This memo discusses benefits and issues that arise when allowing Real-time
+Transport Protocol (RTCP) packets to be transmitted with reduced size.  The size
+can be reduced if the rules on how to create compound packets outlined in RFC
+3550 are removed or changed.  Based on that analysis, this memo defines certain
+changes to the rules to allow feedback messages to be sent as Reduced-Size RTCP
+packets under certain conditions when using the RTP/AVPF (Real-time Transport
+Protocol / Audio-Visual Profile with Feedback) profile (RFC 4585).  This
+document updates RFC 3550, RFC 3711, and RFC
+4585. [STANDARDS-TRACK]</t></abstract></front>
 
 <seriesInfo name='RFC' value='5506' />
 <format type='TXT' octets='41011' target='http://www.rfc-editor.org/rfc/rfc5506.txt' />
@@ -1342,7 +1387,11 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <date month='October' day='19' year='2011' />
 
-<abstract><t>This specification defines a new SDP Grouping Framework SDP grouping framework extension, "BUNDLE", that can be used with the Session Description Protocol (SDP) Offer/Answer mechanism to negotiate the usage of bundled media, which refers to the usage of a single 5-tuple for media associated with multiple SDP media descriptions ("m=" lines).</t></abstract>
+<abstract><t>This specification defines a new SDP Grouping Framework SDP
+grouping framework extension, "BUNDLE", that can be used with the Session
+Description Protocol (SDP) Offer/Answer mechanism to negotiate the usage of
+bundled media, which refers to the usage of a single 5-tuple for media
+associated with multiple SDP media descriptions ("m=" lines).</t></abstract>
 
 </front>
 
@@ -1364,7 +1413,12 @@ a=candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <date month='October' day='15' year='2012' />
 
-<abstract><t>This document specifies a grouping mechanism for RTP media streams that can be used to specify relations between media streams within different RTP sessions.  This mechanism is used to signal the association between the RTP concept of SSRC and the WebRTC concept of "media stream" / "media stream track" using SDP signalling.  This document is an input document for discussion.  It should be discussed in the MMUSIC WG list, mmusic@ietf.org.</t></abstract>
+<abstract><t>This document specifies a grouping mechanism for RTP media streams
+that can be used to specify relations between media streams within different RTP
+sessions.  This mechanism is used to signal the association between the RTP
+concept of SSRC and the WebRTC concept of "media stream" / "media stream track"
+using SDP signalling.  This document is an input document for discussion.  It
+should be discussed in the MMUSIC WG list, mmusic@ietf.org.</t></abstract>
 
 </front>
 
