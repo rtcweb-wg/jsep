@@ -19,11 +19,11 @@ clean:
 #	xsltproc -o $@ rfc2629.xslt $^
 
 %.html: %.xml
-	xml2rfc $^ $@
+	xml2rfc --html $^ -o $@
 
 
 %.txt: %.xml
-	xml2rfc $^ $@
+	xml2rfc --text $^ -o $@
 
 %.diff.html: %.txt
 	htmlwdiff  $^.old $^ >  $@
