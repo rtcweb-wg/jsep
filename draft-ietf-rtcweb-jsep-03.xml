@@ -932,11 +932,52 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     <section title="SDP Interaction Procedures">
       <t>This section describes the specific procedures to be followed when
          creating and parsing SDP objects.
-
-         [Work In Progress]
       </t>
 
       <section title="Constructing an Offer">
+          <t>When createOffer is called, a new SDP description must be created.
+            For an initial offer, the first step is to generate session-level
+            attributes as specified in RFC4566, Section 5. Specifically:
+            <list style="symbols">
+                <t>The first SDP line MUST be "v=0", as specified in RFC4566, Section 5.1</t>
+                <t>The second SDP line MUST be an "o=" line, as specified in RFC4566, Section 5.2.
+                   The value of the &lt;username&gt; field SHOULD be "-".
+                   The value of the &lt;sess-id&gt; field SHOULD be a cryptographically random number.
+                   The value of the &lt;nettype&gt; &lt;addrtype&gt; &lt;unicast-address&gt; tuple 
+                   SHOULD be set to a non-meaningful address, such as IN IP4 0.0.0.0,
+                   to prevent leaking the local address in this field. As mentioned in RFC4566, the entire
+                   o= line needs to be unique, but selecting a random number for &lt;sess-id&gt; is sufficient
+                   to accomplish this.</t>
+                <t>The third SDP line MUST be a "s=" line, as specified in RFC4566, Section 5.3; a single space SHOULD be used as the session name, e.g. "s= "</t>
+                <t>Session Information ("i="), URI ("u="), Email Address ("e="), Phone Number ("p="), Bandwidth ("b="), Repeat Times ("r="), Time Zones ("z="), and Encryption Keys ("k=") lines are not useful in this context and SHOULD NOT be included.</t>
+                <t>A "t=" line MUST be added, as specified in RFC4566, Section 5.9; both &lt;start-time&gt; and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t> 
+                <t>An "a=group" attribute MUST be added, as specified in RFC5888, with semantics of "BUNDLE" and identifying the m= sections to be bundled.</t>
+            </list>
+        </t>
+        <t>The next step is to generate m= sections for each MediaStreamTrack that has been added to the PeerConnection via the addStream method. Note that this method takes a MediaStream, which can contain multiple MediaStreamTracks, and therefore multiple m= sections can be generated even if addStream is only called once.</t>
+
+        <t>Each m= section should be generated as specified in RFC4566, Section 5.14. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
+            <list style="symbols">
+                <t>An "a=mid" line, as specified in RFC5888, Section 4.</t>
+                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in RFC4566, Section 6.</t> 
+                <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in RFC5245, Section 15.4.</t>
+                <t>An "a=ice-options" line, with the "trickle" option.</t>
+                <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in RFC5245, Section 4.3.</t>
+                <t>An "a=fingerprint" line, as specified in RFC4572, Section 5. Use of the SHA-256 algorithm for the fingerprint is RECOMMENDED.</t>
+                <t>An "a=setup" line, as specified in RFC4145, Section 4, and clarified for use in DTLS-SRTP secnarios in RFC5763, Section 5. The role value in the offer MUST be "actpass".</t>
+                <t>An "a=rtcp-mux" line.</t>
+                <t>For each supported RTP header extension, an "a=extmap" line, as specified in RFC 5285, Section 5.</t>
+                <t>For each supported RTCP feedback mechanism, an "a=rtcp-fb" mechanism, as specified in RFC4585, Section 4.2.</t>
+                <t>An "a=ssrc" line, as specified in RFC5576, Section 4.1, indicating the SSRC to be used for sending media.</t>
+                <t>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in RFC 5576, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</t>
+                <t>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line, as specified in RFC 5576, section 4.2, with semantics set to "FEC" and including the primary and FEC SSRCs.</t>
+            </list>
+        </t>
+
+        <t>Lastly, if a data channel has been created, a m= section must be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field must be set to "DTLS/SCTP". The "a=mid", "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate", "a=fingerprint", and "a=setup" lines must be included as mentioned above.
+        </t>
+
+        <t>m= sections MUST NOT include "a=crypto" or "a=ice-lite" attributes.</t>
       </section>
 
       <section title="Generating an Answer">
