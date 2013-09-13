@@ -939,7 +939,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         target="I-D.ietf-rtcweb-rtp-usage"/>. The exact details of this process are explained below.</t>
 
         <section title="Initial Offers">
-          <t>For an initial offer, the first step is to generate session-level
+          <t>When createOffer is called for the first time, the result is known as the initial offer.</t>
+
+          <t>The first step in generating an initial offer is to generate session-level
             attributes, as specified in RFC4566, Section 5. Specifically:
             <list style="symbols">
                 <t>The first SDP line MUST be "v=0", as specified in RFC4566, Section 5.1</t>
@@ -967,10 +969,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>An "a=msid" line, as specified in draft-ietf-mmusic-msid-01, Section 2.</t>
                 <t>[OPEN ISSUE: Use of App Token versus stream-correlator]</t>
                 <t>A directional attribute (e.g. "a=sendrecv"), as specified in RFC3264, Section 5.1.</t>
-                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in RFC4566, Section 6. For audio, the Opus, PCMU, PCMA, and telephone-event codecs must be supported. [OPEN ISSUE: where is the list of mandatory codecs normatively specified?] [TODO: Add references to payload RFCs for these formats] For video, in additional to a currently unspecified primary video codec, the red and ulpfec codecs must be supported, as specified in RFC5109, Section 14.2.</t>
+                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in RFC4566, Section 6. For audio, the codecs specified in http://tools.ietf.org/html/draft-ietf-rtcweb-audio-02, Section 3, MUST be be supported.</t>
+                <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx/8000" and an "a=fmtp" line that references the payload type fo the primary codec, as specified in RFC4588.</t>
+                <t>For each supported FEC mechanism, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
                 <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in RFC5245, Section 15.4.</t>
                 <t>An "a=ice-options" line, with the "trickle" option, as specified in draft-ivov-mmusic-trickle-ice-00, Section 4.</t>
-                <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in RFC5245, Section 4.3.</t>
+                <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in RFC5245, Section 4.3., paragraph 3.</t>
+                <t>For the current default candidate, a "c=" line, as specific in RFC5245, Section 4.3., paragraph 6.</t>
                 <t>An "a=fingerprint" line, as specified in RFC4572, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added.</t>
                 <t>An "a=setup" line, as specified in RFC4145, Section 4, and clarified for use in DTLS-SRTP secnarios in RFC5763, Section 5. The role value in the offer MUST be "actpass".</t>
                 <t>An "a=rtcp-mux" line, as specified in RFC5761, Section 5.1.1.</t>
@@ -981,19 +986,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in RFC 5576, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</t>
                 <t>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line, as specified in RFC 5576, section 4.2, with semantics set to "FEC" and including the primary and FEC SSRCs.</t>
                 <t>[OPEN ISSUE: Handling of a=imageattr]</t>
-                <t>[TODO: c=]</t>
                 <t>[TODO: bundle-only]</t>
             </list>
         </t>
 
         <t>Lastly, if a data channel has been created, a m= section must be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field must be set to "DTLS/SCTP", as specified in draft-ietf-mmusic-sctp-sdp-04, Section 3. The "a=mid", "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate", "a=fingerprint", and "a=setup" lines must be included as mentioned above.
-        [OPEN ISSUE: additional SCTP-specific stuff to be included.]
+        [OPEN ISSUE: additional SCTP-specific stuff to be included, as indicated in http://tools.ietf.org/html/draft-jesup-rtcweb-data-protocol-04 (currently none)]
         </t>
 
-        <t>Attributes that are common between all m= sections MAY be moved to session-level. [OPEN issue: do we want to make a recommendation here one way or the other?]</t>
+        <t>Attributes that are common between all m= sections MAY be moved to session-level, if desired.</t>
 
-        <t>Attributes other than the ones specified above MAY be included, but in order to provide a consistent set of capabilities to application developers, additional attributes are NOT RECOMMENDED. However, the following attributes are specifically incompatible with the requirements of <xref
-        target="I-D.ietf-rtcweb-rtp-usage"/>, and MUST NOT be included.
+        <t>Attributes other than the ones specified above MAY be included, except for the following attributes which are specifically incompatible with the requirements of <xref
+        target="I-D.ietf-rtcweb-rtp-usage"/>, and MUST NOT be included:
           <list style="symbols">
             <t>"a=crypto"</t>
             <t>"a=key-mgmt"</t>
@@ -1003,6 +1007,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </section>
 
     <section title="Subsequent Offers">
+        <t>When createOffer is called a second (or later) time, the processing is slightly different. If a remote description has not yet been applied, meaning the PeerConnection is in the "stable" or "sent-offer" states, the same steps for generating an initial offer should be followed, with these 
         <t>session-version MUST increase.</t>
         <t>Only the negotiated codecs, header exts, RTCP mechanisms can be offered.</t>
         <t>If MSTs are removed, the corresponding m= sections become recvonly or inactive.</t>
@@ -1019,7 +1024,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the "OfferToReceiveAudio" constraint is specified, with a value of "true", the offer MUST include a m= section with media type "video", even if no video MediaStreamTrack has been added to the PeerConnection. This allows the offerer to receive video even when not sending it; accordingly, the directional attribute on the video m= section MUST be set to recvonly. If this constraint is specifed when an video MediaStreamTrack has already been added to the PeerConnection, it has no effect.</t>
         </section>
         <section title="VoiceActivityDetection">
-            <t>If the "VoiceActivityDetection" constraint is specified, with a value of "true", the offer MUST indicate support for silence suppression by including comfort noise ("CN") codecs for each supported clockrate, as specified in RFC3389, Section 5.1.</t>
+            <t>If the "VoiceActivityDetection" constraint is specified, with a value of "true", the offer MUST indicate support for silence suppression by including comfort noise ("CN") codecs for each supported clockrate, as specified in RFC3389, Section 5.1. [OPEN issue: should this do anything in signaling, or should it just control built-in DTX modes in audio codecs? Opus has built-in DTX, but G.711 does not.]</t>
         </section>
         <section title="IceRestart">
             <t>If the "IceRestart" constraint is specified, with a value of "true", the offer MUST indicate an ICE restart by generating new ICE ufrag and pwd attributes, as specified in RFC5245, Section 9.1.1.1. If this constraint is specified on an initial offer, it has no effect.</t>
