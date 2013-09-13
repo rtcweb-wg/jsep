@@ -937,11 +937,104 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     <section title="SDP Interaction Procedures">
       <t>This section describes the specific procedures to be followed when
          creating and parsing SDP objects.
-
-         [Work In Progress]
       </t>
 
       <section title="Constructing an Offer">
+          <t>When createOffer is called, a new SDP description must be created that includes the functionality specified in <xref
+        target="I-D.ietf-rtcweb-rtp-usage"/>. The exact details of this process are explained below.</t>
+
+        <section title="Initial Offers">
+          <t>When createOffer is called for the first time, the result is known as the initial offer.</t>
+
+          <t>The first step in generating an initial offer is to generate session-level
+            attributes, as specified in RFC4566, Section 5. Specifically:
+            <list style="symbols">
+                <t>The first SDP line MUST be "v=0", as specified in RFC4566, Section 5.1</t>
+                <t>The second SDP line MUST be an "o=" line, as specified in RFC4566, Section 5.2.
+                   The value of the &lt;username&gt; field SHOULD be "-".
+                   The value of the &lt;sess-id&gt; field SHOULD be a cryptographically random number. To ensure uniqueness, this number SHOULD be at least 64 bits long.
+                   The value of the &lt;sess-version&gt; field SHOULD be zero.
+                   The value of the &lt;nettype&gt; &lt;addrtype&gt; &lt;unicast-address&gt; tuple 
+                   SHOULD be set to a non-meaningful address, such as IN IP4 0.0.0.0,
+                   to prevent leaking the local address in this field. As mentioned in RFC4566, the entire
+                   o= line needs to be unique, but selecting a random number for &lt;sess-id&gt; is sufficient
+                   to accomplish this.</t>
+                <t>The third SDP line MUST be a "s=" line, as specified in RFC4566, Section 5.3; a single space SHOULD be used as the session name, e.g. "s= "</t>
+                <t>Session Information ("i="), URI ("u="), Email Address ("e="), Phone Number ("p="), Bandwidth ("b="), Repeat Times ("r="), and Time Zones ("z=") lines are not useful in this context and SHOULD NOT be included.</t>
+                <t>Encryption Keys ("k=") lines do not provide sufficient security and MUST NOT be included.</t>
+                <t>A "t=" line MUST be added, as specified in RFC4566, Section 5.9; both &lt;start-time&gt; and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t> 
+                <t>An "a=group" attribute MUST be added, as specified in RFC5888, with semantics of "BUNDLE" and identifying the m= sections to be bundled.</t>
+            </list>
+        </t>
+        <t>The next step is to generate m= sections for each MediaStreamTrack that has been added to the PeerConnection via the addStream method. Note that this method takes a MediaStream, which can contain multiple MediaStreamTracks, and therefore multiple m= sections can be generated even if addStream is only called once.</t>
+
+        <t>Each m= section should be generated as specified in RFC4566, Section 5.14. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
+            <list style="symbols">
+                <t>An "a=mid" line, as specified in RFC5888, Section 4.</t>
+                <t>An "a=msid" line, as specified in draft-ietf-mmusic-msid-01, Section 2.</t>
+                <t>[OPEN ISSUE: Use of App Token versus stream-correlator]</t>
+                <t>A directional attribute (e.g. "a=sendrecv"), as specified in RFC3264, Section 5.1.</t>
+                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in RFC4566, Section 6. For audio, the codecs specified in http://tools.ietf.org/html/draft-ietf-rtcweb-audio-02, Section 3, MUST be be supported.</t>
+                <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx/8000" and an "a=fmtp" line that references the payload type fo the primary codec, as specified in RFC4588.</t>
+                <t>For each supported FEC mechanism, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
+                <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in RFC5245, Section 15.4.</t>
+                <t>An "a=ice-options" line, with the "trickle" option, as specified in draft-ivov-mmusic-trickle-ice-00, Section 4.</t>
+                <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in RFC5245, Section 4.3., paragraph 3.</t>
+                <t>For the current default candidate, a "c=" line, as specific in RFC5245, Section 4.3., paragraph 6.</t>
+                <t>An "a=fingerprint" line, as specified in RFC4572, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added.</t>
+                <t>An "a=setup" line, as specified in RFC4145, Section 4, and clarified for use in DTLS-SRTP secnarios in RFC5763, Section 5. The role value in the offer MUST be "actpass".</t>
+                <t>An "a=rtcp-mux" line, as specified in RFC5761, Section 5.1.1.</t>
+                <t>An "a=rtcp-rsize" line, as specified in RFC5506, Section 5.</t>
+                <t>For each supported RTP header extension, an "a=extmap" line, as specified in RFC 5285, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in RFC6904, Section 4.</t>
+                <t>For each supported RTCP feedback mechanism, an "a=rtcp-fb" mechanism, as specified in RFC4585, Section 4.2. The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.1.</t>
+                <t>An "a=ssrc" line, as specified in RFC5576, Section 4.1, indicating the SSRC to be used for sending media.</t>
+                <t>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in RFC 5576, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</t>
+                <t>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line, as specified in RFC 5576, section 4.2, with semantics set to "FEC" and including the primary and FEC SSRCs.</t>
+                <t>[OPEN ISSUE: Handling of a=imageattr]</t>
+                <t>[TODO: bundle-only]</t>
+            </list>
+        </t>
+
+        <t>Lastly, if a data channel has been created, a m= section must be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field must be set to "DTLS/SCTP", as specified in draft-ietf-mmusic-sctp-sdp-04, Section 3. The "a=mid", "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate", "a=fingerprint", and "a=setup" lines must be included as mentioned above.
+        [OPEN ISSUE: additional SCTP-specific stuff to be included, as indicated in http://tools.ietf.org/html/draft-jesup-rtcweb-data-protocol-04 (currently none)]
+        </t>
+
+        <t>Attributes that are common between all m= sections MAY be moved to session-level, if desired.</t>
+
+        <t>Attributes other than the ones specified above MAY be included, except for the following attributes which are specifically incompatible with the requirements of <xref
+        target="I-D.ietf-rtcweb-rtp-usage"/>, and MUST NOT be included:
+          <list style="symbols">
+            <t>"a=crypto"</t>
+            <t>"a=key-mgmt"</t>
+            <t>"a=ice-lite"</t>
+          </list>
+        </t>
+    </section>
+
+    <section title="Subsequent Offers">
+        <t>When createOffer is called a second (or later) time, the processing is slightly different. If a remote description has not yet been applied, meaning the PeerConnection is in the "stable" or "sent-offer" states, the same steps for generating an initial offer should be followed, with these </t>
+        <t>session-version MUST increase.</t>
+        <t>Only the negotiated codecs, header exts, RTCP mechanisms can be offered.</t>
+        <t>If MSTs are removed, the corresponding m= sections become recvonly or inactive.</t>
+        <t>If MSTs are added, the m= sections are treated as if an initial offer.</t>
+        <t>...</t>
+    </section>
+
+        <section title="Constraints Handling">
+        <t>The createOffer method takes as a parameter a MediaConstraints object. Special processing is performed when generating a SDP description if the following constraints are present.</t>
+        <section title="OfferToReceiveAudio">
+            <t>If the "OfferToReceiveAudio" constraint is specified, with a value of "true", the offer MUST include a m= section with media type "audio", even if no audio MediaStreamTrack has been added to the PeerConnection. This allows the offerer to receive audio even when not sending it; accordingly, the directional attribute on the audio m= section MUST be set to recvonly. If this constraint is specifed when an audio MediaStreamTrack has already been added to the PeerConnection, it has no effect.</t>
+        </section>
+        <section title="OfferToReceiveVideo">
+            <t>If the "OfferToReceiveAudio" constraint is specified, with a value of "true", the offer MUST include a m= section with media type "video", even if no video MediaStreamTrack has been added to the PeerConnection. This allows the offerer to receive video even when not sending it; accordingly, the directional attribute on the video m= section MUST be set to recvonly. If this constraint is specifed when an video MediaStreamTrack has already been added to the PeerConnection, it has no effect.</t>
+        </section>
+        <section title="VoiceActivityDetection">
+            <t>If the "VoiceActivityDetection" constraint is specified, with a value of "true", the offer MUST indicate support for silence suppression by including comfort noise ("CN") codecs for each supported clockrate, as specified in RFC3389, Section 5.1. [OPEN issue: should this do anything in signaling, or should it just control built-in DTX modes in audio codecs? Opus has built-in DTX, but G.711 does not.]</t>
+        </section>
+        <section title="IceRestart">
+            <t>If the "IceRestart" constraint is specified, with a value of "true", the offer MUST indicate an ICE restart by generating new ICE ufrag and pwd attributes, as specified in RFC5245, Section 9.1.1.1. If this constraint is specified on an initial offer, it has no effect.</t>
+        </section>
+      </section>
       </section>
 
       <section title="Generating an Answer">
