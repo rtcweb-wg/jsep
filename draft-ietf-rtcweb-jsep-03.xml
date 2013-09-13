@@ -60,7 +60,7 @@
 
     <abstract>
       <t>This document describes the mechanisms for allowing a Javascript
-      application to fully control the signaling plane of a multimedia session
+      application to control the signaling plane of a multimedia session
       via the interface specified in the W3C RTCPeerConnection API, and
       discusses how this relates to existing signaling protocols.</t>
     </abstract>
@@ -310,48 +310,53 @@
         media layer can provide an offer whenever the Javascript application
         needs one for the signaling. The answerer can send back zero or more
         provisional answers, and finally end the offer-answer exchange by
-        sending a final answer. The state machine for this is as follows:
+        sending a final answer. The state machine for this is as follows:</t>
+
+        <t>
         <figure anchor="fig-state-machine" title="JSEP State Machine">
             <artwork><![CDATA[
-                       setRemote(OFFER)               setLocal(PRANSWER)
-                           /-----\                               /-----\
-                           |     |                               |     |
-                           v     |                               v     |
-            +---------------+    |                +---------------+    |
-            |               |----/                |               |----/
-            |               | setLocal(PRANSWER)  |               |
-            |  Remote-Offer |------------------- >| Local-Pranswer|
-            |               |                     |               |
-            |               |                     |               |
-            +---------------+                     +---------------+    
-                 ^   |                                   |
-                 |   | setLocal(ANSWER)                  |
-setRemote(OFFER) |   |                                   |
-                 |   V                  setLocal(ANSWER) |
-            +---------------+                            |
-            |               |                            |
-            |               |                            |
-            |    Stable     |<---------------------------+
-            |               |                            |
-            |               |                            |
-            +---------------+          setRemote(ANSWER) |                   
-                 ^   |                                   |
-                 |   | setLocal(OFFER)                   |
-setRemote(ANSWER)|   |                                   |
-                 |   V                                   |
-            +---------------+                     +---------------+
-            |               |                     |               |
-            |               | setRemote(PRANSWER) |               |
-            |  Local-Offer  |------------------- >|Remote-Pranswer|
-            |               |                     |               |
-            |               |----\                |               |----\
-            +---------------+    |                +---------------+    |
-                           ^     |                               ^     |
-                           |     |                               |     |
-                           \-----/                               \-----/
-                       setLocal(OFFER)               setRemote(PRANSWER)
+                    setRemote(OFFER)               setLocal(PRANSWER)
+                        /-----\                               /-----\
+                        |     |                               |     |
+                        v     |                               v     |
+         +---------------+    |                +---------------+    |
+         |               |----/                |               |----/
+         |               | setLocal(PRANSWER)  |               |
+         |  Remote-Offer |------------------- >| Local-Pranswer|
+         |               |                     |               |
+         |               |                     |               |
+         +---------------+                     +---------------+    
+              ^   |                                   |
+              |   | setLocal(ANSWER)                  |
+setRemote(OFFER)  |                                   |
+              |   V                  setLocal(ANSWER) |
+         +---------------+                            |
+         |               |                            |
+         |               |                            |
+         |    Stable     |<---------------------------+
+         |               |                            |
+         |               |                            |
+         +---------------+          setRemote(ANSWER) |                   
+              ^   |                                   |
+              |   | setLocal(OFFER)                   |
+setRemote(ANSWER) |                                   |
+              |   V                                   |
+         +---------------+                     +---------------+
+         |               |                     |               |
+         |               | setRemote(PRANSWER) |               |
+         |  Local-Offer  |------------------- >|Remote-Pranswer|
+         |               |                     |               |
+         |               |----\                |               |----\
+         +---------------+    |                +---------------+    |
+                        ^     |                               ^     |
+                        |     |                               |     |
+                        \-----/                               \-----/
+                    setLocal(OFFER)               setRemote(PRANSWER)
 ]]></artwork>
-          </figure> Aside from these state transitions, there is no other
+          </figure>
+        </t>
+
+          <t> Aside from these state transitions, there is no other
         difference between the handling of provisional ("pranswer") and final
         ("answer") answers.</t>
       </section>
@@ -516,7 +521,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           media streams have been added into this new PeerConnection.  Then the
           new PeerConnection object would produce a SDP offer that could be used
           by the signaling to perform the UPDATE strategy discussed in <xref
-          target="RFC3960"/> .</t>
+          target="RFC3960"/>.</t>
 
           <t>As a result of sharing the media streams, the application will
           end up with N parallel PeerConnection sessions, each with a local
