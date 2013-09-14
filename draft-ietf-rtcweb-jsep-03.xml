@@ -944,49 +944,49 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>When createOffer is called for the first time, the result is known as the initial offer.</t>
 
           <t>The first step in generating an initial offer is to generate session-level
-            attributes, as specified in RFC4566, Section 5. Specifically:
+            attributes, as specified in <xref target="RFC4566" />, Section 5. Specifically:
             <list style="symbols">
-                <t>The first SDP line MUST be "v=0", as specified in RFC4566, Section 5.1</t>
-                <t>The second SDP line MUST be an "o=" line, as specified in RFC4566, Section 5.2.
+                <t>The first SDP line MUST be "v=0", as specified in <xref target="RFC4566" />, Section 5.1</t>
+                <t>The second SDP line MUST be an "o=" line, as specified in <xref target="RFC4566" />, Section 5.2.
                    The value of the &lt;username&gt; field SHOULD be "-".
                    The value of the &lt;sess-id&gt; field SHOULD be a cryptographically random number. To ensure uniqueness, this number SHOULD be at least 64 bits long.
                    The value of the &lt;sess-version&gt; field SHOULD be zero.
                    The value of the &lt;nettype&gt; &lt;addrtype&gt; &lt;unicast-address&gt; tuple 
                    SHOULD be set to a non-meaningful address, such as IN IP4 0.0.0.0,
-                   to prevent leaking the local address in this field. As mentioned in RFC4566, the entire
+                   to prevent leaking the local address in this field. As mentioned in <xref target="RFC4566" />, the entire
                    o= line needs to be unique, but selecting a random number for &lt;sess-id&gt; is sufficient
                    to accomplish this.</t>
-                <t>The third SDP line MUST be a "s=" line, as specified in RFC4566, Section 5.3; a single space SHOULD be used as the session name, e.g. "s= "</t>
+                <t>The third SDP line MUST be a "s=" line, as specified in <xref target="RFC4566" />, Section 5.3; a single space SHOULD be used as the session name, e.g. "s= "</t>
                 <t>Session Information ("i="), URI ("u="), Email Address ("e="), Phone Number ("p="), Bandwidth ("b="), Repeat Times ("r="), and Time Zones ("z=") lines are not useful in this context and SHOULD NOT be included.</t>
                 <t>Encryption Keys ("k=") lines do not provide sufficient security and MUST NOT be included.</t>
-                <t>A "t=" line MUST be added, as specified in RFC4566, Section 5.9; both &lt;start-time&gt; and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t> 
-                <t>An "a=group" attribute MUST be added, as specified in RFC5888, with semantics of "BUNDLE" and identifying the m= sections to be bundled.</t>
+                <t>A "t=" line MUST be added, as specified in <xref target="RFC4566" />, Section 5.9; both &lt;start-time&gt; and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t> 
+                <t>An "a=group" attribute MUST be added, as specified in <xref target="RFC5888" />, with semantics of "BUNDLE" and identifying the m= sections to be bundled.</t>
             </list>
         </t>
         <t>The next step is to generate m= sections for each MediaStreamTrack that has been added to the PeerConnection via the addStream method. Note that this method takes a MediaStream, which can contain multiple MediaStreamTracks, and therefore multiple m= sections can be generated even if addStream is only called once.</t>
 
-        <t>Each m= section should be generated as specified in RFC4566, Section 5.14. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
+        <t>Each m= section should be generated as specified in <xref target="RFC4566" />, Section 5.14. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
             <list style="symbols">
-                <t>An "a=mid" line, as specified in RFC5888, Section 4.</t>
+                <t>An "a=mid" line, as specified in <xref target="RFC5888" />, Section 4.</t>
                 <t>An "a=msid" line, as specified in <xref target="I-D.ietf-mmusic-msid" />, Section 2.</t>
                 <t>[OPEN ISSUE: Use of App Token versus stream-correlator]</t>
-                <t>An "a=sendrecv" line, as specified in RFC3264, Section 5.1.</t>
-                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in RFC4566, Section 6. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported.</t>
-                <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx/8000" and an "a=fmtp" line that references the payload type fo the primary codec, as specified in RFC4588.</t>
+                <t>An "a=sendrecv" line, as specified in <xref target="RFC3264" />, Section 5.1.</t>
+                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in <xref target="RFC4566" />, Section 6. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported.</t>
+                <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx/8000" and an "a=fmtp" line that references the payload type fo the primary codec, as specified in <xref target="RFC4588" />.</t>
                 <t>For each supported FEC mechanism, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
-                <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in RFC5245, Section 15.4.</t>
+                <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4.</t>
                 <t>An "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
-                <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in RFC5245, Section 4.3., paragraph 3.</t>
-                <t>For the current default candidate, a "c=" line, as specific in RFC5245, Section 4.3., paragraph 6.</t>
-                <t>An "a=fingerprint" line, as specified in RFC4572, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added.</t>
-                <t>An "a=setup" line, as specified in RFC4145, Section 4, and clarified for use in DTLS-SRTP secnarios in RFC5763, Section 5. The role value in the offer MUST be "actpass".</t>
-                <t>An "a=rtcp-mux" line, as specified in RFC5761, Section 5.1.1.</t>
-                <t>An "a=rtcp-rsize" line, as specified in RFC5506, Section 5.</t>
-                <t>For each supported RTP header extension, an "a=extmap" line, as specified in RFC 5285, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in RFC6904, Section 4.</t>
-                <t>For each supported RTCP feedback mechanism, an "a=rtcp-fb" mechanism, as specified in RFC4585, Section 4.2. The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.1.</t>
-                <t>An "a=ssrc" line, as specified in RFC5576, Section 4.1, indicating the SSRC to be used for sending media.</t>
-                <t>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in RFC 5576, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</t>
-                <t>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line, as specified in RFC 5576, section 4.2, with semantics set to "FEC" and including the primary and FEC SSRCs.</t>
+                <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in <xref target="RFC5245" />, Section 4.3., paragraph 3.</t>
+                <t>For the current default candidate, a "c=" line, as specific in <xref target="RFC5245" />, Section 4.3., paragraph 6.</t>
+                <t>An "a=fingerprint" line, as specified in <xref target="RFC4572" />, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added.</t>
+                <t>An "a=setup" line, as specified in <xref target="RFC4145" />, Section 4, and clarified for use in DTLS-SRTP secnarios in <xref target="RFC5763" />, Section 5. The role value in the offer MUST be "actpass".</t>
+                <t>An "a=rtcp-mux" line, as specified in <xref target="RFC5761" />, Section 5.1.1.</t>
+                <t>An "a=rtcp-rsize" line, as specified in <xref target="RFC5506" />, Section 5.</t>
+                <t>For each supported RTP header extension, an "a=extmap" line, as specified in <xref target="RFC5285" />, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in <xref target="RFC6904" />, Section 4.</t>
+                <t>For each supported RTCP feedback mechanism, an "a=rtcp-fb" mechanism, as specified in <xref target="RFC4585" />, Section 4.2. The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.1.</t>
+                <t>An "a=ssrc" line, as specified in <xref target="RFC5576" />, Section 4.1, indicating the SSRC to be used for sending media.</t>
+                <t>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <xref target="RFC5576" />, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</t>
+                <t>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line, as specified in <xref target="RFC5576" />, section 4.2, with semantics set to "FEC" and including the primary and FEC SSRCs.</t>
                 <t>[OPEN ISSUE: Handling of a=imageattr]</t>
                 <t>[TODO: bundle-only]</t>
             </list>
@@ -1022,7 +1022,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Each "a=mid" line MUST stay the same.</t>
             <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same.</t>
             <t>For MediaStreamTracks that are still present, the "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</t>
-            <t>If any MediaStreamTracks have been removed, either through the removeStream method or by removing them from an added MediaStream, their m= sections MUST be marked as recvonly by changing the value of the RFC3264 directional attribute to "a=recvonly". The "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST be removed from the associated m= sections.</t>
+            <t>If any MediaStreamTracks have been removed, either through the removeStream method or by removing them from an added MediaStream, their m= sections MUST be marked as recvonly by changing the value of the <xref target="RFC3264" /> directional attribute to "a=recvonly". The "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST be removed from the associated m= sections.</t>
           </list>
       </t>
       <t>If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "received-pranswer" or "stable" states, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "sent-offer" state above, along with these exceptions: 
@@ -1052,7 +1052,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the "OfferToReceiveAudio" constraint is specified, with a value of "true", the offer MUST include a m= section with media type "video", even if no video MediaStreamTrack has been added to the PeerConnection. This allows the offerer to receive video even when not sending it; accordingly, the directional attribute on the video m= section MUST be set to recvonly. If this constraint is specifed when an video MediaStreamTrack has already been added to the PeerConnection, or a non-rejected m= section with media type "video" previously existed, it has no effect.</t>
         </section>
         <section title="VoiceActivityDetection">
-            <t>If the "VoiceActivityDetection" constraint is specified, with a value of "true", the offer MUST indicate support for silence suppression by including comfort noise ("CN") codecs for each supported clockrate, as specified in RFC3389, Section 5.1. [OPEN issue: should this do anything in signaling, or should it just control built-in DTX modes in audio codecs? Opus has built-in DTX, but G.711 does not.]</t>
+            <t>If the "VoiceActivityDetection" constraint is specified, with a value of "true", the offer MUST indicate support for silence suppression by including comfort noise ("CN") codecs for each supported clockrate, as specified in <xref target="RFC3389" />, Section 5.1. [OPEN issue: should this do anything in signaling, or should it just control built-in DTX modes in audio codecs? Opus has built-in DTX, but G.711 does not.]</t>
         </section>
         <section title="IceRestart">
             <t>If the "IceRestart" constraint is specified, with a value of "true", the offer MUST indicate an ICE restart by generating new ICE ufrag and pwd attributes, as specified in RFC5245, Section 9.1.1.1. If this constraint is specified on an initial offer, it has no effect (since a new ICE ufrag and pwd are already generated).</t>
@@ -1131,7 +1131,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>change maximum total bandwidth (b=)
           [OPEN ISSUE: need to clarify if this is CT or AS - see section 5.8 of
-           RFC4566]</t>
+           <xref target="RFC4566" />]</t>
 
           <t>remove desired AVPF mechanisms (a=rtcp-fb)</t>
 
@@ -1407,7 +1407,40 @@ conferences. [STANDARDS-TRACK]</t></abstract></front>
 
       <!-- NORM 4 -->
 
+
+<reference anchor='RFC4572'>
+
+<front>
+<title>Connection-Oriented Media Transport over the Transport Layer Security (TLS) Protocol in the Session Description Protocol (SDP)</title>
+<author initials='J.' surname='Lennox' fullname='J. Lennox'>
+<organization /></author>
+<date year='2006' month='July' />
+<abstract>
+<t>This document specifies how to establish secure connection-oriented media transport sessions over the Transport Layer Security (TLS) protocol using the Session Description Protocol (SDP). It defines a new SDP protocol identifier, 'TCP/TLS'. It also defines the syntax and semantics for an SDP 'fingerprint' attribute that identifies the certificate that will be presented for the TLS session. This mechanism allows media transport over TLS connections to be established securely, so long as the integrity of session descriptions is assured.&lt;/t>&lt;t> This document extends and updates RFC 4145. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name='RFC' value='4572' />
+<format type='TXT' octets='38658' target='http://www.rfc-editor.org/rfc/rfc4572.txt' />
+</reference>
+
       <!-- NORM 5 -->
+
+
+<reference anchor='RFC4145'>
+
+<front>
+<title>TCP-Based Media Transport in the Session Description Protocol (SDP)</title>
+<author initials='D.' surname='Yon' fullname='D. Yon'>
+<organization /></author>
+<author initials='G.' surname='Camarillo' fullname='G. Camarillo'>
+<organization /></author>
+<date year='2005' month='September' />
+<abstract>
+<t>This document describes how to express media transport over TCP using the Session Description Protocol (SDP).  It defines the SDP 'TCP' protocol identifier, the SDP 'setup' attribute, which describes the connection setup procedure, and the SDP 'connection' attribute, which handles connection reestablishment. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name='RFC' value='4145' />
+<format type='TXT' octets='30225' target='http://www.rfc-editor.org/rfc/rfc4145.txt' />
+</reference>
+
 
       <!-- NORM 6 -->
 
@@ -1419,7 +1452,41 @@ conferences. [STANDARDS-TRACK]</t></abstract></front>
 
       <!-- NORM 10 -->
 
+
+<reference anchor='RFC5285'>
+
+<front>
+<title>A General Mechanism for RTP Header Extensions</title>
+<author initials='D.' surname='Singer' fullname='D. Singer'>
+<organization /></author>
+<author initials='H.' surname='Desineni' fullname='H. Desineni'>
+<organization /></author>
+<date year='2008' month='July' />
+<abstract>
+<t>This document provides a general mechanism to use the header extension feature of RTP (the Real-Time Transport Protocol).  It provides the option to use a small number of small extensions in each RTP packet, where the universe of possible extensions is large and registration is de-centralized.  The actual extensions in use in a session are signaled in the setup information for that session. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name='RFC' value='5285' />
+<format type='TXT' octets='36844' target='http://www.rfc-editor.org/rfc/rfc5285.txt' />
+</reference>
+
+
       <!-- NORM 11 -->
+
+
+<reference anchor='RFC6904'>
+
+<front>
+<title>Encryption of Header Extensions in the Secure Real-time Transport Protocol (SRTP)</title>
+<author initials='J.' surname='Lennox' fullname='J. Lennox'>
+<organization /></author>
+<date year='2013' month='April' />
+<abstract>
+<t>The Secure Real-time Transport Protocol (SRTP) provides authentication, but not encryption, of the headers of Real-time Transport Protocol (RTP) packets. However, RTP header extensions may carry sensitive information for which participants in multimedia sessions want confidentiality. This document provides a mechanism, extending the mechanisms of SRTP, to selectively encrypt RTP header extensions in SRTP.&lt;/t>&lt;t> This document updates RFC 3711, the Secure Real-time Transport Protocol specification, to require that all future SRTP encryption transforms specify how RTP header extensions are to be encrypted.</t></abstract></front>
+
+<seriesInfo name='RFC' value='6904' />
+<format type='TXT' octets='33486' target='http://www.rfc-editor.org/rfc/rfc6904.txt' />
+</reference>
+
 
       <!-- NORM 12 -->
 
@@ -1865,7 +1932,45 @@ Internet community.</t></abstract></front>
 </reference>
       <!-- INFORM 6 -->
 
+
+<reference anchor='RFC4588'>
+
+<front>
+<title>RTP Retransmission Payload Format</title>
+<author initials='J.' surname='Rey' fullname='J. Rey'>
+<organization /></author>
+<author initials='D.' surname='Leon' fullname='D. Leon'>
+<organization /></author>
+<author initials='A.' surname='Miyazaki' fullname='A. Miyazaki'>
+<organization /></author>
+<author initials='V.' surname='Varsa' fullname='V. Varsa'>
+<organization /></author>
+<author initials='R.' surname='Hakenberg' fullname='R. Hakenberg'>
+<organization /></author>
+<date year='2006' month='July' />
+<abstract>
+<t>RTP retransmission is an effective packet loss recovery technique for real-time applications with relaxed delay bounds.  This document describes an RTP payload format for performing retransmissions.  Retransmitted RTP packets are sent in a separate stream from the original RTP stream.  It is assumed that feedback from receivers to senders is available.  In particular, it is assumed that Real-time Transport Control Protocol (RTCP) feedback as defined in the extended RTP profile for RTCP-based feedback (denoted RTP/AVPF) is available in this memo. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name='RFC' value='4588' />
+<format type='TXT' octets='76630' target='http://www.rfc-editor.org/rfc/rfc4588.txt' />
+</reference>
+
+
       <!-- INFORM 7 -->
+
+
+<reference anchor='RFC3389'>
+
+<front>
+<title>Real-time Transport Protocol (RTP) Payload for Comfort Noise (CN)</title>
+<author initials='R.' surname='Zopf' fullname='R. Zopf'>
+<organization /></author>
+<date year='2002' month='September' /></front>
+
+<seriesInfo name='RFC' value='3389' />
+<format type='TXT' octets='17018' target='http://www.rfc-editor.org/rfc/rfc3389.txt' />
+</reference>
+
 
       <!-- INFORM 8 -->
 
