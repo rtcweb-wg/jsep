@@ -968,14 +968,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <t>Each m= section should be generated as specified in RFC4566, Section 5.14. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
             <list style="symbols">
                 <t>An "a=mid" line, as specified in RFC5888, Section 4.</t>
-                <t>An "a=msid" line, as specified in draft-ietf-mmusic-msid-01, Section 2.</t>
+                <t>An "a=msid" line, as specified in <xref target="I-D.ietf-mmusic-msid" />, Section 2.</t>
                 <t>[OPEN ISSUE: Use of App Token versus stream-correlator]</t>
                 <t>An "a=sendrecv" line, as specified in RFC3264, Section 5.1.</t>
-                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in RFC4566, Section 6. For audio, the codecs specified in http://tools.ietf.org/html/draft-ietf-rtcweb-audio-02, Section 3, MUST be be supported.</t>
+                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in RFC4566, Section 6. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported.</t>
                 <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx/8000" and an "a=fmtp" line that references the payload type fo the primary codec, as specified in RFC4588.</t>
                 <t>For each supported FEC mechanism, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
                 <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in RFC5245, Section 15.4.</t>
-                <t>An "a=ice-options" line, with the "trickle" option, as specified in draft-ivov-mmusic-trickle-ice-00, Section 4.</t>
+                <t>An "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
                 <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in RFC5245, Section 4.3., paragraph 3.</t>
                 <t>For the current default candidate, a "c=" line, as specific in RFC5245, Section 4.3., paragraph 6.</t>
                 <t>An "a=fingerprint" line, as specified in RFC4572, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added.</t>
@@ -992,8 +992,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </list>
         </t>
 
-        <t>Lastly, if a data channel has been created, a m= section must be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field must be set to "DTLS/SCTP", as specified in draft-ietf-mmusic-sctp-sdp-04, Section 3. The "a=mid", "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate", "a=fingerprint", and "a=setup" lines must be included as mentioned above.
-        [OPEN ISSUE: additional SCTP-specific stuff to be included, as indicated in http://tools.ietf.org/html/draft-jesup-rtcweb-data-protocol-04 (currently none)]
+        <t>Lastly, if a data channel has been created, a m= section must be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field must be set to "DTLS/SCTP", as specified in <xref target="I-D.ietf-mmusic-sctp-sdp" />, Section 3. The "a=mid", "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate", "a=fingerprint", and "a=setup" lines must be included as mentioned above.
+        [OPEN ISSUE: additional SCTP-specific stuff to be included, as indicated in <xref target="I-D.jesup-rtcweb-data-protocol" /> (currently none)]
         </t>
 
         <t>Attributes that are common between all m= sections MAY be moved to session-level, if desired.</t>
@@ -1354,7 +1354,56 @@ conferences. [STANDARDS-TRACK]</t></abstract></front>
 
       <!-- NORM 2 -->
 
+
+<reference anchor='I-D.ietf-rtcweb-audio'>
+<front>
+<title>WebRTC Audio Codec and Processing Requirements</title>
+
+<author initials='J' surname='Valin' fullname='Jean-Marc Valin'>
+    <organization />
+</author>
+
+<author initials='C' surname='Bran' fullname='Cary Bran'>
+    <organization />
+</author>
+
+<date month='August' day='2' year='2013' />
+
+<abstract><t>This document outlines the audio codec and processing requirements for WebRTC client application and endpoint devices.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-ietf-rtcweb-audio-02' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-audio-02.txt' />
+</reference>
+
+
       <!-- NORM 3 -->
+
+<reference anchor='I-D.ietf-mmusic-sctp-sdp'>
+<front>
+<title>Stream Control Transmission Protocol (SCTP)-Based Media Transport in the Session Description Protocol (SDP)</title>
+
+<author initials='S' surname='Loreto' fullname='Salvatore Loreto'>
+    <organization />
+</author>
+
+<author initials='G' surname='Camarillo' fullname='Gonzalo Camarillo'>
+    <organization />
+</author>
+
+<date month='June' day='30' year='2013' />
+
+<abstract><t>SCTP (Stream Control Transmission Protocol) is a transport protocol used to establish associations between two endpoints.  This document describes how to express media transport over SCTP in SDP (Session Description Protocol).  This document defines the 'SCTP', 'SCTP/DTLS' and 'DTLS/SCTP' protocol identifiers for SDP.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-ietf-mmusic-sctp-sdp-04' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-ietf-mmusic-sctp-sdp-04.txt' />
+</reference>
+
 
       <!-- NORM 4 -->
 
@@ -1787,6 +1836,33 @@ Internet community.</t></abstract></front>
 
       <!-- INFORM 5 -->
 
+
+<reference anchor='I-D.jesup-rtcweb-data-protocol'>
+<front>
+<title>WebRTC Data Channel Protocol</title>
+
+<author initials='R' surname='Jesup' fullname='Randell Jesup'>
+    <organization />
+</author>
+
+<author initials='S' surname='Loreto' fullname='Salvatore Loreto'>
+    <organization />
+</author>
+
+<author initials='M' surname='Tuexen' fullname='Michael Tuexen'>
+    <organization />
+</author>
+
+<date month='February' day='26' year='2013' />
+
+<abstract><t>The Web Real-Time Communication (WebRTC) working group is charged to provide protocols to support for direct interactive rich communication using audio, video, and data between two peers' web- browsers.  This document specifies an actual (minor) protocol for how the JS-layer DataChannel objects provide the data channels between the peers.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-jesup-rtcweb-data-protocol-04' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-jesup-rtcweb-data-protocol-04.txt' />
+</reference>
       <!-- INFORM 6 -->
 
       <!-- INFORM 7 -->
