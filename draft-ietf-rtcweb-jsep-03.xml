@@ -10,7 +10,7 @@
 <?rfc colonspace="yes" ?>
 <?rfc rfcedstyle="no" ?>
 <?rfc tocdepth="4"?>
-<rfc category="std" docName="draft-ietf-rtcweb-jsep-03" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-rtcweb-jsep-04" ipr="trust200902">
   <front>
     <title abbrev="JSEP">Javascript Session Establishment Protocol</title>
 
@@ -54,7 +54,7 @@
       </address>
     </author>
 
-    <date day="25" month="February" year="2013" />
+    <date day="13" month="September" year="2013" />
 
     <area>RAI</area>
 
@@ -968,7 +968,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>An "a=mid" line, as specified in RFC5888, Section 4.</t>
                 <t>An "a=msid" line, as specified in draft-ietf-mmusic-msid-01, Section 2.</t>
                 <t>[OPEN ISSUE: Use of App Token versus stream-correlator]</t>
-                <t>A directional attribute (e.g. "a=sendrecv"), as specified in RFC3264, Section 5.1.</t>
+                <t>An "a=sendrecv" line, as specified in RFC3264, Section 5.1.</t>
                 <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in RFC4566, Section 6. For audio, the codecs specified in http://tools.ietf.org/html/draft-ietf-rtcweb-audio-02, Section 3, MUST be be supported.</t>
                 <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx/8000" and an "a=fmtp" line that references the payload type fo the primary codec, as specified in RFC4588.</t>
                 <t>For each supported FEC mechanism, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
@@ -1007,32 +1007,70 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </section>
 
     <section title="Subsequent Offers">
-        <t>When createOffer is called a second (or later) time, the processing is slightly different. If a remote description has not yet been applied, meaning the PeerConnection is in the "stable" or "sent-offer" states, the same steps for generating an initial offer should be followed, with these </t>
-        <t>session-version MUST increase.</t>
-        <t>Only the negotiated codecs, header exts, RTCP mechanisms can be offered.</t>
-        <t>If MSTs are removed, the corresponding m= sections become recvonly or inactive.</t>
-        <t>If MSTs are added, the m= sections are treated as if an initial offer.</t>
-        <t>...</t>
+        <t>When createOffer is called a second (or later) time, the processing is different, depending on the current signaling state.</t>
+        <t>If the initial offer was not applied using setLocalDescription, meaning the PeerConnection is still in the "stable" state, the steps for generating an initial offer should be followed, with this exception:
+            <list style="symbols">
+            <t>The "o=" line MUST stay the same.</t>
+            </list>
+        </t>
+        <t>If the initial offer was applied using setLocalDescription, but an answer from the remote side has not yet been applied, meaning the PeerConnection is still in the "sent-offer" state, the steps for generating an initial offer should be followed, with these exceptions:
+          <list style="symbols">
+            <t>The "o=" line MUST stay the same, except for the &lt;session-version&gt; field, which MUST increase by 1 from the previously applied local description.</t>
+            <t>The "s=" and "t=" lines MUST stay the same.</t>
+            <t>Each "a=mid" line MUST stay the same.</t>
+            <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same.</t>
+            <t>For MediaStreamTracks that are still present, the "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</t>
+            <t>If any MediaStreamTracks have been removed, either through the removeStream method or by removing them from an added MediaStream, their m= sections MUST be marked as recvonly by changing the value of the RFC3264 directional attribute to "a=recvonly". The "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST be removed from the associated m= sections.</t>
+          </list>
+      </t>
+      <t>If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "received-pranswer" or "stable" states, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "sent-offer" state above, along with these exceptions: 
+          <list style="symbols">
+            <t>If a m= section was rejected, i.e. has had its port set to zero in either the local or remote description, it MUST remain rejected and have a zero port in the new offer, as indicated in RFC3264, Section 5.1.</t>
+            <t>If a m= section exists in the current local description, but has its state set to inactive or recvonly, and a new MediaStreamTrack is added, the previously existing m= section MUST be recycled instead of creating a new m= section. [OPEN ISSUE: Nail down exactly what this means. Should the codecs remain the same? (No.) Should ICE restart? (No.) Can the "a=mid" attribute be changed? (Yes?)]</t>
+            <t>If a m= section exists in the current local description, but does not have an associated MediaStreamTrack (i.e. it is inactive or recvonly), a corresponding m= section MUST be generated in the new offer, but without "a=msid", "a=ssrc", or "a=ssrc-group" attributes, and the appropriate directional attribute must be specified.</t>
+          </list>
+      </t>
+      <t>In addition, for each previously existing, non-rejected m= section in the new offer, the following adjustments are made based on the contents of the corresponding m= section in the current remote description:
+        <list style="symbols">
+            <t>The m= line and corresponding "a=rtpmap" and "a=fmtp" lines MUST only include codecs present in the remote description.</t>
+            <t>The RTP header extensions MUST only include those that are present in the remote description.</t>
+            <t>The RTCP feedback extensions MUST only include those that are present in the remote description.</t>
+            <t>The "a=rtcp-mux" line MUST only be added if present in the remote description.</t>
+            <t>The "a=rtcp-rsize" line MUST only be added if present in the remote description.</t>
+        </list>
+    </t>
     </section>
 
         <section title="Constraints Handling">
         <t>The createOffer method takes as a parameter a MediaConstraints object. Special processing is performed when generating a SDP description if the following constraints are present.</t>
         <section title="OfferToReceiveAudio">
-            <t>If the "OfferToReceiveAudio" constraint is specified, with a value of "true", the offer MUST include a m= section with media type "audio", even if no audio MediaStreamTrack has been added to the PeerConnection. This allows the offerer to receive audio even when not sending it; accordingly, the directional attribute on the audio m= section MUST be set to recvonly. If this constraint is specifed when an audio MediaStreamTrack has already been added to the PeerConnection, it has no effect.</t>
+            <t>If the "OfferToReceiveAudio" constraint is specified, with a value of "true", the offer MUST include a non-rejected m= section with media type "audio", even if no audio MediaStreamTrack has been added to the PeerConnection. This allows the offerer to receive audio even when not sending it; accordingly, the directional attribute on the audio m= section MUST be set to recvonly. If this constraint is specifed when an audio MediaStreamTrack has already been added to the PeerConnection, or a non-rejected m= section with media type "audio" previously existed, it has no effect.</t>
         </section>
         <section title="OfferToReceiveVideo">
-            <t>If the "OfferToReceiveAudio" constraint is specified, with a value of "true", the offer MUST include a m= section with media type "video", even if no video MediaStreamTrack has been added to the PeerConnection. This allows the offerer to receive video even when not sending it; accordingly, the directional attribute on the video m= section MUST be set to recvonly. If this constraint is specifed when an video MediaStreamTrack has already been added to the PeerConnection, it has no effect.</t>
+            <t>If the "OfferToReceiveAudio" constraint is specified, with a value of "true", the offer MUST include a m= section with media type "video", even if no video MediaStreamTrack has been added to the PeerConnection. This allows the offerer to receive video even when not sending it; accordingly, the directional attribute on the video m= section MUST be set to recvonly. If this constraint is specifed when an video MediaStreamTrack has already been added to the PeerConnection, or a non-rejected m= section with media type "video" previously existed, it has no effect.</t>
         </section>
         <section title="VoiceActivityDetection">
             <t>If the "VoiceActivityDetection" constraint is specified, with a value of "true", the offer MUST indicate support for silence suppression by including comfort noise ("CN") codecs for each supported clockrate, as specified in RFC3389, Section 5.1. [OPEN issue: should this do anything in signaling, or should it just control built-in DTX modes in audio codecs? Opus has built-in DTX, but G.711 does not.]</t>
         </section>
         <section title="IceRestart">
-            <t>If the "IceRestart" constraint is specified, with a value of "true", the offer MUST indicate an ICE restart by generating new ICE ufrag and pwd attributes, as specified in RFC5245, Section 9.1.1.1. If this constraint is specified on an initial offer, it has no effect.</t>
+            <t>If the "IceRestart" constraint is specified, with a value of "true", the offer MUST indicate an ICE restart by generating new ICE ufrag and pwd attributes, as specified in RFC5245, Section 9.1.1.1. If this constraint is specified on an initial offer, it has no effect (since a new ICE ufrag and pwd are already generated).</t>
         </section>
       </section>
       </section>
 
       <section title="Generating an Answer">
+           <t>When createAnswer is called, a new SDP description must be created that is compatible with the supplied remote description as well as the requirements specified in <xref
+        target="I-D.ietf-rtcweb-rtp-usage"/>. The exact details of this process are explained below.</t>
+
+        <section title="Initial Answers">
+          <t>When createAnswer is called for the first time, the result is known as the initial answer.</t>
+
+          <t>The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the Initial Offers section above.</t>
+        </section> 
+        <section title="Subsequent Answers">
+        </section>
+        <section title="Constraints Handling">
+        </section>
       </section>
 
       <section title="Parsing an Offer">
@@ -2104,16 +2142,84 @@ OffererJS->AnswererJS:  ACK
             </figure></t>
         </section>
       </section>
+      <section title="Example Session Descriptions">
+        <section title="createOffer">
+            <t>This SDP shows a typical result from createOffer for a PeerConnection with a single audio MediaStreamTrack and a single video MediaStreamTrack.
+                [TODO: candidates have already been gathered here. Update for trickle.]</t>
+            <figure><artwork>
+v=0
+o=- 4962303333179871722 1 IN IP4 0.0.0.0
+s=-
+t=0 0
+a=group:BUNDLE audio video
+m=audio 58503 RTP/SAVPF 111 0 8 126
+c=IN IP4 10.0.0.11
+a=rtcp:49634 IN IP4 10.0.0.11
+a=candidate:946015839 1 udp 2113937151 10.0.0.11 58503 typ host generation 0
+a=candidate:946015839 2 udp 2113937150 10.0.0.11 49634 typ host generation 0
+a=ice-ufrag:ETEn1v9DoTMB9J4r
+a=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl
+a=ice-options:trickle
+a=mid:audio
+a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
+a=sendrecv
+a=rtcp-mux
+a=rtcp-rsize
+a=fingerprint [TODO]
+a=rtpmap:111 opus/48000/2
+a=fmtp:111 minptime=10
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+a=rtpmap:126 telephone-event/8000
+a=maxptime:60
+a=ssrc:1732846380 cname:EocUG1f0fcg/yvY7
+a=msid:47017fee-b6c1-4162-929c-a25110252400 f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9
+[TODO: ssrc-group]
+m=video 57918 RTP/SAVPF 100 116 117
+c=IN IP4 10.0.0.11
+a=rtcp:50936 IN IP4 10.0.0.11
+a=candidate:946015839 1 udp 2113937151 10.0.0.11 57918 typ host generation 0
+a=candidate:946015839 2 udp 2113937150 10.0.0.11 50936 typ host generation 0
+a=ice-ufrag:ETEn1v9DoTMB9J4r
+a=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl
+a=ice-options:trickle
+a=mid:video
+a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
+a=extmap:3 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=sendrecv
+a=rtcp-mux
+a=rtcp-rsize
+a=fingerprint [TODO]
+a=rtpmap:100 VP8/90000
+a=rtcp-fb:100 ccm fir
+a=rtcp-fb:100 nack
+a=rtcp-fb:100 goog-remb
+a=rtpmap:116 red/90000
+a=rtpmap:117 ulpfec/90000
+a=ssrc:1366781083 cname:EocUG1f0fcg/yvY7
+a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae f30bdb4a-5db8-49b5-bcdc-e0c9a23172e0
+[TODO: ssrc-group]
+[TODO: rtx]
+
+            </artwork></figure>
+        </section>
+        <section title="createAnswer">
+        </section>
+      </section>
     </section>
 
     <section title="Change log">
-      <t>Changes in draft-03:</t>
-
-      <t><list style="symbols">
+      <t>Changes in draft-04: <list style="symbols">
+        <t>Filled in sections on createOffer and createAnswer.</t>
+        <t>Added SDP examples.</t>
+        <t>Fixed references.</t>
+      </list>
+      </t>
+      <t>Changes in draft-03: <list style="symbols">
           <t>Added text describing relationship to W3C specification</t>
         </list></t>
 
-      <t>Changes in draft -02: <list style="symbols">
+      <t>Changes in draft-02: <list style="symbols">
           <!-- A -->
 
           <t>Converted from nroff</t>
@@ -2150,7 +2256,7 @@ OffererJS->AnswererJS:  ACK
           <!-- L -->
         </list></t>
 
-      <t>Changes in draft -01: <list style="symbols">
+      <t>Changes in draft-01: <list style="symbols">
           <t>Added diagrams for architecture and state machine.</t>
 
           <t>Added sections on forking and rehydration.</t>
