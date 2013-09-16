@@ -60,7 +60,7 @@
 
     <abstract>
       <t>This document describes the mechanisms for allowing a Javascript
-      application to fully control the signaling plane of a multimedia session
+      application to control the signaling plane of a multimedia session
       via the interface specified in the W3C RTCPeerConnection API, and
       discusses how this relates to existing signaling protocols.</t>
     </abstract>
@@ -310,48 +310,53 @@
         media layer can provide an offer whenever the Javascript application
         needs one for the signaling. The answerer can send back zero or more
         provisional answers, and finally end the offer-answer exchange by
-        sending a final answer. The state machine for this is as follows:
+        sending a final answer. The state machine for this is as follows:</t>
+
+        <t>
         <figure anchor="fig-state-machine" title="JSEP State Machine">
             <artwork><![CDATA[
-                       setRemote(OFFER)               setLocal(PRANSWER)
-                           /-----\                               /-----\
-                           |     |                               |     |
-                           v     |                               v     |
-            +---------------+    |                +---------------+    |
-            |               |----/                |               |----/
-            |               | setLocal(PRANSWER)  |               |
-            |  Remote-Offer |------------------- >| Local-Pranswer|
-            |               |                     |               |
-            |               |                     |               |
-            +---------------+                     +---------------+    
-                 ^   |                                   |
-                 |   | setLocal(ANSWER)                  |
-setRemote(OFFER) |   |                                   |
-                 |   V                  setLocal(ANSWER) |
-            +---------------+                            |
-            |               |                            |
-            |               |                            |
-            |    Stable     |<---------------------------+
-            |               |                            |
-            |               |                            |
-            +---------------+          setRemote(ANSWER) |                   
-                 ^   |                                   |
-                 |   | setLocal(OFFER)                   |
-setRemote(ANSWER)|   |                                   |
-                 |   V                                   |
-            +---------------+                     +---------------+
-            |               |                     |               |
-            |               | setRemote(PRANSWER) |               |
-            |  Local-Offer  |------------------- >|Remote-Pranswer|
-            |               |                     |               |
-            |               |----\                |               |----\
-            +---------------+    |                +---------------+    |
-                           ^     |                               ^     |
-                           |     |                               |     |
-                           \-----/                               \-----/
-                       setLocal(OFFER)               setRemote(PRANSWER)
+                    setRemote(OFFER)               setLocal(PRANSWER)
+                        /-----\                               /-----\
+                        |     |                               |     |
+                        v     |                               v     |
+         +---------------+    |                +---------------+    |
+         |               |----/                |               |----/
+         |               | setLocal(PRANSWER)  |               |
+         |  Remote-Offer |------------------- >| Local-Pranswer|
+         |               |                     |               |
+         |               |                     |               |
+         +---------------+                     +---------------+    
+              ^   |                                   |
+              |   | setLocal(ANSWER)                  |
+setRemote(OFFER)  |                                   |
+              |   V                  setLocal(ANSWER) |
+         +---------------+                            |
+         |               |                            |
+         |               |                            |
+         |    Stable     |<---------------------------+
+         |               |                            |
+         |               |                            |
+         +---------------+          setRemote(ANSWER) |                   
+              ^   |                                   |
+              |   | setLocal(OFFER)                   |
+setRemote(ANSWER) |                                   |
+              |   V                                   |
+         +---------------+                     +---------------+
+         |               |                     |               |
+         |               | setRemote(PRANSWER) |               |
+         |  Local-Offer  |------------------- >|Remote-Pranswer|
+         |               |                     |               |
+         |               |----\                |               |----\
+         +---------------+    |                +---------------+    |
+                        ^     |                               ^     |
+                        |     |                               |     |
+                        \-----/                               \-----/
+                    setLocal(OFFER)               setRemote(PRANSWER)
 ]]></artwork>
-          </figure> Aside from these state transitions, there is no other
+          </figure>
+        </t>
+
+          <t> Aside from these state transitions, there is no other
         difference between the handling of provisional ("pranswer") and final
         ("answer") answers.</t>
       </section>
@@ -390,7 +395,7 @@ setRemote(ANSWER)|   |                                   |
           <t>Candidate trickling is a technique through which a caller may
           incrementally provide candidates to the callee after the initial
           offer has been dispatched; the semantics of "Trickle ICE" are
-          defined in <xref target="I-D.rescorla-mmusic-ice-trickle"></xref>.
+          defined in <xref target="I-D.ivov-mmusic-trickle-ice"></xref>.
           This process allows the callee to begin acting upon the call and
           setting up the ICE (and perhaps DTLS) connections immediately,
           without having to wait for the caller to gather all possible
@@ -433,7 +438,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             one of two ways; either by a m-line index, or a MID. The m-line
             index is a zero-based index, referring to the Nth m-line in the
             SDP. The MID uses the "media stream identification", as defined in
-            <xref target="RFC3388"/> , to identify the m-line. WebRTC
+            <xref target="RFC5888"/> , to identify the m-line. WebRTC
             implementations creating an ICE Candidate object MUST populate both
             of these fields. Implementations receiving an ICE Candidate object
             SHOULD use the MID if they implement that functionality, or the
@@ -516,7 +521,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           media streams have been added into this new PeerConnection.  Then the
           new PeerConnection object would produce a SDP offer that could be used
           by the signaling to perform the UPDATE strategy discussed in <xref
-          target="RFC3960"/> .</t>
+          target="RFC3960"/>.</t>
 
           <t>As a result of sharing the media streams, the application will
           end up with N parallel PeerConnection sessions, each with a local
@@ -568,9 +573,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       concepts.</t>
 
       <section title="SDP Requirements">
-        <t>Note: The text in this section may not represent working group
-        consensus and is put here so that the working group can discuss it and
-        find out how to change it such that it does have consensus.</t>
 
         <t>When generating SDP blobs, either for offers or answers, the
         generated SDP needs to conform to the following specifications.
@@ -618,20 +620,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             bandwidth, RTCP fraction allocated to the senders and setting
             maximum media bit-rate boundaries.</t>
 
-            <t><xref target="RFC4568"/> MAY be implemented to signal SDES SRTP
+            <t><xref target="RFC4568"/> MUST NOT be implemented to signal SDES SRTP
             keying information.</t>
 
-            <t>A TBD-draft MUST be supported, in order to signal associations
+            <t>A <xref target="I-D.ietf-mmusic-msid"/> MUST be supported, in order to signal associations
             between RTP objects and W3C MediaStreams and MediaStreamTracks in a
-            standard way. Though there is not yet WG consensus in this area,
-            this TBD-draft is very likely to be <xref
-            target="I-D.alvestrand-mmusic-msid"/>. </t>
+            standard way. </t>
 
-            <t>A TBD-draft MUST be supported to signal the use or multiplexing
+            <t>The bundle mechanism in <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" /> 
+            MUST be supported to signal the use or multiplexing
             RTP somethings on a single UDP port, in order to avoid excessive
-            use of port number resources. Though there is not yet WG consensus
-            in this area, this TBD-draft is very likely to be
-            <xref target="I-D.holmberg-mmusic-sdp-bundle-negotiation" />. </t>
+            use of port number resources.  </t>
 
           </list></t>
 
@@ -942,56 +941,56 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>When createOffer is called for the first time, the result is known as the initial offer.</t>
 
           <t>The first step in generating an initial offer is to generate session-level
-            attributes, as specified in RFC4566, Section 5. Specifically:
+            attributes, as specified in <xref target="RFC4566" />, Section 5. Specifically:
             <list style="symbols">
-                <t>The first SDP line MUST be "v=0", as specified in RFC4566, Section 5.1</t>
-                <t>The second SDP line MUST be an "o=" line, as specified in RFC4566, Section 5.2.
+                <t>The first SDP line MUST be "v=0", as specified in <xref target="RFC4566" />, Section 5.1</t>
+                <t>The second SDP line MUST be an "o=" line, as specified in <xref target="RFC4566" />, Section 5.2.
                    The value of the &lt;username&gt; field SHOULD be "-".
                    The value of the &lt;sess-id&gt; field SHOULD be a cryptographically random number. To ensure uniqueness, this number SHOULD be at least 64 bits long.
                    The value of the &lt;sess-version&gt; field SHOULD be zero.
                    The value of the &lt;nettype&gt; &lt;addrtype&gt; &lt;unicast-address&gt; tuple 
                    SHOULD be set to a non-meaningful address, such as IN IP4 0.0.0.0,
-                   to prevent leaking the local address in this field. As mentioned in RFC4566, the entire
+                   to prevent leaking the local address in this field. As mentioned in <xref target="RFC4566" />, the entire
                    o= line needs to be unique, but selecting a random number for &lt;sess-id&gt; is sufficient
                    to accomplish this.</t>
-                <t>The third SDP line MUST be a "s=" line, as specified in RFC4566, Section 5.3; a single space SHOULD be used as the session name, e.g. "s= "</t>
+                <t>The third SDP line MUST be a "s=" line, as specified in <xref target="RFC4566" />, Section 5.3; a single space SHOULD be used as the session name, e.g. "s= "</t>
                 <t>Session Information ("i="), URI ("u="), Email Address ("e="), Phone Number ("p="), Bandwidth ("b="), Repeat Times ("r="), and Time Zones ("z=") lines are not useful in this context and SHOULD NOT be included.</t>
                 <t>Encryption Keys ("k=") lines do not provide sufficient security and MUST NOT be included.</t>
-                <t>A "t=" line MUST be added, as specified in RFC4566, Section 5.9; both &lt;start-time&gt; and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t> 
-                <t>An "a=group" attribute MUST be added, as specified in RFC5888, with semantics of "BUNDLE" and identifying the m= sections to be bundled.</t>
+                <t>A "t=" line MUST be added, as specified in <xref target="RFC4566" />, Section 5.9; both &lt;start-time&gt; and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t> 
+                <t>An "a=group" attribute MUST be added, as specified in <xref target="RFC5888" />, with semantics of "BUNDLE" and identifying the m= sections to be bundled.</t>
             </list>
         </t>
         <t>The next step is to generate m= sections for each MediaStreamTrack that has been added to the PeerConnection via the addStream method. Note that this method takes a MediaStream, which can contain multiple MediaStreamTracks, and therefore multiple m= sections can be generated even if addStream is only called once.</t>
 
-        <t>Each m= section should be generated as specified in RFC4566, Section 5.14. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
+        <t>Each m= section should be generated as specified in <xref target="RFC4566" />, Section 5.14. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
             <list style="symbols">
-                <t>An "a=mid" line, as specified in RFC5888, Section 4.</t>
-                <t>An "a=msid" line, as specified in draft-ietf-mmusic-msid-01, Section 2.</t>
+                <t>An "a=mid" line, as specified in <xref target="RFC5888" />, Section 4.</t>
+                <t>An "a=msid" line, as specified in <xref target="I-D.ietf-mmusic-msid" />, Section 2.</t>
                 <t>[OPEN ISSUE: Use of App Token versus stream-correlator]</t>
-                <t>An "a=sendrecv" line, as specified in RFC3264, Section 5.1.</t>
-                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in RFC4566, Section 6. For audio, the codecs specified in http://tools.ietf.org/html/draft-ietf-rtcweb-audio-02, Section 3, MUST be be supported.</t>
-                <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx/8000" and an "a=fmtp" line that references the payload type fo the primary codec, as specified in RFC4588.</t>
+                <t>An "a=sendrecv" line, as specified in <xref target="RFC3264" />, Section 5.1.</t>
+                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in <xref target="RFC4566" />, Section 6. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported.</t>
+                <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx/8000" and an "a=fmtp" line that references the payload type fo the primary codec, as specified in <xref target="RFC4588" />.</t>
                 <t>For each supported FEC mechanism, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
-                <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in RFC5245, Section 15.4.</t>
-                <t>An "a=ice-options" line, with the "trickle" option, as specified in draft-ivov-mmusic-trickle-ice-00, Section 4.</t>
-                <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in RFC5245, Section 4.3., paragraph 3.</t>
-                <t>For the current default candidate, a "c=" line, as specific in RFC5245, Section 4.3., paragraph 6.</t>
-                <t>An "a=fingerprint" line, as specified in RFC4572, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added.</t>
-                <t>An "a=setup" line, as specified in RFC4145, Section 4, and clarified for use in DTLS-SRTP secnarios in RFC5763, Section 5. The role value in the offer MUST be "actpass".</t>
-                <t>An "a=rtcp-mux" line, as specified in RFC5761, Section 5.1.1.</t>
-                <t>An "a=rtcp-rsize" line, as specified in RFC5506, Section 5.</t>
-                <t>For each supported RTP header extension, an "a=extmap" line, as specified in RFC 5285, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in RFC6904, Section 4.</t>
-                <t>For each supported RTCP feedback mechanism, an "a=rtcp-fb" mechanism, as specified in RFC4585, Section 4.2. The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.1.</t>
-                <t>An "a=ssrc" line, as specified in RFC5576, Section 4.1, indicating the SSRC to be used for sending media.</t>
-                <t>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in RFC 5576, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</t>
-                <t>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line, as specified in RFC 5576, section 4.2, with semantics set to "FEC" and including the primary and FEC SSRCs.</t>
+                <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4.</t>
+                <t>An "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
+                <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in <xref target="RFC5245" />, Section 4.3., paragraph 3.</t>
+                <t>For the current default candidate, a "c=" line, as specific in <xref target="RFC5245" />, Section 4.3., paragraph 6.</t>
+                <t>An "a=fingerprint" line, as specified in <xref target="RFC4572" />, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added.</t>
+                <t>An "a=setup" line, as specified in <xref target="RFC4145" />, Section 4, and clarified for use in DTLS-SRTP secnarios in <xref target="RFC5763" />, Section 5. The role value in the offer MUST be "actpass".</t>
+                <t>An "a=rtcp-mux" line, as specified in <xref target="RFC5761" />, Section 5.1.1.</t>
+                <t>An "a=rtcp-rsize" line, as specified in <xref target="RFC5506" />, Section 5.</t>
+                <t>For each supported RTP header extension, an "a=extmap" line, as specified in <xref target="RFC5285" />, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in <xref target="RFC6904" />, Section 4.</t>
+                <t>For each supported RTCP feedback mechanism, an "a=rtcp-fb" mechanism, as specified in <xref target="RFC4585" />, Section 4.2. The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.1.</t>
+                <t>An "a=ssrc" line, as specified in <xref target="RFC5576" />, Section 4.1, indicating the SSRC to be used for sending media.</t>
+                <t>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <xref target="RFC5576" />, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</t>
+                <t>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line, as specified in <xref target="RFC5576" />, section 4.2, with semantics set to "FEC" and including the primary and FEC SSRCs.</t>
                 <t>[OPEN ISSUE: Handling of a=imageattr]</t>
                 <t>[TODO: bundle-only]</t>
             </list>
         </t>
 
-        <t>Lastly, if a data channel has been created, a m= section must be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field must be set to "DTLS/SCTP", as specified in draft-ietf-mmusic-sctp-sdp-04, Section 3. The "a=mid", "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate", "a=fingerprint", and "a=setup" lines must be included as mentioned above.
-        [OPEN ISSUE: additional SCTP-specific stuff to be included, as indicated in http://tools.ietf.org/html/draft-jesup-rtcweb-data-protocol-04 (currently none)]
+        <t>Lastly, if a data channel has been created, a m= section must be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field must be set to "DTLS/SCTP", as specified in <xref target="I-D.ietf-mmusic-sctp-sdp" />, Section 3. The "a=mid", "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate", "a=fingerprint", and "a=setup" lines must be included as mentioned above.
+        [OPEN ISSUE: additional SCTP-specific stuff to be included, as indicated in <xref target="I-D.jesup-rtcweb-data-protocol" /> (currently none)]
         </t>
 
         <t>Attributes that are common between all m= sections MAY be moved to session-level, if desired.</t>
@@ -1020,7 +1019,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Each "a=mid" line MUST stay the same.</t>
             <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same.</t>
             <t>For MediaStreamTracks that are still present, the "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</t>
-            <t>If any MediaStreamTracks have been removed, either through the removeStream method or by removing them from an added MediaStream, their m= sections MUST be marked as recvonly by changing the value of the RFC3264 directional attribute to "a=recvonly". The "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST be removed from the associated m= sections.</t>
+            <t>If any MediaStreamTracks have been removed, either through the removeStream method or by removing them from an added MediaStream, their m= sections MUST be marked as recvonly by changing the value of the <xref target="RFC3264" /> directional attribute to "a=recvonly". The "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST be removed from the associated m= sections.</t>
           </list>
       </t>
       <t>If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "received-pranswer" or "stable" states, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "sent-offer" state above, along with these exceptions: 
@@ -1050,7 +1049,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the "OfferToReceiveAudio" constraint is specified, with a value of "true", the offer MUST include a m= section with media type "video", even if no video MediaStreamTrack has been added to the PeerConnection. This allows the offerer to receive video even when not sending it; accordingly, the directional attribute on the video m= section MUST be set to recvonly. If this constraint is specifed when an video MediaStreamTrack has already been added to the PeerConnection, or a non-rejected m= section with media type "video" previously existed, it has no effect.</t>
         </section>
         <section title="VoiceActivityDetection">
-            <t>If the "VoiceActivityDetection" constraint is specified, with a value of "true", the offer MUST indicate support for silence suppression by including comfort noise ("CN") codecs for each supported clockrate, as specified in RFC3389, Section 5.1. [OPEN issue: should this do anything in signaling, or should it just control built-in DTX modes in audio codecs? Opus has built-in DTX, but G.711 does not.]</t>
+            <t>If the "VoiceActivityDetection" constraint is specified, with a value of "true", the offer MUST indicate support for silence suppression by including comfort noise ("CN") codecs for each supported clockrate, as specified in <xref target="RFC3389" />, Section 5.1. [OPEN issue: should this do anything in signaling, or should it just control built-in DTX modes in audio codecs? Opus has built-in DTX, but G.711 does not.]</t>
         </section>
         <section title="IceRestart">
             <t>If the "IceRestart" constraint is specified, with a value of "true", the offer MUST indicate an ICE restart by generating new ICE ufrag and pwd attributes, as specified in RFC5245, Section 9.1.1.1. If this constraint is specified on an initial offer, it has no effect (since a new ICE ufrag and pwd are already generated).</t>
@@ -1129,7 +1128,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>change maximum total bandwidth (b=)
           [OPEN ISSUE: need to clarify if this is CT or AS - see section 5.8 of
-           RFC4566]</t>
+           <xref target="RFC4566" />]</t>
 
           <t>remove desired AVPF mechanisms (a=rtcp-fb)</t>
 
@@ -1297,25 +1296,6 @@ feedback. [STANDARDS-TRACK]</t></abstract></front>
 <format type='TXT' octets='37856' target='http://www.rfc-editor.org/rfc/rfc5124.txt' />
 </reference>
 
-<reference anchor='RFC3960'>
-
-<front>
-<title>Early Media and Ringing Tone Generation in the Session Initiation Protocol (SIP)</title>
-<author initials='G.' surname='Camarillo' fullname='G. Camarillo'>
-<organization /></author>
-<author initials='H.' surname='Schulzrinne' fullname='H. Schulzrinne'>
-<organization /></author>
-<date year='2004' month='December' />
-<abstract>
-<t>This document describes how to manage early media in the Session Initiation
-Protocol (SIP) using two models: the gateway model and the application server
-model.  It also describes the inputs one needs to consider in defining local
-policies for ringing tone generation.  This memo provides information for the
-Internet community.</t></abstract></front>
-
-<seriesInfo name='RFC' value='3960' />
-<format type='TXT' octets='31692' target='http://www.rfc-editor.org/rfc/rfc3960.txt' />
-</reference>
 
 <reference anchor='RFC3261'>
 
@@ -1349,31 +1329,96 @@ conferences. [STANDARDS-TRACK]</t></abstract></front>
 <format type='TXT' octets='647976' target='http://www.rfc-editor.org/rfc/rfc3261.txt' />
 </reference>
 
-<reference anchor='RFC3388'>
-
-<front>
-<title>Grouping of Media Lines in the Session Description Protocol (SDP)</title>
-<author initials='G.' surname='Camarillo' fullname='G. Camarillo'>
-<organization /></author>
-<author initials='G.' surname='Eriksson' fullname='G. Eriksson'>
-<organization /></author>
-<author initials='J.' surname='Holler' fullname='J. Holler'>
-<organization /></author>
-<author initials='H.' surname='Schulzrinne' fullname='H. Schulzrinne'>
-<organization /></author>
-<date year='2002' month='December' /></front>
-
-<seriesInfo name='RFC' value='3388' />
-<format type='TXT' octets='39365' target='http://www.rfc-editor.org/rfc/rfc3388.txt' />
-</reference>
 
       <!-- NORM 2 -->
 
+
+<reference anchor='I-D.ietf-rtcweb-audio'>
+<front>
+<title>WebRTC Audio Codec and Processing Requirements</title>
+
+<author initials='J' surname='Valin' fullname='Jean-Marc Valin'>
+    <organization />
+</author>
+
+<author initials='C' surname='Bran' fullname='Cary Bran'>
+    <organization />
+</author>
+
+<date month='August' day='2' year='2013' />
+
+<abstract><t>This document outlines the audio codec and processing requirements for WebRTC client application and endpoint devices.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-ietf-rtcweb-audio-02' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-audio-02.txt' />
+</reference>
+
+
       <!-- NORM 3 -->
+
+<reference anchor='I-D.ietf-mmusic-sctp-sdp'>
+<front>
+<title>Stream Control Transmission Protocol (SCTP)-Based Media Transport in the Session Description Protocol (SDP)</title>
+
+<author initials='S' surname='Loreto' fullname='Salvatore Loreto'>
+    <organization />
+</author>
+
+<author initials='G' surname='Camarillo' fullname='Gonzalo Camarillo'>
+    <organization />
+</author>
+
+<date month='June' day='30' year='2013' />
+
+<abstract><t>SCTP (Stream Control Transmission Protocol) is a transport protocol used to establish associations between two endpoints.  This document describes how to express media transport over SCTP in SDP (Session Description Protocol).  This document defines the 'SCTP', 'SCTP/DTLS' and 'DTLS/SCTP' protocol identifiers for SDP.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-ietf-mmusic-sctp-sdp-04' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-ietf-mmusic-sctp-sdp-04.txt' />
+</reference>
+
 
       <!-- NORM 4 -->
 
+
+<reference anchor='RFC4572'>
+
+<front>
+<title>Connection-Oriented Media Transport over the Transport Layer Security (TLS) Protocol in the Session Description Protocol (SDP)</title>
+<author initials='J.' surname='Lennox' fullname='J. Lennox'>
+<organization /></author>
+<date year='2006' month='July' />
+<abstract>
+<t>This document specifies how to establish secure connection-oriented media transport sessions over the Transport Layer Security (TLS) protocol using the Session Description Protocol (SDP). It defines a new SDP protocol identifier, 'TCP/TLS'. It also defines the syntax and semantics for an SDP 'fingerprint' attribute that identifies the certificate that will be presented for the TLS session. This mechanism allows media transport over TLS connections to be established securely, so long as the integrity of session descriptions is assured.&lt;/t>&lt;t> This document extends and updates RFC 4145. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name='RFC' value='4572' />
+<format type='TXT' octets='38658' target='http://www.rfc-editor.org/rfc/rfc4572.txt' />
+</reference>
+
       <!-- NORM 5 -->
+
+
+<reference anchor='RFC4145'>
+
+<front>
+<title>TCP-Based Media Transport in the Session Description Protocol (SDP)</title>
+<author initials='D.' surname='Yon' fullname='D. Yon'>
+<organization /></author>
+<author initials='G.' surname='Camarillo' fullname='G. Camarillo'>
+<organization /></author>
+<date year='2005' month='September' />
+<abstract>
+<t>This document describes how to express media transport over TCP using the Session Description Protocol (SDP).  It defines the SDP 'TCP' protocol identifier, the SDP 'setup' attribute, which describes the connection setup procedure, and the SDP 'connection' attribute, which handles connection reestablishment. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name='RFC' value='4145' />
+<format type='TXT' octets='30225' target='http://www.rfc-editor.org/rfc/rfc4145.txt' />
+</reference>
+
 
       <!-- NORM 6 -->
 
@@ -1385,13 +1430,126 @@ conferences. [STANDARDS-TRACK]</t></abstract></front>
 
       <!-- NORM 10 -->
 
+
+<reference anchor='RFC5285'>
+
+<front>
+<title>A General Mechanism for RTP Header Extensions</title>
+<author initials='D.' surname='Singer' fullname='D. Singer'>
+<organization /></author>
+<author initials='H.' surname='Desineni' fullname='H. Desineni'>
+<organization /></author>
+<date year='2008' month='July' />
+<abstract>
+<t>This document provides a general mechanism to use the header extension feature of RTP (the Real-Time Transport Protocol).  It provides the option to use a small number of small extensions in each RTP packet, where the universe of possible extensions is large and registration is de-centralized.  The actual extensions in use in a session are signaled in the setup information for that session. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name='RFC' value='5285' />
+<format type='TXT' octets='36844' target='http://www.rfc-editor.org/rfc/rfc5285.txt' />
+</reference>
+
+
       <!-- NORM 11 -->
+
+
+<reference anchor='RFC6904'>
+
+<front>
+<title>Encryption of Header Extensions in the Secure Real-time Transport Protocol (SRTP)</title>
+<author initials='J.' surname='Lennox' fullname='J. Lennox'>
+<organization /></author>
+<date year='2013' month='April' />
+<abstract>
+<t>The Secure Real-time Transport Protocol (SRTP) provides authentication, but not encryption, of the headers of Real-time Transport Protocol (RTP) packets. However, RTP header extensions may carry sensitive information for which participants in multimedia sessions want confidentiality. This document provides a mechanism, extending the mechanisms of SRTP, to selectively encrypt RTP header extensions in SRTP.&lt;/t>&lt;t> This document updates RFC 3711, the Secure Real-time Transport Protocol specification, to require that all future SRTP encryption transforms specify how RTP header extensions are to be encrypted.</t></abstract></front>
+
+<seriesInfo name='RFC' value='6904' />
+<format type='TXT' octets='33486' target='http://www.rfc-editor.org/rfc/rfc6904.txt' />
+</reference>
+
 
       <!-- NORM 12 -->
 
+
+<reference anchor='I-D.ietf-rtcweb-rtp-usage'>
+<front>
+<title>Web Real-Time Communication (WebRTC): Media Transport and Use of RTP</title>
+
+<author initials='C' surname='Perkins' fullname='Colin Perkins'>
+    <organization />
+</author>
+
+<author initials='M' surname='Westerlund' fullname='Magnus Westerlund'>
+    <organization />
+</author>
+
+<author initials='J' surname='Ott' fullname='Joerg Ott'>
+    <organization />
+</author>
+
+<date month='September' day='5' year='2013' />
+
+<abstract><t>The Web Real-Time Communication (WebRTC) framework provides support for direct interactive rich communication using audio, video, text, collaboration, games, etc.  between two peers' web-browsers.  This memo describes the media transport aspects of the WebRTC framework. It specifies how the Real-time Transport Protocol (RTP) is used in the WebRTC context, and gives requirements for which RTP features, profiles, and extensions need to be supported.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-ietf-rtcweb-rtp-usage-09' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-rtp-usage-09.txt' />
+</reference>
+
+
       <!-- NORM 13 -->
 
+
+<reference anchor='I-D.ietf-mmusic-sdp-bundle-negotiation'>
+<front>
+<title>Multiplexing Negotiation Using Session Description Protocol (SDP) Port Numbers</title>
+
+<author initials='C' surname='Holmberg' fullname='Christer Holmberg'>
+    <organization />
+</author>
+
+<author initials='H' surname='Alvestrand' fullname='Harald Alvestrand'>
+    <organization />
+</author>
+
+<author initials='C' surname='Jennings' fullname='Cullen Jennings'>
+    <organization />
+</author>
+
+<date month='June' day='14' year='2013' />
+
+<abstract><t>This specification defines a new SDP Grouping Framework extension, "BUNDLE", that can be used with the Session Description Protocol (SDP) Offer/Answer mechanism to negotiate the usage of bundled media, which refers to the usage of a single 5-tuple for media associated with multiple SDP media descriptions ("m=" lines).</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-ietf-mmusic-sdp-bundle-negotiation-04' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-ietf-mmusic-sdp-bundle-negotiation-04.txt' />
+</reference>
+
+
       <!-- NORM 14 -->
+
+
+<reference anchor='I-D.ietf-mmusic-msid'>
+<front>
+<title>Cross Session Stream Identification in the Session Description Protocol</title>
+
+<author initials='H' surname='Alvestrand' fullname='Harald Alvestrand'>
+    <organization />
+</author>
+
+<date month='August' day='13' year='2013' />
+
+<abstract><t>This document specifies a grouping mechanism for RTP media streams that can be used to specify relations between media streams.  This mechanism is used to signal the association between the SDP concept of "m-line" and the WebRTC concept of "MediaStream" / "MediaStreamTrack" using SDP signaling.  This document is a work item of the MMUSIC WG, whose discussion list is mmusic@ietf.org.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-ietf-mmusic-msid-01' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-ietf-mmusic-msid-01.txt' />
+</reference>
+
 
       <!-- NORM 15 -->
 
@@ -1400,44 +1558,6 @@ conferences. [STANDARDS-TRACK]</t></abstract></front>
       <!-- NORM 17 -->
 
       <!-- NORM 18 -->
-
-      <reference anchor="I-D.rescorla-mmusic-ice-trickle">
-        <front>
-          <title>Trickle ICE: Incremental Provisioning of Candidates for the
-          Interactive Connectivity Establishment (ICE) Protocol</title>
-
-          <author fullname="Eric Rescorla" initials="E" surname="Rescorla">
-            <organization></organization>
-          </author>
-
-          <author fullname="Justin Uberti" initials="J" surname="Uberti">
-            <organization></organization>
-          </author>
-
-          <author fullname="Emil Ivov" initials="E" surname="Ivov">
-            <organization></organization>
-          </author>
-
-          <date day="10" month="October" year="2012" />
-
-          <abstract>
-            <t>This document describes an extension to the Interactive
-            Connectivity Establishment (ICE) protocol that allows ICE agents
-            to send and receive candidates incrementally rather than
-            exchanging complete lists. With such incremental provisioning, ICE
-            agents can begin connectivity checks while they are still
-            gathering candidates and considerably shorten the time necessary
-            for ICE processing to complete. The above mechanism is also
-            referred to as "trickle ICE".</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-rescorla-mmusic-ice-trickle-00" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-rescorla-mmusic-ice-trickle-00.txt"
-                type="TXT" />
-      </reference>
 
       <!-- NORM 19 -->
 
@@ -1610,110 +1730,140 @@ document updates RFC 3550, RFC 3711, and RFC
 <format type='TXT' octets='41011' target='http://www.rfc-editor.org/rfc/rfc5506.txt' />
 </reference>
 
-      <reference anchor="I-D.ietf-rtcweb-rtp-usage">
-        <front>
-          <title>Web Real-Time Communication (WebRTC): Media Transport and Use
-          of RTP</title>
-
-          <author fullname="Colin Perkins" initials="C" surname="Perkins">
-            <organization></organization>
-          </author>
-
-          <author fullname="Magnus Westerlund" initials="M"
-                  surname="Westerlund">
-            <organization></organization>
-          </author>
-
-          <author fullname="Joerg Ott" initials="J" surname="Ott">
-            <organization></organization>
-          </author>
-
-          <date day="16" month="July" year="2012" />
-
-          <abstract>
-            <t>The Web Real-Time Communication (WebRTC) framework provides
-            support for direct interactive rich communication using audio,
-            video, text, collaboration, games, etc. between two peers'
-            web-browsers. This memo describes the media transport aspects of
-            the WebRTC framework. It specifies how the Real-time Transport
-            Protocol (RTP) is used in the WebRTC context, and gives
-            requirements for which RTP features, profiles, and extensions need
-            to be supported.</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-ietf-rtcweb-rtp-usage-04" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-rtp-usage-04.txt"
-                type="TXT" />
-      </reference>
 
       <!-- INFORM 2 -->
 
-<reference anchor='I-D.holmberg-mmusic-sdp-bundle-negotiation'>
-<front>
-<title>Multiplexing Negotiation Using Session Description Protocol (SDP) Port Numbers</title>
-
-<author initials='C' surname='Holmberg' fullname='Christer Holmberg'>
-    <organization />
-</author>
-
-<author initials='H' surname='Alvestrand' fullname='Harald Alvestrand'>
-    <organization />
-</author>
-
-<date month='October' day='19' year='2011' />
-
-<abstract><t>This specification defines a new SDP Grouping Framework SDP
-grouping framework extension, "BUNDLE", that can be used with the Session
-Description Protocol (SDP) Offer/Answer mechanism to negotiate the usage of
-bundled media, which refers to the usage of a single 5-tuple for media
-associated with multiple SDP media descriptions ("m=" lines).</t></abstract>
-
-</front>
-
-<seriesInfo name='Internet-Draft' value='draft-holmberg-mmusic-sdp-bundle-negotiation-00' />
-<format type='TXT'
-        target='http://www.ietf.org/internet-drafts/draft-holmberg-mmusic-sdp-bundle-negotiation-00.txt' />
-</reference>
 
       <!-- INFORM 3 -->
 
 
-<reference anchor='I-D.alvestrand-mmusic-msid'>
+      <!-- INFORM 4 -->
+
+
+<reference anchor='RFC3960'>
+
 <front>
-<title>Cross Session Stream Identification in the Session Description Protocol</title>
+<title>Early Media and Ringing Tone Generation in the Session Initiation Protocol (SIP)</title>
+<author initials='G.' surname='Camarillo' fullname='G. Camarillo'>
+<organization /></author>
+<author initials='H.' surname='Schulzrinne' fullname='H. Schulzrinne'>
+<organization /></author>
+<date year='2004' month='December' />
+<abstract>
+<t>This document describes how to manage early media in the Session Initiation
+Protocol (SIP) using two models: the gateway model and the application server
+model.  It also describes the inputs one needs to consider in defining local
+policies for ringing tone generation.  This memo provides information for the
+Internet community.</t></abstract></front>
 
-<author initials='H' surname='Alvestrand' fullname='Harald Alvestrand'>
-    <organization />
-</author>
-
-<date month='October' day='15' year='2012' />
-
-<abstract><t>This document specifies a grouping mechanism for RTP media streams
-that can be used to specify relations between media streams within different RTP
-sessions.  This mechanism is used to signal the association between the RTP
-concept of SSRC and the WebRTC concept of "media stream" / "media stream track"
-using SDP signalling.  This document is an input document for discussion.  It
-should be discussed in the MMUSIC WG list, mmusic@ietf.org.</t></abstract>
-
-</front>
-
-<seriesInfo name='Internet-Draft' value='draft-alvestrand-mmusic-msid-01' />
-<format type='TXT'
-        target='http://www.ietf.org/internet-drafts/draft-alvestrand-mmusic-msid-01.txt' />
+<seriesInfo name='RFC' value='3960' />
+<format type='TXT' octets='31692' target='http://www.rfc-editor.org/rfc/rfc3960.txt' />
 </reference>
 
-      <!-- INFORM 4 -->
 
       <!-- INFORM 5 -->
 
+
+<reference anchor='I-D.jesup-rtcweb-data-protocol'>
+<front>
+<title>WebRTC Data Channel Protocol</title>
+
+<author initials='R' surname='Jesup' fullname='Randell Jesup'>
+    <organization />
+</author>
+
+<author initials='S' surname='Loreto' fullname='Salvatore Loreto'>
+    <organization />
+</author>
+
+<author initials='M' surname='Tuexen' fullname='Michael Tuexen'>
+    <organization />
+</author>
+
+<date month='February' day='26' year='2013' />
+
+<abstract><t>The Web Real-Time Communication (WebRTC) working group is charged to provide protocols to support for direct interactive rich communication using audio, video, and data between two peers' web- browsers.  This document specifies an actual (minor) protocol for how the JS-layer DataChannel objects provide the data channels between the peers.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-jesup-rtcweb-data-protocol-04' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-jesup-rtcweb-data-protocol-04.txt' />
+</reference>
       <!-- INFORM 6 -->
+
+
+<reference anchor='RFC4588'>
+
+<front>
+<title>RTP Retransmission Payload Format</title>
+<author initials='J.' surname='Rey' fullname='J. Rey'>
+<organization /></author>
+<author initials='D.' surname='Leon' fullname='D. Leon'>
+<organization /></author>
+<author initials='A.' surname='Miyazaki' fullname='A. Miyazaki'>
+<organization /></author>
+<author initials='V.' surname='Varsa' fullname='V. Varsa'>
+<organization /></author>
+<author initials='R.' surname='Hakenberg' fullname='R. Hakenberg'>
+<organization /></author>
+<date year='2006' month='July' />
+<abstract>
+<t>RTP retransmission is an effective packet loss recovery technique for real-time applications with relaxed delay bounds.  This document describes an RTP payload format for performing retransmissions.  Retransmitted RTP packets are sent in a separate stream from the original RTP stream.  It is assumed that feedback from receivers to senders is available.  In particular, it is assumed that Real-time Transport Control Protocol (RTCP) feedback as defined in the extended RTP profile for RTCP-based feedback (denoted RTP/AVPF) is available in this memo. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name='RFC' value='4588' />
+<format type='TXT' octets='76630' target='http://www.rfc-editor.org/rfc/rfc4588.txt' />
+</reference>
+
 
       <!-- INFORM 7 -->
 
+
+<reference anchor='RFC3389'>
+
+<front>
+<title>Real-time Transport Protocol (RTP) Payload for Comfort Noise (CN)</title>
+<author initials='R.' surname='Zopf' fullname='R. Zopf'>
+<organization /></author>
+<date year='2002' month='September' /></front>
+
+<seriesInfo name='RFC' value='3389' />
+<format type='TXT' octets='17018' target='http://www.rfc-editor.org/rfc/rfc3389.txt' />
+</reference>
+
+
       <!-- INFORM 8 -->
+
+
+
+<reference anchor='I-D.ivov-mmusic-trickle-ice'>
+<front>
+<title>Trickle ICE: Incremental Provisioning of Candidates for the Interactive Connectivity Establishment (ICE) Protocol</title>
+
+<author initials='E' surname='Ivov' fullname='Emil Ivov'>
+    <organization />
+</author>
+
+<author initials='E' surname='Rescorla' fullname='Eric Rescorla'>
+    <organization />
+</author>
+
+<author initials='J' surname='Uberti' fullname='Justin Uberti'>
+    <organization />
+</author>
+
+<date month='March' day='11' year='2013' />
+
+<abstract><t>This document describes an extension to the Interactive Connectivity Establishment (ICE) protocol that allows ICE agents to send and receive candidates incrementally rather than exchanging complete lists.  With such incremental provisioning, ICE agents can begin connectivity checks while they are still gathering candidates and considerably shorten the time necessary for ICE processing to complete.  The above mechanism is also referred to as "trickle ICE".</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-ivov-mmusic-trickle-ice-01' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-ivov-mmusic-trickle-ice-01.txt' />
+</reference>
+
+
 
       <!-- INFORM 9 -->
 
@@ -1728,6 +1878,7 @@ should be discussed in the MMUSIC WG list, mmusic@ietf.org.</t></abstract>
       <!-- INFORM 14 -->
 
       <!-- INFORM 15 -->
+
 
       <reference anchor="I-D.jennings-rtcweb-signaling">
         <front>
@@ -1772,43 +1923,35 @@ should be discussed in the MMUSIC WG list, mmusic@ietf.org.</t></abstract>
                 type="PDF" />
       </reference>
 
+
       <!-- INFORM 16 -->
 
-      <reference anchor="I-D.nandakumar-rtcweb-sdp">
-        <front>
-          <title>SDP for the WebRTC</title>
 
-          <author fullname="Suhas Nandakumar" initials="S"
-                  surname="Nandakumar">
-            <organization></organization>
-          </author>
+<reference anchor='I-D.nandakumar-rtcweb-sdp'>
+<front>
+<title>SDP for the WebRTC</title>
 
-          <author fullname="Cullen Jennings" initials="C" surname="Jennings">
-            <organization></organization>
-          </author>
+<author initials='S' surname='Nandakumar' fullname='Suhas Nandakumar'>
+    <organization />
+</author>
 
-          <date day="15" month="October" year="2012" />
+<author initials='C' surname='Jennings' fullname='Cullen Jennings'>
+    <organization />
+</author>
 
-          <abstract>
-            <t>The Web Real-Time Communication (WebRTC) [WEBRTC] working group
-            is charged to provide protocol support for direct interactive rich
-            communication using audio, video and data between two peers' web
-            browsers. With in the WebRTC framework, Session Description
-            protocol (SDP) [RFC4566] is used for negotiating session
-            capabilities between the peers. Such a negotiataion happens based
-            on the SDP Offer/Answer exchange mechanism described in the RFC
-            3264 [RFC3264]. This document serves a introductory purpose in
-            describing the role of SDP for the most common WebRTC
-            use-cases.</t>
-          </abstract>
-        </front>
+<date month='July' day='13' year='2013' />
 
-        <seriesInfo name="Internet-Draft"
-                    value="draft-nandakumar-rtcweb-sdp-00" />
+<abstract><t>The Web Real-Time Communication (WebRTC) [WEBRTC] working group is charged to provide protocol support for direct interactive rich communication using audio,video and data between two peers' web browsers.  With in the WebRTC framework, Session Description protocol (SDP) [RFC4566] is used for negotiating session capabilities between the peers.  Such a negotiataion happens based on the SDP Offer/Answer exchange mechanism described in the RFC 3264 [RFC3264].  This document serves a introductory purpose in describing the role of SDP for the most common WebRTC use-cases.  This SDP examples provided in this document is still a work in progress, but aims to align closest to the evolving standards.</t></abstract>
 
-        <format target="http://www.ietf.org/internet-drafts/draft-nandakumar-rtcweb-sdp-00.txt"
-                type="TXT" />
-      </reference>
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-nandakumar-rtcweb-sdp-02' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-nandakumar-rtcweb-sdp-02.txt' />
+<format type='PDF'
+        target='http://www.ietf.org/internet-drafts/draft-nandakumar-rtcweb-sdp-02.pdf' />
+</reference>
+
 
       <!-- INFORM 17 -->
 <reference anchor='RFC5763'>
@@ -2145,7 +2288,8 @@ OffererJS->AnswererJS:  ACK
       <section title="Example Session Descriptions">
         <section title="createOffer">
             <t>This SDP shows a typical result from createOffer for a PeerConnection with a single audio MediaStreamTrack and a single video MediaStreamTrack.
-                [TODO: candidates have already been gathered here. Update for trickle.]</t>
+                [TODO: candidates have already been gathered here. Update for trickle.] 
+Note some lines have been broken into two lines for formatting reasons. </t>
             <figure><artwork>
 v=0
 o=- 4962303333179871722 1 IN IP4 0.0.0.0
@@ -2155,8 +2299,10 @@ a=group:BUNDLE audio video
 m=audio 58503 RTP/SAVPF 111 0 8 126
 c=IN IP4 10.0.0.11
 a=rtcp:49634 IN IP4 10.0.0.11
-a=candidate:946015839 1 udp 2113937151 10.0.0.11 58503 typ host generation 0
-a=candidate:946015839 2 udp 2113937150 10.0.0.11 49634 typ host generation 0
+a=candidate:946015839 1 udp 2113937151 10.0.0.11 58503 
+            typ host generation 0
+a=candidate:946015839 2 udp 2113937150 10.0.0.11 49634 
+            typ host generation 0
 a=ice-ufrag:ETEn1v9DoTMB9J4r
 a=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl
 a=ice-options:trickle
@@ -2173,13 +2319,16 @@ a=rtpmap:8 PCMA/8000
 a=rtpmap:126 telephone-event/8000
 a=maxptime:60
 a=ssrc:1732846380 cname:EocUG1f0fcg/yvY7
-a=msid:47017fee-b6c1-4162-929c-a25110252400 f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9
+a=msid:47017fee-b6c1-4162-929c-a25110252400 
+       f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9
 [TODO: ssrc-group]
 m=video 57918 RTP/SAVPF 100 116 117
 c=IN IP4 10.0.0.11
 a=rtcp:50936 IN IP4 10.0.0.11
-a=candidate:946015839 1 udp 2113937151 10.0.0.11 57918 typ host generation 0
-a=candidate:946015839 2 udp 2113937150 10.0.0.11 50936 typ host generation 0
+a=candidate:946015839 1 udp 2113937151 10.0.0.11 57918 typ host 
+            generation 0
+a=candidate:946015839 2 udp 2113937150 10.0.0.11 50936 typ host 
+            generation 0
 a=ice-ufrag:ETEn1v9DoTMB9J4r
 a=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl
 a=ice-options:trickle
@@ -2197,7 +2346,8 @@ a=rtcp-fb:100 goog-remb
 a=rtpmap:116 red/90000
 a=rtpmap:117 ulpfec/90000
 a=ssrc:1366781083 cname:EocUG1f0fcg/yvY7
-a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae f30bdb4a-5db8-49b5-bcdc-e0c9a23172e0
+a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae 
+       f30bdb4a-5db8-49b5-bcdc-e0c9a23172e0
 [TODO: ssrc-group]
 [TODO: rtx]
 
