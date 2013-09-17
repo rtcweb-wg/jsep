@@ -898,8 +898,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             signal information about media direction.</t>
 
             <t><xref target="RFC5576"/> MUST be implemented to signal RTP SSRC
-            values. [OPEN ISSUE; depends on BUNDLE and how we choose to
-            represent multiple media sources]</t>
+            values.</t>
 
             <t><xref target="RFC5763"/> MUST be implemented to signal DTLS
             certificate fingerprints.</t>
@@ -1032,7 +1031,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <t>If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "remote-pranswer" or "stable" states,
       an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "local-offer" state above, along with these exceptions:
-      [OPEN ISSUE: should this be permitted in the received-pranswer state?]
+      [OPEN ISSUE: should this be permitted in the remote-pranswer state?]
           <list style="symbols">
             <t>If a m= section was rejected, i.e. has had its port set to zero in either the local or remote description, it MUST remain rejected and have a zero port in the new offer, as indicated in RFC3264, Section 5.1.</t>
             <t>If a m= section exists in the current local description, but has its state set to inactive or recvonly, and a new MediaStreamTrack is added, the previously existing m= section MUST be recycled instead of creating a new m= section. [OPEN ISSUE: Nail down exactly what this means. Should the codecs remain the same? (No.) Should ICE restart? (No.) Can the "a=mid" attribute be changed? (Yes?)]</t>
@@ -1075,7 +1074,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Initial Answers">
           <t>When createAnswer is called for the first time after a remote description has been provided, the result is known as the initial answer. If no remote description has been installed, an answer cannot be generated, and an error MUST be returned.</t>
 
-          <t>Note that the remote description SDP may not have been created by a WebRTC endpoint and may not conform to all the requirements listed in <xref target="sec-create-offer"/>. For many cases, this is not a problem. However, if any mandatory SDP attributes are missing, or functionality listed as mandatory-to-use is not present (e.g. ICE, DTLS), this MUST be treated as an error. [OPEN ISSUE: Should this cause setRemoteDescription to fail, or should this cause createAnswer to reject those particular m= sections?]</t>
+          <t>Note that the remote description SDP may not have been created by a WebRTC endpoint and may not conform to all the requirements listed in <xref target="sec-create-offer"/>. For many cases, this is not a problem. However, if any mandatory SDP attributes are missing, or functionality listed as mandatory-to-use is not present (e.g. ICE, DTLS) [TODO: find reference for this], this MUST be treated as an error. [OPEN ISSUE: Should this cause setRemoteDescription to fail, or should this cause createAnswer to reject those particular m= sections?]</t>
 
           <t>The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the Initial Offers section above, with the addition that </t>
 
