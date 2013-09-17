@@ -976,7 +976,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4. [TODO: reference BUNDLE draft on when ICE credentials are the same and when they are different.]</t>
                 <t>An "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
                 <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in <xref target="RFC5245" />, Section 4.3., paragraph 3.</t>
-                <t>For the current default candidate, a "c=" line, as specific in <xref target="RFC5245" />, Section 4.3., paragraph 6. If no candidates have yet been gathered yet, the default candidate should be set to the null value defined in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 5.1.</t>
+                <t>For the current default candidate, a "c=" line, as specific in <xref target="RFC5245" />, Section 4.3., paragraph 6. [OPEN ISSUE, pending resolution in mmusic: If no candidates have yet been gathered yet, the default candidate should be set to the null value defined in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 5.1.]</t>
                 <t>An "a=fingerprint" line, as specified in <xref target="RFC4572" />, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added.</t>
                 <t>An "a=setup" line, as specified in <xref target="RFC4145" />, Section 4, and clarified for use in DTLS-SRTP scenarios in <xref target="RFC5763" />, Section 5. The role value in the offer MUST be "actpass".</t>
                 <t>An "a=rtcp-mux" line, as specified in <xref target="RFC5761" />, Section 5.1.1.</t>
@@ -1079,23 +1079,23 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>For each non-rejected m= section of a given media type, if there is a local MediaStreamTrack of the specified type which has been added to the PeerConnection via addStream and not yet associated with a m= section, the MediaStreamTrack is associated with the m= section at this time. If there are more m= sections of a certain type than MediaStreamTracks, some m= sections will not have an associated MediaStreamTrack. If there are more MediaStreamTracks of a certain type than m= sections, only the first N MediaStreamTracks will be able to be associated in the constructed answer. The remainder will need to be associated in a subsequent offer. </t>
 
         <t>Each m= section should then generated as specified in <xref target="RFC3264" />, Section 6.1. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
-            <list style="symbols">
+           <list style="symbols"> 
                 <t>If present in the offer, an "a=mid" line, as specified in <xref target="RFC5888" />, Section 9.1. The "mid" value MUST match that specified in the offer.</t>
                 <t>If a local MediaStreamTrack has been associated, an "a=msid" line, as specified in <xref target="I-D.ietf-mmusic-msid" />, Section 2.</t>
                 <t>[OPEN ISSUE: Use of App Token versus stream-correlator ]</t>
-                <t>If a local MediaStreamTrack has been associated, an "a=sendrecv" line, as specified in <xref target="RFC3264" />, Section 6.1. If no local MediaStreamTrack has been associated, an "a=recvonly" line.</t>
-                [TODO: handle non-sendrecv offered m= sections]
+                <t>If a local MediaStreamTrack has been associated, an "a=sendrecv" line, as specified in <xref target="RFC3264" />, Section 6.1. If no local MediaStreamTrack has been associated, an "a=recvonly" line.
+                [TODO: handle non-sendrecv offered m= sections]</t>
                 <t>For each supported codec that is present in the offer, "a=rtpmap" and "a=fmtp" lines, as specified in <xref target="RFC4566" />, Section 6, and <xref target="RFC3264" />, Section 6.1. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported. Note that for simplicity, the answerer MAY use different payload types for codecs than the offerer, as it is not prohibited by Section 6.1.</t>
                 <t>If "rtx" is present in the offer, for each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx" with the clock rate of the primary codec and an "a=fmtp" line that references the payload type fo the primary codec, as specified in <xref target="RFC4588" />, Section 8.1.</t>
                 <t>For each supported FEC mechanism that is present in the offer, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
                 <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4.</t>
                 <t>If the "trickle" ICE option is present in the offer, an "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
                 <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in <xref target="RFC5245" />, Section 4.3., paragraph 3.</t>
-                <t>For the current default candidate, a "c=" line, as specific in <xref target="RFC5245" />, Section 4.3., paragraph 6. If no candidates have yet been gathered yet, the default candidate should be set to the null value defined in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 5.1.</t>
+                <t>For the current default candidate, a "c=" line, as specific in <xref target="RFC5245" />, Section 4.3., paragraph 6. [OPEN ISSUE, pending resolution in mmusic: If no candidates have yet been gathered yet, the default candidate should be set to the null value defined in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 5.1.]</t>
                 <t>An "a=fingerprint" line, as specified in <xref target="RFC4572" />, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added.</t>
                 <t>An "a=setup" line, as specified in <xref target="RFC4145" />, Section 4, and clarified for use in DTLS-SRTP scenarios in <xref target="RFC5763" />, Section 5. The role value in the answer MUST be "active" or "passive"; the "active" role is RECOMMENDED.</t>
                 <t>If present in the offer, an "a=rtcp-mux" line, as specified in <xref target="RFC5761" />, Section 5.1.1.</t>
-                <t>If present in the answer, an "a=rtcp-rsize" line, as specified in <xref target="RFC5506" />, Section 5.</t>
+                <t>If present in the offer, an "a=rtcp-rsize" line, as specified in <xref target="RFC5506" />, Section 5.</t>
                 <t>For each supported RTP header extension that is present in the offer, an "a=extmap" line, as specified in <xref target="RFC5285" />, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in <xref target="RFC6904" />, Section 4.</t>
                 <t>For each supported RTCP feedback mechanism that is present in the offer, an "a=rtcp-fb" mechanism, as specified in <xref target="RFC4585" />, Section 4.2. The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.1.</t>
                 <t>If a local MediaStreamTrack has been associated, an "a=ssrc" line, as specified in <xref target="RFC5576" />, Section 4.1, indicating the SSRC to be used for sending media.</t>
@@ -2357,8 +2357,8 @@ a=sendrecv
 a=rtcp-mux
 a=rtcp-rsize
 a=fingerprint:sha-256
-              19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
-              BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
+              19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
+             :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass              
 a=rtpmap:111 opus/48000/2
 a=fmtp:111 minptime=10
@@ -2382,8 +2382,8 @@ a=sendrecv
 a=rtcp-mux
 a=rtcp-rsize
 a=fingerprint:sha-256
-              19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
-              BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
+              19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
+             :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
 a=rtpmap:100 VP8/90000
 a=rtcp-fb:100 ccm fir
@@ -2406,8 +2406,8 @@ a=ice-ufrag:VD5v2BnbZm3mgP3d
 a=ice-pwd:+Jlkuox+VVIUDqxcfIDuTZMH
 a=ice-options:trickle
 a=mid:data
-a=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
-                      BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
+a=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
+                     :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
 a=fmtp:5000 protocol=webrtc-datachannel; streams=10
             </artwork></figure>
@@ -2426,8 +2426,8 @@ c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
 a=ice-ufrag:6sFvz2gdLkEwjZEr
 a=ice-pwd:cOTZKZNVlO9RSGsEGM63JXT2
-a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
-                      DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
+a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
+                     :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
 a=mid:audio
 a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
@@ -2447,8 +2447,8 @@ c=IN IP4 0.0.0.0
 a=rtcp:1 IN IP4 0.0.0.0
 a=ice-ufrag:xvURvWWcA/tyMcxR
 a=ice-pwd:rTnKv8I7t9Nd4BBvnQSDNVq3
-a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
-                      DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
+a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
+                     :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
 a=mid:video
 a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
@@ -2474,8 +2474,8 @@ m=application 9 DTLS/SCTP 5000
 c=IN IP4 0.0.0.0
 a=ice-ufrag:9TF7rdya0fKuMkl9
 a=ice-pwd:BpCsBLK/MHwNGnKp4kVen2oZ
-a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
-                      DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
+a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
+                     :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
 a=mid:data
 a=fmtp:5000 protocol=webrtc-datachannel; streams=10
