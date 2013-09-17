@@ -960,7 +960,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>Session Information ("i="), URI ("u="), Email Address ("e="), Phone Number ("p="), Bandwidth ("b="), Repeat Times ("r="), and Time Zones ("z=") lines are not useful in this context and SHOULD NOT be included.</t>
                 <t>Encryption Keys ("k=") lines do not provide sufficient security and MUST NOT be included.</t>
                 <t>A "t=" line MUST be added, as specified in <xref target="RFC4566" />, Section 5.9; both &lt;start-time&gt; and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t> 
-                <t>An "a=group" attribute MUST be added, as specified in <xref target="RFC5888" />, with semantics of "BUNDLE" and identifying the m= sections to be bundled. [OPEN ISSUE: Need to determine exactly how this decision is made.]</t>
             </list>
         </t>
         <t>The next step is to generate m= sections for each MediaStreamTrack that has been added to the PeerConnection via the addStream method. Note that this method takes a MediaStream, which can contain multiple MediaStreamTracks, and therefore multiple m= sections can be generated even if addStream is only called once.</t>
@@ -974,7 +973,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in <xref target="RFC4566" />, Section 6. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported.</t>
                 <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx" with the clock rate of the primary codec and an "a=fmtp" line that references the payload type fo the primary codec, as specified in <xref target="RFC4588" />, Section 8.1.</t>
                 <t>For each supported FEC mechanism, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
-                <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4.</t>
+                <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4. [TODO: reference BUNDLE draft on when ICE credentials are the same and when they are different.]</t>
                 <t>An "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
                 <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in <xref target="RFC5245" />, Section 4.3., paragraph 3.</t>
                 <t>For the current default candidate, a "c=" line, as specific in <xref target="RFC5245" />, Section 4.3., paragraph 6. If no candidates have yet been gathered yet, the default candidate should be set to the null value defined in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 5.1.</t>
@@ -992,10 +991,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </list>
         </t>
 
-        <t>Lastly, if a data channel has been created, a m= section must be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field must be set to "DTLS/SCTP", as specified in <xref target="I-D.ietf-mmusic-sctp-sdp" />, Section 3. The "a=mid", "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate", "a=fingerprint", and "a=setup" lines must be included as mentioned above.
+        <t>Lastly, if a data channel has been created, a m= section MUST be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field MUST be set to "DTLS/SCTP", as specified in <xref target="I-D.ietf-mmusic-sctp-sdp" />, Section 3. The "a=mid", "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate", "a=fingerprint", and "a=setup" lines MUST be included as mentioned above.
         [OPEN ISSUE: additional SCTP-specific stuff to be included, as indicated in <xref target="I-D.jesup-rtcweb-data-protocol" /> (currently none)]
         </t>
 
+        <t>Once all m= sections have been generated, a session-level "a=group" attribute MUST be added as specified in <xref target="RFC5888" />. This attribute MUST have semantics "BUNDLE", and identify the m= sections to be bundled. [OPEN ISSUE: Need to determine exactly how this decision is made.]</t>
+        
         <t>Attributes that are common between all m= sections MAY be moved to session-level, if desired.</t>
 
         <t>Attributes other than the ones specified above MAY be included, except for the following attributes which are specifically incompatible with the requirements of <xref
@@ -1067,7 +1068,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Initial Answers">
           <t>When createAnswer is called for the first time after a remote description has been provided, the result is known as the initial answer. If no remote description has been installed, an answer cannot be generated, and an error MUST be returned.</t>
 
-          <t>The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the Initial Offers section above.</t>
+          <t>[OPEN ISSUE: If mandatory attributes are missing in a particular m= section in the offer, should this cause setRemoteDescription to fail, or should this cause createAnswer to reject those particular m= sections?]</t>
+
+          <t>The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the Initial Offers section above, with the addition that </t>
 
           <t>The next step is to generate m= sections for each m= section that is present in the remote offer, as specified in <xref target="RFC3264" />, Section 6. For the purposes of this discussion, any session-level attributes in the offer that are also valid as media-level attributes SHALL be considered to be present in each m= section.</t>
 
@@ -1082,29 +1085,36 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>[OPEN ISSUE: Use of App Token versus stream-correlator ]</t>
                 <t>If a local MediaStreamTrack has been associated, an "a=sendrecv" line, as specified in <xref target="RFC3264" />, Section 6.1. If no local MediaStreamTrack has been associated, an "a=recvonly" line.</t>
                 [TODO: handle non-sendrecv offered m= sections]
-                <t>For each supported codec that is present in the offer, "a=rtpmap" and "a=fmtp" lines, as specified in <xref target="RFC4566" />, Section 6, and <xref target="RFC3264" />, Section 6.1. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported. Note that </t>
+                <t>For each supported codec that is present in the offer, "a=rtpmap" and "a=fmtp" lines, as specified in <xref target="RFC4566" />, Section 6, and <xref target="RFC3264" />, Section 6.1. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported. Note that for simplicity, the answerer MAY use different payload types for codecs than the offerer, as it is not prohibited by Section 6.1.</t>
                 <t>If "rtx" is present in the offer, for each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx" with the clock rate of the primary codec and an "a=fmtp" line that references the payload type fo the primary codec, as specified in <xref target="RFC4588" />, Section 8.1.</t>
                 <t>For each supported FEC mechanism that is present in the offer, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
-               
-                [WORKING HERE]
                 <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4.</t>
-                <t>An "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
+                <t>If the "trickle" ICE option is present in the offer, an "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
                 <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in <xref target="RFC5245" />, Section 4.3., paragraph 3.</t>
                 <t>For the current default candidate, a "c=" line, as specific in <xref target="RFC5245" />, Section 4.3., paragraph 6. If no candidates have yet been gathered yet, the default candidate should be set to the null value defined in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 5.1.</t>
                 <t>An "a=fingerprint" line, as specified in <xref target="RFC4572" />, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added.</t>
-                <t>An "a=setup" line, as specified in <xref target="RFC4145" />, Section 4, and clarified for use in DTLS-SRTP scenarios in <xref target="RFC5763" />, Section 5. The role value in the offer MUST be "actpass".</t>
-                <t>An "a=rtcp-mux" line, as specified in <xref target="RFC5761" />, Section 5.1.1.</t>
-                <t>An "a=rtcp-rsize" line, as specified in <xref target="RFC5506" />, Section 5.</t>
-                <t>For each supported RTP header extension, an "a=extmap" line, as specified in <xref target="RFC5285" />, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in <xref target="RFC6904" />, Section 4.</t>
-                <t>For each supported RTCP feedback mechanism, an "a=rtcp-fb" mechanism, as specified in <xref target="RFC4585" />, Section 4.2. The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.1.</t>
-                <t>An "a=ssrc" line, as specified in <xref target="RFC5576" />, Section 4.1, indicating the SSRC to be used for sending media.</t>
-                <t>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <xref target="RFC5576" />, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</t>
-                <t>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line, as specified in <xref target="RFC5576" />, section 4.2, with semantics set to "FEC" and including the primary and FEC SSRCs.</t>
+                <t>An "a=setup" line, as specified in <xref target="RFC4145" />, Section 4, and clarified for use in DTLS-SRTP scenarios in <xref target="RFC5763" />, Section 5. The role value in the answer MUST be "active" or "passive"; the "active" role is RECOMMENDED.</t>
+                <t>If present in the offer, an "a=rtcp-mux" line, as specified in <xref target="RFC5761" />, Section 5.1.1.</t>
+                <t>If present in the answer, an "a=rtcp-rsize" line, as specified in <xref target="RFC5506" />, Section 5.</t>
+                <t>For each supported RTP header extension that is present in the offer, an "a=extmap" line, as specified in <xref target="RFC5285" />, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in <xref target="RFC6904" />, Section 4.</t>
+                <t>For each supported RTCP feedback mechanism that is present in the offer, an "a=rtcp-fb" mechanism, as specified in <xref target="RFC4585" />, Section 4.2. The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <xref target="I-D.ietf-rtcweb-rtp-usage"/>, Section 5.1.</t>
+                <t>If a local MediaStreamTrack has been associated, an "a=ssrc" line, as specified in <xref target="RFC5576" />, Section 4.1, indicating the SSRC to be used for sending media.</t>
+                <t>If a local MediaStreamTrack has been associated, and RTX has been negotiated for this m= section, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <xref target="RFC5576" />, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</t>
+                <t>If a local MediaStreamTrack has been associated, and FEC has been negotiated for this m= section, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line, as specified in <xref target="RFC5576" />, section 4.2, with semantics set to "FEC" and including the primary and FEC SSRCs.</t>
                 <t>[OPEN ISSUE: Handling of a=imageattr]</t>
                 <t>[TODO: bundle-only]</t>
             </list>
         </t>
 
+        <t>If a data channel m= section has been offered, a m= section MUST also be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field MUST be set to "DTLS/SCTP", as specified in <xref target="I-D.ietf-mmusic-sctp-sdp" />, Section 3. The "a=mid", "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate", "a=fingerprint", and "a=setup" lines MUST be included as mentioned above.
+        [OPEN ISSUE: additional SCTP-specific stuff to be included, as indicated in <xref target="I-D.jesup-rtcweb-data-protocol" /> (currently none)]
+        </t>
+
+        <t>Once all m= sections have been generated, a session-level "a=group" attribute MUST be added as specified in <xref target="RFC5888" />. This attribute MUST have semantics "BUNDLE", and identify the non-rejected m= sections to be bundled. [OPEN ISSUE: Need to determine exactly how this decision is made.]</t>
+        
+        <t>Attributes that are common between all m= sections MAY be moved to session-level, if desired.</t>
+
+        <t>The attributes prohibited in creation of offers are also prohibited in the creation of answers.</t>
         </section> 
         <section title="Subsequent Answers">
         </section>
