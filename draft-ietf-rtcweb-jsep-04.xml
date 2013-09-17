@@ -964,21 +964,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </t>
         <t>The next step is to generate m= sections for each MediaStreamTrack that has been added to the PeerConnection via the addStream method. Note that this method takes a MediaStream, which can contain multiple MediaStreamTracks, and therefore multiple m= sections can be generated even if addStream is only called once.</t>
 
-        <t>Each m= section should be generated as specified in <xref target="RFC4566" />, Section 5.14. Each m= line that is not marked for "bundle-only" MUST have a unique port number in the initial offer while m= lines that are marked bundle-only MUST use the same port.  The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
+        <t>Each m= section should be generated as specified in <xref target="RFC4566" />, Section 5.14. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". If a m= section is not being bundled into another m= section, it MUST generate a unique set of ICE credentials and gather its own set of candidates. Otherwise, it MUST use the same ICE credentials and candidates that were used in the m= section that it is being bundled into. For DTLS, all m= sections MUST use the same certificate [OPEN ISSUE: how this is configured] and will therefore have the same fingerprint values.</t>
+
+        <t>Each m= section MUST include the following:
             <list style="symbols">
                 <t>An "a=mid" line, as specified in <xref target="RFC5888" />, Section 4.</t>
-                <t>For all m= sections that are allowed to be bundled, add them to the bundle group.</t>
                 <t>An "a=msid" line, as specified in <xref target="I-D.ietf-mmusic-msid" />, Section 2.</t>
                 <t>[OPEN ISSUE: Use of App Token versus stream-correlator ]</t>
                 <t>An "a=sendrecv" line, as specified in <xref target="RFC3264" />, Section 5.1.</t>
                 <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in <xref target="RFC4566" />, Section 6. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported.</t>
                 <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx" with the clock rate of the primary codec and an "a=fmtp" line that references the payload type fo the primary codec, as specified in <xref target="RFC4588" />, Section 8.1.</t>
                 <t>For each supported FEC mechanism, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
-                <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4. [TODO: reference BUNDLE draft on when ICE credentials are the same and when they are different.]</t>
+                <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4.</t>
                 <t>An "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
                 <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in <xref target="RFC5245" />, Section 4.3., paragraph 3.</t>
                 <t>For the current default candidate, a "c=" line, as specific in <xref target="RFC5245" />, Section 4.3., paragraph 6. [OPEN ISSUE, pending resolution in mmusic: If no candidates have yet been gathered yet, the default candidate should be set to the null value defined in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 5.1.]</t>
-                <t>An "a=fingerprint" line, as specified in <xref target="RFC4572" />, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added. When using bundle, all m= section MUST use the same certificate so they get the same fingerprint values. </t>
+                <t>An "a=fingerprint" line, as specified in <xref target="RFC4572" />, Section 5. Use of the SHA-256 algorithm for the fingerprint is REQUIRED; if the browser also supports stronger hashes, additional "a=fingerprint" lines with these hashes MAY also be added. /t>
                 <t>An "a=setup" line, as specified in <xref target="RFC4145" />, Section 4, and clarified for use in DTLS-SRTP scenarios in <xref target="RFC5763" />, Section 5. The role value in the offer MUST be "actpass".</t>
                 <t>An "a=rtcp-mux" line, as specified in <xref target="RFC5761" />, Section 5.1.1.</t>
                 <t>An "a=rtcp-rsize" line, as specified in <xref target="RFC5506" />, Section 5.</t>
@@ -987,7 +988,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>An "a=ssrc" line, as specified in <xref target="RFC5576" />, Section 4.1, indicating the SSRC to be used for sending media.</t>
                 <t>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <xref target="RFC5576" />, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</t>
                 <t>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line, as specified in <xref target="RFC5576" />, section 4.2, with semantics set to "FEC" and including the primary and FEC SSRCs.</t>
-              <t> When adding any SDP extension with bundle, the offer MUST follow the advice in  <xref target="I-D.nandakumar-mmusic-sdp-mux-attributes"/> on constraints when using that SDP extension with bundle. </t>
                 <t>[OPEN ISSUE: Handling of a=imageattr]</t>
                 <t>[TODO: bundle-only]</t>
             </list>
@@ -1008,6 +1008,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>"a=key-mgmt"</t>
             <t>"a=ice-lite"</t>
           </list>
+          <t>Note that when BUNDLE is used, any additional attributes that are added MUST follow the advice in <xref target="I-D.nandakumar-mmusic-sdp-mux-attributes"/> on how those attributes interact with BUNDLE.</t>
         </t>
     </section>
 
@@ -1029,11 +1030,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </list>
       </t>
 
- <t>If the initial offer was applied using setLocalDescription and the PeerConnection is in the "received-pranswer" states, the offer must be identical to the original offer with the exception of including ICE candidates lines for any all the ICE candidates that have been gathered. 
- </t>
-
-      <t>If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription,
- and the PeerConnection is in the "stable" state, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "sent-offer" state above, along with these exceptions: 
+      <t>If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "received-pranswer" or "stable" states,
+      an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "sent-offer" state above, along with these exceptions:
+      [OPEN ISSUE: should this be permitted in the received-pranswer state?]
           <list style="symbols">
             <t>If a m= section was rejected, i.e. has had its port set to zero in either the local or remote description, it MUST remain rejected and have a zero port in the new offer, as indicated in RFC3264, Section 5.1.</t>
             <t>If a m= section exists in the current local description, but has its state set to inactive or recvonly, and a new MediaStreamTrack is added, the previously existing m= section MUST be recycled instead of creating a new m= section. [OPEN ISSUE: Nail down exactly what this means. Should the codecs remain the same? (No.) Should ICE restart? (No.) Can the "a=mid" attribute be changed? (Yes?)]</t>
@@ -1071,12 +1070,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <section title="Generating an Answer">
            <t>When createAnswer is called, a new SDP description must be created that is compatible with the supplied remote description as well as the requirements specified in <xref
-        target="I-D.ietf-rtcweb-rtp-usage"/>.  The exact details of this process are explained below.</t>
+        target="I-D.ietf-rtcweb-rtp-usage"/>. The exact details of this process are explained below.</t>
 
         <section title="Initial Answers">
-          <t>When createAnswer is called for the first time after a remote description has been provided, the result is known as the initial answer. If no remote description has been installed, an answer cannot be generated, and an error MUST be returned. Note that the remote description SDP may not have been created by a WebRTC endpoint and may not conform to the requirements in <xref target="sec-create-offer"/>.</t>
+          <t>When createAnswer is called for the first time after a remote description has been provided, the result is known as the initial answer. If no remote description has been installed, an answer cannot be generated, and an error MUST be returned.</t>
 
-          <t>[OPEN ISSUE: If attributes that are madatory in SDP are missing in a particular m= section in the offer, should this cause setRemoteDescription to fail, or should this cause createAnswer to reject those particular m= sections?]</t>
+          <t>Note that the remote description SDP may not have been created by a WebRTC endpoint and may not conform to all the requirements listed in <xref target="sec-create-offer"/>. For many cases, this is not a problem. However, if any mandatory SDP attributes are missing, or functionality listed as mandatory-to-use is not present (e.g. ICE, DTLS), this MUST be treated as an error. [OPEN ISSUE: Should this cause setRemoteDescription to fail, or should this cause createAnswer to reject those particular m= sections?]</t>
 
           <t>The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the Initial Offers section above, with the addition that </t>
 
@@ -1086,7 +1085,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>For each non-rejected m= section of a given media type, if there is a local MediaStreamTrack of the specified type which has been added to the PeerConnection via addStream and not yet associated with a m= section, the MediaStreamTrack is associated with the m= section at this time. If there are more m= sections of a certain type than MediaStreamTracks, some m= sections will not have an associated MediaStreamTrack. If there are more MediaStreamTracks of a certain type than m= sections, only the first N MediaStreamTracks will be able to be associated in the constructed answer. The remainder will need to be associated in a subsequent offer. </t>
 
-        <t>Each m= section should then generated as specified in <xref target="RFC3264" />, Section 6.1. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". If the offer supports bundle, all m= lines in the bundle group MUST use the same port while "m=" lines that are not in the bundle group MUST get a unique port number. Each m= section MUST include the following:
+        <t>Each m= section should then generated as specified in <xref target="RFC3264" />, Section 6.1. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". If the offer supports BUNDLE, all m= sections to be BUNDLEd must use the same ICE credentials and candidates; all m= sections not being BUNDLEd must use unique ICE credentials and candidates. Each m= section MUST include the following:
            <list style="symbols"> 
                 <t>If present in the offer, an "a=mid" line, as specified in <xref target="RFC5888" />, Section 9.1. The "mid" value MUST match that specified in the offer.</t>
                 <t>If a local MediaStreamTrack has been associated, an "a=msid" line, as specified in <xref target="I-D.ietf-mmusic-msid" />, Section 2.</t>
@@ -1118,7 +1117,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         [OPEN ISSUE: additional SCTP-specific stuff to be included, as indicated in <xref target="I-D.jesup-rtcweb-data-protocol" /> (currently none)]
         </t>
 
-        <t>Once all m= sections have been generated, a session-level "a=group" attribute MUST be added as specified in <xref target="RFC5888" />. This attribute MUST have semantics "BUNDLE", and identify the non-rejected m= sections to be bundled. [OPEN ISSUE: Need to determine exactly how this decision is made.]</t>
+        <t>[TODO: processing of BUNDLE group]</t>
         
         <t>Attributes that are common between all m= sections MAY be moved to session-level, if desired.</t>
 
