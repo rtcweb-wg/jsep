@@ -972,7 +972,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>[OPEN ISSUE: Use of App Token versus stream-correlator ]</t>
                 <t>An "a=sendrecv" line, as specified in <xref target="RFC3264" />, Section 5.1.</t>
                 <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in <xref target="RFC4566" />, Section 6. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported.</t>
-                <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx/8000" and an "a=fmtp" line that references the payload type fo the primary codec, as specified in <xref target="RFC4588" />.</t>
+                <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx" with the clock rate of the primary codec and an "a=fmtp" line that references the payload type fo the primary codec, as specified in <xref target="RFC4588" />, Section 8.1.</t>
                 <t>For each supported FEC mechanism, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
                 <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4.</t>
                 <t>An "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
@@ -1069,20 +1069,24 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the Initial Offers section above.</t>
 
-          <t>The next step is to generate m= sections for each m= section that is present in the remote offer. For the purposes of this discussion, any session-level attributes in the offer that are also valid as media-level attributes SHALL be considered to be present in each m= section.</t>
+          <t>The next step is to generate m= sections for each m= section that is present in the remote offer, as specified in <xref target="RFC3264" />, Section 6. For the purposes of this discussion, any session-level attributes in the offer that are also valid as media-level attributes SHALL be considered to be present in each m= section.</t>
 
-          <t>For each m= section of a given media type, if there is a local MediaStreamTracks of the specified type which has been added to the PeerConnection via addStream, and not yet associated with a m= section, it is associated with the m= section. If there are more m= sections of a certain type than MediaStreamTracks, some m= sections will not have an associated MediaStreamTrack. If there are more MediaStreamTracks of a certain type than m= sections, only the first N MediaStreamTracks will be able to be associated in the constructed answer. The remainder will need to be associated in a subsequent offer. </t>
+          <t>If any of the offered m= sections have been rejected, by stopping the associated remote MediaStreamTrack, the corresponding m= section in the answer MUST be marked as rejected by setting the port in the m= line to zero, as indicated in <xref target="RFC3264" />, Section 6., and processing continues with the next m= section.</t>
 
-        <t>Each m= section should be generated as specified in <xref target="RFC4566" />, Section 5.14. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
-            [TODO: STill working on this part]
+          <t>For each non-rejected m= section of a given media type, if there is a local MediaStreamTrack of the specified type which has been added to the PeerConnection via addStream and not yet associated with a m= section, the MediaStreamTrack is associated with the m= section at this time. If there are more m= sections of a certain type than MediaStreamTracks, some m= sections will not have an associated MediaStreamTrack. If there are more MediaStreamTracks of a certain type than m= sections, only the first N MediaStreamTracks will be able to be associated in the constructed answer. The remainder will need to be associated in a subsequent offer. </t>
+
+        <t>Each m= section should then generated as specified in <xref target="RFC3264" />, Section 6.1. The &lt;proto&gt; field MUST be set to "RTP/SAVPF". Each m= section MUST include the following:
             <list style="symbols">
-                <t>An "a=mid" line, as specified in <xref target="RFC5888" />, Section 4.</t>
-                <t>An "a=msid" line, as specified in <xref target="I-D.ietf-mmusic-msid" />, Section 2.</t>
+                <t>If present in the offer, an "a=mid" line, as specified in <xref target="RFC5888" />, Section 9.1. The "mid" value MUST match that specified in the offer.</t>
+                <t>If a local MediaStreamTrack has been associated, an "a=msid" line, as specified in <xref target="I-D.ietf-mmusic-msid" />, Section 2.</t>
                 <t>[OPEN ISSUE: Use of App Token versus stream-correlator ]</t>
-                <t>An "a=sendrecv" line, as specified in <xref target="RFC3264" />, Section 5.1.</t>
-                <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in <xref target="RFC4566" />, Section 6. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported.</t>
-                <t>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx/8000" and an "a=fmtp" line that references the payload type fo the primary codec, as specified in <xref target="RFC4588" />.</t>
-                <t>For each supported FEC mechanism, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
+                <t>If a local MediaStreamTrack has been associated, an "a=sendrecv" line, as specified in <xref target="RFC3264" />, Section 6.1. If no local MediaStreamTrack has been associated, an "a=recvonly" line.</t>
+                [TODO: handle non-sendrecv offered m= sections]
+                <t>For each supported codec that is present in the offer, "a=rtpmap" and "a=fmtp" lines, as specified in <xref target="RFC4566" />, Section 6, and <xref target="RFC3264" />, Section 6.1. For audio, the codecs specified in <xref target="I-D.ietf-rtcweb-audio"/>, Section 3, MUST be be supported. Note that </t>
+                <t>If "rtx" is present in the offer, for each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx" with the clock rate of the primary codec and an "a=fmtp" line that references the payload type fo the primary codec, as specified in <xref target="RFC4588" />, Section 8.1.</t>
+                <t>For each supported FEC mechanism that is present in the offer, a corresponding "a=rtpmap" line indicating the desired FEC codec.</t>
+               
+                [WORKING HERE]
                 <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref target="RFC5245" />, Section 15.4.</t>
                 <t>An "a=ice-options" line, with the "trickle" option, as specified in <xref target="I-D.ivov-mmusic-trickle-ice" />, Section 4.</t>
                 <t>For each candidate that has been gathered during the most recent gathering phase, an "a=candidate" line, as specified in <xref target="RFC5245" />, Section 4.3., paragraph 3.</t>
@@ -2323,22 +2327,17 @@ OffererJS->AnswererJS:  ACK
       </section>
       <section title="Example Session Descriptions">
         <section title="createOffer">
-            <t>This SDP shows a typical result from createOffer for a PeerConnection with a single audio MediaStreamTrack and a single video MediaStreamTrack.
-                [TODO: candidates have already been gathered here. Update for trickle.] 
+            <t>This SDP shows a typical initial offer, created by createOffer for a PeerConnection with a single audio MediaStreamTrack, a single video MediaStreamTrack, and a single data channel.
 Note some lines have been broken into two lines for formatting reasons. </t>
             <figure><artwork>
 v=0
 o=- 4962303333179871722 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=group:BUNDLE audio video
-m=audio 58503 RTP/SAVPF 111 0 8 126
-c=IN IP4 10.0.0.11
-a=rtcp:49634 IN IP4 10.0.0.11
-a=candidate:946015839 1 udp 2113937151 10.0.0.11 58503 
-            typ host generation 0
-a=candidate:946015839 2 udp 2113937150 10.0.0.11 49634 
-            typ host generation 0
+a=group:BUNDLE audio video data
+m=audio 9 RTP/SAVPF 111 0 8 126
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
 a=ice-ufrag:ETEn1v9DoTMB9J4r
 a=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl
 a=ice-options:trickle
@@ -2350,6 +2349,7 @@ a=rtcp-rsize
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
+a=setup:actpass              
 a=rtpmap:111 opus/48000/2
 a=fmtp:111 minptime=10
 a=rtpmap:0 PCMU/8000
@@ -2359,16 +2359,11 @@ a=maxptime:60
 a=ssrc:1732846380 cname:EocUG1f0fcg/yvY7
 a=msid:47017fee-b6c1-4162-929c-a25110252400 
        f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9
-
-m=video 57918 RTP/SAVPF 100 115 116 117
-c=IN IP4 10.0.0.11
-a=rtcp:50936 IN IP4 10.0.0.11
-a=candidate:946015839 1 udp 2113937151 10.0.0.11 57918 typ host 
-            generation 0
-a=candidate:946015839 2 udp 2113937150 10.0.0.11 50936 typ host 
-            generation 0
-a=ice-ufrag:ETEn1v9DoTMB9J4r
-a=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl
+m=video 9 RTP/SAVPF 100 115 116 117
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
+a=ice-ufrag:BGKkWnG5GmiUpdIV
+a=ice-pwd:mqyWsAjvtKwTGnvhPztQ9mIf
 a=ice-options:trickle
 a=mid:video
 a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
@@ -2379,6 +2374,7 @@ a=rtcp-rsize
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
+a=setup:actpass
 a=rtpmap:100 VP8/90000
 a=rtcp-fb:100 ccm fir
 a=rtcp-fb:100 nack
@@ -2394,9 +2390,86 @@ a=ssrc-group:FID 1366781083 1366781084
 a=ssrc-group:FEC 1366781083 1366781085
 a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae 
        f30bdb4a-5db8-49b5-bcdc-e0c9a23172e0
+m=application 9 DTLS/SCTP 5000
+c=IN IP4 0.0.0.0
+a=ice-ufrag:VD5v2BnbZm3mgP3d
+a=ice-pwd:+Jlkuox+VVIUDqxcfIDuTZMH
+a=ice-options:trickle
+a=mid:data
+a=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
+                      BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
+a=setup:actpass
+a=fmtp:5000 protocol=webrtc-datachannel; streams=10
             </artwork></figure>
         </section>
         <section title="createAnswer">
+              <t>This SDP shows a typical initial answer to the above offer, created by createAnswer for a PeerConnection with a single audio MediaStreamTrack and a single video MediaStreamTrack.
+Note some lines have been broken into two lines for formatting reasons. </t>
+            <figure><artwork>
+v=0
+o=- 6729291447651054566 1 IN IP4 0.0.0.0
+s=-
+t=0 0
+a=group:BUNDLE audio video data
+m=audio 9 RTP/SAVPF 111 0 8 126
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
+a=ice-ufrag:6sFvz2gdLkEwjZEr
+a=ice-pwd:cOTZKZNVlO9RSGsEGM63JXT2
+a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
+                      DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
+a=setup:active
+a=mid:audio
+a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
+a=sendrecv
+a=rtcp-mux
+a=rtpmap:111 opus/48000/2
+a=fmtp:111 minptime=10
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+a=rtpmap:126 telephone-event/8000
+a=maxptime:60
+a=ssrc:3429951804 cname:Q/NWs1ao1HmN4Xa5
+a=msid:PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1
+       PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1a0
+m=video 1 RTP/SAVPF 100 115 116 117
+c=IN IP4 0.0.0.0
+a=rtcp:1 IN IP4 0.0.0.0
+a=ice-ufrag:xvURvWWcA/tyMcxR
+a=ice-pwd:rTnKv8I7t9Nd4BBvnQSDNVq3
+a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
+                      DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
+a=setup:active
+a=mid:video
+a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
+a=extmap:3 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=sendrecv
+a=rtcp-mux
+a=rtpmap:100 VP8/90000
+a=rtcp-fb:100 ccm fir
+a=rtcp-fb:100 nack
+a=rtcp-fb:100 goog-remb
+a=rtpmap:115 rtx/90000
+a=fmtp:115 apt=100
+a=rtpmap:116 red/90000
+a=rtpmap:117 ulpfec/90000
+a=ssrc:3229706345 cname:Q/NWs1ao1HmN4Xa5
+a=ssrc:3229706346 cname:Q/NWs1ao1HmN4Xa5
+a=ssrc:3229706347 cname:Q/NWs1ao1HmN4Xa5
+a=ssrc-group:FID 3229706345 3229706346
+a=ssrc-group:FEC 3229706345 3229706347
+a=msid:PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1
+       PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1v0
+m=application 9 DTLS/SCTP 5000
+c=IN IP4 0.0.0.0
+a=ice-ufrag:9TF7rdya0fKuMkl9
+a=ice-pwd:BpCsBLK/MHwNGnKp4kVen2oZ
+a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
+                      DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
+a=setup:active
+a=mid:data
+a=fmtp:5000 protocol=webrtc-datachannel; streams=10
+            </artwork></figure>
         </section>
       </section>
     </section>
