@@ -54,7 +54,7 @@
       </address>
     </author>
 
-    <date day="18" month="September" year="2013" />
+    <date day="21" month="October" year="2013" />
 
     <area>RAI</area>
 
@@ -873,72 +873,96 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       <t>This section describes the specific procedures to be followed when
       creating and parsing SDP objects.</t>
 
-      <section title="SDP Requirements Overview">
-        <t>The key specifications that govern creation and processing of
-        offers and answers are listed below. This list is derived from <xref
-        target="I-D.ietf-rtcweb-rtp-usage"></xref>. <list style="format R-%d">
-            <!-- TODO - fix the refs in here -->
+      <section title="Requirements Overview">
+        <t>JSEP implementations must comply with the specifications listed 
+        below that govern the creation and processing of offers and answers.
+        </t>
+        <t>The first set of specifications is the "mandatory-to-implement" set.
+        All implementations must support these behaviors, but may not use all
+        of them if the remote side, which may not be a JSEP endpoint, does not
+        support them.</t>
+        <t>The second set of specifications is the "mandatory-to-use" set.
+        The local JSEP endpoint and any remote endpoint must indicate support
+        for these specifications in their session descriptions.</t>
+        
+        <section title="Implementation Requirements">
+            <t>This list of mandatory-to-implement specifications is derived 
+            from the requirements outlined in 
+            <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>.
+            <list style="format R-%d">
+                <t><xref target="RFC4566"></xref> is the base SDP specification
+                and MUST be implemented.</t>
 
-            <t><xref target="RFC4566"></xref> is the base SDP specification
-            and MUST be implemented.</t>
+                <t><xref target="RFC5764"></xref> MUST be supported for signaling
+                the UDP/TLS/RTP/SAVPF RTP profile.</t>
 
-            <t>The <xref target="RFC5888"></xref> grouping framework MUST be
-            implemented for signaling grouping information, and MUST be used
-            to identify m= lines via the a=mid attribute.</t>
+                <t><xref target="RFC5245"></xref> MUST be implemented for
+                signaling the ICE credentials and candidate lines corresponding
+                to each media stream. The ICE implementation MUST be a Full
+                implementation, not a Lite implementation.</t>
 
-            <t><xref target="RFC5124"></xref> MUST be supported for signaling
-            RTP/SAVPF RTP profile.</t>
+                <t><xref target="RFC5763"></xref> MUST be implemented to signal
+                DTLS certificate fingerprints.</t>
 
-            <t><xref target="RFC4585"></xref> MUST be implemented to signal
-            RTCP based feedback.</t>
+                <t><xref target="RFC4568"></xref> MUST NOT be implemented to
+                signal SDES SRTP keying information.</t>
 
-            <t><xref target="RFC5245"></xref> MUST be implemented for
-            signaling the ICE candidate lines corresponding to each media
-            stream.</t>
+                <t>The <xref target="RFC5888"></xref> grouping framework MUST 
+                be implemented for signaling grouping information, and MUST be 
+                used to identify m= lines via the a=mid attribute.</t>
 
-            <t><xref target="RFC5761"></xref> MUST be implemented to signal
-            multiplexing of RTP and RTCP.</t>
+                <t><xref target="I-D.ietf-mmusic-msid"></xref> MUST be
+                supported, in order to signal associations between RTP objects
+                and W3C MediaStreams and MediaStreamTracks in a standard way.
+                </t>
 
-            <t>The SDP atributes of "sendonly", "recvonly", "inactive", and
-            "sendrecv" from <xref target="RFC4566"></xref> MUST be implemented
-            to signal information about media direction.</t>
+                <t>The bundle mechanism in <xref
+                target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref> MUST be
+                supported to signal the ability to multiplex RTP streams on a
+                single UDP port, in order to avoid excessive use of port number
+                resources.</t>
 
-            <t><xref target="RFC5576"></xref> MUST be implemented to signal
-            RTP SSRC values.</t>
+                <t>The SDP attributes of "sendonly", "recvonly", "inactive", and
+                "sendrecv" from <xref target="RFC4566"></xref> MUST be
+                implemented to signal information about media direction.</t>
 
-            <t><xref target="RFC5763"></xref> MUST be implemented to signal
-            DTLS certificate fingerprints.</t>
+                <t><xref target="RFC5576"></xref> MUST be implemented to signal
+                RTP SSRC values.</t>
 
-            <t><xref target="RFC5506"></xref> MAY be implemented to signal
-            Reduced-Size RTCP messages.</t>
+                <t><xref target="RFC4585"></xref> MUST be implemented to signal
+                RTCP based feedback.</t>
 
-            <t><xref target="RFC3556"></xref> with bandwidth modifiers MAY be
-            supported for specifying RTCP bandwidth as a fraction of the media
-            bandwidth, RTCP fraction allocated to the senders and setting
-            maximum media bit-rate boundaries.</t>
+                <t><xref target="RFC5761"></xref> MUST be implemented to signal
+                multiplexing of RTP and RTCP.</t>
 
-            <t><xref target="RFC4568"></xref> MUST NOT be implemented to
-            signal SDES SRTP keying information.</t>
+                <t><xref target="RFC5506"></xref> MUST be implemented to signal
+                reduced-size RTCP messages.</t>
 
-            <t>A <xref target="I-D.ietf-mmusic-msid"></xref> MUST be
-            supported, in order to signal associations between RTP objects and
-            W3C MediaStreams and MediaStreamTracks in a standard way.</t>
+                <t><xref target="RFC3556"></xref> with bandwidth modifiers MAY 
+                be supported for specifying RTCP bandwidth as a fraction of the
+                media bandwidth, RTCP fraction allocated to the senders and 
+                setting maximum media bit-rate boundaries.</t>
+            </list></t>
 
-            <t>The bundle mechanism in <xref
-            target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref> MUST be
-            supported to signal the use or multiplexing RTP somethings on a
-            single UDP port, in order to avoid excessive use of port number
-            resources.</t>
-          </list></t>
+            <t>As required by <xref target="RFC4566"></xref>, Section 5.13, JSEP
+            implementations MUST ignore unknown attribute (a=) lines.</t>
+        </section>
 
-        <t>As required by <xref target="RFC4566"></xref> Section 5.13 JSEP
-        implementations MUST ignore unknown attributes (a=) lines.</t>
-
-        <t>Example SDP for RTCWeb call flows can be found in <xref
-        target="I-D.nandakumar-rtcweb-sdp"></xref>. [TODO: since we are
-        starting to specify how to handle SDP in this document, should these
-        call flows be merged into this document, or this link moved to the
-        examples section?]</t>
+        <section title="Usage Requirements">
+            <t>All session descriptions handled by JSEP endpoints, 
+            both local and remote, MUST indicate support for the following
+            specifications. If any of these are absent, this omission MUST be
+            treated as an error. <list style="format R-%d">
+                <t>Either the UDP/TLS/RTP/SAVP or the UDP/TLS/RTP/SAVPF RTP
+                profile, as specified in <xref target="RFC5764"></xref>,
+                MUST be used.</t>
+                <t>ICE, as specified in <xref target="RFC5245"></xref>,
+                MUST be used. Note that the remote endpoint MAY use a Lite
+                implementation.</t>
+                <t>DTLS-SRTP, as specified in <xref target="RFC5763"></xref>,
+                MUST be used.</t> 
+            </list></t>
+        </section>
       </section>
 
       <section anchor="sec-create-offer" title="Constructing an Offer">
@@ -1295,10 +1319,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             value of "true", the offer MUST indicate support for silence
             suppression by including comfort noise ("CN") codecs for each
             supported clock rate, as specified in <xref
-            target="RFC3389"></xref>, Section 5.1. [OPEN issue: should this do
-            anything in signaling, or should it just control built-in DTX
-            modes in audio codecs? Opus has built-in DTX, but G.711 does
-            not.]</t>
+            target="RFC3389"></xref>, Section 5.1.</t>
           </section>
 
           <section title="IceRestart">
@@ -1326,14 +1347,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           cannot be generated, and an error MUST be returned.</t>
 
           <t>Note that the remote description SDP may not have been created by
-          a WebRTC endpoint and may not conform to all the requirements listed
+          a JSEP endpoint and may not conform to all the requirements listed
           in <xref target="sec-create-offer"></xref>. For many cases, this is
           not a problem. However, if any mandatory SDP attributes are missing,
-          or functionality listed as mandatory-to-use is not present (e.g.
-          ICE, DTLS) [TODO: find reference for this], this MUST be treated as
-          an error. [OPEN ISSUE: Should this cause setRemoteDescription to
-          fail, or should this cause createAnswer to reject those particular
-          m= sections?]</t>
+          or functionality listed as mandatory-to-use above is not present, 
+          this MUST be treated as an error, and MUST cause the affected 
+          m= sections to be marked as rejected.</t>
 
           <t>The first step in generating an initial answer is to generate
           session-level attributes. The process here is identical to that
@@ -1496,7 +1515,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Attributes that are common between all m= sections MAY be moved
           to session-level, if desired.</t>
 
-          <t>The attributes prohibited in creation of offers are also
+          <t>The attributes prohibited in the creation of offers are also
           prohibited in the creation of answers.</t>
         </section>
 
@@ -3194,6 +3213,11 @@ a=mid:data
 a=sctpmap:5000 webrtc-datachannel 16
             ]]></artwork>
           </figure>
+        </section>
+        <section title="Call Flows">
+            <t>Example SDP for WebRTC call flows can be found in <xref
+            target="I-D.nandakumar-rtcweb-sdp"></xref>. [TODO: should these
+            call flows be merged into this section?]</t>
         </section>
       </section>
     </section>
