@@ -405,7 +405,7 @@ setRemote(ANSWER) |                                   |
           <t>Candidate trickling is a technique through which a caller may
           incrementally provide candidates to the callee after the initial
           offer has been dispatched; the semantics of "Trickle ICE" are
-          defined in <xref target="I-D.ivov-mmusic-trickle-ice"></xref>. This
+          defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>. This
           process allows the callee to begin acting upon the call and setting
           up the ICE (and perhaps DTLS) connections immediately, without
           having to wait for the caller to gather all possible candidates.
@@ -973,8 +973,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               to accomplish this.</t>
 
               <t>The third SDP line MUST be a "s=" line, as specified in <xref
-              target="RFC4566"></xref>, Section 5.3; a single space SHOULD be
-              used as the session name, e.g. "s= "</t>
+              target="RFC4566"></xref>, Section 5.3; to match the "o=" line, a
+              single dash SHOULD be used as the session name, e.g. "s=-".</t>
 
               <t>Session Information ("i="), URI ("u="), Email Address ("e="),
               Phone Number ("p="), Bandwidth ("b="), Repeat Times ("r="), and
@@ -987,25 +987,51 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>A "t=" line MUST be added, as specified in <xref
               target="RFC4566"></xref>, Section 5.9; both &lt;start-time&gt;
               and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t>
+
+              <t>An "a=msid-semantic:WMS" line MUST be added, as specified in
+              <xref target="I-D.ietf-mmusic-msid"></xref>, Section 4.</t>
             </list></t>
 
           <t>The next step is to generate m= sections for each
           MediaStreamTrack that has been added to the PeerConnection via the
-          addStream method. Note that this method takes a MediaStream, which
+          addStream method. (Note that this method takes a MediaStream, which
           can contain multiple MediaStreamTracks, and therefore multiple m=
-          sections can be generated even if addStream is only called once.</t>
+          sections can be generated even if addStream is only called once.) 
+          When generating m= sections, the ordering is based on (1) the order
+          in which the MediaStreams were added to the PeerConnection, and (2)
+          the alphabetical ordering of the media type for the MediaStreamTrack.
+          For example, if a MediaStream containing both an audio and a video 
+          MediaStreamTrack is added to a PeerConnection, the resultant m=audio
+          section will precede the m=video section.</t>
+
+          <t>Each m= section, provided it is not being bundled into
+          another m= section, MUST generate a unique set of ICE credentials
+          and gather its own unique set of ICE candidates. Otherwise, it MUST
+          use the same ICE credentials and candidates that were used in the
+          m= section that it is being bundled into.</t>
+
+          <t>For DTLS, all m= sections MUST use the certificate for the
+          identity that has been specified for the PeerConnection; as a result,
+          they MUST all have the same <xref target="RFC4572"></xref>fingerprint
+          value.</t>
 
           <t>Each m= section should be generated as specified in <xref
-          target="RFC4566"></xref>, Section 5.14. The &lt;proto&gt; field MUST
-          be set to "RTP/SAVPF". If a m= section is not being bundled into
-          another m= section, it MUST generate a unique set of ICE credentials
-          and gather its own set of candidates. Otherwise, it MUST use the
-          same ICE credentials and candidates that were used in the m= section
-          that it is being bundled into. For DTLS, all m= sections MUST use
-          the same certificate [OPEN ISSUE: how this is configured] and will
-          therefore have the same fingerprint values.</t>
-
-          <t>Each m= section MUST include the following: <list style="symbols">
+          target="RFC4566"></xref>, Section 5.14. For the m= line itself, the
+          following rules MUST be followed:<list style="symbols">
+            <t>The port value is set to the port of the default ICE candidate 
+            for this m= section; if this m= section is not being bundled into
+            another m= section, the port value MUST be unique. If no candidates
+            have yet been gathered, and a 'null' port value is being used, as 
+            indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+            Section 5.1., this port MUST still be unique.</t>
+            <t>To properly indicate use of DTLS, the &lt;proto&gt; field MUST
+            be set to "UDP/TLS/RTP/SAVPF", as specified in 
+            <xref target="RFC5764"/>, Section 8.</t>
+            </list>
+          </t>
+            
+          <t>Each m= section MUST include the following attribute lines:
+              <list style="symbols">
               <t>An "a=mid" line, as specified in <xref
               target="RFC5888"></xref>, Section 4.</t>
 
@@ -1036,7 +1062,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC5245"></xref>, Section 15.4.</t>
 
               <t>An "a=ice-options" line, with the "trickle" option, as
-              specified in <xref target="I-D.ivov-mmusic-trickle-ice"></xref>,
+              specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
               Section 4.</t>
 
               <t>For each candidate that has been gathered during the most
@@ -1045,16 +1071,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>For the current default candidate, a "c=" line, as specific
               in <xref target="RFC5245"></xref>, Section 4.3., paragraph 6.
-              [OPEN ISSUE, pending resolution in mmusic: If no candidates have
-              yet been gathered yet, the default candidate should be set to
-              the null value defined in <xref
-              target="I-D.ivov-mmusic-trickle-ice"></xref>, Section 5.1.]</t>
+              If no candidates have been gathered yet, the default candidate
+              should be set to the 'null' value defined in <xref
+              target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 5.1.</t>
 
               <t>An "a=fingerprint" line, as specified in <xref
-              target="RFC4572"></xref>, Section 5. Use of the SHA-256
-              algorithm for the fingerprint is REQUIRED; if the browser also
-              supports stronger hashes, additional "a=fingerprint" lines with
-              these hashes MAY also be added.</t>
+              target="RFC4572"></xref>, Section 5; the algorithm used for the 
+              fingerprint MUST match that used in the certificate signature.
+              </t>
 
               <t>An "a=setup" line, as specified in <xref
               target="RFC4145"></xref>, Section 4, and clarified for use in
@@ -1083,7 +1107,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>An "a=ssrc" line, as specified in <xref
               target="RFC5576"></xref>, Section 4.1, indicating the SSRC to be
-              used for sending media.</t>
+              used for sending media, along with the mandatory "cname" source
+              attribute, as specified in Section 6.1, indicating the CNAME for
+              the source. The CNAME must be generated in accordance with 
+              draft-rescorla-random-cname-00. [OPEN ISSUE: How are CNAMEs
+              specified for MSTs? Are they randomly generated for each
+              MediaStream? If so, can two MediaStreams be synced?]</t>
 
               <t>If RTX is supported for this media type, another "a=ssrc"
               line with the RTX SSRC, and an "a=ssrc-group" line, as specified
@@ -1104,13 +1133,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           generated for data. The &lt;media&gt; field MUST be set to
           "application" and the &lt;proto&gt; field MUST be set to
           "DTLS/SCTP", as specified in <xref
-          target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 3. The "a=mid",
+          target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 3; the "fmt" value
+          MUST be set to the SCTP port number, as specified in Section 4.1.</t>
+          <t>Within the data m= section, the "a=mid",
           "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate",
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
-          above. [OPEN ISSUE: additional SCTP-specific stuff to be included,
-          as indicated in <xref
-          target="I-D.jesup-rtcweb-data-protocol"></xref> (currently
-          none)]</t>
+          above, along with an "a=sctpmap" line referencing the SCTP port number
+          and specifying the application protocol indicated in <xref
+          target="I-D.ietf-rtcweb-data-protocol"></xref>. [OPEN ISSUE: the -00
+          of this document is missing this information.]</t>
 
           <t>Once all m= sections have been generated, a session-level
           "a=group" attribute MUST be added as specified in <xref
@@ -1140,26 +1171,26 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
 
         <section title="Subsequent Offers">
-          <t>When createOffer is called a second (or later) time, the
-          processing is different, depending on the current signaling
-          state.</t>
+          <t>When createOffer is called a second (or later) time, or is called
+          after a local description has already been installed, the processing
+          is somewhat different than for an initial offer.</t>
 
           <t>If the initial offer was not applied using setLocalDescription,
           meaning the PeerConnection is still in the "stable" state, the steps
-          for generating an initial offer should be followed, with this
-          exception: <list style="symbols">
-              <t>The "o=" line MUST stay the same.</t>
-            </list></t>
+          for generating an initial offer should be followed, subject to the
+          following restriction: <list style="symbols">
+            <t>The fields of the "o=" line MUST stay the same except for the
+            &lt;session-version&gt; field, which MUST increment if the session
+            description changes in any way, including the addition of 
+            ICE candidates.</t>
+            </list>
+          </t>
 
           <t>If the initial offer was applied using setLocalDescription, but
           an answer from the remote side has not yet been applied, meaning the
-          PeerConnection is still in the "local-offer" state, the steps for
-          generating an initial offer should be followed, with these
-          exceptions: <list style="symbols">
-              <t>The "o=" line MUST stay the same, except for the
-              &lt;session-version&gt; field, which MUST increase by 1 from the
-              previously applied local description.</t>
-
+          PeerConnection is still in the "local-offer" state, an offer is
+          generated by following the steps in the "stable" state above, along
+          with these exceptions: <list style="symbols">
               <t>The "s=" and "t=" lines MUST stay the same.</t>
 
               <t>Each "a=mid" line MUST stay the same.</t>
@@ -1306,8 +1337,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The first step in generating an initial answer is to generate
           session-level attributes. The process here is identical to that
-          indicated in the Initial Offers section above, with the addition
-          that</t>
+          indicated in the Initial Offers section above.</t>
 
           <t>The next step is to generate m= sections for each m= section that
           is present in the remote offer, as specified in <xref
@@ -1334,11 +1364,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           remainder will need to be associated in a subsequent offer.</t>
 
           <t>Each m= section should then generated as specified in <xref
-          target="RFC3264"></xref>, Section 6.1. The &lt;proto&gt; field MUST
-          be set to "RTP/SAVPF". If the offer supports BUNDLE, all m= sections
-          to be BUNDLEd must use the same ICE credentials and candidates; all
-          m= sections not being BUNDLEd must use unique ICE credentials and
-          candidates. Each m= section MUST include the following: <list
+          target="RFC3264"></xref>, Section 6.1. Because use of DTLS is
+          mandatory, the &lt;proto&gt; field MUST be set to "UDP/TLS/RTP/SAVPF".
+          If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
+          the same ICE credentials and candidates; all m= sections not being
+          BUNDLEd must use unique ICE credentials and candidates. Each
+          m= section MUST include the following: <list
               style="symbols">
               <t>If present in the offer, an "a=mid" line, as specified in
               <xref target="RFC5888"></xref>, Section 9.1. The "mid" value
@@ -1381,7 +1412,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>If the "trickle" ICE option is present in the offer, an
               "a=ice-options" line, with the "trickle" option, as specified in
-              <xref target="I-D.ivov-mmusic-trickle-ice"></xref>, Section
+              <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
               4.</t>
 
               <t>For each candidate that has been gathered during the most
@@ -1390,16 +1421,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>For the current default candidate, a "c=" line, as specific
               in <xref target="RFC5245"></xref>, Section 4.3., paragraph 6.
-              [OPEN ISSUE, pending resolution in mmusic: If no candidates have
-              yet been gathered yet, the default candidate should be set to
-              the null value defined in <xref
-              target="I-D.ivov-mmusic-trickle-ice"></xref>, Section 5.1.]</t>
+              If no candidates have been gathered yet, the default candidate
+              should be set to the 'null' value defined in <xref
+              target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 5.1.</t>
 
               <t>An "a=fingerprint" line, as specified in <xref
-              target="RFC4572"></xref>, Section 5. Use of the SHA-256
-              algorithm for the fingerprint is REQUIRED; if the browser also
-              supports stronger hashes, additional "a=fingerprint" lines with
-              these hashes MAY also be added.</t>
+              target="RFC4572"></xref>, Section 5; the algorithm used for the 
+              fingerprint MUST match that used in the certificate signature.
+              </t>
 
               <t>An "a=setup" line, as specified in <xref
               target="RFC4145"></xref>, Section 4, and clarified for use in
@@ -1452,13 +1481,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           also be generated for data. The &lt;media&gt; field MUST be set to
           "application" and the &lt;proto&gt; field MUST be set to
           "DTLS/SCTP", as specified in <xref
-          target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 3. The "a=mid",
+          target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 3; the "fmt" value
+          MUST be set to the SCTP port number, as specified in Section 4.1.</t>
+          <t>Within the data m= section, the "a=mid",
           "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate",
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
-          above. [OPEN ISSUE: additional SCTP-specific stuff to be included,
-          as indicated in <xref
-          target="I-D.jesup-rtcweb-data-protocol"></xref> (currently
-          none)]</t>
+          above, along with an "a=sctpmap" line referencing the SCTP port number
+          and specifying the application protocol indicated in <xref
+          target="I-D.ietf-rtcweb-data-protocol"></xref>. [OPEN ISSUE: the -00
+          of this document is missing this information.]</t>
 
           <t>[TODO: processing of BUNDLE group]</t>
 
@@ -2405,7 +2436,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <!-- INFORM 5 -->
 
-      <reference anchor="I-D.jesup-rtcweb-data-protocol">
+      <reference anchor="I-D.ietf-rtcweb-data-protocol">
         <front>
           <title>WebRTC Data Channel Protocol</title>
 
@@ -2434,9 +2465,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </front>
 
         <seriesInfo name="Internet-Draft"
-                    value="draft-jesup-rtcweb-data-protocol-04" />
+                    value="draft-ietf-rtcweb-data-protocol-04" />
 
-        <format target="http://www.ietf.org/internet-drafts/draft-jesup-rtcweb-data-protocol-04.txt"
+        <format target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-data-protocol-04.txt"
                 type="TXT" />
       </reference>
 
@@ -2510,7 +2541,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <!-- INFORM 8 -->
 
-      <reference anchor="I-D.ivov-mmusic-trickle-ice">
+      <reference anchor="I-D.ietf-mmusic-trickle-ice">
         <front>
           <title>Trickle ICE: Incremental Provisioning of Candidates for the
           Interactive Connectivity Establishment (ICE) Protocol</title>
@@ -2542,9 +2573,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </front>
 
         <seriesInfo name="Internet-Draft"
-                    value="draft-ivov-mmusic-trickle-ice-01" />
+                    value="draft-ietf-mmusic-trickle-ice-00" />
 
-        <format target="http://www.ietf.org/internet-drafts/draft-ivov-mmusic-trickle-ice-01.txt"
+        <format target="http://www.ietf.org/internet-drafts/draft-ivov-mmusic-trickle-ice-00.txt"
                 type="TXT" />
       </reference>
 
@@ -2688,6 +2719,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <format octets="81546"
                 target="http://www.rfc-editor.org/rfc/rfc5763.txt" type="TXT" />
       </reference>
+
+      <?rfc include="reference.RFC.5764.xml"?>
 
       <reference anchor="RFC4568">
         <front>
@@ -3001,8 +3034,9 @@ v=0
 o=- 4962303333179871722 1 IN IP4 0.0.0.0
 s=-
 t=0 0
+a=msid-semanticƒ:WMS
 a=group:BUNDLE audio video data
-m=audio 56500 RTP/SAVPF 111 0 8 126
+m=audio 56500 UDP/TLS/RTP/SAVPF 111 0 8 126
 c=IN IP4 192.0.2.1
 a=rtcp:56501 IN IP4 192.0.2.1
 a=candidate:3348148302 1 udp 2113937151 192.0.2.1 56500
@@ -3030,7 +3064,7 @@ a=maxptime:60
 a=ssrc:1732846380 cname:EocUG1f0fcg/yvY7
 a=msid:47017fee-b6c1-4162-929c-a25110252400 
        f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9
-m=video 56502 RTP/SAVPF 100 115 116 117
+m=video 56502 UDP/TLS/RTP/SAVPF 100 115 116 117
 c=IN IP4 192.0.2.1
 a=rtcp:56503 IN IP4 192.0.2.1
 a=candidate:3348148302 1 udp 2113937151 192.0.2.1 56502
@@ -3076,7 +3110,7 @@ a=mid:data
 a=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
                      :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-a=fmtp:5000 protocol=webrtc-datachannel; streams=10
+a=sctpmap:5000 webrtc-datachannel 16
             ]]></artwork>
           </figure>
         </section>
@@ -3094,8 +3128,9 @@ v=0
 o=- 6729291447651054566 1 IN IP4 0.0.0.0
 s=-
 t=0 0
+a=msid-semantic:WMS
 a=group:BUNDLE audio video data
-m=audio 20000 RTP/SAVPF 111 0 8 126
+m=audio 20000 UDP/TLS/RTP/SAVPF 111 0 8 126
 c=IN IP4 192.0.2.2
 a=candidate:2299743422 1 udp 2113937151 192.0.2.2 20000
             typ host generation 0
@@ -3117,7 +3152,7 @@ a=maxptime:60
 a=ssrc:3429951804 cname:Q/NWs1ao1HmN4Xa5
 a=msid:PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1
        PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1a0
-m=video 20000 RTP/SAVPF 100 115 116 117
+m=video 20000 UDP/TLS/RTP/SAVPF 100 115 116 117
 c=IN IP4 192.0.2.2
 a=candidate:2299743422 1 udp 2113937151 192.0.2.2 20000
             typ host generation 0
@@ -3156,7 +3191,7 @@ a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
 a=mid:data
-a=fmtp:5000 protocol=webrtc-datachannel; streams=10
+a=sctpmap:5000 webrtc-datachannel 16
             ]]></artwork>
           </figure>
         </section>
