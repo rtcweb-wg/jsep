@@ -688,7 +688,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           transmission, if the answer does not specify an inactive media
           direction. A description used as a "pranswer" may be applied as a
           response to an "offer", or an update to a previously sent
-          "answer".</t>
+          "pranswer".</t>
 
           <t>"answer" indicates that a description should be parsed as an
           answer, the offer-answer exchange should be considered complete, and
@@ -711,31 +711,34 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <section title="Use of Provisional Answers">
             <t>Most web applications will not need to create answers using the
-            "pranswer" type. The preferred handling for a web application
-            would be to create and send an "inactive" answer more or less
-            immediately after receiving the offer, instead of waiting for a
-            human user to physically answer the call. Later, when the human
-            input is received, the application can create a new "sendrecv"
-            offer to update the previous offer/answer pair and start the media
-            flow. This approach is preferred because it minimizes the amount
-            of time that the offer-answer exchange is left open, in addition
-            to avoiding media clipping by ensuring the transport is ready to
-            go by the time the call is physically answered. However, some
-            applications may not be able to do this, particularly ones that
-            are attempting to gateway to other signaling protocols. In these
-            cases, "pranswer" can still allow the application to warm up the
-            transport.</t>
+            "pranswer" type. While it is good practice to send an immediate 
+            response to an "offer", in order to warm up the session transport
+            and prevent media clipping, the preferred handling for a web
+            application would be to create and send an "inactive" final answer
+            immediately after receiving the offer. Later, when the called 
+            user actually accepts the call, the application can create a new 
+            "sendrecv" offer to update the previous offer/answer pair and start
+            the media flow. While this could also be done with an inactive
+            "pranswer", followed by a sendrecv "answer", the initial "pranswer"
+            leaves the offer-answer exchange open, which means the caller cannot
+            send an updated offer during this time.</t>
 
-            <t>Consider a typical web application that will set up a data
-            channel, an audio channel, and a video channel. When an endpoint
-            receives an offer with these channels, it could send an answer
-            accepting the data channel for two-way data, and accepting the
-            audio and video tracks as inactive or receive-only. It could then
-            ask the user to accept the call, acquire the local media streams,
-            and send a new offer to the remote side moving the audio and video
-            to be two-way media. By the time the human has accepted the call
-            and sent the new offer, it is likely that the ICE and DTLS
-            handshaking for all the channels will already be set up.</t>
+            <t>As an example, consider a typical web application that will
+            set up a data channel, an audio channel, and a video channel. When
+            an endpoint receives an offer with these channels, it could send an
+            answer accepting the data channel for two-way data, and accepting 
+            the audio and video tracks as inactive or receive-only. It could
+            then ask the user to accept the call, acquire the local media
+            streams, and send a new offer to the remote side moving the audio
+            and video to be two-way media. By the time the human has accepted
+            the call and triggered the new offer, it is likely that the ICE and
+            DTLS handshaking for all the channels will already be set up.</t>
+
+            <t>Of course, some applications may not be able to perform this
+            double offer-answer exchange, particularly ones that are attempting
+            to gateway to legacy signaling protocols. In these cases, "pranswer"
+            can still provide the application with a mechanism to warm up the
+            transport.</t>
           </section>
 
           <section title="Rollback">
@@ -1174,7 +1177,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           Need to determine exactly how this decision is made.]</t>
 
           <t>Attributes that are common between all m= sections MAY be moved
-          to session-level, if desired.</t>
+          to session-level, if explicitly defined to be valid at
+          session-level.</t>
 
           <t>Attributes other than the ones specified above MAY be included,
           except for the following attributes which are specifically
