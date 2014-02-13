@@ -457,18 +457,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
 
         <section title="ICE Candidate Pool">
-          <t> The browser MAY keep a pool of potential ICE candidates available
-          to help ensure rapid media setup. The size of this pool, referred to
-          as poolSize, is fairly small and set via an API from the Javascript
-          application. Any time the browser goes to gather a new ICE candidiate,
-          it can start by checking if any candidates are available in the
-          pool. If there are candidates in the pool, they can be used. There are
-          times when there will not be enough candidates in the pool, either
-          because a large number of candidates is needed, or because the pool
-          has not had enough time to gather candidates. When the number of
-          candidates in the pool is less than the current value of the poolSize,
-          the ICE Agent gathers candidates in the background and saves them in
-          the pool.
+          <t>JSEP applications typically inform the browser to begin ICE 
+          gathering via the information supplied to setLocalDescription, as this
+          is where the app specifies the number of media streams to gather 
+          candidates for. However, to accelerate cases where the browser knows
+          the number of media streams to use ahead of time, the application MAY 
+          ask the browser to gather a pool of potential ICE candidates to help
+          ensure rapid media setup. When setLocalDescription is eventually
+          called, and the browser goes to gather the needed ICE candidates, it
+          can start by checking if any candidates are available in the pool.
+          If there are candidates in the pool, they can be handed to the 
+          application immediately via the aforementioned candidate callback.
+          If the pool becomes depleted, either because a larger than expected 
+          number of candidates is needed, or because the pool has not had enough
+          time to gather candidates, the remaining candidates are gathered as 
+          usual.
           </t>
         </section>
 
@@ -600,7 +603,40 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <section title="Methods">
         <section title="Constructor">
-          <t>
+          <t>The PeerConnection constructor allows the application to specify
+          global parameters for the media session, such as the STUN/TURN servers
+          and credentials to use when gathering candidates.</t>
+
+          <t>In addition, the
+          application can specify its preferred policy regarding use of BUNDLE,
+          the multiplexing mechanism defined in <xref
+          target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>.
+          By specifying a policy from the list below, the application can
+          control how aggressively it will try to BUNDLE media streams together.
+          The set of available policies is as follows:
+          <list style="symbols">
+              <t>"default": The application will BUNDLE all media streams of
+              the same type together. That is, if there are multiple audio and
+              multiple video MediaStreamTracks attached to a PeerConnection, all
+              but the first audio and video tracks will be marked as
+              bundle-only, and candidates will only be gathered for N media
+              streams, where N is the number of distinct media types. When 
+              talking to a non-BUNDLE-aware endpoint, only the non-bundle-only
+              streams will be negotiated. This policy balances desire to
+              multiplex with the need to ensure basic audio and video still 
+              works in legacy cases.
+              </t>
+              <t>"max-bundle": The application will BUNDLE all of its media 
+              streams on a single transport. All streams other than the first
+              will be marked as bundle-only. This policy aims to maximize 
+              multiplexing, at the cost of less compatibility with legacy 
+              endpoints.
+              </t>
+              <t>"max-compat": The application will offer BUNDLE, but mark none
+              of its streams as bundle-only. This policy will allow all streams
+              to be received by non-BUNDLE-aware endpoints.
+              </t>
+            </list>
           </t>
         </section>
         <section title="createOffer">
@@ -609,7 +645,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           configurations for the session, including descriptions of the local
           MediaStreams attached to this PeerConnection, the codec/RTP/RTCP
           options supported by this implementation, and any candidates that
-          have been gathered by the ICE Agent. A constraints parameters may be
+          have been gathered by the ICE Agent. A constraints parameter may be
           supplied to provide additional control over the generated offer.
           This constraints parameter should allow for the following
           manipulations to be performed: <list style="symbols">
@@ -771,17 +807,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             description. To support this, we introduce the concept of
             "rollback".</t>
 
-            <t>A rollback returns the state machine to its previous state, and
-            the local or remote description to its previous value. Any
-            resources or candidates that were allocated by the new local
-            description are discarded; any media that is received will be
-            processed according to the previous session description.</t>
+            <t>A rollback discards any proposed changes to the session, 
+            returning the state machine to the stable state, and setting the
+            modified local or remote description back to its previous
+            value. Any resources or candidates that were allocated by the new
+            local description are discarded; any media that is received will be
+            processed according to the previous session description. Rollback
+            can only be used to cancel proposed changes; there is no support for
+            rolling back from a stable state to a previous stable state.
+            </t>
 
             <t>A rollback is performed by supplying a session description of
             type "rollback" to either setLocalDescription or
             setRemoteDescription, depending on which needs to be rolled back
             (i.e. if the new offer was supplied to setLocalDescription, the
-            rollback should be done on setLocalDescription as well.)</t>
+            rollback should be done on setLocalDescription as well.) Rollback is
+            only allowed in the "local-offer" or "remote-offer" states. 
+            [OPEN ISSUE: should rollback be allowed in 
+            the pranswer states? Need use case if so.]
+            </t>
           </section>
         </section>
 
@@ -1082,7 +1126,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>An "a=msid" line, as specified in <xref
               target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
 
-              <t>[OPEN ISSUE: Use of App Token versus stream-correlator ]</t>
+              <t>[OPEN ISSUE: Use of AppID ]</t>
 
               <t>An "a=sendrecv" line, as specified in <xref
               target="RFC3264"></xref>, Section 5.1.</t>
@@ -1170,7 +1214,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>[OPEN ISSUE: Handling of a=imageattr]</t>
 
-              <t>[TODO: bundle-only]</t>
+              <t>If the BUNDLE policy for this PeerConnection is set to 
+              "max-bundle", and this is not the first m= section, or the BUNDLE
+              policy is set to "default", and this is not the first m= section
+              for this media type, an "a=bundle-only" line.</t>
             </list></t>
 
           <t>Lastly, if a data channel has been created, a m= section MUST be
@@ -1184,14 +1231,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
           above, along with an "a=sctpmap" line referencing the SCTP port number
           and specifying the application protocol indicated in <xref
-          target="I-D.ietf-rtcweb-data-protocol"></xref>. [OPEN ISSUE: the -00
+          target="I-D.ietf-rtcweb-data-protocol"></xref>. [OPEN ISSUE: the -01
           of this document is missing this information.]</t>
 
           <t>Once all m= sections have been generated, a session-level
           "a=group" attribute MUST be added as specified in <xref
           target="RFC5888"></xref>. This attribute MUST have semantics
-          "BUNDLE", and identify the m= sections to be bundled. [OPEN ISSUE:
-          Need to determine exactly how this decision is made.]</t>
+          "BUNDLE", and MUST include the mid identifiers of each m= section.
+          </t>
 
           <t>Attributes that are common between all m= sections MAY be moved
           to session-level, if explicitly defined to be valid at
@@ -1303,6 +1350,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>The "a=rtcp-rsize" line MUST only be added if present in the
               remote description.</t>
             </list></t>
+
+            <t>TODO: bundle handling in sub offers</t>
         </section>
 
         <section title="Constraints Handling">
