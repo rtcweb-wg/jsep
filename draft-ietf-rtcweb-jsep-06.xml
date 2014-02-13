@@ -1309,8 +1309,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               MediaStreamTrack to the m= section. This is done by adding the
               necessary "a=msid", "a=ssrc", and "a=ssrc-group" lines to the 
               recycled m= section, and removing the "a=recvonly" attribute.
-              No attempt is made to recycle m= sections for MediaStreamTracks
-              of different media types.
               </t>
             </list></t>
 
@@ -1337,11 +1335,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="RFC3264"></xref>, Section 8.2.</t>
 
               <t>If any MediaStreamTracks have been added, and there exist
-              m= sections of the appropriate media type with no associated
-              MediaStreamTracks, and they are marked as rejected or recvonly
-              (including those marked as such by following the preceding
-              paragraph), those m= sections MUST be recycled instead of
-              creating a new m= section.</t>
+              recvonly m= sections of the appropriate media type with no
+              associated MediaStreamTracks, or rejected m= sections of any 
+              media type, those m= sections MUST be recycled, and the
+              local MediaStreamTracks associated with these recycled m=
+              sections. This includes any recvonly or rejected m= sections
+              created by the preceding paragraph.</t>
             </list></t>
 
           <t>In addition, for each non-recycled, non-rejected m=
@@ -1365,11 +1364,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </list></t>
 
             <t>The "a=group:BUNDLE" attribute MUST include the mid identifiers
-            specified in the most recent answer, minus any m= sections that have
-            been marked as rejected, plus any newly added or re-enabled
-            m= sections. In other words, the BUNDLE attribute must contain all
-            m= sections that were previously bundled, as long as they are still
-            alive, as well as any new m= sections.</t>
+            specified in the BUNDLE group in the most recent answer, minus any
+            m= sections that have been marked as rejected, plus any newly added 
+            or re-enabled m= sections. In other words, the BUNDLE attribute must
+            contain all m= sections that were previously bundled, as long as
+            they are still alive, as well as any new m= sections.</t>
         </section>
 
         <section title="Constraints Handling">
@@ -1600,8 +1599,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               "FEC" and including the primary and FEC SSRCs.</t>
 
               <t>[OPEN ISSUE: Handling of a=imageattr]</t>
-
-              <t>[TODO: bundle-only]</t>
             </list></t>
 
           <t>If a data channel m= section has been offered, a m= section MUST
@@ -1615,13 +1612,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
           above, along with an "a=sctpmap" line referencing the SCTP port number
           and specifying the application protocol indicated in <xref
-          target="I-D.ietf-rtcweb-data-protocol"></xref>. [OPEN ISSUE: the -00
+          target="I-D.ietf-rtcweb-data-protocol"></xref>. [OPEN ISSUE: the -01
           of this document is missing this information.]</t>
 
-          <t>[TODO: processing of BUNDLE group]</t>
+          <t>If "a=group" attributes with semantics of "BUNDLE" are offered,
+          corresponding session-level "a=group" attributes MUST be added as 
+          specified in <xref target="RFC5888"></xref>. These attributes MUST
+          have semantics "BUNDLE", and MUST include the all mid identifiers from
+          the offered BUNDLE groups that have not been rejected. 
+          Note that regardless of the presence of "a=bundle-only" in the offer, 
+          no m= sections in the answer should have an "a=bundle-only" line.
+          </t>
 
           <t>Attributes that are common between all m= sections MAY be moved
-          to session-level, if desired.</t>
+          to session-level, if explicitly defined to be valid at
+          session-level.</t>
 
           <t>The attributes prohibited in the creation of offers are also
           prohibited in the creation of answers.</t>
