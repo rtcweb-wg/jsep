@@ -605,7 +605,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Constructor">
           <t>The PeerConnection constructor allows the application to specify
           global parameters for the media session, such as the STUN/TURN servers
-          and credentials to use when gathering candidates.</t>
+          and credentials to use when gathering candidates. The size of the 
+          ICE candidate pool can also be set, if desired; by default the 
+          candidate pool size is zero.</t>
 
           <t>In addition, the
           application can specify its preferred policy regarding use of BUNDLE,
@@ -628,13 +630,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               </t>
               <t>"max-bundle": The application will BUNDLE all of its media 
               streams on a single transport. All streams other than the first
-              will be marked as bundle-only. This policy aims to maximize 
-              multiplexing, at the cost of less compatibility with legacy 
-              endpoints.
+              will be marked as bundle-only. This policy aims to minimize
+              candidate gathering and maximize multiplexing, at the cost of less
+              compatibility with legacy endpoints.
               </t>
               <t>"max-compat": The application will offer BUNDLE, but mark none
               of its streams as bundle-only. This policy will allow all streams
-              to be received by non-BUNDLE-aware endpoints.
+              to be received by non-BUNDLE-aware endpoints, but require separate
+              candidates to be gathered for each media stream.
               </t>
             </list>
           </t>
