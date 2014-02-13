@@ -812,22 +812,20 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>A rollback discards any proposed changes to the session, 
             returning the state machine to the stable state, and setting the
-            modified local or remote description back to its previous
-            value. Any resources or candidates that were allocated by the new
-            local description are discarded; any media that is received will be
-            processed according to the previous session description. Rollback
-            can only be used to cancel proposed changes; there is no support for
-            rolling back from a stable state to a previous stable state.
+            modified local and/or remote description back to their previous
+            values. Any resources or candidates that were allocated by the 
+            abandoned local description are discarded; any media that is
+            received will be processed according to the previous local and 
+            remote descriptions. Rollback can only be used to cancel proposed
+            changes; there is no support for rolling back from a stable state to
+            a previous stable state.
             </t>
 
             <t>A rollback is performed by supplying a session description of
-            type "rollback" to either setLocalDescription or
-            setRemoteDescription, depending on which needs to be rolled back
+            type "rollback" with empty contents to either setLocalDescription or
+            setRemoteDescription, depending on which was most recently used
             (i.e. if the new offer was supplied to setLocalDescription, the
-            rollback should be done on setLocalDescription as well.) Rollback is
-            only allowed in the "local-offer" or "remote-offer" states. 
-            [OPEN ISSUE: should rollback be allowed in 
-            the pranswer states? Need use case if so.]
+            rollback should be done using setLocalDescription as well).
             </t>
           </section>
         </section>
@@ -1303,6 +1301,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               directional attribute to "a=recvonly". The "a=msid", "a=ssrc",
               and "a=ssrc-group" lines MUST be removed from the associated m=
               sections.</t>
+
+              <t>If any MediaStreamTracks have been added, and there exist 
+              m= sections of the appropriate media type with no associated 
+              MediaStreamTracks (i.e. as described in the preceding paragraph),
+              those m= sections MUST be recycled by adding the new
+              MediaStreamTrack to the m= section. This is done by adding the
+              necessary "a=msid", "a=ssrc", and "a=ssrc-group" lines to the 
+              recycled m= section, and removing the "a=recvonly" attribute.
+              No attempt is made to recycle m= sections for MediaStreamTracks
+              of different media types.
+              </t>
             </list></t>
 
           <t>If the initial offer was applied using setLocalDescription, and
@@ -1313,28 +1322,29 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           for the "local-offer" state above, along with these exceptions:
           [OPEN ISSUE: should this be permitted in the remote-pranswer state?]
           <list style="symbols">
-              <t>If a m= section was rejected, i.e. has had its port set to
-              zero in either the local or remote description, it MUST remain
-              rejected and have a zero port in the new offer, as indicated in
-              RFC3264, Section 5.1.</t>
-
               <t>If a m= section exists in the current local description, but
-              has its state set to inactive or recvonly, and a new
-              MediaStreamTrack is added, the previously existing m= section
-              MUST be recycled instead of creating a new m= section. [OPEN
-              ISSUE: Nail down exactly what this means. Should the codecs
-              remain the same? (No.) Should ICE restart? (No.) Can the "a=mid"
-              attribute be changed? (Yes?)]</t>
+              does not have an associated local MediaStreamTrack (possibly
+              because said MediaStreamTrack was removed since the last
+              exchange), a m= section MUST still be generated in the new offer, 
+              as indicated in <xref target="RFC3264"></xref>, Section 8. The
+              disposition of this section will depend on the state of the 
+              remote MediaStreamTrack associated with this m= section. If one
+              exists, and it is still in the "live" state, the new m= section
+              MUST be marked as "a=recvonly", with no "a=msid" or related 
+              attributes present. If no remote MediaStreamTrack 
+              exists, or it is in the "ended" state, the m= section MUST be
+              marked as rejected, by setting the port to zero, as indicated in
+              <xref target="RFC3264"></xref>, Section 8.2.</t>
 
-              <t>If a m= section exists in the current local description, but
-              does not have an associated MediaStreamTrack (i.e. it is
-              inactive or recvonly), a corresponding m= section MUST be
-              generated in the new offer, but without "a=msid", "a=ssrc", or
-              "a=ssrc-group" attributes, and the appropriate directional
-              attribute must be specified.</t>
+              <t>If any MediaStreamTracks have been added, and there exist
+              m= sections of the appropriate media type with no associated
+              MediaStreamTracks, and they are marked as rejected or recvonly
+              (including those marked as such by following the preceding
+              paragraph), those m= sections MUST be recycled instead of
+              creating a new m= section.</t>
             </list></t>
 
-          <t>In addition, for each previously existing, non-rejected m=
+          <t>In addition, for each non-recycled, non-rejected m=
           section in the new offer, the following adjustments are made based
           on the contents of the corresponding m= section in the current
           remote description: <list style="symbols">
@@ -1356,8 +1366,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>The "a=group:BUNDLE" attribute MUST include the mid identifiers
             specified in the most recent answer, minus any m= sections that have
-            been marked as rejected, plus any newly added m= sections.
-            [TODO: expand?]</t>
+            been marked as rejected, plus any newly added or re-enabled
+            m= sections. In other words, the BUNDLE attribute must contain all
+            m= sections that were previously bundled, as long as they are still
+            alive, as well as any new m= sections.</t>
         </section>
 
         <section title="Constraints Handling">
@@ -1367,27 +1379,34 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <section title="OfferToReceiveAudio">
             <t>If the "OfferToReceiveAudio" constraint is specified, with a
-            value of "true", the offer MUST include a non-rejected m= section
-            with media type "audio", even if no audio MediaStreamTrack has
-            been added to the PeerConnection. This allows the offerer to
-            receive audio even when not sending it; accordingly, the
-            directional attribute on the audio m= section MUST be set to
-            recvonly. If this constraint is specified when an audio
-            MediaStreamTrack has already been added to the PeerConnection, or
-            a non-rejected m= section with media type "audio" previously
-            existed, it has no effect.</t>
+            value of "N", the offer MUST include N non-rejected m= sections
+            with media type "audio", even if fewer than N audio 
+            MediaStreamTracks have been added to the PeerConnection. This allows
+            the offerer to receive audio, including multiple independent
+            streams, even when not sending it; accordingly, the directional
+            attribute on the audio m= sections without associated
+            MediaStreamTracks MUST be set to recvonly. If this constraint is 
+            specified in the case where at least N audio MediaStreamTracks have 
+            already been added to the PeerConnection, or N non-rejected
+            m= sections with media type "audio" would otherwise be generated,
+            it has no effect. For backwards compatibility, a value of "true"
+            is interpreted as equivalent to N=1.</t>
           </section>
 
           <section title="OfferToReceiveVideo">
-            <t>If the "OfferToReceiveAudio" constraint is specified, with a
-            value of "true", the offer MUST include a m= section with media
-            type "video", even if no video MediaStreamTrack has been added to
-            the PeerConnection. This allows the offerer to receive video even
-            when not sending it; accordingly, the directional attribute on the
-            video m= section MUST be set to recvonly. If this constraint is
-            specified when an video MediaStreamTrack has already been added to
-            the PeerConnection, or a non-rejected m= section with media type
-            "video" previously existed, it has no effect.</t>
+            <t>If the "OfferToReceiveVideo" constraint is specified, with a
+            value of "N", the offer MUST include N non-rejected m= sections
+            with media type "video", even if fewer than N video 
+            MediaStreamTracks have been added to the PeerConnection. This allows
+            the offerer to receive video, including multiple independent
+            streams, even when not sending it; accordingly, the directional
+            attribute on the video m= sections without associated
+            MediaStreamTracks MUST be set to recvonly. If this constraint is 
+            specified in the case where at least N video MediaStreamTracks have 
+            already been added to the PeerConnection, or N non-rejected
+            m= sections with media type "video" would otherwise be generated,
+            it has no effect. For backwards compatibility, a value of "true"
+            is interpreted as equivalent to N=1.</t>
           </section>
 
           <section title="VoiceActivityDetection">
@@ -1441,24 +1460,29 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           valid as media-level attributes SHALL be considered to be present in
           each m= section.</t>
 
-          <t>If any of the offered m= sections have been rejected, by stopping
-          the associated remote MediaStreamTrack, the corresponding m= section
-          in the answer MUST be marked as rejected by setting the port in the
-          m= line to zero, as indicated in <xref target="RFC3264"></xref>,
-          Section 6., and processing continues with the next m= section.</t>
-
-          <t>For each non-rejected m= section of a given media type, if there
+          <t>For each offered m= section of a given media type, if there
           is a local MediaStreamTrack of the specified type which has been
           added to the PeerConnection via addStream and not yet associated
-          with a m= section, the MediaStreamTrack is associated with the m=
+          with a m= section, and the specific m= section is either sendrecv or
+          recvonly, the MediaStreamTrack is associated with the m=
           section at this time. If there are more m= sections of a certain
           type than MediaStreamTracks, some m= sections will not have an
           associated MediaStreamTrack. If there are more MediaStreamTracks of
-          a certain type than m= sections, only the first N MediaStreamTracks
-          will be able to be associated in the constructed answer. The
-          remainder will need to be associated in a subsequent offer.</t>
+          a certain type than compatible m= sections, only the first N
+          MediaStreamTracks will be able to be associated in the constructed
+          answer. The remainder will need to be associated in a subsequent
+          offer.</t>
 
-          <t>Each m= section should then generated as specified in <xref
+          <t>For each offered m= section, if the associated remote
+          MediaStreamTrack has been stopped, and is therefore in state "ended", 
+          and no local MediaStreamTrack has been associated, the corresponding
+          m= section in the answer MUST be marked as rejected by setting the 
+          port in the m= line to zero, as indicated in
+          <xref target="RFC3264"></xref>, Section 6., and further processing for
+          this m= section can be skipped.</t>
+
+          <t>Provided that is not the case, each m= section in the answer should
+          then generated as specified in <xref
           target="RFC3264"></xref>, Section 6.1. Because use of DTLS is
           mandatory, the &lt;proto&gt; field MUST be set to "UDP/TLS/RTP/SAVPF".
           If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
@@ -1474,13 +1498,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               line, as specified in <xref
               target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
 
-              <t>[OPEN ISSUE: Use of App Token versus stream-correlator ]</t>
+              <t>[OPEN ISSUE: Use of AppID]</t>
 
-              <t>If a local MediaStreamTrack has been associated, an
-              "a=sendrecv" line, as specified in <xref
-              target="RFC3264"></xref>, Section 6.1. If no local
-              MediaStreamTrack has been associated, an "a=recvonly" line.
-              [TODO: handle non-sendrecv offered m= sections]</t>
+              <t>Depending on the directionality of the offer, the disposition
+              of any associated remote MediaStreamTrack, and the presence of an
+              associated local MediaStreamTrack, the appropriate directionality
+              attribute, as specified in <xref target="RFC3264"></xref>, 
+              Section 6.1. If the offer was sendrecv, and the remote
+              MediaStreamTrack is still "live", and there a local
+              MediaStreamTrack has been associated, the directionality MUST be 
+              set as sendrecv. If the offer was sendonly, and the remote 
+              MediaStreamTrack is still "live", the directionality MUST be set 
+              as recvonly. If the offer was recvonly, and a local 
+              MediaStreamTrack has been associated, the directionality MUST be
+              set as sendonly. If the offer was inactive, the directionality
+              MUST be set as inactive.
 
               <t>For each supported codec that is present in the offer,
               "a=rtpmap" and "a=fmtp" lines, as specified in <xref
@@ -3301,9 +3333,16 @@ a=sctpmap:5000 webrtc-datachannel 16
     <section title="Change log">
 
       <t>Changes in draft-06: <list style="symbols">
-          <t> TBD. </t>
+          <t>Reworked handling of m= line recycling.</t>
 
-          <t> Add text on ICE Candidate Pool </t>
+          <t>Added handling of BUNDLE and bundle-only.</t>
+
+          <t>Clarified handling of rollback.</t>
+
+          <t>Added text describing the ICE Candidate Pool and its behavior.</t>
+
+          <t>Allowed OfferToReceiveX to create multiple recvonly m= sections.
+          </t>
 
         </list></t>
 
