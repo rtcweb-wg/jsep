@@ -26,7 +26,7 @@ clean:
 	-rm -f $(next).txt $(next).html
 	-rm -f $(draft)-[0-9][0-9].xml
 
-$(next).md: $(draft).md
+$(next).xml: $(draft).xml
 	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
 
 #%.xml: %.md
