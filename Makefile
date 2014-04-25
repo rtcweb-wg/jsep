@@ -2,7 +2,8 @@ xml2rfc ?= xml2rfc
 kramdown-rfc2629 ?= kramdown-rfc2629
 idnits ?= idnits
 
-draft := draft-ietf-tls-tls13
+draft := draft-ietf-rtcweb-jsep
+
 current_ver := $(shell git tag | grep "$(draft)" | tail -1 | sed -e"s/.*-//")
 ifeq "${current_ver}" ""
 next_ver ?= 00
@@ -28,8 +29,8 @@ clean:
 $(next).md: $(draft).md
 	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
 
-%.xml: %.md
-	$(kramdown-rfc2629) $< > $@
+#%.xml: %.md
+#	$(kramdown-rfc2629) $< > $@
 
 %.txt: %.xml
 	$(xml2rfc) $< $@
