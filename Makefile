@@ -1,41 +1,39 @@
+xml2rfc ?= xml2rfc
+kramdown-rfc2629 ?= kramdown-rfc2629
+idnits ?= idnits
 
+draft := draft-ietf-rtcweb-jsep
 
-SRC  := $(wildcard draft-*.xml)
-WSRC  := $(wildcard *.wsd)
+current_ver := $(shell git tag | grep "$(draft)" | tail -1 | sed -e"s/.*-//")
+ifeq "${current_ver}" ""
+next_ver ?= 00
+else
+next_ver ?= $(shell printf "%.2d" $$((1$(current_ver)-99)))
+endif
+next := $(draft)-$(next_ver)
 
-HTML := $(patsubst %.xml,%.html,$(SRC))
-TXT  := $(patsubst %.xml,%.txt,$(SRC))
-DIF  := $(patsubst %.xml,%.diff.html,$(SRC))
-PDF  := $(patsubst %.xml,%.pdf,$(SRC))
-SVG  := $(patsubst %.wsd,%.svg,$(WSRC))
+.PHONY: latest submit clean
 
-#all: $(HTML) $(TXT) $(DIF) $(PDF)
-all: $(HTML) $(TXT) $(DIF) $(SVG) $(PDF)
+latest: $(draft).txt $(draft).html
+
+submit: $(next).txt
+
+idnits: $(next).txt
+	$(idnits) $<
 
 clean:
-	rm -f *~ draft*.html draft*pdf draft-*txt $(SVG)
+	-rm -f $(draft).txt $(draft).html
+	-rm -f $(next).txt $(next).html
+	-rm -f $(draft)-[0-9][0-9].xml
 
-#%.html: %.xml
-#	xsltproc -o $@ rfc2629.xslt $^
+$(next).xml: $(draft).xml
+	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
 
-%.html: %.xml
-	xml2rfc --html $^ -o $@
-
+#%.xml: %.md
+#	$(kramdown-rfc2629) $< > $@
 
 %.txt: %.xml
-	xml2rfc --text $^ -o $@
+	$(xml2rfc) $< $@
 
-%.diff.html: %.txt.old %.txt 
-	htmlwdiff  $^ >  $@
-
-%.pdf: %.html  $(SVG)
-	wkpdf -p letter -s $^ -o $@
-
-%.svg: %.wsd
-	node ~/bin/ladder.js $^ $@
-
-%.png: %.svg
-	java -jar batik-rasterizer.jar $^ -d $@ -bg 255.255.255.255
-
-
-
+%.html: %.xml
+	$(xml2rfc) --html $< $@
