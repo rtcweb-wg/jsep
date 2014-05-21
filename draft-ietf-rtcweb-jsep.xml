@@ -628,10 +628,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The PeerConnection constructor allows the application to specify
           global parameters for the media session, such as the STUN/TURN servers
           and credentials to use when gathering candidates. The size of the 
-          ICE candidate pool can also be set, if desired; by default the 
-          candidate pool size is zero.
-          [[OPEN ISSUE: this is an inconsistency with the W3C spec
-          https://github.com/rtcweb-wg/jsep/issues/12.]]
+          ICE candidate pool can also be set, if desired. If the application
+          does not indicate a candidate pool size, the browser may
+          select any default candidate pool size.
           </t>
 
           <t>In addition, the
@@ -1073,7 +1072,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         target="I-D.ietf-rtcweb-rtp-usage"></xref>. The exact details of this
         process are explained below.</t>
 
-        <section title="Initial Offers">
+        <section title="Initial Offers" anchor="sec.initial-offers">
           <t>When createOffer is called for the first time, the result is
           known as the initial offer.</t>
 
@@ -1510,7 +1509,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           added to the PeerConnection via addStream and not yet associated
           with a m= section, and the specific m= section is either sendrecv or
           recvonly, the MediaStreamTrack is associated with the m=
-          section at this time. If there are more m= sections of a certain
+          section at this time. MediaStreamTracks are assigned to m=
+          sections using the canonical order described in
+          <xref target="sec.initial-offers"/>. If there are more m= sections of a certain
           type than MediaStreamTracks, some m= sections will not have an
           associated MediaStreamTrack. If there are more MediaStreamTracks of
           a certain type than compatible m= sections, only the first N
