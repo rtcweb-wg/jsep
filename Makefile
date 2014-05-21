@@ -1,4 +1,4 @@
-xml2rfc ?= xml2rfc
+xml2rfc ?= xml2rfc -v
 kramdown-rfc2629 ?= kramdown-rfc2629
 idnits ?= idnits
 
