@@ -89,12 +89,12 @@
   </front>
 
   <middle>
-    <section title="Introduction">
+    <section title="Introduction" anchor="sec.introduction">
       <t>This document describes how the W3C WEBRTC RTCPeerConnection
       interface<xref target="W3C.WD-webrtc-20111027"></xref> is used to
       control the setup, management and teardown of a multimedia session.</t>
 
-      <section title="General Design of JSEP">
+      <section title="General Design of JSEP" anchor="sec.general-design-of-jsep">
         <t>The thinking behind WebRTC call setup has been to fully specify and
         control the media plane, but to leave the signaling plane up to the
         application as much as possible. The rationale is that different
@@ -179,7 +179,7 @@
         complexity on the novice developer.</t>
       </section>
 
-      <section title="Other Approaches Considered">
+      <section title="Other Approaches Considered" anchor="sec.other-approaches-consider">
         <t>One approach that was considered instead of JSEP was to include a
         lightweight signaling protocol. Instead of providing session
         descriptions to the API, the API would produce and consume messages
@@ -223,15 +223,15 @@
       </section>
     </section>
 
-    <section title="Terminology">
+    <section title="Terminology" anchor="sec.terminology">
       <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
       "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
       document are to be interpreted as described in <xref
       target="RFC2119"></xref>.</t>
     </section>
 
-    <section title="Semantics and Syntax">
-      <section title="Signaling Model">
+    <section title="Semantics and Syntax" anchor="sec.semantics-and-syntax">
+      <section title="Signaling Model" anchor="sec.signaling-model">
         <t>JSEP does not specify a particular signaling model or state
         machine, other than the generic need to exchange SDP media
         descriptions in the fashion described by <xref
@@ -260,7 +260,7 @@
         </figure>
       </section>
 
-      <section title="Session Descriptions and State Machine">
+      <section title="Session Descriptions and State Machine" anchor="sec.session-descriptions-and-">
         <t>In order to establish the media plane, the user agent needs
         specific parameters to indicate what to transmit to the remote side,
         as well as how to handle the media that is received. These parameters
@@ -385,7 +385,7 @@ setRemote(ANSWER) |                                   |
         answers.</t>
       </section>
 
-      <section title="Session Description Format">
+      <section title="Session Description Format" anchor="sec.session-description-forma">
         <t>In the WebRTC specification, session descriptions are formatted as
         SDP messages. While this format is not optimal for manipulation from
         Javascript, it is widely accepted, and frequently updated with new
@@ -416,14 +416,14 @@ setRemote(ANSWER) |                                   |
         sort of SessionDescription to produce.</t>
       </section>
 
-      <section title="ICE">
+      <section title="ICE" anchor="sec.ice">
         <t>When a new ICE candidate is available, the ICE Agent will notify
         the application via a callback; these candidates will automatically be
         added to the local session description. When all candidates have been
         gathered, the callback will also be invoked to signal that the
         gathering process is complete.</t>
 
-        <section title="ICE Candidate Trickling">
+        <section title="ICE Candidate Trickling" anchor="sec.ice-candidate-trickling">
           <t>Candidate trickling is a technique through which a caller may
           incrementally provide candidates to the callee after the initial
           offer has been dispatched; the semantics of "Trickle ICE" are
@@ -447,7 +447,7 @@ setRemote(ANSWER) |                                   |
           will supply them to its ICE Agent. This triggers the ICE Agent to
           start using the new remote candidates for connectivity checks.</t>
 
-          <section title="ICE Candidate Format">
+          <section title="ICE Candidate Format" anchor="sec.ice-candidate-format">
             <t>As with session descriptions, the syntax of the IceCandidate
             object provides some abstraction, but can be easily converted to
             and from the SDP candidate lines.</t>
@@ -478,7 +478,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </section>
         </section>
 
-        <section title="ICE Candidate Pool">
+        <section title="ICE Candidate Pool" anchor="sec.ice-candidate-pool">
           <t>JSEP applications typically inform the browser to begin ICE 
           gathering via the information supplied to setLocalDescription, as this
           is where the app specifies the number of media streams to gather 
@@ -499,7 +499,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       </section>
 
-      <section title="Interactions With Forking">
+      <section title="Interactions With Forking" anchor="sec.interactions-with-forking">
         <t>Some call signaling systems allow various types of forking where an
         SDP Offer may be provided to more than one device. For example, SIP
         <xref target="RFC3261"></xref> defines both a "Parallel Search" and
@@ -520,7 +520,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             resources in the offer that are not being used.</t>
           </list></t>
 
-        <section title="Sequential Forking">
+        <section title="Sequential Forking" anchor="sec.sequential-forking">
           <t>Sequential forking involves a call being dispatched to multiple
           remote callees, where each callee can accept the call, but only one
           active session ever exists at a time; no mixing of received media is
@@ -544,7 +544,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           existing remote description as a final answer.</t>
         </section>
 
-        <section title="Parallel Forking">
+        <section title="Parallel Forking" anchor="sec.parallel-forking">
           <t>Parallel forking involves a call being dispatched to multiple
           remote callees, where each callee can accept the call, and multiple
           simultaneous active signaling sessions can be established as a
@@ -585,7 +585,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
       </section>
 
-      <section title="Session Rehydration">
+      <section title="Session Rehydration" anchor="sec.session-rehydration">
         <t>In the event that the local application state is reinitialized,
         either due to a user reload of the page, or a decision within the
         application to reload itself (perhaps to update to a new version), it
@@ -617,14 +617,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
     </section>
 
-    <section title="Interface">
+    <section title="Interface" anchor="sec.interface">
       <t>This section details the basic operations that must be present to
       implement JSEP functionality. The actual API exposed in the W3C API may
       have somewhat different syntax, but should map easily to these
       concepts.</t>
 
-      <section title="Methods">
-        <section title="Constructor">
+      <section title="Methods" anchor="sec.methods">
+        <section title="Constructor" anchor="sec.constructor">
           <t>The PeerConnection constructor allows the application to specify
           global parameters for the media session, such as the STUN/TURN servers
           and credentials to use when gathering candidates. The size of the 
@@ -668,7 +668,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </list>
           </t>
         </section>
-        <section title="createOffer">
+        <section title="createOffer" anchor="sec.createoffer">
           <t>The createOffer method generates a blob of SDP that contains a
           <xref target="RFC3264"></xref> offer with the supported
           configurations for the session, including descriptions of the local
@@ -724,7 +724,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           media to start or stop flowing.</t>
         </section>
 
-        <section title="createAnswer">
+        <section title="createAnswer" anchor="sec.createanswer">
           <t>The createAnswer method generates a blob of SDP that contains a
           <xref target="RFC3264"></xref> SDP answer with the supported
           configuration for the session that is compatible with the parameters
@@ -754,7 +754,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           media state.</t>
         </section>
 
-        <section title="SessionDescriptionType">
+        <section title="SessionDescriptionType" anchor="sec.sessiondescriptiontype">
           <t>Session description objects (RTCSessionDescription) may be of
           type "offer", "pranswer", and "answer". These types provide
           information as to how the description parameter should be parsed,
@@ -798,7 +798,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           state, as described in <xref target="sec.rollback"/>.
           The contents MUST be empty.</t>
 
-          <section title="Use of Provisional Answers">
+          <section title="Use of Provisional Answers" anchor="sec.use-of-provisional-answer">
             <t>Most web applications will not need to create answers using the
             "pranswer" type. While it is good practice to send an immediate 
             response to an "offer", in order to warm up the session transport
@@ -863,7 +863,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </section>
         </section>
 
-        <section title="setLocalDescription">
+        <section title="setLocalDescription" anchor="sec.setlocaldescription">
           <t>The setLocalDescription method instructs the PeerConnection to
           apply the supplied SDP blob as its local configuration. The type
           field indicates whether the blob should be processed as an offer,
@@ -894,7 +894,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           send, this will result in the starting of media transmission.</t>
         </section>
 
-        <section title="setRemoteDescription">
+        <section title="setRemoteDescription" anchor="sec.setremotedescription">
           <t>The setRemoteDescription method instructs the PeerConnection to
           apply the supplied SDP blob as the desired remote configuration. As
           in setLocalDescription, the type field of the indicates how the blob
@@ -909,7 +909,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           send, this will result in the starting of media transmission.</t>
         </section>
 
-        <section title="localDescription">
+        <section title="localDescription" anchor="sec.localdescription">
           <t>The localDescription method returns a copy of the current local
           configuration, i.e. what was most recently passed to
           setLocalDescription, plus any local candidates that have been
@@ -923,7 +923,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           yet been established, or if the PeerConnection has been closed.</t>
         </section>
 
-        <section title="remoteDescription">
+        <section title="remoteDescription" anchor="sec.remotedescription">
           <t>The remoteDescription method returns a copy of the current remote
           configuration, i.e. what was most recently passed to
           setRemoteDescription, plus any remote candidates that have been
@@ -937,7 +937,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           yet been established, or if the PeerConnection has been closed.</t>
         </section>
 
-        <section title="updateIce">
+        <section title="updateIce" anchor="sec.updateice">
           <t>The updateIce method allows the configuration of the ICE Agent to
           be changed during the session, primarily for changing which types of
           local candidates are provided to the application and used for
@@ -956,7 +956,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           connectivity being established.</t>
         </section>
 
-        <section title="addIceCandidate">
+        <section title="addIceCandidate" anchor="sec.addicecandidate">
           <t>The addIceCandidate method provides a remote candidate to the ICE
           Agent, which, if parsed successfully, will be added to the remote
           description according to the rules defined for Trickle ICE.
@@ -969,11 +969,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
     </section>
 
-    <section title="SDP Interaction Procedures">
+    <section title="SDP Interaction Procedures" anchor="sec.sdp-interaction-procedure">
       <t>This section describes the specific procedures to be followed when
       creating and parsing SDP objects.</t>
 
-      <section title="Requirements Overview">
+      <section title="Requirements Overview" anchor="sec.requirements-overview">
         <t>JSEP implementations must comply with the specifications listed 
         below that govern the creation and processing of offers and answers.
         </t>
@@ -985,7 +985,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         The local JSEP endpoint and any remote endpoint must indicate support
         for these specifications in their session descriptions.</t>
         
-        <section title="Implementation Requirements">
+        <section title="Implementation Requirements" anchor="sec.implementation-requiremen">
             <t>This list of mandatory-to-implement specifications is derived 
             from the requirements outlined in 
             <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>.
@@ -1048,7 +1048,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             implementations MUST ignore unknown attribute (a=) lines.</t>
         </section>
 
-        <section title="Usage Requirements">
+        <section title="Usage Requirements" anchor="sec.usage-requirements">
             <t>All session descriptions handled by JSEP endpoints, 
             both local and remote, MUST indicate support for the following
             specifications. If any of these are absent, this omission MUST be
@@ -1307,7 +1307,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           SDP in this specification.</t>
         </section>
 
-        <section title="Subsequent Offers">
+        <section title="Subsequent Offers" anchor="sec.subsequent-offers">
           <t>When createOffer is called a second (or later) time, or is called
           after a local description has already been installed, the processing
           is somewhat different than for an initial offer.</t>
@@ -1415,12 +1415,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             they are still alive, as well as any new m= sections.</t>
         </section>
 
-        <section title="Options Handling">
+        <section title="Options Handling" anchor="sec.options-handling">
           <t>The createOffer method takes as a parameter an RTCOfferOptions
           object. Special processing is performed when generating a SDP
           description if the following constraints are present.</t>
 
-          <section title="OfferToReceiveAudio">
+          <section title="OfferToReceiveAudio" anchor="sec.offertoreceiveaudio">
             <t>If the "OfferToReceiveAudio" option is specified, with a
             value of "N", the offer MUST include N non-rejected m= sections
             with media type "audio", even if fewer than N audio 
@@ -1436,7 +1436,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             is interpreted as equivalent to N=1.</t>
           </section>
 
-          <section title="OfferToReceiveVideo">
+          <section title="OfferToReceiveVideo" anchor="sec.offertoreceivevideo">
             <t>If the "OfferToReceiveVideo" option is specified, with a
             value of "N", the offer MUST include N non-rejected m= sections
             with media type "video", even if fewer than N video 
@@ -1452,7 +1452,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             is interpreted as equivalent to N=1.</t>
           </section>
 
-          <section title="VoiceActivityDetection">
+          <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection">
             <t>If the "VoiceActivityDetection" option is specified, with a
             value of "true", the offer MUST indicate support for silence
             suppression by including comfort noise ("CN") codecs for each
@@ -1460,7 +1460,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             target="RFC3389"></xref>, Section 5.1.</t>
           </section>
 
-          <section title="IceRestart">
+          <section title="IceRestart" anchor="sec.icerestart">
             <t>If the "IceRestart" option is specified, with a value of
             "true", the offer MUST indicate an ICE restart by generating new
             ICE ufrag and pwd attributes, as specified in RFC5245, Section
@@ -1471,14 +1471,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
       </section>
 
-      <section title="Generating an Answer">
+      <section title="Generating an Answer" anchor="sec.generating-an-answer">
         <t>When createAnswer is called, a new SDP description must be created
         that is compatible with the supplied remote description as well as the
         requirements specified in <xref
         target="I-D.ietf-rtcweb-rtp-usage"></xref>. The exact details of this
         process are explained below.</t>
 
-        <section title="Initial Answers">
+        <section title="Initial Answers" anchor="sec.initial-answers">
           <t>When createAnswer is called for the first time after a remote
           description has been provided, the result is known as the initial
           answer. If no remote description has been installed, an answer
@@ -1678,21 +1678,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           prohibited in the creation of answers.</t>
         </section>
 
-        <section title="Subsequent Answers"></section>
+        <section title="Subsequent Answers" anchor="sec.subsequent-answers"></section>
 
-        <section title="Options Handling"></section>
+        <section title="Options Handling" anchor="sec.options-handling2"></section>
       </section>
 
-      <section title="Parsing an Offer"></section>
+      <section title="Parsing an Offer" anchor="sec.parsing-an-offer"></section>
 
-      <section title="Parsing an Answer"></section>
+      <section title="Parsing an Answer" anchor="sec.parsing-an-answer"></section>
 
-      <section title="Applying a Local Description"></section>
+      <section title="Applying a Local Description" anchor="sec.applying-a-local-descript"></section>
 
-      <section title="Applying a Remote Description"></section>
+      <section title="Applying a Remote Description" anchor="sec.applying-a-remote-descrip"></section>
     </section>
 
-    <section title="Configurable SDP Parameters">
+    <section title="Configurable SDP Parameters" anchor="sec.configurable-sdp-paramete">
       <t>Note: This section is still very early and is likely to significantly
       change as we get a better understanding of a) the use cases for this b)
       the implications at the protocol level c) feedback from implementors on
@@ -1764,18 +1764,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       implementation of this specification.</t>
     </section>
 
-    <section title="Security Considerations">
+    <section title="Security Considerations" anchor="sec.security-considerations">
       <t>The intent of the WebRTC protocol suite is to provide an environment
       that is securable by default: all media is encrypted, keys are exchanged
       in a secure fashion, and the Javascript API includes functions that can
       be used to verify the identity of communication partners.</t>
     </section>
 
-    <section title="IANA Considerations">
+    <section title="IANA Considerations" anchor="sec.iana-considerations">
       <t>This document requires no actions from IANA.</t>
     </section>
 
-    <section title="Acknowledgements">
+    <section title="Acknowledgements" anchor="sec.acknowledgements">
       <t>Significant text incorporated in the draft as well and review was
       provided by Harald Alvestrand and Suhas Nandakumar. <!-- ACK 1 --> Dan
       Burnett, Neil Stratford, Eric Rescorla, Anant Narayanan, Andrew Hutton,
@@ -2971,15 +2971,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </reference>
     </references>
 
-    <section title="JSEP Implementation Examples">
-      <section title="Example API Flows">
+    <section title="JSEP Implementation Examples" anchor="sec.jsep-implementation-examp">
+      <section title="Example API Flows" anchor="sec.example-api-flows">
         <t>Below are several sample flows for the new PeerConnection and
         library APIs, demonstrating when the various APIs are called in
         different situations and with various transport protocols. For clarity
         and simplicity, the createOffer/createAnswer calls are assumed to be
         synchronous in these examples, whereas the actual APIs are async.</t>
 
-        <section title="Call using ROAP">
+        <section title="Call using ROAP" anchor="sec.call-using-roap">
           <t>This example demonstrates a ROAP call, without the use of trickle
           candidates. <figure>
               <artwork><![CDATA[
@@ -3017,7 +3017,7 @@ OffererUA->AnswererUA:  Media
             </figure></t>
         </section>
 
-        <section title="Call using XMPP">
+        <section title="Call using XMPP" anchor="sec.call-using-xmpp">
           <t>This example demonstrates an XMPP call, making use of trickle
           candidates. <figure>
               <artwork><![CDATA[
@@ -3072,7 +3072,7 @@ OffererUA->AnswererUA:  Media
             </figure></t>
         </section>
 
-        <section title="Adding video to a call, using XMPP">
+        <section title="Adding video to a call, using XMPP" anchor="sec.adding-video-to-a-call-us">
           <t>This example demonstrates an XMPP call, where the XMPP
           content-add mechanism is used to add video media to an existing
           session. For simplicity, candidate exchange is not shown.</t>
@@ -3102,7 +3102,7 @@ OffererJS->OffererUA:   pc.setRemoteDescription("answer", answer);
             </figure></t>
         </section>
 
-        <section title="Simultaneous add of video streams, using XMPP">
+        <section title="Simultaneous add of video streams, using XMPP" anchor="sec.simultaneous-add-of-video">
           <t>This example demonstrates an XMPP call, where new video sources
           are added at the same time to a call that already has video; since
           adding these sources only affects one side of the call, there is no
@@ -3139,7 +3139,7 @@ AnswererJS->AnswererUA: pc.setRemoteDescription("answer", offer);
             </figure></t>
         </section>
 
-        <section title="Call using SIP">
+        <section title="Call using SIP" anchor="sec.call-using-sip">
           <t>This example demonstrates a simple SIP call (e.g. where the
           client talks to a SIP proxy over WebSockets). <figure>
               <artwork><![CDATA[
@@ -3181,7 +3181,7 @@ OffererUA->AnswererUA:  Media
             </figure></t>
         </section>
 
-        <section title="Handling early media (e.g. 1-800-GO FEDEX), using SIP">
+        <section title="Handling early media (e.g. 1-800-GO FEDEX), using SIP" anchor="sec.handling-early-media-eg-1">
           <t>This example demonstrates how early media could be handled; for
           simplicity, only the offerer side of the call is shown. <figure>
               <artwork><![CDATA[
@@ -3211,8 +3211,8 @@ OffererJS->AnswererJS:  ACK
         </section>
       </section>
 
-      <section title="Example Session Descriptions">
-        <section title="createOffer">
+      <section title="Example Session Descriptions" anchor="sec.example-session-descripti">
+        <section title="createOffer" anchor="sec.createoffer2">
           <t>This SDP shows a typical initial offer, created by createOffer
           for a PeerConnection with a single audio MediaStreamTrack, a single
           video MediaStreamTrack, and a single data channel. Host candidates
@@ -3306,7 +3306,7 @@ a=sctpmap:5000 webrtc-datachannel 16
           </figure>
         </section>
 
-        <section title="createAnswer">
+        <section title="createAnswer" anchor="sec.createanswer2">
           <t>This SDP shows a typical initial answer to the above offer,
           created by createAnswer for a PeerConnection with a single audio
           MediaStreamTrack, a single video MediaStreamTrack, and a single data
@@ -3386,7 +3386,7 @@ a=sctpmap:5000 webrtc-datachannel 16
             ]]></artwork>
           </figure>
         </section>
-        <section title="Call Flows">
+        <section title="Call Flows" anchor="sec.call-flows">
             <t>Example SDP for WebRTC call flows can be found in <xref
             target="I-D.nandakumar-rtcweb-sdp"></xref>. [TODO: should these
             call flows be merged into this section?]</t>
@@ -3394,7 +3394,7 @@ a=sctpmap:5000 webrtc-datachannel 16
       </section>
     </section>
 
-    <section title="Change log">
+    <section title="Change log" anchor="sec.change-log">
 
       <t>Changes in draft-06: <list style="symbols">
           <t>Reworked handling of m= line recycling.</t>
