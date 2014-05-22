@@ -1334,7 +1334,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Each "a=mid" line MUST stay the same.</t>
 
               <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
-              same.</t>
+              same unless the "IceRestart" option (<xref target="sec.options-handling"/>
+              was specified. Note that it's not clear why you would actually
+              want to do this, since at this point ICE has not yet started
+              and is thus unlikely to need a restart.
+              </t>
 
               <t>For MediaStreamTracks that are still present, the "a=msid",
               "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</t>
@@ -1416,7 +1420,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             they are still alive, as well as any new m= sections.</t>
         </section>
 
-        <section title="Options Handling">
+        <section title="Options Handling" anchor="sec.options-handling">
           <t>The createOffer method takes as a parameter an RTCOfferOptions
           object. Special processing is performed when generating a SDP
           description if the following constraints are present.</t>
