@@ -3,8 +3,6 @@ import sys
 import subprocess
 import shutil
 
-print os.environ['GH_TOKEN']
-
 if len(sys.argv) != 2:
     sys.exit(1)
 
