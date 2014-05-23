@@ -13,7 +13,7 @@ built = sys.argv[1]
 os.mkdir("out")
 os.chdir("out")
 subprocess.check_call(["git","init","."])
-shutil.move("upload-tmp", built)
+shutil.move("../%s"%built, ".")
 subprocess.check_call(["git","add",built])
 subprocess.check_call(["git","commit","-m", "Commit"])
 subprocess.check_output(["git","push","--force","https://${GH_TOKEN}@${GH_REF}","master:gh-pages"], stderr=STDOUT)
