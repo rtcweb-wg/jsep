@@ -18,6 +18,6 @@ subprocess.check_call(["git","config","--global","user.name","EKR CI Bot"])
 shutil.move("../%s"%built, ".")
 subprocess.check_call(["git","add",built])
 subprocess.check_call(["git","commit","-m", "Commit"])
-subprocess.check_output(["git","push","--force","https://${GH_TOKEN}@${GH_REF}","master:gh-pages"], stderr=STDOUT)
+subprocess.check_output(["git","push","--force","https://${GH_TOKEN}@${GH_REF}","master:gh-pages"], stderr=subprocess.STDOUT)
 
 
