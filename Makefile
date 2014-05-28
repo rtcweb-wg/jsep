@@ -40,4 +40,4 @@ $(next).xml: $(draft).xml
 
 
 upload: $(draft).txt
-	python upload-draft.py $(draft).txt
+	python upload-draft.py $(draft).html
