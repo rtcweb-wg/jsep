@@ -39,5 +39,5 @@ $(next).xml: $(draft).xml
 	$(xml2rfc) --html $< $@
 
 
-upload: $(draft).txt
+upload: $(draft).html $(draft).txt
 	python upload-draft.py $(draft).html
