@@ -899,6 +899,31 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           yet been established, or if the PeerConnection has been closed.</t>
         </section>
 
+        <section title="canTrickle" anchor="sec.cantrickle">
+          <t>
+            [[TODO: Revise if the W3C API uses different stuff here.]]
+            The canTrickle property indicates whether the remote side supports
+            trickle ICE. There are three potential values:
+            <list style="hanging">
+              <t hangText="undefined:">no SDP has been received from the other side
+              so it is not known if it can handle trickle. This is the initial
+              value before setRemoteDescription() is called.</t>
+              <t hangText="true:">SDP has been received from the other side
+              indicating that it can support trickle.</t>
+              <t hangText="false:">SDP has been received from the other side
+              indicating that it cannot support trickle.</t>
+            </list>
+          </t>
+          <t>
+            JSEP implementations always do trickle ICE.
+            Applications can use the canTrickle property to determine whether they
+            need to wait for ICE gathering to complete before sending SDP. Because
+            "undefined" is a falsy value, an application which tests for
+            canTrickle will by default attempt half-trickle on initial offers
+            but will do trickle on subsequent interactions with a trickle ICE
+            compatible agent.
+          </t>
+        </section>
         <section title="updateIce" anchor="sec.updateice">
           <t>The updateIce method allows the configuration of the ICE Agent to
           be changed during the session, primarily for changing which types of
