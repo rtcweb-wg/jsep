@@ -905,7 +905,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             The canTrickle property indicates whether the remote side supports
             trickle ICE. There are three potential values:
             <list style="hanging">
-              <t hangText="undefined:">no SDP has been received from the other side
+              <t hangText="null:">no SDP has been received from the other side
               so it is not known if it can handle trickle. This is the initial
               value before setRemoteDescription() is called.</t>
               <t hangText="true:">SDP has been received from the other side
@@ -914,14 +914,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               indicating that it cannot support trickle.</t>
             </list>
           </t>
-          <t>
-            JSEP implementations always do trickle ICE.
-            Applications can use the canTrickle property to determine whether they
-            need to wait for ICE gathering to complete before sending SDP. Because
-            "undefined" is a falsy value, an application which tests for
-            canTrickle will by default attempt half-trickle on initial offers
-            but will do trickle on subsequent interactions with a trickle ICE
-            compatible agent.
+          <t> JSEP implementations always provide candidates to the
+          application in a manner consistent with Trickle ICE. However,
+          applications can use the canTrickle property to determine whether they
+          can safely send an offer or answer before ICE gathering is complete.
+          Because "null" is a falsy value, an application which tests for
+          canTrickle will by default attempt half-trickle on initial offers but
+          will do trickle on subsequent interactions with a trickle ICE
+          compatible agent.
           </t>
         </section>
         <section title="updateIce" anchor="sec.updateice">
@@ -1137,7 +1137,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             for this m= section. As no candidates have been gathered,
             the 'null' port value MUST be used, as
             indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-            Section 5.1. This port MUST still be unique.
+            Section 5.1. Each "m=" section which is not being bundled
+            MUST still have a unique port.
             [[OPEN ISSUE: See https://github.com/rtcweb-wg/jsep/issues/41]]</t>
             <t>To properly indicate use of DTLS, the &lt;proto&gt; field MUST
             be set to "UDP/TLS/RTP/SAVPF", as specified in 
@@ -1377,7 +1378,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               MUST have the port value set to the port of the default ICE candidate
               for that m= section; if the m= section is not being bundled into
               another m= section, the port value MUST be unique. If no candidates
-              have yet been gathered, and a 'null' port value is being used, as 
+              have yet been gathered, a 'null' port value is used, as 
               indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
               Section 5.1. The port MUST still be unique. In addition, depending
               on the ICE gathering state, the following adjustments must be made:
@@ -1544,7 +1545,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           for this m= section. As no candidates have been gathered,
           the 'null' port value is being used, as 
           indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-          Section 5.1. This port MUST still be unique.
+          Section 5.1. Each "m=" section which is not being bundled
+          MUST still have a unique port.
           [[OPEN ISSUE: See https://github.com/rtcweb-wg/jsep/issues/41]]</t>
 
           <t>Because use of DTLS is
