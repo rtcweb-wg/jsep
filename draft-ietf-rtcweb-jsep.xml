@@ -1659,11 +1659,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </section>
 
     <section title="Configurable SDP Parameters" anchor="sec.configurable-sdp-paramete">
-      <t>Note: This section is still very early and is likely to significantly
-      change as we get a better understanding of a) the use cases for this b)
-      the implications at the protocol level c) feedback from implementors on
-      what they can do.</t>
-
+      <t>
+        It is possible to change elements in the SDP returned from createOffer
+        before passing it to setLocalDescription. When an implementation
+        receives modified SDP it MUST either:
+      </t>
+      <t>
+        <list style="symbols">
+          <t>Accept the changes and adjust its behavior to match the SDP.</t>
+          <t>Reject the changes and return an error via the error callback.</t>
+        </list>
+      </t>
+      <t>
+        Changes MUST NOT be silently ignored.
+      </t>
+      
       <t>The following elements of the SDP media description MUST NOT be
       changed between the createOffer and the setLocalDescription, since they
       reflect transport attributes that are solely under browser control, and
@@ -1685,41 +1695,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Remove or reorder codecs (m=)</t>
         </list></t>
 
-      <t>The following parameters may be controlled by constraints passed into
-      createOffer/createAnswer. As an open issue, these changes may also be be
-      performed by manipulating the SDP returned from
-      createOffer/createAnswer, as indicated above, as long as the
-      capabilities of the endpoint are not exceeded (e.g. asking for a
-      resolution greater than what the endpoint can encode):</t>
+      <t>
+       [[OPEN ISSUE: This is a placeholder for other modifications, which
+       we may continue adding as use cases appear.]]
+      </t>
 
-      <t><list style="symbols">
-          <t>disable BUNDLE (a=group)</t>
-
-          <t>disable RTCP mux (a=rtcp-mux)</t>
-
-          <t>change send resolution or frame rate</t>
-
-          <t>change desired recv resolution or frame rate</t>
-
-          <t>change maximum total bandwidth (b=) [OPEN ISSUE: need to clarify
-          if this is CT or AS - see section 5.8 of <xref
-          target="RFC4566"></xref>]</t>
-
-          <t>remove desired AVPF mechanisms (a=rtcp-fb)</t>
-
-          <t>remove RTP header extensions (a=extmap)</t>
-
-          <t>change media send/recv state (a=sendonly/recvonly/inactive)</t>
-        </list></t>
-
-      <t>For example, an application could implement call hold by adding an
-      a=inactive attribute to its local description, and then applying and
-      signaling that description.</t>
-
-      <t>The application can also modify the SDP to reduce the capabilities in
-      the offer it sends to the far side in any way the application sees fit,
-      as long as it is a valid SDP offer and specifies a subset of what the
-      browser is expecting to do.</t>
+      <t>Implementations MAY choose to either honor or reject any elements not
+      listed in the above two categories, but must do so explicitly as
+      described at the beginning of this section. Note that future standards
+      may add new SDP elements to the list of elements which must be accepted
+      or rejected, but due to version skew, applications must be
+      prepared for implementations to accept changes which must be
+      rejected and vice versa.</t>
 
       <t>As always, the application is solely responsible for what it sends to
       the other party, and all incoming SDP will be processed by the browser
