@@ -535,6 +535,97 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           with a timer; at this point, the application could reapply the
           existing remote description as a final answer.</t>
         </section>
+        <section anchor="sec.imageattr" title="Video size negotiation">
+          <t>Video size negotiation is the process of using the "a=imageattr"
+          SDP attribute<xref target="RFC6236"/> to indicate:</t>
+
+          <t><list style="symbols">
+            <t>From the sender to the receiver: What video frame sizes it is
+            capable of sending, and what video frame sizes it prefers to
+            send</t>
+
+            <t>From the receiver to the sender: What video frame sizes it is
+            capable of receiving, and what video frame sizes it prefers to
+            receive</t>
+          </list>Since "a=imageattr" is defined to be an advisory field, this
+          does not absolutely constrain the video formats that the sender can
+          use, but gives an indication of the preferred values.</t>
+
+          <section title="Choice of imageattr sub-attributes">
+            <t>The "a=imageattr" field is described as payload type specific.
+            When all video codecs supported have the same capabilities, use of
+            the wildcard payload type (*) is RECOMMENDED.</t>
+
+            <t>If video codecs have differing capabilities, the specific payload
+            types are used, and there is one "a=imageattr" line per payload
+            type.</t>
+
+            <t>The "a=imageattr" field can contain multiple sets of parameters,
+            each with a specified q value (a preference). In this specification,
+            the preferences are used in the following manner:</t>
+
+            <t><list style="symbols">
+              <t>q=0.1 is used to indicate the decode capabilities of the
+              device, if known. Using image sizes outside these parameters
+              risks decode failure.</t>
+
+              <t>q=0.5 is used to indicate the limits to image resolution
+              caused by mandatory constraints set by the user (if any).</t>
+
+              <t>q=1.0 is used to indicate the preferred format. Usually the
+              present format of the videostream will be preferred by the
+              sender and the size of the receiver's display surface will be
+              preferred by the receiver; if this format can be used, the video
+              stream can be passed through with an absolute minimum of
+              rescaling. If the user has specified "ideal" constraint values,
+              these might be used instead.</t>
+            </list>Thus, a system with a HD decoder might send</t>
+
+            <t><list style="symbols">
+              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]</t>
+              </list>If the Javascript has constrained the stream to have
+            width={min:320, max:640}, the result might be</t>
+
+            <t><list style="symbols">
+              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]
+              [x=[320:640],y=[16:1080],q=0.5]</t>
+              </list>and if the stream is known to be displayed on a surface of
+            dimension 640x480, the result might be</t>
+
+            <t><list style="symbols">
+              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]
+              [x=[320:640],y=[16:1080],q=0.5] [x=640,y=480,q=1.0]</t>
+              </list>The "par=" parameter is used to represent a constraint on
+              the aspect ratio. The numbers given are produced from the
+              user-specified value by rounding the minimum down to four decimal
+            digits, and rounding the maximum up to four decimal digits.</t>
+          </section>
+
+          <section title="Intersection of imageattr values">
+            <t>When it is necessary to form an intersection between local
+            capabilities and proposed capabilities, as will happen when
+            generating answers and when considering an answer the following
+            procedure is used, where "result" is the proposal being generated,
+            and "proposal" is the imageattr from the corresponding incoming
+            m-line.</t>
+
+            <t>The intention of the intersection algorithm is that the result
+            should be a set of capabilities that are acceptable by both sides,
+            with priority given to the formats preferred by each side.</t>
+
+            <t>[[TODO: Specify an actual algorithm]]</t>
+          </section>
+
+          <section title="Choosing a video configuration">
+            <t>Given that a=imageattr is defined as advisory, the video sender
+            is not constrained to keep within the values selected. However, it
+            is RECOMMENDED that the video sender choose a configuration that
+            fits within the highest q value possible. Using image sizes above
+            the ones specified at the lowest q value is NOT RECOMMENDED. [[NOTE
+            IN DRAFT: Should *this* document mandate not using higher
+            values?]]</t>
+          </section>
+        </section>
 
         <section title="Parallel Forking" anchor="sec.parallel-forking">
           <t>Parallel forking involves a call being dispatched to multiple
@@ -1217,7 +1308,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               in <xref target="RFC5576"></xref>, section 4.2, with semantics
               set to "FEC" and including the primary and FEC SSRCs.</t>
 
-              <t>[OPEN ISSUE: Handling of a=imageattr]</t>
+              <t>If the m-line is a video m-line, generate an "a=imageattr"
+              line as described in section <xref target="sec.imageattr"/>,
+              containing a "send" section based on the properties of the
+              connected video stream, and a "recv" section based on the
+              capabilities of the platform.</t>
 
               <t>If the BUNDLE policy for this PeerConnection is set to
               "max-bundle", and this is not the first m= section, or the BUNDLE
@@ -1616,7 +1711,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC5576"></xref>, section 4.2, with semantics set to
               "FEC" and including the primary and FEC SSRCs.</t>
 
-              <t>[OPEN ISSUE: Handling of a=imageattr]</t>
+              <t>If the type is "video", generate an "a=imageattr" line
+              according to <xref target="sec.imageattr"/>, intersecting the
+              offer's imageattr with the imageattr formed from the connected
+              video stream's properties (if any) and the local platform's
+              receive capabilities.</t>
             </list></t>
 
           <t>If a data channel m= section has been offered, a m= section MUST
@@ -2438,6 +2537,30 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <format octets="108820"
                 target="http://www.rfc-editor.org/rfc/rfc4566.txt" type="TXT" />
       </reference>
+      <reference anchor="RFC6236">
+
+        <front>
+          <title>Negotiation of Generic Image Attributes in the Session Description Protocol (SDP)</title>
+          <author initials="I." surname="Johansson" fullname="I. Johansson">
+          <organization/></author>
+          <author initials="K." surname="Jung" fullname="K. Jung">
+          <organization/></author>
+          <date year="2011" month="May"/>
+          <abstract>
+            <t>This document proposes a new generic session setup
+            attribute to make it possible to negotiate different image
+            attributes such as image size.  A possible use case is to make
+            it possible for a \%low-end \%hand- held terminal to display
+            video without the need to rescale the image, something that
+            may consume large amounts of memory and processing power.  The
+            document also helps to maintain an optimal bitrate for video
+            as only the image size that is desired by the receiver is
+        transmitted. [STANDARDS-TRACK]</t></abstract></front>
+
+        <seriesInfo name="RFC" value="6236"/>
+        <format type="TXT" octets="49356" target="http://www.rfc-editor.org/rfc/rfc6236.txt"/>
+      </reference>
+
     </references>
 
     <references title="Informative References">
