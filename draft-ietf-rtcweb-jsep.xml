@@ -613,11 +613,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               talking to a non-BUNDLE-aware endpoint, only the non-bundle-only
               streams will be negotiated. This policy balances desire to
               multiplex with the need to ensure basic audio and video still
-              works in legacy cases.
+              works in legacy cases. Data channels will be in a separate bundle
+              group.
               </t>
               <t></t>
               <t hangText="max-bundle:">The application will BUNDLE all of its media
-              streams on a single transport. All streams other than the first
+              streams, including data channels,
+              on a single transport. All streams other than the first
               will be marked as bundle-only. This policy aims to minimize
               candidate gathering and maximize multiplexing, at the cost of less
               compatibility with legacy endpoints.
@@ -691,7 +693,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The createAnswer method generates a blob of SDP that contains a
           <xref target="RFC3264"></xref> SDP answer with the supported
           configuration for the session that is compatible with the parameters
-          supplied in the offer. Like createOffer, the returned blob contains
+          supplied in the most recent call to setRemoteDescription, which MUST
+          have been called prior to calling createAnswer.
+          Like createOffer, the returned blob contains
           descriptions of the local MediaStreams attached to this
           PeerConnection, the codec/RTP/RTCP options negotiated for this
           session, and any candidates that have been gathered by the ICE
@@ -772,8 +776,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             "sendrecv" offer to update the previous offer/answer pair and start
             the media flow. While this could also be done with an inactive
             "pranswer", followed by a sendrecv "answer", the initial "pranswer"
-            leaves the offer-answer exchange open, which means the caller cannot
-            send an updated offer during this time.</t>
+            leaves the offer-answer exchange open, which means that
+            neither side can send an updated offer during this time.</t>
 
             <t>As an example, consider a typical web application that will
             set up a data channel, an audio channel, and a video channel. When
@@ -784,7 +788,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             streams, and send a new offer to the remote side moving the audio
             and video to be two-way media. By the time the human has accepted
             the call and triggered the new offer, it is likely that the ICE and
-            DTLS handshaking for all the channels will already be set up.</t>
+            DTLS handshaking for all the channels will already have finished.</t>
 
             <t>Of course, some applications may not be able to perform this
             double offer-answer exchange, particularly ones that are attempting
@@ -814,7 +818,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             received will be processed according to the previous local and
             remote descriptions. Rollback can only be used to cancel proposed
             changes; there is no support for rolling back from a stable state to
-            a previous stable state.
+            a previous stable state. Note that this implies that once the answerer
+            has performed setLocalDescription with his answer, this cannot
+            be rolled back.
             </t>
 
             <t>A rollback is performed by supplying a session description of
@@ -1084,8 +1090,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           addStream method. (Note that this method takes a MediaStream, which
           can contain multiple MediaStreamTracks, and therefore multiple m=
           sections can be generated even if addStream is only called once.)
-          m=sections MUST be sorted first by the order
-          the order in which the MediaStreams were added to the PeerConnection, and
+          m=sections MUST be sorted first by the order in which the
+          MediaStreams were added to the PeerConnection, and
           then by the alphabetical ordering of the media type for the MediaStreamTrack.
           For example, if a MediaStream containing both an audio and a video
           MediaStreamTrack is added to a PeerConnection, the resultant m=audio
@@ -1206,7 +1212,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the source. The CNAME must be generated in accordance with
               <xref target="RFC7022"></xref>. [OPEN ISSUE: How are CNAMEs
               specified for MSTs? Are they randomly generated for each
-              MediaStream? If so, can two MediaStreams be synced?]</t>
+              MediaStream? If so, can two MediaStreams be synced?
+              See: https://github.com/rtcweb-wg/jsep/issues/4]</t>
 
               <t>If RTX is supported for this media type, another "a=ssrc"
               line with the RTX SSRC, and an "a=ssrc-group" line, as specified
@@ -1244,6 +1251,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           "a=group" attribute MUST be added as specified in <xref
           target="RFC5888"></xref>. This attribute MUST have semantics
           "BUNDLE", and MUST include the mid identifiers of each m= section.
+          The effect of that the browser offers all m= sections as one
+          BUNDLE group. However, whether the m= sections are bundle-only
+          or not depends on the BUNDLE policy.
           </t>
 
           <t>Attributes which SDP permits to either be at the session
@@ -1355,8 +1365,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               recvonly m= sections of the appropriate media type with no
               associated MediaStreamTracks, or rejected m= sections of any
               media type, those m= sections MUST be recycled, and the
-              local MediaStreamTracks associated with these recycled m=
-              sections. This includes any recvonly or rejected m= sections
+              local MediaStreamTrack associated with these recycled m=
+              sections until all such existing m= sections have been
+              used. This includes any recvonly or rejected m= sections
               created by the preceding paragraph.</t>
             </list></t>
 
@@ -2344,6 +2355,45 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <!-- NORM 18 -->
 
+
+      <reference anchor="I-D.ietf-mmusic-trickle-ice">
+        <front>
+          <title>Trickle ICE: Incremental Provisioning of Candidates for the
+          Interactive Connectivity Establishment (ICE) Protocol</title>
+
+          <author fullname="Emil Ivov" initials="E" surname="Ivov">
+            <organization></organization>
+          </author>
+
+          <author fullname="Eric Rescorla" initials="E" surname="Rescorla">
+            <organization></organization>
+          </author>
+
+          <author fullname="Justin Uberti" initials="J" surname="Uberti">
+            <organization></organization>
+          </author>
+
+          <date day="11" month="March" year="2013" />
+
+          <abstract>
+            <t>This document describes an extension to the Interactive
+            Connectivity Establishment (ICE) protocol that allows ICE agents
+            to send and receive candidates incrementally rather than
+            exchanging complete lists. With such incremental provisioning, ICE
+            agents can begin connectivity checks while they are still
+            gathering candidates and considerably shorten the time necessary
+            for ICE processing to complete. The above mechanism is also
+            referred to as "trickle ICE".</t>
+          </abstract>
+        </front>
+
+        <seriesInfo name="Internet-Draft"
+                    value="draft-ietf-mmusic-trickle-ice-00" />
+
+        <format target="http://www.ietf.org/internet-drafts/draft-ivov-mmusic-trickle-ice-00.txt"
+                type="TXT" />
+      </reference>
+
       <!-- NORM 19 -->
 
       <reference anchor="RFC2119">
@@ -2440,6 +2490,42 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 target="http://www.rfc-editor.org/rfc/rfc4566.txt" type="TXT" />
       </reference>
     </references>
+
+      <reference anchor="I-D.ietf-rtcweb-data-protocol">
+        <front>
+          <title>WebRTC Data Channel Protocol</title>
+
+          <author fullname="Randell Jesup" initials="R" surname="Jesup">
+            <organization></organization>
+          </author>
+
+          <author fullname="Salvatore Loreto" initials="S" surname="Loreto">
+            <organization></organization>
+          </author>
+
+          <author fullname="Michael Tuexen" initials="M" surname="Tuexen">
+            <organization></organization>
+          </author>
+
+          <date day="26" month="February" year="2013" />
+
+          <abstract>
+            <t>The Web Real-Time Communication (WebRTC) working group is
+            charged to provide protocols to support for direct interactive
+            rich communication using audio, video, and data between two peers'
+            web- browsers. This document specifies an actual (minor) protocol
+            for how the JS-layer DataChannel objects provide the data channels
+            between the peers.</t>
+          </abstract>
+        </front>
+
+        <seriesInfo name="Internet-Draft"
+                    value="draft-ietf-rtcweb-data-protocol-04" />
+
+        <format target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-data-protocol-04.txt"
+                type="TXT" />
+      </reference>
+
 
     <references title="Informative References">
       <!-- INFORM 1 -->
@@ -2585,40 +2671,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <!-- INFORM 5 -->
 
-      <reference anchor="I-D.ietf-rtcweb-data-protocol">
-        <front>
-          <title>WebRTC Data Channel Protocol</title>
-
-          <author fullname="Randell Jesup" initials="R" surname="Jesup">
-            <organization></organization>
-          </author>
-
-          <author fullname="Salvatore Loreto" initials="S" surname="Loreto">
-            <organization></organization>
-          </author>
-
-          <author fullname="Michael Tuexen" initials="M" surname="Tuexen">
-            <organization></organization>
-          </author>
-
-          <date day="26" month="February" year="2013" />
-
-          <abstract>
-            <t>The Web Real-Time Communication (WebRTC) working group is
-            charged to provide protocols to support for direct interactive
-            rich communication using audio, video, and data between two peers'
-            web- browsers. This document specifies an actual (minor) protocol
-            for how the JS-layer DataChannel objects provide the data channels
-            between the peers.</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-ietf-rtcweb-data-protocol-04" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-data-protocol-04.txt"
-                type="TXT" />
-      </reference>
 
       <!-- INFORM 6 -->
 
@@ -2689,44 +2741,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </reference>
 
       <!-- INFORM 8 -->
-
-      <reference anchor="I-D.ietf-mmusic-trickle-ice">
-        <front>
-          <title>Trickle ICE: Incremental Provisioning of Candidates for the
-          Interactive Connectivity Establishment (ICE) Protocol</title>
-
-          <author fullname="Emil Ivov" initials="E" surname="Ivov">
-            <organization></organization>
-          </author>
-
-          <author fullname="Eric Rescorla" initials="E" surname="Rescorla">
-            <organization></organization>
-          </author>
-
-          <author fullname="Justin Uberti" initials="J" surname="Uberti">
-            <organization></organization>
-          </author>
-
-          <date day="11" month="March" year="2013" />
-
-          <abstract>
-            <t>This document describes an extension to the Interactive
-            Connectivity Establishment (ICE) protocol that allows ICE agents
-            to send and receive candidates incrementally rather than
-            exchanging complete lists. With such incremental provisioning, ICE
-            agents can begin connectivity checks while they are still
-            gathering candidates and considerably shorten the time necessary
-            for ICE processing to complete. The above mechanism is also
-            referred to as "trickle ICE".</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-ietf-mmusic-trickle-ice-00" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-ivov-mmusic-trickle-ice-00.txt"
-                type="TXT" />
-      </reference>
 
       <!-- INFORM 9 -->
 
