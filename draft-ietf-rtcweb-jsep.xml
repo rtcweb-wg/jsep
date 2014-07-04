@@ -535,97 +535,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           with a timer; at this point, the application could reapply the
           existing remote description as a final answer.</t>
         </section>
-        <section anchor="sec.imageattr" title="Video size negotiation">
-          <t>Video size negotiation is the process of using the "a=imageattr"
-          SDP attribute<xref target="RFC6236"/> to indicate:</t>
-
-          <t><list style="symbols">
-            <t>From the sender to the receiver: What video frame sizes it is
-            capable of sending, and what video frame sizes it prefers to
-            send</t>
-
-            <t>From the receiver to the sender: What video frame sizes it is
-            capable of receiving, and what video frame sizes it prefers to
-            receive</t>
-          </list>Since "a=imageattr" is defined to be an advisory field, this
-          does not absolutely constrain the video formats that the sender can
-          use, but gives an indication of the preferred values.</t>
-
-          <section title="Choice of imageattr sub-attributes">
-            <t>The "a=imageattr" field is described as payload type specific.
-            When all video codecs supported have the same capabilities, use of
-            the wildcard payload type (*) is RECOMMENDED.</t>
-
-            <t>If video codecs have differing capabilities, the specific payload
-            types are used, and there is one "a=imageattr" line per payload
-            type.</t>
-
-            <t>The "a=imageattr" field can contain multiple sets of parameters,
-            each with a specified q value (a preference). In this specification,
-            the preferences are used in the following manner:</t>
-
-            <t><list style="symbols">
-              <t>q=0.1 is used to indicate the decode capabilities of the
-              device, if known. Using image sizes outside these parameters
-              risks decode failure.</t>
-
-              <t>q=0.5 is used to indicate the limits to image resolution
-              caused by mandatory constraints set by the user (if any).</t>
-
-              <t>q=1.0 is used to indicate the preferred format. Usually the
-              present format of the videostream will be preferred by the
-              sender and the size of the receiver's display surface will be
-              preferred by the receiver; if this format can be used, the video
-              stream can be passed through with an absolute minimum of
-              rescaling. If the user has specified "ideal" constraint values,
-              these might be used instead.</t>
-            </list>Thus, a system with a HD decoder might send</t>
-
-            <t><list style="symbols">
-              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]</t>
-              </list>If the Javascript has constrained the stream to have
-            width={min:320, max:640}, the result might be</t>
-
-            <t><list style="symbols">
-              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]
-              [x=[320:640],y=[16:1080],q=0.5]</t>
-              </list>and if the stream is known to be displayed on a surface of
-            dimension 640x480, the result might be</t>
-
-            <t><list style="symbols">
-              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]
-              [x=[320:640],y=[16:1080],q=0.5] [x=640,y=480,q=1.0]</t>
-              </list>The "par=" parameter is used to represent a constraint on
-              the aspect ratio. The numbers given are produced from the
-              user-specified value by rounding the minimum down to four decimal
-            digits, and rounding the maximum up to four decimal digits.</t>
-          </section>
-
-          <section title="Intersection of imageattr values">
-            <t>When it is necessary to form an intersection between local
-            capabilities and proposed capabilities, as will happen when
-            generating answers and when considering an answer the following
-            procedure is used, where "result" is the proposal being generated,
-            and "proposal" is the imageattr from the corresponding incoming
-            m-line.</t>
-
-            <t>The intention of the intersection algorithm is that the result
-            should be a set of capabilities that are acceptable by both sides,
-            with priority given to the formats preferred by each side.</t>
-
-            <t>[[TODO: Specify an actual algorithm]]</t>
-          </section>
-
-          <section title="Choosing a video configuration">
-            <t>Given that a=imageattr is defined as advisory, the video sender
-            is not constrained to keep within the values selected. However, it
-            is RECOMMENDED that the video sender choose a configuration that
-            fits within the highest q value possible. Using image sizes above
-            the ones specified at the lowest q value is NOT RECOMMENDED. [[NOTE
-            IN DRAFT: Should *this* document mandate not using higher
-            values?]]</t>
-          </section>
-        </section>
 
         <section title="Parallel Forking" anchor="sec.parallel-forking">
           <t>Parallel forking involves a call being dispatched to multiple
@@ -667,6 +576,135 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           can simply terminate the sessions that it no longer needs.</t>
         </section>
       </section>
+        <section anchor="sec.imageattr" title="Video size negotiation">
+          <t>Video size negotiation is the process of using the "a=imageattr"
+          SDP attribute<xref target="RFC6236"/> to indicate:</t>
+
+          <t>
+            <list style="symbols">
+              <t>From the sender to the receiver: What video frame sizes it is
+              capable of sending, and what video frame sizes it prefers to
+              send</t>
+
+              <t>From the receiver to the sender: What video frame sizes it is
+              capable of receiving, and what video frame sizes it prefers to
+              receive</t>
+            </list>
+          </t>
+
+          <section title="Choice of imageattr recv attributes">
+            <t>The "a=imageattr" field is described as payload type specific.
+            When all video codecs supported have the same capabilities, use of
+            the wildcard payload type (*) is RECOMMENDED.</t>
+
+            <t>If video codecs have differing capabilities, the specific payload
+            types are used, and there is one "a=imageattr" line per payload
+            type.</t>
+
+            <t>The "a=imageattr" field can contain multiple sets of parameters,
+            each with a specified q value (a preference). In this specification,
+            the preferences are used in the following manner:</t>
+
+            <t><list style="symbols">
+              <t>q=0.1 is used to indicate the decode capabilities of the
+              device, if known. Using image sizes outside these ranges
+              risks decode failure.</t>
+
+              <t>q=0.5 is used to indicate the limits to image resolution
+              caused by mandatory constraints set by the user (if any).</t>
+
+              <t>q=1.0 is used to indicate the preferred format. Usually the
+              present format of the videostream will be preferred by the
+              sender and the size of the receiver's display surface will be
+              preferred by the receiver; if this format can be used, the video
+              stream can be passed through with an absolute minimum of
+              rescaling. If the user has specified "ideal" constraint values,
+              these might be used instead.</t>
+            </list>
+            Thus, a system with a HD decoder might send</t>
+
+            <t><list style="symbols">
+              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]</t>
+              </list>If the Javascript has constrained the stream to have
+            width={min:320, max:640}, the result might be</t>
+
+            <t><list style="symbols">
+              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]
+              [x=[320:640],y=[16:1080],q=0.5]</t>
+              </list>and if the stream is known to be displayed on a surface of
+            dimension 640x480, the result might be</t>
+
+            <t><list style="symbols">
+              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]
+              [x=[320:640],y=[16:1080],q=0.5] [x=640,y=480,q=1.0]</t>
+            </list>
+            The "par=" parameter is used to represent a constraint on
+            the aspect ratio. The numbers given are produced from the
+            user-specified value by rounding the minimum down to four decimal
+            digits, and rounding the maximum up to four decimal digits.</t>
+          </section>
+
+          <section title="Choice of imageattr send attributes">
+            <t>There are two cases for generation of the send
+            attributes: When the correspondent's recv attribute is
+            unknown, and when the recv attribute is known.
+            </t>
+            <t>When the recv attribute is unknown, such as for an
+            initial offer, the send attribute is generated as follows:
+            </t>
+            <t><list style="symbols">
+              <t>q=0.1 is used to indicate the range of video sizes the
+              system is capable of generating.</t>
+              <t>q=0.5 is used to indicate the range of video sizes
+              that are allowed within present constraints for the
+              attached video stream. If no video stream is attached,
+              this is omitted.</t>
+              <t>q=1.0 is used for the presently generated video
+              format.</t>
+            </list></t>
+            <t>When the recv attribute is known, and a video stream is
+            attached, the sender MAY choose to act as if the set of
+            formats given were a set of constraints, and apply those to the
+            video stream, in addition to any user-specified
+            constraints,
+            before generating the send attribute. Note
+            that in the case of non-WebRTC-generated "recv"
+            attributes, the lower-priority configurations might not be
+            subsets of the higher-priority ones, so they need to be
+            applied as "advanced" constraints, in order from highest
+            to lowest priority, in order to give a reasonable result
+            for all cases, and the application of some constraints
+            will likely fail.
+            </t>
+            <t>This will generate an "a=imageattr send" attribute
+            where the q=0.5 tier reflects how well the preferences of
+            the receiver could be accomondated, and where the q=1.0
+            tier indicates a specific configuration within that range.
+            The q=0.1 tier will not change.
+            </t>
+            <t>If the sender chooses not to apply these constraints,
+            the same send attribute as for the "unknown recv
+            attribute" case will be generated.
+            </t>
+          </section>
+
+          <section title="Choosing a video configuration">
+            <t>
+            <xref target="RFC6236"/> defines "a=imageattr" to be an advisory
+            field. This means that it
+            does not absolutely constrain the video formats that the sender can
+            use, but gives an indication of the preferred values.</t>
+            <t>This specification, however, specifies that if one party sends
+            a recv attribute in an imageattr, the other party MUST NOT send
+            video that is larger than the largest size specified in that
+            imageattr attribute.</t>
+            <t>Within the constraints above, the sender SHOULD choose
+            the largest video configuration (largest width x height)
+            that it is capable of
+            generating that fits within the highest "recv" q tier
+            specified by the receiver that is possible to generate.</t>
+          </section>
+        </section>
     </section>
 
     <section title="Interface" anchor="sec.interface">
@@ -1712,10 +1750,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               "FEC" and including the primary and FEC SSRCs.</t>
 
               <t>If the type is "video", generate an "a=imageattr" line
-              according to <xref target="sec.imageattr"/>, intersecting the
-              offer's imageattr with the imageattr formed from the connected
-              video stream's properties (if any) and the local platform's
-              receive capabilities.</t>
+              according to <xref target="sec.imageattr"/>. Note that
+              this process may have to consider constraints on an
+              attached outgoing MediaStreamTrack (if any).</t>
             </list></t>
 
           <t>If a data channel m= section has been offered, a m= section MUST
