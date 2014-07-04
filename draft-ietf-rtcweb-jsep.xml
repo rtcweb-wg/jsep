@@ -108,12 +108,12 @@
 
         <t>With these considerations in mind, this document describes the
         Javascript Session Establishment Protocol (JSEP) that allows for full
-        control of the signaling state machine from Javascript. This mechanism
-        effectively removes the browser almost completely from the core
-        signaling flow; the only interface needed is a way for the application
-        to pass in the local and remote session descriptions negotiated by
-        whatever signaling mechanism is used, and a way to interact with the
-        ICE state machine.</t>
+        control of the signaling state machine from Javascript. 
+        JSEP removes the browser almost entirely from the core signaling flow, which
+        is instead handled by the Javascript making use of two interfaces:
+        (1) passing in local and remote session descriptions and (2) interacting
+        with the ICE state machine.
+        </t>
 
         <t>In this document, the use of JSEP is described as if it always
         occurs between two browsers. Note though in many cases it will
@@ -474,18 +474,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>JSEP applications typically inform the browser to begin ICE
           gathering via the information supplied to setLocalDescription, as this
           is where the app specifies the number of media streams for which to gather
-          candidates. However, to accelerate cases where the browser knows
-          the number of media streams to use ahead of time, the application MAY
+          candidates. However, to accelerate cases where the likely
+          number of media streams to use ahead of time, the application MAY
           ask the browser to gather a pool of potential ICE candidates to help
-          ensure rapid media setup. When setLocalDescription is eventually
-          called, and the browser goes to gather the needed ICE candidates, it
-          SHOULD start by checking if any candidates are available in the pool.
-          If there are candidates in the pool, they SHOULD be handed to the
-          application immediately via the ICE candidate callback.
-          If the pool becomes depleted, either because a larger-than-expected
-          number of media streams is used, or because the pool has not had enough
-          time to gather candidates, the remaining candidates are gathered as
-          usual.
+          ensure rapid media setup. For instance, in a simple 1-1 video
+          calling setting, the application knows that it will generally want
+          two media streams and can start gathering as soon as notification
+          of a call arrives and before the user has accepted the call, thus
+          parallelizing the user's response and the gathering phase.
+          When setLocalDescription is eventually called, and the
+          browser goes to gather the needed ICE candidates, it SHOULD start by
+          checking if any candidates are available in the pool.  If there are
+          candidates in the pool, they SHOULD be handed to the application
+          immediately via the ICE candidate callback.  If the pool becomes
+          depleted, either because a larger-than-expected number of media
+          streams is used, or because the pool has not had enough time to gather
+          candidates, the remaining candidates are gathered as usual.
           </t>
         </section>
 
@@ -651,7 +655,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </list>
           </t>
           <t>In the initial offer, the generated SDP will contain all desired
-          functionality for the session (certain parts that are supported but
+          functionality for the session (functionality that is supported but
           not desired by default may be omitted); for each SDP line, the
           generation of the SDP will follow the process defined for generating
           an initial offer from the document that specifies the given SDP
@@ -664,7 +668,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           session, e.g. adding or removing MediaStreams, or requesting an ICE
           restart. For each existing stream, the generation of each SDP line
           must follow the process defined for generating an updated offer from
-          the document that specifies the given SDP line. For each new stream,
+          the RFC that specifies the given SDP line. For each new stream,
           the generation of the SDP must follow the process of generating an
           initial offer, as mentioned above. If no changes have been made, or
           for SDP lines that are unaffected by the requested changes, the
@@ -1019,8 +1023,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 profile, as specified in <xref target="RFC5764"></xref>,
                 MUST be used.</t>
                 <t>ICE, as specified in <xref target="RFC5245"></xref>,
-                MUST be used. Note that the remote endpoint MAY use a Lite
-                implementation.</t>
+                MUST be used. Note that the remote endpoint may use a Lite
+                implementation. Implementations MUST properly handle remote
+                endpoints which do ICE-Lite.</t>
                 <t>DTLS-SRTP, as specified in <xref target="RFC5763"></xref>,
                 MUST be used.</t>
             </list></t>
@@ -1060,7 +1065,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>The third SDP line MUST be a "s=" line, as specified in <xref
               target="RFC4566"></xref>, Section 5.3; to match the "o=" line, a
-              single dash SHOULD be used as the session name, e.g. "s=-".</t>
+              single dash SHOULD be used as the session name, e.g. "s=-".
+              Note that this differs from the advice in <xref target="RFC4566"/>
+              which proposes a single space, but as both "o=" and "s="
+              are meaningless, having the same meaningless value seem clearer.
+              </t>
 
               <t>Session Information ("i="), URI ("u="), Email Address ("e="),
               Phone Number ("p="), Bandwidth ("b="), Repeat Times ("r="), and
@@ -1078,7 +1087,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="I-D.ietf-mmusic-msid"></xref>, Section 4.</t>
             </list></t>
 
-          <t>The next step is to generate m= sections for each
+          <t>The next step is to generate m= sections, as specified in
+          <xref target="RFC4566"/> Section 5.14, for each
           MediaStreamTrack that has been added to the PeerConnection via the
           addStream method. (Note that this method takes a MediaStream, which
           can contain multiple MediaStreamTracks, and therefore multiple m=
@@ -1393,8 +1403,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           description if the following constraints are present.</t>
 
           <section title="OfferToReceiveAudio" anchor="sec.offertoreceiveaudio">
-            <t>If the "OfferToReceiveAudio" option is specified, with a
-            value of "N", the offer MUST include N non-rejected m= sections
+            <t>If the "OfferToReceiveAudio" option is specified, with an integer
+            value of N, the offer MUST include N non-rejected m= sections
             with media type "audio", even if fewer than N audio
             MediaStreamTracks have been added to the PeerConnection. This allows
             the offerer to receive audio, including multiple independent
@@ -1429,7 +1439,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             value of "true", the offer MUST indicate support for silence
             suppression by including comfort noise ("CN") codecs for each
             supported clock rate, as specified in <xref
-            target="RFC3389"></xref>, Section 5.1.</t>
+            target="RFC3389"></xref>, Section 5.1.
+            This option allows for significant bandwidth reductions with
+            codecs such as G.711.</t>
           </section>
 
           <section title="IceRestart" anchor="sec.icerestart">
@@ -1438,7 +1450,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             ICE ufrag and pwd attributes, as specified in RFC5245, Section
             9.1.1.1. If this option is specified on an initial offer, it
             has no effect (since a new ICE ufrag and pwd are already
-            generated).</t>
+            generated). This option is useful for reestablishing connectivity
+            in cases where failures are detected.
+            </t>
           </section>
         </section>
       </section>
@@ -1475,11 +1489,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           valid as media-level attributes SHALL be considered to be present in
           each m= section.</t>
 
-          <t>For each offered m= section of a given media type, if there
-          is a local MediaStreamTrack of the specified type which has been
+          <t>The next step is to go through each offered m= section.
+          If there is a local MediaStreamTrack of the same type which has been
           added to the PeerConnection via addStream and not yet associated
           with a m= section, and the specific m= section is either sendrecv or
-          recvonly, the MediaStreamTrack is associated with the m=
+          recvonly, the MediaStreamTrack will be associated with the m=
           section at this time. MediaStreamTracks are assigned to m=
           sections using the canonical order described in
           <xref target="sec.initial-offers"/>. If there are more m= sections of a certain
