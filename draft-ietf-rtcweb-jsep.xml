@@ -1444,10 +1444,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the "VoiceActivityDetection" option is specified, with a
             value of "true", the offer MUST indicate support for silence
             suppression in the audio it receives by including comfort noise
-            ("CN") codecs for each supported clock rate, as specified in <xref
-            target="RFC3389"></xref>, Section 5.1.
-            This option allows for significant bandwidth reductions with
-            codecs such as G.711.</t>
+            ("CN") codecs for each offered audio codec, as specified in <xref
+            target="RFC3389"></xref>, Section 5.1, except for codecs that have their
+            own internal silence suppression support. For codecs that have their own internal silence suppression support, the appropriate fmtp parameters
+            for that codec MUST be specified to indicate that silence suppression for
+            received audio is desired. For example, when using the Opus codec, the "usedtx=1" parameter would be specified in the offer.
+            This option allows the endpoint to significantly reduce the amount of
+            audio bandwidth it receives, at the cost of some fidelity, depending on
+            the quality of the remote VAD algorithm.</t>
           </section>
 
           <section title="IceRestart" anchor="sec.icerestart">
