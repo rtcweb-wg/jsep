@@ -91,7 +91,7 @@
   <middle>
     <section title="Introduction" anchor="sec.introduction">
       <t>This document describes how the W3C WEBRTC RTCPeerConnection
-      interface<xref target="W3C.WD-webrtc-20111027"></xref> is used to
+      interface<xref target="W3C.WD-webrtc-20140617"></xref> is used to
       control the setup, management and teardown of a multimedia session.</t>
 
       <section title="General Design of JSEP" anchor="sec.general-design-of-jsep">
@@ -457,16 +457,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 ]]></artwork>
             </figure>
 
-            <t>The IceCandidate object also contains fields to indicate which
-            m= line it should be associated with. The m line can be identified
-            in one of two ways; either by a m-line index, or a MID. The m-line
-            index is a zero-based index, referring to the Nth m-line in the
-            SDP. The MID uses the "media stream identification", as defined in
-            <xref target="RFC5888"></xref> , to identify the m-line. WebRTC
-            implementations creating an ICE Candidate object MUST populate
-            both of these fields. Implementations receiving an ICE Candidate
-            object SHOULD use the MID if they implement that functionality, or
-            the m-line index, if not.</t>
+            <t>The IceCandidate object also contains fields to
+            indicate which m= line it should be associated with. The m line can be
+            identified in one of two ways; either by a m-line index, or a MID. The
+            m-line index is a zero-based index, with index N referring to the
+            N+1th m-line in the SDP sent by the entity which sent the IceCandidate.
+            The MID uses the "media stream identification", as defined in <xref
+            target="RFC5888"></xref>, to identify the m-line. WebRTC
+            implementations creating an ICE Candidate object MUST populate both of
+            these fields. Implementations receiving an ICE Candidate object SHOULD
+            use the MID if they implement that functionality, or the m-line index,
+            if not.</t>
           </section>
         </section>
 
@@ -556,8 +557,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           wishes to simultaneously exchange media with multiple peers, the
           flow is slightly more complex, but the Javascript application can
           follow the strategy that <xref target="RFC3960"></xref> describes
-          using UPDATE. (It is worth noting that use cases where this is the
-          desired behavior are very unusual.) The UPDATE approach allows the
+          using UPDATE. The UPDATE approach allows the
           signaling to set up a separate media flow for each peer that it
           wishes to exchange media with. In JSEP, this offer used in the
           UPDATE would be formed by simply creating a new PeerConnection and
@@ -612,11 +612,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               talking to a non-BUNDLE-aware endpoint, only the non-bundle-only
               streams will be negotiated. This policy balances desire to
               multiplex with the need to ensure basic audio and video still
-              works in legacy cases.
+              works in legacy cases. Data channels will be in a separate bundle
+              group.
               </t>
               <t></t>
               <t hangText="max-bundle:">The application will BUNDLE all of its media
-              streams on a single transport. All streams other than the first
+              streams, including data channels,
+              on a single transport. All streams other than the first
               will be marked as bundle-only. This policy aims to minimize
               candidate gathering and maximize multiplexing, at the cost of less
               compatibility with legacy endpoints.
@@ -690,7 +692,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The createAnswer method generates a blob of SDP that contains a
           <xref target="RFC3264"></xref> SDP answer with the supported
           configuration for the session that is compatible with the parameters
-          supplied in the offer. Like createOffer, the returned blob contains
+          supplied in the most recent call to setRemoteDescription, which MUST
+          have been called prior to calling createAnswer.
+          Like createOffer, the returned blob contains
           descriptions of the local MediaStreams attached to this
           PeerConnection, the codec/RTP/RTCP options negotiated for this
           session, and any candidates that have been gathered by the ICE
@@ -771,8 +775,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             "sendrecv" offer to update the previous offer/answer pair and start
             the media flow. While this could also be done with an inactive
             "pranswer", followed by a sendrecv "answer", the initial "pranswer"
-            leaves the offer-answer exchange open, which means the caller cannot
-            send an updated offer during this time.</t>
+            leaves the offer-answer exchange open, which means that
+            neither side can send an updated offer during this time.</t>
 
             <t>As an example, consider a typical web application that will
             set up a data channel, an audio channel, and a video channel. When
@@ -783,7 +787,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             streams, and send a new offer to the remote side moving the audio
             and video to be two-way media. By the time the human has accepted
             the call and triggered the new offer, it is likely that the ICE and
-            DTLS handshaking for all the channels will already be set up.</t>
+            DTLS handshaking for all the channels will already have finished.</t>
 
             <t>Of course, some applications may not be able to perform this
             double offer-answer exchange, particularly ones that are attempting
@@ -813,7 +817,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             received will be processed according to the previous local and
             remote descriptions. Rollback can only be used to cancel proposed
             changes; there is no support for rolling back from a stable state to
-            a previous stable state.
+            a previous stable state. Note that this implies that once the answerer
+            has performed setLocalDescription with his answer, this cannot
+            be rolled back.
             </t>
 
             <t>A rollback is performed by supplying a session description of
@@ -1083,8 +1089,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           addStream method. (Note that this method takes a MediaStream, which
           can contain multiple MediaStreamTracks, and therefore multiple m=
           sections can be generated even if addStream is only called once.)
-          m=sections MUST be sorted first by the order
-          the order in which the MediaStreams were added to the PeerConnection, and
+          m=sections MUST be sorted first by the order in which the
+          MediaStreams were added to the PeerConnection, and
           then by the alphabetical ordering of the media type for the MediaStreamTrack.
           For example, if a MediaStream containing both an audio and a video
           MediaStreamTrack is added to a PeerConnection, the resultant m=audio
@@ -1205,7 +1211,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the source. The CNAME must be generated in accordance with
               <xref target="RFC7022"></xref>. [OPEN ISSUE: How are CNAMEs
               specified for MSTs? Are they randomly generated for each
-              MediaStream? If so, can two MediaStreams be synced?]</t>
+              MediaStream? If so, can two MediaStreams be synced?
+              See: https://github.com/rtcweb-wg/jsep/issues/4]</t>
 
               <t>If RTX is supported for this media type, another "a=ssrc"
               line with the RTX SSRC, and an "a=ssrc-group" line, as specified
@@ -1243,6 +1250,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           "a=group" attribute MUST be added as specified in <xref
           target="RFC5888"></xref>. This attribute MUST have semantics
           "BUNDLE", and MUST include the mid identifiers of each m= section.
+          The effect of this is that the browser offers all m= sections as one
+          BUNDLE group. However, whether the m= sections are bundle-only
+          or not depends on the BUNDLE policy.
           </t>
 
           <t>Attributes which SDP permits to either be at the session
@@ -1353,9 +1363,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>If any MediaStreamTracks have been added, and there exist
               recvonly m= sections of the appropriate media type with no
               associated MediaStreamTracks, or rejected m= sections of any
-              media type, those m= sections MUST be recycled, and the
-              local MediaStreamTracks associated with these recycled m=
-              sections. This includes any recvonly or rejected m= sections
+              media type, those m= sections MUST be recycled, and a
+              local MediaStreamTrack associated with these recycled m=
+              sections until all such existing m= sections have been
+              used. This includes any recvonly or rejected m= sections
               created by the preceding paragraph.</t>
             </list></t>
 
@@ -2409,7 +2420,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <!-- NORM 18 -->
       <reference anchor='RFC3552'>
-
         <front>
           <title>Guidelines for Writing RFC Text on Security Considerations</title>
           <author initials='E.' surname='Rescorla' fullname='E. Rescorla'>
@@ -2518,6 +2528,41 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <format octets="108820"
                 target="http://www.rfc-editor.org/rfc/rfc4566.txt" type="TXT" />
+      </reference>
+
+      <reference anchor="I-D.ietf-rtcweb-data-protocol">
+        <front>
+          <title>WebRTC Data Channel Protocol</title>
+
+          <author fullname="Randell Jesup" initials="R" surname="Jesup">
+            <organization></organization>
+          </author>
+
+          <author fullname="Salvatore Loreto" initials="S" surname="Loreto">
+            <organization></organization>
+          </author>
+
+          <author fullname="Michael Tuexen" initials="M" surname="Tuexen">
+            <organization></organization>
+          </author>
+
+          <date day="26" month="February" year="2013" />
+
+          <abstract>
+            <t>The Web Real-Time Communication (WebRTC) working group is
+            charged to provide protocols to support for direct interactive
+            rich communication using audio, video, and data between two peers'
+            web- browsers. This document specifies an actual (minor) protocol
+            for how the JS-layer DataChannel objects provide the data channels
+            between the peers.</t>
+          </abstract>
+        </front>
+
+        <seriesInfo name="Internet-Draft"
+                    value="draft-ietf-rtcweb-data-protocol-04" />
+
+        <format target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-data-protocol-04.txt"
+                type="TXT" />
       </reference>
     </references>
 
@@ -2665,40 +2710,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <!-- INFORM 5 -->
 
-      <reference anchor="I-D.ietf-rtcweb-data-protocol">
-        <front>
-          <title>WebRTC Data Channel Protocol</title>
-
-          <author fullname="Randell Jesup" initials="R" surname="Jesup">
-            <organization></organization>
-          </author>
-
-          <author fullname="Salvatore Loreto" initials="S" surname="Loreto">
-            <organization></organization>
-          </author>
-
-          <author fullname="Michael Tuexen" initials="M" surname="Tuexen">
-            <organization></organization>
-          </author>
-
-          <date day="26" month="February" year="2013" />
-
-          <abstract>
-            <t>The Web Real-Time Communication (WebRTC) working group is
-            charged to provide protocols to support for direct interactive
-            rich communication using audio, video, and data between two peers'
-            web- browsers. This document specifies an actual (minor) protocol
-            for how the JS-layer DataChannel objects provide the data channels
-            between the peers.</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-ietf-rtcweb-data-protocol-04" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-data-protocol-04.txt"
-                type="TXT" />
-      </reference>
 
       <!-- INFORM 6 -->
 
@@ -2808,6 +2819,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 type="TXT" />
       </reference>
 
+
       <!-- INFORM 9 -->
 
       <!-- INFORM 10 -->
@@ -2821,49 +2833,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       <!-- INFORM 14 -->
 
       <!-- INFORM 15 -->
-
-      <reference anchor="I-D.jennings-rtcweb-signaling">
-        <front>
-          <title>RTCWeb Offer/Answer Protocol (ROAP)</title>
-
-          <author fullname="Cullen Jennings" initials="C" surname="Jennings">
-            <organization></organization>
-          </author>
-
-          <author fullname="Jonathan Rosenberg" initials="J"
-                  surname="Rosenberg">
-            <organization></organization>
-          </author>
-
-          <author fullname="Randell Jesup" initials="R" surname="Jesup">
-            <organization></organization>
-          </author>
-
-          <date day="30" month="October" year="2011" />
-
-          <abstract>
-            <t>This document describes an protocol used to negotiate media
-            between browsers or other compatible devices. This protocol
-            provides the state machinery needed to implement the offer/answer
-            model (RFC 3264), and defines the semantics and necessary
-            attributes of messages that must be exchanged. The protocol uses
-            an abstract transport in that it does not actually define how
-            these messages are exchanged. Rather, such exchanges are handled
-            through web-based transports like HTTP or WebSockets. The protocol
-            focuses solely on media negotiation and does not handle call
-            control, call processing, or other functions.</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-jennings-rtcweb-signaling-01" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.txt"
-                type="TXT" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.pdf"
-                type="PDF" />
-      </reference>
 
       <!-- INFORM 16 -->
 
@@ -2991,8 +2960,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 target="http://www.rfc-editor.org/rfc/rfc4568.txt" type="TXT" />
       </reference>
 
-      <reference anchor="W3C.WD-webrtc-20111027"
-                 target="http://www.w3.org/TR/2011/WD-webrtc-20111027">
+      <reference anchor="W3C.WD-webrtc-20140617"
+                 target="http://www.w3.org/TR/2011/WD-webrtc-20140617">
         <front>
           <title>WebRTC 1.0: Real-time Communication Between Browsers</title>
 
@@ -3012,13 +2981,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <organization></organization>
           </author>
 
-          <date day="27" month="October" year="2011" />
+          <date day="17" month="June" year="2014" />
         </front>
 
         <seriesInfo name="World Wide Web Consortium WD"
-                    value="WD-webrtc-20111027" />
+                    value="WD-webrtc-20140617" />
 
-        <format target="http://www.w3.org/TR/2011/WD-webrtc-20111027"
+        <format target="http://www.w3.org/TR/2011/WD-webrtc-20140617"
                 type="HTML" />
       </reference>
     </references>
