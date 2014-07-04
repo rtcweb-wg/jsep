@@ -280,7 +280,7 @@
         configuration. [[OPEN ISSUE: See issue 10 above.]]</t>
 
         <t>Lastly, while the exact media parameters are only known only after
-        a offer and an answer have been exchanged, it is possible for the
+        an offer and an answer have been exchanged, it is possible for the
         offerer to receive media after they have sent an offer and before they
         have received an answer. To properly process incoming media in this
         case, the offerer's media handler must be aware of the details of the
@@ -473,8 +473,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="ICE Candidate Pool" anchor="sec.ice-candidate-pool">
           <t>JSEP applications typically inform the browser to begin ICE
           gathering via the information supplied to setLocalDescription, as this
-          is where the app specifies the number of media streams to gather
-          candidates for. However, to accelerate cases where the browser knows
+          is where the app specifies the number of media streams for which to gather
+          candidates. However, to accelerate cases where the browser knows
           the number of media streams to use ahead of time, the application MAY
           ask the browser to gather a pool of potential ICE candidates to help
           ensure rapid media setup. When setLocalDescription is eventually
@@ -497,7 +497,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <xref target="RFC3261"></xref> defines both a "Parallel Search" and
         "Sequential Search". Although these are primarily signaling level
         issues that are outside the scope of JSEP, they do have some impact on
-        the configuration of the media plane which is relevant. When forking
+        the configuration of the media plane that is relevant. When forking
         happens at the signaling layer, the Javascript application responsible
         for the signaling needs to make the decisions about what media should
         be sent or received at any point of time, as well as which remote
@@ -1095,8 +1095,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Each m= section, provided it is not being bundled into
           another m= section, MUST generate a unique set of ICE credentials
           and gather its own unique set of ICE candidates. Otherwise, it MUST
-          use the same ICE credentials and candidates that were used in the
-          m= section that it is being bundled into. Note that this means
+          use the same ICE credentials and candidates as the m= section
+          into which it is being bundled. Note that this means
           that for offers, any m= sections which are not bundle-only
           MUST have unique ICE credentials and candidates, since it is
           possible that the answerer will accept them without bundling
@@ -1105,7 +1105,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>For DTLS, all m= sections MUST use the certificate for the
           identity that has been specified for the PeerConnection; as a result,
-          they MUST all have the same <xref target="RFC4572"></xref>fingerprint
+          they MUST all have the same <xref target="RFC4572"></xref> fingerprint
           value, or this value MUST be a session-level attribute.</t>
 
           <t>Each m= section should be generated as specified in <xref
@@ -1145,7 +1145,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>For each primary codec where RTP retransmission should be
               used, a corresponding "a=rtpmap" line indicating "rtx" with the
               clock rate of the primary codec and an "a=fmtp" line that
-              references the payload type fo the primary codec, as specified
+              references the payload type of the primary codec, as specified
               in <xref target="RFC4588"></xref>, Section 8.1.</t>
 
               <t>For each supported FEC mechanism, a corresponding "a=rtpmap"
@@ -1162,7 +1162,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               recent gathering phase, an "a=candidate" line, as specified in
               <xref target="RFC5245"></xref>, Section 4.3., paragraph 3.</t>
 
-              <t>For the current default candidate, a "c=" line, as specific
+              <t>For the current default candidate, a "c=" line, as specified
               in <xref target="RFC5245"></xref>, Section 4.3., paragraph 6.
               If no candidates have been gathered yet, the default candidate
               should be set to the 'null' value defined in <xref
@@ -1499,7 +1499,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           this m= section can be skipped.</t>
 
           <t>Provided that is not the case, each m= section in the answer should
-          then generated as specified in <xref
+          then be generated as specified in <xref
           target="RFC3264"></xref>, Section 6.1. Because use of DTLS is
           mandatory, the &lt;proto&gt; field MUST be set to "UDP/TLS/RTP/SAVPF".
           If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
@@ -1522,8 +1522,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               associated local MediaStreamTrack, the appropriate directionality
               attribute, as specified in <xref target="RFC3264"></xref>,
               Section 6.1. If the offer was sendrecv, and the remote
-              MediaStreamTrack is still "live", and there a local
-              MediaStreamTrack has been associated, the directionality MUST be
+              MediaStreamTrack is still "live", and there is a local
+              MediaStreamTrack that has been associated, the directionality MUST be
               set as sendrecv. If the offer was sendonly, and the remote
               MediaStreamTrack is still "live", the directionality MUST be set
               as recvonly. If the offer was recvonly, and a local
@@ -1536,7 +1536,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC4566"></xref>, Section 6, and <xref
               target="RFC3264"></xref>, Section 6.1. For audio, the codecs
               specified in <xref target="I-D.ietf-rtcweb-audio"></xref>,
-              Section 3, MUST be be supported. Note that for simplicity, the
+              Section 3, MUST be supported. Note that for simplicity, the
               answerer MAY use different payload types for codecs than the
               offerer, as it is not prohibited by Section 6.1.</t>
 
@@ -1544,7 +1544,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               where RTP retransmission should be used, a corresponding
               "a=rtpmap" line indicating "rtx" with the clock rate of the
               primary codec and an "a=fmtp" line that references the payload
-              type fo the primary codec, as specified in <xref
+              type of the primary codec, as specified in <xref
               target="RFC4588"></xref>, Section 8.1.</t>
 
               <t>For each supported FEC mechanism that is present in the
@@ -1563,7 +1563,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               recent gathering phase, an "a=candidate" line, as specified in
               <xref target="RFC5245"></xref>, Section 4.3., paragraph 3.</t>
 
-              <t>For the current default candidate, a "c=" line, as specific
+              <t>For the current default candidate, a "c=" line, as specified
               in <xref target="RFC5245"></xref>, Section 4.3., paragraph 6.
               If no candidates have been gathered yet, the default candidate
               should be set to the 'null' value defined in <xref
