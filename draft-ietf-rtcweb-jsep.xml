@@ -1737,12 +1737,41 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </section>
 
     <section title="Security Considerations" anchor="sec.security-considerations">
-      <t>The intent of the WebRTC protocol suite is to provide an environment
-      that is securable by default: all media is encrypted, keys are exchanged
-      in a secure fashion, and the Javascript API includes functions that can
-      be used to verify the identity of communication partners.</t>
+      <t>
+        The IETF has published separate documents
+        <xref target="I-D.ietf-rtcweb-security-arch"/>
+        <xref target="I-D.ietf-rtcweb-security"/>
+        describing the security architecture for WebRTC as a whole.
+        The remainder of this section describes security considerations
+        for this document.
+      </t>
+      <t>
+        While formally the JSEP interface is an API, it is better to
+        think of it is an Internet protocol, with the JS being untrustworthy
+        from the perspective of the browser. Thus, the threat model of <xref
+        target="RFC3552"/> applies.  In particular, JS can call the API in any
+        order and with any inputs, including malicious ones. This is
+        particularly relevant when we consider the SDP which is passed to
+        setLocalDescription(). While correct API usage requires that the
+        application pass in SDP which was derived from createOffer() or
+        createAnswer() (perhaps suitably modified as described in <xref
+        target="sec.configurable-sdp-paramete"/>, there is no guarantee that
+        applications do so. The browser MUST be prepared for the JS to pass in
+        bogus data instead.
+      </t>
+      <t>
+        Conversely, the application programmer MUST recognize that the
+        JS does not have complete control of browser behavior. One case that
+        bears particular mention is that editing ICE candidates out of the SDP
+        or suppressing trickled candidates does not have the expected
+        behavior: implementations will still perform checks from those
+        candidates even if they are not sent to the other side.  Thus, for
+        instance, it is not possible to prevent the remote peer from
+        learning your public IP address by removing server reflexive
+        candidates. Applications which wish to conceal their public IP address
+        should instead configure the ICE agent to use only relay candidates.
+      </t>
     </section>
-
     <section title="IANA Considerations" anchor="sec.iana-considerations">
       <t>This document requires no actions from IANA.</t>
     </section>
@@ -2339,10 +2368,62 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <!-- NORM 16 -->
 
+      <reference anchor='I-D.ietf-rtcweb-security'>
+        <front>
+          <title>Security Considerations for WebRTC</title>
+
+          <author initials='E' surname='Rescorla' fullname='Eric Rescorla'>
+            <organization />
+          </author>
+
+          <date month='January' day='21' year='2014' />
+
+          <abstract><t>The Real-Time Communications on the Web (RTCWEB) working group is tasked with standardizing protocols for real-time communications between Web browsers, generally called "WebRTC".  The major use cases for WebRTC technology are real-time audio and/or video calls, Web conferencing, and direct data transfer.  Unlike most conventional real-time systems (e.g., SIP-based soft phones) WebRTC communications are directly controlled by a Web server, which poses new security challenges.  For instance, a Web browser might expose a JavaScript API which allows a server to place a video call.  Unrestricted access to such an API would allow any site which a user visited to "bug" a user's computer, capturing any activity which passed in front of their camera.  This document defines the WebRTC threat model and analyzes the security threats of WebRTC in that model.</t></abstract>
+
+        </front>
+
+        <seriesInfo name='Internet-Draft' value='draft-ietf-rtcweb-security-06' />
+        <format type='TXT'
+                target='http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-security-06.txt' />
+      </reference>
+
       <!-- NORM 17 -->
+      <reference anchor='I-D.ietf-rtcweb-security-arch'>
+        <front>
+          <title>WebRTC Security Architecture</title>
+
+          <author initials='E' surname='Rescorla' fullname='Eric Rescorla'>
+            <organization />
+          </author>
+
+          <date month='February' day='14' year='2014' />
+
+          <abstract><t>The Real-Time Communications on the Web (RTCWEB) working group is tasked with standardizing protocols for enabling real-time communications within user-agents using web technologies (commonly called "WebRTC").  This document defines the security architecture for WebRTC.</t></abstract>
+
+        </front>
+
+        <seriesInfo name='Internet-Draft' value='draft-ietf-rtcweb-security-arch-09' />
+        <format type='TXT'
+                target='http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-security-arch-09.txt' />
+      </reference>
 
       <!-- NORM 18 -->
+      <reference anchor='RFC3552'>
 
+        <front>
+          <title>Guidelines for Writing RFC Text on Security Considerations</title>
+          <author initials='E.' surname='Rescorla' fullname='E. Rescorla'>
+          <organization /></author>
+          <author initials='B.' surname='Korver' fullname='B. Korver'>
+          <organization /></author>
+          <date year='2003' month='July' />
+          <abstract>
+        <t>All RFCs are required to have a Security Considerations section.  Historically, such sections have been relatively weak.  This document provides guidelines to RFC authors on how to write a good Security Considerations section.  This document specifies an Internet Best Current Practices for the Internet Community, and requests discussion and suggestions for improvements.</t></abstract></front>
+
+        <seriesInfo name='BCP' value='72' />
+        <seriesInfo name='RFC' value='3552' />
+        <format type='TXT' octets='110393' target='http://www.rfc-editor.org/rfc/rfc3552.txt' />
+      </reference>
       <!-- NORM 19 -->
 
       <reference anchor="RFC2119">
