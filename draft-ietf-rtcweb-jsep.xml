@@ -576,6 +576,135 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           can simply terminate the sessions that it no longer needs.</t>
         </section>
       </section>
+        <section anchor="sec.imageattr" title="Video size negotiation">
+          <t>Video size negotiation is the process of using the "a=imageattr"
+          SDP attribute<xref target="RFC6236"/> to indicate:</t>
+
+          <t>
+            <list style="symbols">
+              <t>From the sender to the receiver: What video frame sizes it is
+              capable of sending, and what video frame sizes it prefers to
+              send</t>
+
+              <t>From the receiver to the sender: What video frame sizes it is
+              capable of receiving, and what video frame sizes it prefers to
+              receive</t>
+            </list>
+          </t>
+
+          <section title="Choice of imageattr recv attributes">
+            <t>The "a=imageattr" field is described as payload type specific.
+            When all video codecs supported have the same capabilities, use of
+            the wildcard payload type (*) is RECOMMENDED.</t>
+
+            <t>If video codecs have differing capabilities, the specific payload
+            types are used, and there is one "a=imageattr" line per payload
+            type.</t>
+
+            <t>The "a=imageattr" field can contain multiple sets of parameters,
+            each with a specified q value (a preference). In this specification,
+            the preferences are used in the following manner:</t>
+
+            <t><list style="symbols">
+              <t>q=0.1 is used to indicate the decode capabilities of the
+              device, if known. Using image sizes outside these ranges
+              risks decode failure.</t>
+
+              <t>q=0.5 is used to indicate the limits to image resolution
+              caused by mandatory constraints set by the user (if any).</t>
+
+              <t>q=1.0 is used to indicate the preferred format. Usually the
+              present format of the videostream will be preferred by the
+              sender and the size of the receiver's display surface will be
+              preferred by the receiver; if this format can be used, the video
+              stream can be passed through with an absolute minimum of
+              rescaling. If the user has specified "ideal" constraint values,
+              these might be used instead.</t>
+            </list>
+            Thus, a system with a HD decoder might send</t>
+
+            <t><list style="symbols">
+              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]</t>
+              </list>If the Javascript has constrained the stream to have
+            width={min:320, max:640}, the result might be</t>
+
+            <t><list style="symbols">
+              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]
+              [x=[320:640],y=[16:1080],q=0.5]</t>
+              </list>and if the stream is known to be displayed on a surface of
+            dimension 640x480, the result might be</t>
+
+            <t><list style="symbols">
+              <t>a=imageattr:* recv [x=[16:1920],y=[16:1080],q=0.1]
+              [x=[320:640],y=[16:1080],q=0.5] [x=640,y=480,q=1.0]</t>
+            </list>
+            The "par=" parameter is used to represent a constraint on
+            the aspect ratio. The numbers given are produced from the
+            user-specified value by rounding the minimum down to four decimal
+            digits, and rounding the maximum up to four decimal digits.</t>
+          </section>
+
+          <section title="Choice of imageattr send attributes">
+            <t>There are two cases for generation of the send
+            attributes: When the correspondent's recv attribute is
+            unknown, and when the recv attribute is known.
+            </t>
+            <t>When the recv attribute is unknown, such as for an
+            initial offer, the send attribute is generated as follows:
+            </t>
+            <t><list style="symbols">
+              <t>q=0.1 is used to indicate the range of video sizes the
+              system is capable of generating.</t>
+              <t>q=0.5 is used to indicate the range of video sizes
+              that are allowed within present constraints for the
+              attached video stream. If no video stream is attached,
+              this is omitted.</t>
+              <t>q=1.0 is used for the presently generated video
+              format.</t>
+            </list></t>
+            <t>When the recv attribute is known, and a video stream is
+            attached, the sender MAY choose to act as if the set of
+            formats given were a set of constraints, and apply those to the
+            video stream, in addition to any user-specified
+            constraints,
+            before generating the send attribute. Note
+            that in the case of non-WebRTC-generated "recv"
+            attributes, the lower-priority configurations might not be
+            subsets of the higher-priority ones, so they need to be
+            applied as "advanced" constraints, in order from highest
+            to lowest priority, in order to give a reasonable result
+            for all cases, and the application of some constraints
+            will likely fail.
+            </t>
+            <t>This will generate an "a=imageattr send" attribute
+            where the q=0.5 tier reflects how well the preferences of
+            the receiver could be accomondated, and where the q=1.0
+            tier indicates a specific configuration within that range.
+            The q=0.1 tier will not change.
+            </t>
+            <t>If the sender chooses not to apply these constraints,
+            the same send attribute as for the "unknown recv
+            attribute" case will be generated.
+            </t>
+          </section>
+
+          <section title="Choosing a video configuration">
+            <t>
+            <xref target="RFC6236"/> defines "a=imageattr" to be an advisory
+            field. This means that it
+            does not absolutely constrain the video formats that the sender can
+            use, but gives an indication of the preferred values.</t>
+            <t>This specification, however, specifies that if one party sends
+            a recv attribute in an imageattr, the other party MUST NOT send
+            video that is larger than the largest size specified in that
+            imageattr attribute.</t>
+            <t>Within the constraints above, the sender SHOULD choose
+            the largest video configuration (largest width x height)
+            that it is capable of
+            generating that fits within the highest "recv" q tier
+            specified by the receiver that is possible to generate.</t>
+          </section>
+        </section>
     </section>
 
     <section title="Interface" anchor="sec.interface">
@@ -1217,7 +1346,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               in <xref target="RFC5576"></xref>, section 4.2, with semantics
               set to "FEC" and including the primary and FEC SSRCs.</t>
 
-              <t>[OPEN ISSUE: Handling of a=imageattr]</t>
+              <t>If the m-line is a video m-line, generate an "a=imageattr"
+              line as described in section <xref target="sec.imageattr"/>,
+              containing a "send" section based on the properties of the
+              connected video stream, and a "recv" section based on the
+              capabilities of the platform.</t>
 
               <t>If the BUNDLE policy for this PeerConnection is set to
               "max-bundle", and this is not the first m= section, or the BUNDLE
@@ -1616,7 +1749,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC5576"></xref>, section 4.2, with semantics set to
               "FEC" and including the primary and FEC SSRCs.</t>
 
-              <t>[OPEN ISSUE: Handling of a=imageattr]</t>
+              <t>If the type is "video", generate an "a=imageattr" line
+              according to <xref target="sec.imageattr"/>. Note that
+              this process may have to consider constraints on an
+              attached outgoing MediaStreamTrack (if any).</t>
             </list></t>
 
           <t>If a data channel m= section has been offered, a m= section MUST
@@ -2519,6 +2655,30 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <format octets="108820"
                 target="http://www.rfc-editor.org/rfc/rfc4566.txt" type="TXT" />
       </reference>
+      <reference anchor="RFC6236">
+
+        <front>
+          <title>Negotiation of Generic Image Attributes in the Session Description Protocol (SDP)</title>
+          <author initials="I." surname="Johansson" fullname="I. Johansson">
+          <organization/></author>
+          <author initials="K." surname="Jung" fullname="K. Jung">
+          <organization/></author>
+          <date year="2011" month="May"/>
+          <abstract>
+            <t>This document proposes a new generic session setup
+            attribute to make it possible to negotiate different image
+            attributes such as image size.  A possible use case is to make
+            it possible for a \%low-end \%hand- held terminal to display
+            video without the need to rescale the image, something that
+            may consume large amounts of memory and processing power.  The
+            document also helps to maintain an optimal bitrate for video
+            as only the image size that is desired by the receiver is
+        transmitted. [STANDARDS-TRACK]</t></abstract></front>
+
+        <seriesInfo name="RFC" value="6236"/>
+        <format type="TXT" octets="49356" target="http://www.rfc-editor.org/rfc/rfc6236.txt"/>
+      </reference>
+
     </references>
 
     <references title="Informative References">
