@@ -265,19 +265,18 @@
         list of codecs sent to a remote party indicates what the local side is
         willing to receive, which, when intersected with the set of codecs the
         remote side supports, specifies what the remote side should send.
-        However, not all parameters follow this rule; for example, the SRTP
-        parameters <xref target="RFC4568"></xref> sent to a remote party
-        indicate what the local side will use to encrypt, and thereby what the
-        remote party should expect to receive; the remote party will have to
-        accept these parameters, with no option to choose a different
-        value. [[OPEN ISSUE: This is not correct because we removed SDES
-        (https://github.com/rtcweb-wg/jsep/issues/10)]]
+        However, not all parameters follow this rule; for example, the DTLS-SRTP
+        parameters <xref target="RFC5763"></xref> sent to a remote party
+        indicate what certificate the local side will use in DTLS setup, and
+        thereby what the remote party should expect to receive; the remote party
+        will have to accept these parameters, with no option to choose different
+        values.
         </t>
 
         <t>In addition, various RFCs put different conditions on the format of
-        offers versus answers. For example, a offer may propose multiple SRTP
-        configurations, but an answer may only contain a single SRTP
-        configuration. [[OPEN ISSUE: See issue 10 above.]]</t>
+        offers versus answers. For example, a offer may propose an arbitrary
+        number of media streams (i.e. m= sections), but an answer must contain
+        the exact same number as the offer.</t>
 
         <t>Lastly, while the exact media parameters are only known only after
         an offer and an answer have been exchanged, it is possible for the
@@ -458,16 +457,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </figure>
 
             <t>The IceCandidate object also contains fields to
-            indicate which m= line it should be associated with. The m line can be
-            identified in one of two ways; either by a m-line index, or a MID. The
-            m-line index is a zero-based index, with index N referring to the
-            N+1th m-line in the SDP sent by the entity which sent the IceCandidate.
-            The MID uses the "media stream identification", as defined in <xref
-            target="RFC5888"></xref>, to identify the m-line. WebRTC
-            implementations creating an ICE Candidate object MUST populate both of
-            these fields. Implementations receiving an ICE Candidate object SHOULD
-            use the MID if they implement that functionality, or the m-line index,
-            if not.</t>
+            indicate which m= line it should be associated with. The m= line can be
+            identified in one of two ways; either by a m= line index, or a MID.
+            The m= line index is a zero-based index, with index N referring to the
+            N+1th m= line in the SDP sent by the entity which sent the IceCandidate.
+            The MID uses the "media stream identification" attribute, as defined in 
+            <xref target="RFC5888"></xref>, Section 4, to identify the m= line.
+            JSEP implementations creating an ICE Candidate object MUST populate
+            both of these fields. Implementations receiving an ICE Candidate
+            object MUST use the MID if present, or the m= line index, if not
+            (as it could have come from a non-JSEP endpoint).</t>
           </section>
         </section>
 
@@ -1712,7 +1711,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       the browser MUST NOT honor an attempt to change them:</t>
 
       <t><list style="symbols">
-          <t>The number, type and port number of m-lines.</t>
+          <t>The number, type and port number of m= lines.</t>
 
           <t>The generated ICE credentials (a=ice-ufrag and a=ice-pwd).</t>
 
