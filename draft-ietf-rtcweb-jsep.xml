@@ -414,7 +414,11 @@ setRemote(ANSWER) |                                   |
           Collection of ICE candidates is referred to as a gathering phase,
           and this is triggered either by the addition of a new or recycled m= 
           line to the local session description, or new ICE credentials in the
-          description (i.e. an ICE restart). When a new
+          description, indicating an ICE restart. Use of new ICE credentials can
+          be triggered explicitly by the application, or implicitly by the
+          browser in response to changes in the ICE configuration.
+          </t>
+          <t>When a new
           gathering phase starts, the ICE Agent will notify the application that
           gathering is occurring through a callback. Then, when each new ICE
           candidate becomes available, the ICE Agent will supply it to the 
@@ -489,25 +493,35 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           relay. However, in certain cases, applications may want to have more
           specific control over the gathering process, due to privacy or related
           concerns. For example, one may want to suppress the use of host 
-          candidates, to avoid leaking information about the local network, or
+          candidates, to avoid exposing information about the local network, or
           go as far as only using relay candidates, to leak as little 
-          location information as possible (note that these choices come with a
-          corresponding operational cost). To accomplish this, the browser 
-          SHOULD allow the application to restrict which ICE candidates are used
-          in a session; in addition, this topic may also be a concern to local
-          administrators, and so the browser SHOULD also allow control via local
-          policy, with the most restrictive policy prevailing.</t>
+          location information as possible (note that these choices come with
+          corresponding operational costs). To accomplish this, the browser 
+          MUST allow the application to restrict which ICE candidates are used
+          in a session. In addition, administrators may also wish to control
+          the set of ICE candidates, and so the browser SHOULD also allow 
+          control via local policy, with the most restrictive policy prevailing.</t>
+          
           <t>There may also be cases where the application wants to change which
           types of candidates are used while the session is active. A prime 
           example is where a callee may initially want to use only relay
           candidates, to avoid leaking location information to an arbitrary
           caller, but then change to use all candidates (for lower operational 
-          cost) once the user has indicated they want to take the call. To allow
-          for this, the application SHOULD gather all candidates, but only 
-          use (i.e., surface to the application and send connectivity checks
-          from) the candidates permitted by the currently active policy. The 
-          application can then quickly start using the other candidates if the
-          policy is changed.
+          cost) once the user has indicated they want to take the call. For this
+          scenario, the browser MUST allow the candidate policy to be changed
+          in mid-session, subject to the aforementioned interactions with local
+          policy.</t>
+
+          <t>To administer the ICE candidate policy, the browser will
+          determine the current setting at the start of each gathering phase
+          Then, during the gathering phase, the browser MUST NOT
+          expose candidates disallowed by the current policy to the 
+          application, use them as the source of connectivity checks, or 
+          indirectly expose them via other fields, such as the raddr/rport
+          attributes for ICE candidates.
+          Later, if a different policy is specified by the application, the 
+          application can apply it by kicking off a new gathering phase via an
+          ICE restart.
           </t>
         </section>
         <section title="ICE Candidate Pool" anchor="sec.ice-candidate-pool">
@@ -642,21 +656,20 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           initial ICE candidate policy and pool size, and also the BUNDLE
           policy to use.</t>
 
-          <t>Regardless of the ICE candidate policy setting, the gathering 
-          process collects all available candidates. However, candidates
-          excluded by policy MUST NOT be surfaced in the onicecandidate
-          callback, used for connectivity checks, or indirectly exposed via
-          the raddr/rport fields in other ICE candidates. Although it can be
-          overridden by local policy, the default ICE candidate policy SHOULD be
-          set to allow all candidates, as this minimizes use of STUN/TURN
-          server resources.</t>
+          <t>If an ICE candidate policy is specified, it functions as
+          described in <xref target="sec.ice-candidate-policy"/>, causing the 
+          browser to only surface the permitted candidates to the application, 
+          and only use those candidates for connectivity checks. Although it
+          can be overridden by local policy, the default ICE candidate policy 
+          MUST be set to allow all candidates, as this minimizes use of STUN/
+          TURN server resources.</t>
 
           <t>If a size is specified for the ICE candidate pool, this indicates
           the number of ICE components to pre-gather candidates for. Because 
           pre-gathering results in utilizing STUN/TURN server resources for 
-          potentially long periods of time, it is recommended that this only
+          potentially long periods of time, this must only
           occur upon application request, and therefore the default
-          candidate pool size SHOULD be zero.
+          candidate pool size MUST be zero.
           </t>
 
           <t>Lastly, the
@@ -976,14 +989,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           on when it is invoked, and differ depending on which specific 
           parameters are changed:</t>
          <t><list style="symbols">
-            <t>Any changes to the STUN/TURN servers in use take effect in
-            the next gathering phase. If gathering has already occurred, an
-            ICE restart must be performed to force use of the new 
-            servers and discontinue use of any previous servers.</t>
-            <t>Any changes to the ICE candidate policy take effect 
-            in the next gathering phase. If gathering has already occurred, an
-            ICE restart must be performed to force use of the new policy and
-            discontinue use of any candidates from the old policy.</t>
+            <t>Any changes to the STUN/TURN servers to use affect
+            the next gathering phase. If gathering has already occurred, this
+            will cause the next call to createOffer to generate new ICE 
+            credentials, for the purpose of forcing an ICE restart and kicking
+            off a new gathering phase, in which the new servers will be used.
+            If the ICE candidate pool has a nonzero size, any existing
+            candidates will be discarded, and new candidates will be gathered
+            from the new servers.
+            </t>
+            <t>Any changes to the ICE candidate policy also affect the next 
+            gathering phase, in similar fashion to the server changes described
+            above. Note though that changes to the policy have no effect on 
+            the candidate pool, because pooled candidates are not surfaced to
+            the application until a gathering phase occurs, and so any 
+            necessary filtering can still be done on any pooled candidates.</t>
             <t>Any changes to the ICE candidate pool size take effect 
             immediately; if increased, additional candidates are pre-gathered;
             if decreased, the now-superfluous candidates are discarded.</t>
