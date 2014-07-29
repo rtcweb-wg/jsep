@@ -513,7 +513,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           policy.</t>
 
           <t>To administer the ICE candidate policy, the browser will
-          determine the current setting at the start of each gathering phase
+          determine the current setting at the start of each gathering phase.
           Then, during the gathering phase, the browser MUST NOT
           expose candidates disallowed by the current policy to the 
           application, use them as the source of connectivity checks, or 
@@ -1410,10 +1410,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Each "a=mid" line MUST stay the same.</t>
 
               <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
-              same unless the "IceRestart" option (<xref target="sec.options-handling"/>
-              was specified. Note that it's not clear why you would actually
-              want to do this, since at this point ICE has not yet started
-              and is thus unlikely to need a restart.
+              same, unless the ICE configuration has changed (either changes to
+              the supported STUN/TURN servers, or the ICE candidate policy), or
+              the "IceRestart" option (<xref target="sec.ice-restart"/>
+              was specified. 
               </t>
 
               <t>For MediaStreamTracks that are still present, the "a=msid",
@@ -1516,8 +1516,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             m= sections with media type "audio" would otherwise be generated,
             it has no effect. For backwards compatibility with older versions
             of this specification, a value of "true"
-            is interpreted as equivalent to N=1.
-            [OPEN ISSUE: Should N=-1 be allowed for specifying sendonly?]</t>
+            is interpreted as equivalent to N=1.</t>
           </section>
 
           <section title="OfferToReceiveVideo" anchor="sec.offertoreceivevideo">
@@ -1534,8 +1533,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             m= sections with media type "video" would otherwise be generated,
             it has no effect. For backwards compatibility with older versions
             of this specification, a value of "true"
-            is interpreted as equivalent to N=1.
-            [OPEN ISSUE: See above]</t>
+            is interpreted as equivalent to N=1.</t>
           </section>
 
           <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection">
@@ -1561,10 +1559,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             target="RFC5245"></xref>, Section
             9.1.1.1. If this option is specified on an initial offer, it
             has no effect (since a new ICE ufrag and pwd are already
-            generated). This option is useful for reestablishing connectivity
-            in cases where failures are detected, or for applying changes in 
-            the ICE configuration, e.g. new STUN/TURN servers or candidate 
-            policy.
+            generated). Similarly, if the ICE configuration has changed, this
+            option has no effect, since new ufrag and pwd attributes will be
+            generated automatically. This option is primarily useful for
+            reestablishing connectivity in cases where failures are detected by 
+            the application.
             </t>
           </section>
         </section>
