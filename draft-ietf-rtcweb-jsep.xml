@@ -500,7 +500,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           MUST allow the application to restrict which ICE candidates are used
           in a session. In addition, administrators may also wish to control
           the set of ICE candidates, and so the browser SHOULD also allow 
-          control via local policy, with the most restrictive policy prevailing.</t>
+          control via local policy, with the most restrictive policy prevailing.
+          </t>
           
           <t>There may also be cases where the application wants to change which
           types of candidates are used while the session is active. A prime 
@@ -518,7 +519,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           expose candidates disallowed by the current policy to the 
           application, use them as the source of connectivity checks, or 
           indirectly expose them via other fields, such as the raddr/rport
-          attributes for ICE candidates.
+          attributes for other ICE candidates.
           Later, if a different policy is specified by the application, the 
           application can apply it by kicking off a new gathering phase via an
           ICE restart.
@@ -659,10 +660,27 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>If an ICE candidate policy is specified, it functions as
           described in <xref target="sec.ice-candidate-policy"/>, causing the 
           browser to only surface the permitted candidates to the application, 
-          and only use those candidates for connectivity checks. Although it
-          can be overridden by local policy, the default ICE candidate policy 
-          MUST be set to allow all candidates, as this minimizes use of STUN/
-          TURN server resources.</t>
+          and only use those candidates for connectivity checks. The set of 
+          available policies is as follows:
+          <list style="hanging">
+                <t hangText="all:">All candidates will be gathered and used.</t>
+                <t></t>
+                <t hangText="public:">Candidates with private IP addresses
+                [RFC1918] will be filtered out. This prevents exposure of
+                internal network details, at the cost of requiring
+                relay usage even for intranet calls, if the NAT does not allow 
+                hairpinning as described in [RFC4787], section 6.</t>
+                <t></t>
+                <t hangText="relay:">All candidates except relay candidates will
+                be filtered out. This obfuscates the location information that 
+                might be ascertained by the remote peer from the received 
+                candidates. Depending on how the application deploys its relay 
+                servers, this could obfuscate location to a metro or possibly
+                even global level.</t>
+          </list>
+          Although it can be overridden by local policy, the default ICE
+          candidate policy MUST be set to allow all candidates, as this
+          minimizes use of application STUN/TURN server resources.</t>
 
           <t>If a size is specified for the ICE candidate pool, this indicates
           the number of ICE components to pre-gather candidates for. Because 
@@ -707,6 +725,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               candidates to be gathered for each media stream.
               </t>
             </list>
+            As it provides the best tradeoff between performance and
+            compatibility with legacy endpoints, the default BUNDLE policy
+            MUST be set to "balanced".
           </t>
         </section>
         <section title="createOffer" anchor="sec.createoffer">
@@ -1003,13 +1024,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             above. Note though that changes to the policy have no effect on 
             the candidate pool, because pooled candidates are not surfaced to
             the application until a gathering phase occurs, and so any 
-            necessary filtering can still be done on any pooled candidates.</t>
+            necessary filtering can still be done on any pooled candidates.
+            </t>
             <t>Any changes to the ICE candidate pool size take effect 
             immediately; if increased, additional candidates are pre-gathered;
-            if decreased, the now-superfluous candidates are discarded.</t>
+            if decreased, the now-superfluous candidates are discarded.
+            </t>
             <t>Any changes to the BUNDLE policy take effect immediately, i.e.
             any future tracks added to the PeerConnection will have their
-            bundle-only state marked accordingly.</t>
+            bundle-only state marked accordingly.
+            </t>
           </list></t>
          
           <t>This call may result in a change to the state of the ICE Agent,
@@ -1412,7 +1436,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
               same, unless the ICE configuration has changed (either changes to
               the supported STUN/TURN servers, or the ICE candidate policy), or
-              the "IceRestart" option (<xref target="sec.ice-restart"/>
+              the "IceRestart" option (<xref target="sec.icerestart"/>
               was specified. 
               </t>
 
@@ -1514,8 +1538,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             specified in the case where at least N audio MediaStreamTracks have
             already been added to the PeerConnection, or N non-rejected
             m= sections with media type "audio" would otherwise be generated,
-            it has no effect. For backwards compatibility with older versions
-            of this specification, a value of "true"
+            it has no effect. For backwards compatibility with pre-standard
+            versions of this specification, a value of "true"
             is interpreted as equivalent to N=1.</t>
           </section>
 
@@ -1531,8 +1555,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             specified in the case where at least N video MediaStreamTracks have
             already been added to the PeerConnection, or N non-rejected
             m= sections with media type "video" would otherwise be generated,
-            it has no effect. For backwards compatibility with older versions
-            of this specification, a value of "true"
+            it has no effect. For backwards compatibility with pre-standard
+            versions of this specification, a value of "true"
             is interpreted as equivalent to N=1.</t>
           </section>
 
