@@ -408,11 +408,27 @@ setRemote(ANSWER) |                                   |
       </section>
 
       <section title="ICE" anchor="sec.ice">
-        <t>When a new ICE candidate is available, the ICE Agent will notify
-        the application via a callback; these candidates will automatically be
-        added to the local session description. When all candidates have been
-        gathered, the callback will also be invoked to signal that the
-        gathering process is complete.</t>
+        <section title="ICE Gathering Overview" anchor="sec.ice-gather-overview">
+          <t>JSEP gathers ICE candidates as needed by the application.
+          Collection of ICE candidates is referred to as a gathering phase,
+          and this is triggered either by the addition of a new or recycled m= 
+          line to the local session description, or new ICE credentials in the
+          description, indicating an ICE restart. Use of new ICE credentials can
+          be triggered explicitly by the application, or implicitly by the
+          browser in response to changes in the ICE configuration.
+          </t>
+          <t>When a new
+          gathering phase starts, the ICE Agent will notify the application that
+          gathering is occurring through a callback. Then, when each new ICE
+          candidate becomes available, the ICE Agent will supply it to the 
+          application via an additional callback; these candidates will also
+          automatically be added to the local session description. Finally, when
+          all candidates have been gathered, a callback will be dispatched
+          to signal that the gathering process is complete.</t>
+          <t>Note that gathering phases only gather the candidates needed by
+          new/recycled/restarting m= lines; other m= lines continue to use their
+          existing candidates.</t>
+        </section>
 
         <section title="ICE Candidate Trickling" anchor="sec.ice-candidate-trickling">
           <t>Candidate trickling is a technique through which a caller may
@@ -425,7 +441,8 @@ setRemote(ANSWER) |                                   |
           This results in faster media setup in cases where gathering is not
           performed prior to initiating the call.</t>
 
-          <t>JSEP supports optional candidate trickling by providing APIs that
+          <t>JSEP supports optional candidate trickling by providing APIs, as
+          described above, that
           provide control and feedback on the ICE candidate gathering process.
           Applications that support candidate trickling can send the initial
           offer immediately and send individual candidates when they get the
@@ -469,22 +486,71 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             (as it could have come from a non-JSEP endpoint).</t>
           </section>
         </section>
+        <section title="ICE Candidate Policy" anchor="sec.ice-candidate-policy">
+          <t>Typically, when gathering ICE candidates, the browser will gather
+          all possible forms of initial candidates - host, server reflexive, and
+          relay. However, in certain cases, applications may want to have more
+          specific control over the gathering process, due to privacy or related
+          concerns. For example, one may want to suppress the use of host 
+          candidates, to avoid exposing information about the local network, or
+          go as far as only using relay candidates, to leak as little 
+          location information as possible (note that these choices come with
+          corresponding operational costs). To accomplish this, the browser 
+          MUST allow the application to restrict which ICE candidates are used
+          in a session. In addition, administrators may also wish to control
+          the set of ICE candidates, and so the browser SHOULD also allow 
+          control via local policy, with the most restrictive policy prevailing.
+          </t>
+          
+          <t>There may also be cases where the application wants to change which
+          types of candidates are used while the session is active. A prime 
+          example is where a callee may initially want to use only relay
+          candidates, to avoid leaking location information to an arbitrary
+          caller, but then change to use all candidates (for lower operational 
+          cost) once the user has indicated they want to take the call. For this
+          scenario, the browser MUST allow the candidate policy to be changed
+          in mid-session, subject to the aforementioned interactions with local
+          policy.</t>
 
+          <t>To administer the ICE candidate policy, the browser will
+          determine the current setting at the start of each gathering phase.
+          Then, during the gathering phase, the browser MUST NOT
+          expose candidates disallowed by the current policy to the 
+          application, use them as the source of connectivity checks, or 
+          indirectly expose them via other fields, such as the raddr/rport
+          attributes for other ICE candidates.
+          Later, if a different policy is specified by the application, the 
+          application can apply it by kicking off a new gathering phase via an
+          ICE restart.
+          </t>
+        </section>
         <section title="ICE Candidate Pool" anchor="sec.ice-candidate-pool">
           <t>JSEP applications typically inform the browser to begin ICE
           gathering via the information supplied to setLocalDescription, as this
-          is where the app specifies the number of media streams for which to gather
-          candidates. However, to accelerate cases where the application knows
-          the number of media streams to use ahead of time, it MAY
-          ask the browser to gather a pool of potential ICE candidates to help
-          ensure rapid media setup. When setLocalDescription is eventually called, and the
+          is where the app specifies the number of media streams, and thereby
+          ICE components, for which to gather candidates. However, to accelerate
+          cases where the application knows the number of ICE components to use
+          ahead of time, it may ask the browser to gather a pool of potential
+          ICE candidates to help ensure rapid media setup.
+          </t>
+          <t>When setLocalDescription is eventually called, and the
           browser goes to gather the needed ICE candidates, it SHOULD start by
           checking if any candidates are available in the pool.  If there are
           candidates in the pool, they SHOULD be handed to the application
           immediately via the ICE candidate callback.  If the pool becomes
-          depleted, either because a larger-than-expected number of media
-          streams is used, or because the pool has not had enough time to gather
-          candidates, the remaining candidates are gathered as usual.
+          depleted, either because a larger-than-expected number of ICE
+          components is used, or because the pool has not had enough time to
+          gather candidates, the remaining candidates are gathered as usual.
+          </t>
+          <t>One example of where this concept is useful is an application that
+          expects an incoming call at some point in the future, and wants to
+          minimize the time it takes to establish connectivity, to avoid
+          clipping of initial media. By pre-gathering candidates into the pool,
+          it can exchange and start sending connectivity checks from these
+          candidates almost immediately upon receipt of a call. Note though that
+          by holding on to these pre-gathered candidates, which will be kept
+          alive as long as they may be needed, the application will consume
+          resources on the STUN/TURN servers it is using.
           </t>
         </section>
 
@@ -586,14 +652,44 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Constructor" anchor="sec.constructor">
           <t>The PeerConnection constructor allows the application to specify
           global parameters for the media session, such as the STUN/TURN servers
-          and credentials to use when gathering candidates. The size of the
-          ICE candidate pool can also be set, if desired; this indicates the
-          number of ICE components to pre-gather candidates for. If the application
-          does not indicate a candidate pool size, the browser may
-          select any default candidate pool size.
+          and credentials to use when gathering candidates, as well as the 
+          initial ICE candidate policy and pool size, and also the BUNDLE
+          policy to use.</t>
+
+          <t>If an ICE candidate policy is specified, it functions as
+          described in <xref target="sec.ice-candidate-policy"/>, causing the 
+          browser to only surface the permitted candidates to the application, 
+          and only use those candidates for connectivity checks. The set of 
+          available policies is as follows:
+          <list style="hanging">
+                <t hangText="all:">All candidates will be gathered and used.</t>
+                <t></t>
+                <t hangText="public:">Candidates with private IP addresses
+                [RFC1918] will be filtered out. This prevents exposure of
+                internal network details, at the cost of requiring
+                relay usage even for intranet calls, if the NAT does not allow 
+                hairpinning as described in [RFC4787], section 6.</t>
+                <t></t>
+                <t hangText="relay:">All candidates except relay candidates will
+                be filtered out. This obfuscates the location information that 
+                might be ascertained by the remote peer from the received 
+                candidates. Depending on how the application deploys its relay 
+                servers, this could obfuscate location to a metro or possibly
+                even global level.</t>
+          </list>
+          Although it can be overridden by local policy, the default ICE
+          candidate policy MUST be set to allow all candidates, as this
+          minimizes use of application STUN/TURN server resources.</t>
+
+          <t>If a size is specified for the ICE candidate pool, this indicates
+          the number of ICE components to pre-gather candidates for. Because 
+          pre-gathering results in utilizing STUN/TURN server resources for 
+          potentially long periods of time, this must only
+          occur upon application request, and therefore the default
+          candidate pool size MUST be zero.
           </t>
 
-          <t>In addition, the
+          <t>Lastly, the
           application can specify its preferred policy regarding use of BUNDLE,
           the multiplexing mechanism defined in <xref
           target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>.
@@ -628,6 +724,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               candidates to be gathered for each media stream.
               </t>
             </list>
+            As it provides the best tradeoff between performance and
+            compatibility with legacy endpoints, the default BUNDLE policy
+            MUST be set to "balanced".
           </t>
         </section>
         <section title="createOffer" anchor="sec.createoffer">
@@ -903,20 +1002,39 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           yet been established, or if the PeerConnection has been closed.</t>
         </section>
 
-        <section title="updateIce" anchor="sec.updateice">
-          <t>The updateIce method allows the configuration of the ICE Agent to
-          be changed during the session, primarily for changing which types of
-          local candidates are provided to the application and used for
-          connectivity checks. A callee may initially configure the ICE Agent
-          to use only relay candidates, to avoid leaking location information,
-          but update this configuration to use all candidates once the call is
-          accepted.</t>
-
-          <t>Regardless of the configuration, the gathering process collects
-          all available candidates, but excluded candidates will not be
-          surfaced in onicecandidate callback or used for connectivity
-          checks.</t>
-
+        <section title="setConfiguration" anchor="sec.setconfiguration">
+          <t>The setConfiguration method allows the global configuration of the 
+          PeerConnection, which was initially set by constructor parameters, to
+          be changed during the session. The effects of this method call depend
+          on when it is invoked, and differ depending on which specific 
+          parameters are changed:</t>
+         <t><list style="symbols">
+            <t>Any changes to the STUN/TURN servers to use affect
+            the next gathering phase. If gathering has already occurred, this
+            will cause the next call to createOffer to generate new ICE 
+            credentials, for the purpose of forcing an ICE restart and kicking
+            off a new gathering phase, in which the new servers will be used.
+            If the ICE candidate pool has a nonzero size, any existing
+            candidates will be discarded, and new candidates will be gathered
+            from the new servers.
+            </t>
+            <t>Any changes to the ICE candidate policy also affect the next 
+            gathering phase, in similar fashion to the server changes described
+            above. Note though that changes to the policy have no effect on 
+            the candidate pool, because pooled candidates are not surfaced to
+            the application until a gathering phase occurs, and so any 
+            necessary filtering can still be done on any pooled candidates.
+            </t>
+            <t>Any changes to the ICE candidate pool size take effect 
+            immediately; if increased, additional candidates are pre-gathered;
+            if decreased, the now-superfluous candidates are discarded.
+            </t>
+            <t>Any changes to the BUNDLE policy take effect immediately, i.e.
+            any future tracks added to the PeerConnection will have their
+            bundle-only state marked accordingly.
+            </t>
+          </list></t>
+         
           <t>This call may result in a change to the state of the ICE Agent,
           and may result in a change to media state if it results in
           connectivity being established.</t>
@@ -1315,10 +1433,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Each "a=mid" line MUST stay the same.</t>
 
               <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
-              same unless the "IceRestart" option (<xref target="sec.options-handling"/>
-              was specified. Note that it's not clear why you would actually
-              want to do this, since at this point ICE has not yet started
-              and is thus unlikely to need a restart.
+              same, unless the ICE configuration has changed (either changes to
+              the supported STUN/TURN servers, or the ICE candidate policy), or
+              the "IceRestart" option (<xref target="sec.icerestart"/>
+              was specified. 
               </t>
 
               <t>For MediaStreamTracks that are still present, the "a=msid",
@@ -1419,7 +1537,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             specified in the case where at least N audio MediaStreamTracks have
             already been added to the PeerConnection, or N non-rejected
             m= sections with media type "audio" would otherwise be generated,
-            it has no effect. For backwards compatibility, a value of "true"
+            it has no effect. For backwards compatibility with pre-standard
+            versions of this specification, a value of "true"
             is interpreted as equivalent to N=1.</t>
           </section>
 
@@ -1435,7 +1554,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             specified in the case where at least N video MediaStreamTracks have
             already been added to the PeerConnection, or N non-rejected
             m= sections with media type "video" would otherwise be generated,
-            it has no effect. For backwards compatibility, a value of "true"
+            it has no effect. For backwards compatibility with pre-standard
+            versions of this specification, a value of "true"
             is interpreted as equivalent to N=1.</t>
           </section>
 
@@ -1458,11 +1578,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <section title="IceRestart" anchor="sec.icerestart">
             <t>If the "IceRestart" option is specified, with a value of
             "true", the offer MUST indicate an ICE restart by generating new
-            ICE ufrag and pwd attributes, as specified in RFC5245, Section
+            ICE ufrag and pwd attributes, as specified in <xref
+            target="RFC5245"></xref>, Section
             9.1.1.1. If this option is specified on an initial offer, it
             has no effect (since a new ICE ufrag and pwd are already
-            generated). This option is useful for reestablishing connectivity
-            in cases where failures are detected.
+            generated). Similarly, if the ICE configuration has changed, this
+            option has no effect, since new ufrag and pwd attributes will be
+            generated automatically. This option is primarily useful for
+            reestablishing connectivity in cases where failures are detected by 
+            the application.
             </t>
           </section>
         </section>
