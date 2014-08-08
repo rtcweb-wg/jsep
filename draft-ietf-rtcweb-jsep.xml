@@ -1974,6 +1974,198 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       remote offer or answer, unmodified SDP coming from any other
       implementation of this specification.</t>
     </section>
+  
+    <section title="Examples" anchor="sec.examples">
+
+    <section title="Simple Examples" anchor="sec.simple-examples">
+
+      <t> This section shows a very simple example that sets up a
+      minimal audio / video call between two browsers and does not use
+      trickle ICE. This example in the following section provides a
+      more realistic example of what would happen in a normal browser
+      to browser connection. </t>
+
+      <t> The flow shows Alice's browser initiating the session to
+      Bob's browser. The messages from Alice's JS to Bob's JS are
+      assumed to flow over some signaling protocol via a web
+      server. The JS from both Alice and Bob wait for all candidates
+      before sending the offer or answer to the other side so they do
+      not use trickle ICE.  </t>
+
+     <t><figure>
+       <artwork><![CDATA[
+// Call is initiated from Alice to Bob
+AliceJS->AliceUA:   pc = new PeerConnection();
+AliceJS->AliceUA:   pc.addStream(localStream, null);
+AliceJS->AliceUA:   offer = pc.createOffer(null);
+AliceJS->AliceUA:   pc.setLocalDescription("offer", offer);
+AliceJS->AliceUA:   pc.startIce();
+AliceUA->AliceJS:   onicecandidate(candidate);
+
+// wait for ICE gather to complete
+AliceUA->AliceJS:   onicecandidate(null);
+AliceJS->AliceUA:   offer1 = pc.localDescription; 
+
+// offer1 is sent over signaling protocol to Bob
+AliceJS->WebServer: signaling with offer1
+WebServer->BobJS:   signaling with offer1
+
+// session-initiate arrives at Bob
+BobJS->BobUA: pc = new PeerConnection();
+BobJS->BobUA: pc.setRemoteDescription("offer", offer1);
+BobUA->BobJS: onaddstream(remoteStream);
+
+// Bob accepts call
+BobJS->BobUA: pc.addStream(localStream, null);
+BobJS->BobUA: answer = pc.createAnswer(offer, null);
+BobJS->BobUA: pc.setLocalDescription("answer", answer);
+BobUA->BobJS: onicecandidate(candidate);
+
+// wait for ICE gather to complete
+BobUA->BobJS: onicecandidate(null);
+BobJS->BobUA: answer1 = pc.localDescription; 
+
+// answer1 is sent over signaling protocol to Alice
+BobJS->WebServer:   signaling with answer1
+WebServer->AliceJS: signaling with answer1
+
+// session-accept arrives at Alice
+AliceJS->AliceUA:   pc.setRemoteDescription("answer", answer1);
+AliceUA->AliceJS:   onaddstream(remoteStream);
+
+// ICE Completes (at Bob)
+BobUA->AliceUA:  Media
+
+// ICE Completes (at Alice)
+AliceUA->BobUA:  Media
+]]></artwork>
+     </figure></t>
+
+      <t>
+	The SDP for the offer1 looks like:
+	<figure>
+	  <artwork><![CDATA[
+	  TODO
+	  ]]></artwork>
+	</figure>
+      </t>
+      
+      <t>
+	The SDP for the answer1 looks like:
+	<figure>
+	  <artwork><![CDATA[
+	  TODO
+	  ]]></artwork>
+	</figure>
+      </t>
+      
+    </section>
+
+    <section title="Normal Examples" anchor="sec.normal-examples">
+
+     <t> This section shows a typical example of a session between two
+     browsers and uses trickle ICE and sets up an audio, two video,
+     and data channel. The flow shows Alice's browser initiating the
+     session to Bob's browser. The messages from Alice's JS to Bob's
+     JS are assumed to flow over some signaling protocol via a web
+     server. </t>
+
+     <t><figure>
+       <artwork><![CDATA[
+// Call is initiated toward Answerer
+AliceJS->AliceUA:   pc = new PeerConnection();
+AliceJS->AliceUA:   pc.addStream(localStream, null);
+AliceJS->AliceUA:   offer2 = pc.createOffer(null);
+AliceJS->AliceUA:   pc.setLocalDescription("offer", offer2);
+
+// offer2 is sent over signaling protocol to Bob
+AliceJS->WebServer: signaling with offer2
+WebServer->BobJS:   signaling with offer2
+
+// ice gathering is happening in parallel with stuff Bob is doing 
+AliceJS->AliceUA:   pc.startIce();
+AliceUA->AliceJS:   onicecandidate(candidate2);
+
+// session-initiate arrives at Bob
+BobJS->BobUA: pc = new PeerConnection();
+BobJS->BobUA: pc.setRemoteDescription("offer", offer2);
+BobUA->BobJS: onaddstream(remoteStream);
+
+// candidate2 is sent over signaling protocol to Bob
+AliceJS->WebServer: signaling with candidate2
+WebServer->BobJS:   signaling with candidate2
+
+// transport-infos arrive at Bob
+BobJS->BobUA: pc.addIceCandidate(candidate2);
+BobUA->BobJS: onicecandidate(candidate3)
+
+// candidate3 is sent over signaling protocol to Alice
+BobJS->WebServer: signaling with candidate3
+WebServer->AliceJS:   signaling with candidate3
+
+// transport-infos arrive at Alice
+AliceJS->AliceUA:   pc.addIceCandidate(candidate3);
+
+// Bob accepts call
+BobJS->BobUA: pc.addStream(localStream, null);
+BobJS->BobUA: answer2 = pc.createAnswer(offer, null);
+BobJS->BobUA: pc.setLocalDescription("answer", answer2);
+
+// answer2 is sent over signaling protocol to Alice
+BobJS->WebServer: signaling with answer2
+WebServer->AliceJS:   signaling with answer2
+
+// session-accept arrives at Alice
+AliceJS->AliceUA:   pc.setRemoteDescription("answer", answer2);
+AliceUA->AliceJS:   onaddstream(remoteStream);
+
+// ICE Completes (at Bob)
+BobUA->AliceUA:  Media
+
+// ICE Completes (at Alice)
+AliceUA->BobUA:  Media
+]]></artwork>
+     </figure></t>
+
+     <t>
+       The SDP for the offer2 looks like:
+       <figure>
+	 <artwork><![CDATA[
+	 TODO
+	 ]]></artwork>
+       </figure>
+     </t>
+     
+     <t>
+       The SDP for the candidate2 looks like:
+       <figure>
+	 <artwork><![CDATA[
+	 TODO
+	 ]]></artwork>
+       </figure>
+     </t>
+     
+     <t>
+       The SDP for the candidate3 looks like:
+       <figure>
+	 <artwork><![CDATA[
+	 TODO
+	 ]]></artwork>
+       </figure>
+     </t>
+     
+     <t>
+       The SDP for the answer2 looks like:
+       <figure>
+	 <artwork><![CDATA[
+	 TODO
+	 ]]></artwork>
+       </figure>
+     </t>
+     
+    </section>
+
+    </section>
 
     <section title="Security Considerations" anchor="sec.security-considerations">
       <t>
