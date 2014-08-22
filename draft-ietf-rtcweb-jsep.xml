@@ -1977,6 +1977,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   
     <section title="Examples" anchor="sec.examples">
 
+      <t> Note that this example section shows several SDP fragments. To
+      format in 72 columns some of the lines in SDP have been split into
+      multiple lines where the lines other than the first line start with
+      whitespace. </t>
+
     <section title="Simple Examples" anchor="sec.simple-examples">
 
       <t> This section shows a very simple example that sets up a
@@ -1998,7 +2003,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 AliceJS->AliceUA:   pc = new PeerConnection();
 AliceJS->AliceUA:   pc.addTrack(localStreamTrack);
 AliceJS->AliceUA:   offer = pc.createOffer(null);
-AliceJS->AliceUA:   pc.setLocalDescription("offer", offer);
+AliceJS->AliceUA:   pc.setLocalDescription(offer);
 AliceJS->AliceUA:   pc.startIce();
 AliceUA->AliceJS:   onicecandidate(candidate);
 
@@ -2012,13 +2017,13 @@ WebServer->BobJS:   signaling with offer1
 
 // session-initiate arrives at Bob
 BobJS->BobUA: pc = new PeerConnection();
-BobJS->BobUA: pc.setRemoteDescription("offer", offer1);
+BobJS->BobUA: pc.setRemoteDescription(offer1);
 BobUA->BobJS: onaddstream(remoteStream);
 
 // Bob accepts call
 BobJS->BobUA: pc.addStream(localStream, null);
-BobJS->BobUA: answer = pc.createAnswer(offer, null);
-BobJS->BobUA: pc.setLocalDescription("answer", answer);
+BobJS->BobUA: answer = pc.createAnswer();
+BobJS->BobUA: pc.setLocalDescription(answer);
 BobUA->BobJS: onicecandidate(candidate);
 
 // wait for ICE gather to complete
@@ -2030,7 +2035,7 @@ BobJS->WebServer:   signaling with answer1
 WebServer->AliceJS: signaling with answer1
 
 // session-accept arrives at Alice
-AliceJS->AliceUA:   pc.setRemoteDescription("answer", answer1);
+AliceJS->AliceUA:   pc.setRemoteDescription(answer1);
 AliceUA->AliceJS:   onaddstream(remoteStream);
 
 // ICE Completes (at Bob)
@@ -2052,14 +2057,14 @@ o=- 4962303333179871722 1 IN IP4 0.0.0.0
 s=-
 t=0 0
 a=msid-semantic:WMS
-a=group:BUNDLE audio video data
+a=group:BUNDLE audio video
 m=audio 56500 UDP/TLS/RTP/SAVPF 111 0 8 126
 c=IN IP4 192.0.2.1
 a=rtcp:56501 IN IP4 192.0.2.1
 a=candidate:3348148302 1 udp 2113937151 192.0.2.1 56500
-            typ host generation 0
+            typ host 
 a=candidate:3348148302 2 udp 2113937151 192.0.2.1 56501
-            typ host generation 0
+            typ host 
 a=ice-ufrag:ETEn1v9DoTMB9J4r
 a=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl
 a=ice-options:trickle
@@ -2081,7 +2086,7 @@ a=maxptime:60
 a=ssrc:1732846380 cname:EocUG1f0fcg/yvY7
 a=msid:47017fee-b6c1-4162-929c-a25110252400
        f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9
-m=video 56502 UDP/TLS/RTP/SAVPF 100 115 116 117
+m=video 56502 UDP/TLS/RTP/SAVPF 100 
 c=IN IP4 192.0.2.1
 a=rtcp:56503 IN IP4 192.0.2.1
 a=candidate:3348148302 1 udp 2113937151 192.0.2.1 56502
@@ -2092,8 +2097,6 @@ a=ice-ufrag:BGKkWnG5GmiUpdIV
 a=ice-pwd:mqyWsAjvtKwTGnvhPztQ9mIf
 a=ice-options:trickle
 a=mid:video
-a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
-a=extmap:3 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
 a=sendrecv
 a=rtcp-mux
 a=rtcp-rsize
@@ -2104,19 +2107,9 @@ a=setup:actpass
 a=rtpmap:100 VP8/90000
 a=rtcp-fb:100 ccm fir
 a=rtcp-fb:100 nack
-a=rtcp-fb:100 goog-remb
-a=rtpmap:115 rtx/90000
-a=fmtp:115 apt=100
-a=rtpmap:116 red/90000
-a=rtpmap:117 ulpfec/90000
 a=ssrc:1366781083 cname:EocUG1f0fcg/yvY7
-a=ssrc:1366781084 cname:EocUG1f0fcg/yvY7
-a=ssrc:1366781085 cname:EocUG1f0fcg/yvY7
-a=ssrc-group:FID 1366781083 1366781084
-a=ssrc-group:FEC 1366781083 1366781085
 a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae
        f30bdb4a-5db8-49b5-bcdc-e0c9a23172e0
-
 	  ]]></artwork>
 	</figure>
       </t>
@@ -2132,15 +2125,15 @@ o=- 6729291447651054566 1 IN IP4 0.0.0.0
 s=-
 t=0 0
 a=msid-semantic:WMS
-a=group:BUNDLE audio video data
+a=group:BUNDLE audio video 
 m=audio 20000 UDP/TLS/RTP/SAVPF 111 0 8 126
 c=IN IP4 192.0.2.2
 a=candidate:2299743422 1 udp 2113937151 192.0.2.2 20000
-            typ host generation 0
+            typ host
 a=ice-ufrag:6sFvz2gdLkEwjZEr
 a=ice-pwd:cOTZKZNVlO9RSGsEGM63JXT2
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
-                     :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
+            :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
 a=mid:audio
 a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
@@ -2155,10 +2148,10 @@ a=maxptime:60
 a=ssrc:3429951804 cname:Q/NWs1ao1HmN4Xa5
 a=msid:PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1
        PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1a0
-m=video 20000 UDP/TLS/RTP/SAVPF 100 115 116 117
+m=video 20000 UDP/TLS/RTP/SAVPF 100 
 c=IN IP4 192.0.2.2
 a=candidate:2299743422 1 udp 2113937151 192.0.2.2 20000
-            typ host generation 0
+            typ host
 a=ice-ufrag:6sFvz2gdLkEwjZEr
 a=ice-pwd:cOTZKZNVlO9RSGsEGM63JXT2
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
@@ -2166,22 +2159,13 @@ a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
 a=setup:active
 a=mid:video
 a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
-a=extmap:3 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
 a=sendrecv
 a=rtcp-mux
 a=rtpmap:100 VP8/90000
 a=rtcp-fb:100 ccm fir
 a=rtcp-fb:100 nack
-a=rtcp-fb:100 goog-remb
 a=rtpmap:115 rtx/90000
-a=fmtp:115 apt=100
-a=rtpmap:116 red/90000
-a=rtpmap:117 ulpfec/90000
 a=ssrc:3229706345 cname:Q/NWs1ao1HmN4Xa5
-a=ssrc:3229706346 cname:Q/NWs1ao1HmN4Xa5
-a=ssrc:3229706347 cname:Q/NWs1ao1HmN4Xa5
-a=ssrc-group:FID 3229706345 3229706346
-a=ssrc-group:FEC 3229706345 3229706347
 a=msid:PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1
        PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1v0
 	  ]]></artwork>
@@ -2193,8 +2177,9 @@ a=msid:PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1
     <section title="Normal Examples" anchor="sec.normal-examples">
 
      <t> This section shows a typical example of a session between two
-     browsers and uses trickle ICE and sets up an audio, two video,
-     and data channel. The flow shows Alice's browser initiating the
+     browsers and uses trickle ICE and sets up an audio
+     and a data channel. Later two video flows are added to session. 
+     The flow shows Alice's browser initiating the
      session to Bob's browser. The messages from Alice's JS to Bob's
      JS are assumed to flow over some signaling protocol via a web
      server. </t>
@@ -2205,7 +2190,7 @@ a=msid:PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1
 AliceJS->AliceUA:   pc = new PeerConnection();
 AliceJS->AliceUA:   pc.addStream(localStream, null);
 AliceJS->AliceUA:   offer2 = pc.createOffer(null);
-AliceJS->AliceUA:   pc.setLocalDescription("offer", offer2);
+AliceJS->AliceUA:   pc.setLocalDescription(offer2);
 
 // offer2 is sent over signaling protocol to Bob
 AliceJS->WebServer: signaling with offer2
@@ -2217,7 +2202,7 @@ AliceUA->AliceJS:   onicecandidate(candidate2);
 
 // session-initiate arrives at Bob
 BobJS->BobUA: pc = new PeerConnection();
-BobJS->BobUA: pc.setRemoteDescription("offer", offer2);
+BobJS->BobUA: pc.setRemoteDescription(offer2);
 BobUA->BobJS: onaddstream(remoteStream);
 
 // candidate2 is sent over signaling protocol to Bob
@@ -2238,14 +2223,14 @@ AliceJS->AliceUA:   pc.addIceCandidate(candidate3);
 // Bob accepts call
 BobJS->BobUA: pc.addStream(localStream, null);
 BobJS->BobUA: answer2 = pc.createAnswer(offer, null);
-BobJS->BobUA: pc.setLocalDescription("answer", answer2);
+BobJS->BobUA: pc.setLocalDescription(answer2);
 
 // answer2 is sent over signaling protocol to Alice
 BobJS->WebServer: signaling with answer2
 WebServer->AliceJS:   signaling with answer2
 
 // session-accept arrives at Alice
-AliceJS->AliceUA:   pc.setRemoteDescription("answer", answer2);
+AliceJS->AliceUA:   pc.setRemoteDescription(answer2);
 AliceUA->AliceJS:   onaddstream(remoteStream);
 
 // ICE Completes (at Bob)
@@ -2253,6 +2238,8 @@ BobUA->AliceUA:  Media
 
 // ICE Completes (at Alice)
 AliceUA->BobUA:  Media
+
+TODO - add stuff to add in two video streams
 ]]></artwork>
      </figure></t>
 
