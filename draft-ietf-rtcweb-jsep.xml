@@ -1078,7 +1078,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 and MUST be implemented.</t>
 
                 <t><xref target="RFC5764"></xref> MUST be supported for signaling
-                the UDP/TLS/RTP/SAVPF RTP profile.</t>
+                the UDP/TLS/RTP/SAVPF and TCP/TLS/RTP/SAVPF RTP profiles.
+                </t>
 
                 <t><xref target="RFC5245"></xref> MUST be implemented for
                 signaling the ICE credentials and candidate lines corresponding
@@ -1137,9 +1138,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             both local and remote, MUST indicate support for the following
             specifications. If any of these are absent, this omission MUST be
             treated as an error. <list style="format R-%d">
-                <t>Either the UDP/TLS/RTP/SAVP or the UDP/TLS/RTP/SAVPF RTP
-                profile, as specified in <xref target="RFC5764"></xref>,
-                MUST be used.</t>
                 <t>ICE, as specified in <xref target="RFC5245"></xref>,
                 MUST be used. Note that the remote endpoint may use a Lite
                 implementation; implementations MUST properly handle remote
@@ -1147,6 +1145,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>DTLS-SRTP, as specified in <xref target="RFC5763"></xref>,
                 MUST be used.</t>
             </list></t>
+            <t>JSEP endpoints MUST tolerate any profile containing
+            the string "RTP/" for a media m= section but interpret that
+            as indicating support for either "UDP/TLS/RTP/SAVPF"
+            or "TCP/TLS/RTP/SAVPF" depending on the transport.
+            Because ICE can select either TCP or UDP transport depending
+            on network conditions, an advertisement for either transport
+            is actually an advertisement for both.
+            For example, even if "RTP/AVP" is indicated, the endpoint MUST
+            assume that the peer is offering SRTP with feedback.
+            JSEP endpoints MUST accept "UDP/TLS/SCTP", "TCP/TLS/SCTP", or
+            "DTLS/SCTP" for data channel m= sections.
+            </t>
         </section>
       </section>
 
@@ -1247,7 +1257,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             Section 5.1., this port MUST still be unique.</t>
             <t>To properly indicate use of DTLS, the &lt;proto&gt; field MUST
             be set to "UDP/TLS/RTP/SAVPF", as specified in
-            <xref target="RFC5764"/>, Section 8.</t>
+            <xref target="RFC5764"/>, Section 8.</t> if UDP transport
+            is the default or "TCP/TLS/RTP/SAVPF" if TCP transport is
+            the default.
             </list>
           </t>
 
@@ -1650,7 +1662,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Provided that is not the case, each m= section in the answer should
           then be generated as specified in <xref
           target="RFC3264"></xref>, Section 6.1. Because use of DTLS is
-          mandatory, the &lt;proto&gt; field MUST be set to "UDP/TLS/RTP/SAVPF".
+          mandatory, the &lt;proto&gt; field MUST be set to "UDP/TLS/RTP/SAVPF"
+          if UDP transport is the default or "TCP/TLS/RTP/SAVPF" if TCP transport is
+          the default.
           If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
           the same ICE credentials and candidates; all m= sections not being
           BUNDLEd must use unique ICE credentials and candidates. Each
@@ -1922,7 +1936,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </t>
     </section>
     <section title="IANA Considerations" anchor="sec.iana-considerations">
-      <t>This document requires no actions from IANA.</t>
+      <t>This specification updates the "Session Description Protocol
+      (SDP) Parameters" registry as defined in Section 8.2.2 of [RFC4566] to
+      add the values "TCP/TLS/RTP/SAVPF" to the table for the "proto" field
+      to indicate DTLS-SRTP with feedback <xref target="RFC5764"/> when
+      carried over TCP transport.</t>
     </section>
 
     <section title="Acknowledgements" anchor="sec.acknowledgements">
