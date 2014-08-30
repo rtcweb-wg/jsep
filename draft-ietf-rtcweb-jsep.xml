@@ -76,7 +76,7 @@
     </author>
 
 
-    <date day="11" month="May" year="2014" />
+    <date day="4" month="July" year="2014" />
 
     <area>RAI</area>
 
@@ -91,7 +91,7 @@
   <middle>
     <section title="Introduction" anchor="sec.introduction">
       <t>This document describes how the W3C WEBRTC RTCPeerConnection
-      interface<xref target="W3C.WD-webrtc-20111027"></xref> is used to
+      interface<xref target="W3C.WD-webrtc-20140617"></xref> is used to
       control the setup, management and teardown of a multimedia session.</t>
 
       <section title="General Design of JSEP" anchor="sec.general-design-of-jsep">
@@ -108,12 +108,12 @@
 
         <t>With these considerations in mind, this document describes the
         Javascript Session Establishment Protocol (JSEP) that allows for full
-        control of the signaling state machine from Javascript. This mechanism
-        effectively removes the browser almost completely from the core
-        signaling flow; the only interface needed is a way for the application
-        to pass in the local and remote session descriptions negotiated by
-        whatever signaling mechanism is used, and a way to interact with the
-        ICE state machine.</t>
+        control of the signaling state machine from Javascript. 
+        JSEP removes the browser almost entirely from the core signaling flow, which
+        is instead handled by the Javascript making use of two interfaces:
+        (1) passing in local and remote session descriptions and (2) interacting
+        with the ICE state machine.
+        </t>
 
         <t>In this document, the use of JSEP is described as if it always
         occurs between two browsers. Note though in many cases it will
@@ -130,11 +130,11 @@
         (e.g., WebSockets); upon receipt of that offer, the remote party
         installs it using the setRemoteDescription() API.</t>
 
-        <t>When the call is accepted, the callee uses the createAnswer() API
-        to generate an appropriate answer, applies it using
-        setLocalDescription(), and sends the answer back to the initiator over
-        the signaling channel. When the offerer gets that answer, it installs
-        it using setRemoteDescription(), and initial setup is complete. This
+        <t>To complete the offer/answer exchange, the remote party uses the createAnswer() API
+        to generate an appropriate answer, applies it using the
+        setLocalDescription() API, and sends the answer back to the initiator over
+        the signaling channel. When the initiator gets that answer, it installs
+        it using the setRemoteDescription() API, and initial setup is complete. This
         process can be repeated for additional offer/answer exchanges.</t>
 
         <t>Regarding ICE <xref target="RFC5245"></xref>, JSEP decouples the
@@ -239,13 +239,13 @@
 
         <figure anchor="fig-sigModel" title="JSEP Signaling Model">
           <artwork><![CDATA[
-    +-----------+                               +-----------+ 
+    +-----------+                               +-----------+
     |  Web App  |<--- App-Specific Signaling -->|  Web App  |
     +-----------+                               +-----------+
           ^                                            ^
-          |  SDP                                       |  SDP 
+          |  SDP                                       |  SDP
           V                                            V
-    +-----------+                                +-----------+ 
+    +-----------+                                +-----------+
     |  Browser  |<----------- Media ------------>|  Browser  |
     +-----------+                                +-----------+
 ]]></artwork>
@@ -265,22 +265,21 @@
         list of codecs sent to a remote party indicates what the local side is
         willing to receive, which, when intersected with the set of codecs the
         remote side supports, specifies what the remote side should send.
-        However, not all parameters follow this rule; for example, the SRTP
-        parameters <xref target="RFC4568"></xref> sent to a remote party
-        indicate what the local side will use to encrypt, and thereby what the
-        remote party should expect to receive; the remote party will have to
-        accept these parameters, with no option to choose a different
-        value. [[OPEN ISSUE: This is not correct because we removed SDES
-        (https://github.com/rtcweb-wg/jsep/issues/10)]]
+        However, not all parameters follow this rule; for example, the DTLS-SRTP
+        parameters <xref target="RFC5763"></xref> sent to a remote party
+        indicate what certificate the local side will use in DTLS setup, and
+        thereby what the remote party should expect to receive; the remote party
+        will have to accept these parameters, with no option to choose different
+        values.
         </t>
 
         <t>In addition, various RFCs put different conditions on the format of
-        offers versus answers. For example, a offer may propose multiple SRTP
-        configurations, but an answer may only contain a single SRTP
-        configuration. [[OPEN ISSUE: See issue 10 above.]]</t>
+        offers versus answers. For example, a offer may propose an arbitrary
+        number of media streams (i.e. m= sections), but an answer must contain
+        the exact same number as the offer.</t>
 
         <t>Lastly, while the exact media parameters are only known only after
-        a offer and an answer have been exchanged, it is possible for the
+        an offer and an answer have been exchanged, it is possible for the
         offerer to receive media after they have sent an offer and before they
         have received an answer. To properly process incoming media in this
         case, the offerer's media handler must be aware of the details of the
@@ -342,7 +341,7 @@
          |  Remote-Offer |------------------- >| Local-Pranswer|
          |               |                     |               |
          |               |                     |               |
-         +---------------+                     +---------------+    
+         +---------------+                     +---------------+
               ^   |                                   |
               |   | setLocal(ANSWER)                  |
 setRemote(OFFER)  |                                   |
@@ -353,7 +352,7 @@ setRemote(OFFER)  |                                   |
          |    Stable     |
          |               |<---------------------------+
          |               |                            |
-         +---------------+          setRemote(ANSWER) |                   
+         +---------------+          setRemote(ANSWER) |
               ^   |                                   |
               |   | setLocal(OFFER)                   |
 setRemote(ANSWER) |                                   |
@@ -409,11 +408,27 @@ setRemote(ANSWER) |                                   |
       </section>
 
       <section title="ICE" anchor="sec.ice">
-        <t>When a new ICE candidate is available, the ICE Agent will notify
-        the application via a callback; these candidates will automatically be
-        added to the local session description. When all candidates have been
-        gathered, the callback will also be invoked to signal that the
-        gathering process is complete.</t>
+        <section title="ICE Gathering Overview" anchor="sec.ice-gather-overview">
+          <t>JSEP gathers ICE candidates as needed by the application.
+          Collection of ICE candidates is referred to as a gathering phase,
+          and this is triggered either by the addition of a new or recycled m= 
+          line to the local session description, or new ICE credentials in the
+          description, indicating an ICE restart. Use of new ICE credentials can
+          be triggered explicitly by the application, or implicitly by the
+          browser in response to changes in the ICE configuration.
+          </t>
+          <t>When a new
+          gathering phase starts, the ICE Agent will notify the application that
+          gathering is occurring through a callback. Then, when each new ICE
+          candidate becomes available, the ICE Agent will supply it to the 
+          application via an additional callback; these candidates will also
+          automatically be added to the local session description. Finally, when
+          all candidates have been gathered, a callback will be dispatched
+          to signal that the gathering process is complete.</t>
+          <t>Note that gathering phases only gather the candidates needed by
+          new/recycled/restarting m= lines; other m= lines continue to use their
+          existing candidates.</t>
+        </section>
 
         <section title="ICE Candidate Trickling" anchor="sec.ice-candidate-trickling">
           <t>Candidate trickling is a technique through which a caller may
@@ -426,7 +441,8 @@ setRemote(ANSWER) |                                   |
           This results in faster media setup in cases where gathering is not
           performed prior to initiating the call.</t>
 
-          <t>JSEP supports optional candidate trickling by providing APIs that
+          <t>JSEP supports optional candidate trickling by providing APIs, as
+          described above, that
           provide control and feedback on the ICE candidate gathering process.
           Applications that support candidate trickling can send the initial
           offer immediately and send individual candidates when they get the
@@ -457,35 +473,84 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 ]]></artwork>
             </figure>
 
-            <t>The IceCandidate object also contains fields to indicate which
-            m= line it should be associated with. The m line can be identified
-            in one of two ways; either by a m-line index, or a MID. The m-line
-            index is a zero-based index, referring to the Nth m-line in the
-            SDP. The MID uses the "media stream identification", as defined in
-            <xref target="RFC5888"></xref> , to identify the m-line. WebRTC
-            implementations creating an ICE Candidate object MUST populate
+            <t>The IceCandidate object also contains fields to
+            indicate which m= line it should be associated with. The m= line can be
+            identified in one of two ways; either by a m= line index, or a MID.
+            The m= line index is a zero-based index, with index N referring to the
+            N+1th m= line in the SDP sent by the entity which sent the IceCandidate.
+            The MID uses the "media stream identification" attribute, as defined in 
+            <xref target="RFC5888"></xref>, Section 4, to identify the m= line.
+            JSEP implementations creating an ICE Candidate object MUST populate
             both of these fields. Implementations receiving an ICE Candidate
-            object SHOULD use the MID if they implement that functionality, or
-            the m-line index, if not.</t>
+            object MUST use the MID if present, or the m= line index, if not
+            (as it could have come from a non-JSEP endpoint).</t>
           </section>
         </section>
+        <section title="ICE Candidate Policy" anchor="sec.ice-candidate-policy">
+          <t>Typically, when gathering ICE candidates, the browser will gather
+          all possible forms of initial candidates - host, server reflexive, and
+          relay. However, in certain cases, applications may want to have more
+          specific control over the gathering process, due to privacy or related
+          concerns. For example, one may want to suppress the use of host 
+          candidates, to avoid exposing information about the local network, or
+          go as far as only using relay candidates, to leak as little 
+          location information as possible (note that these choices come with
+          corresponding operational costs). To accomplish this, the browser 
+          MUST allow the application to restrict which ICE candidates are used
+          in a session. In addition, administrators may also wish to control
+          the set of ICE candidates, and so the browser SHOULD also allow 
+          control via local policy, with the most restrictive policy prevailing.
+          </t>
+          
+          <t>There may also be cases where the application wants to change which
+          types of candidates are used while the session is active. A prime 
+          example is where a callee may initially want to use only relay
+          candidates, to avoid leaking location information to an arbitrary
+          caller, but then change to use all candidates (for lower operational 
+          cost) once the user has indicated they want to take the call. For this
+          scenario, the browser MUST allow the candidate policy to be changed
+          in mid-session, subject to the aforementioned interactions with local
+          policy.</t>
 
+          <t>To administer the ICE candidate policy, the browser will
+          determine the current setting at the start of each gathering phase.
+          Then, during the gathering phase, the browser MUST NOT
+          expose candidates disallowed by the current policy to the 
+          application, use them as the source of connectivity checks, or 
+          indirectly expose them via other fields, such as the raddr/rport
+          attributes for other ICE candidates.
+          Later, if a different policy is specified by the application, the 
+          application can apply it by kicking off a new gathering phase via an
+          ICE restart.
+          </t>
+        </section>
         <section title="ICE Candidate Pool" anchor="sec.ice-candidate-pool">
-          <t>JSEP applications typically inform the browser to begin ICE 
+          <t>JSEP applications typically inform the browser to begin ICE
           gathering via the information supplied to setLocalDescription, as this
-          is where the app specifies the number of media streams to gather 
-          candidates for. However, to accelerate cases where the browser knows
-          the number of media streams to use ahead of time, the application MAY 
-          ask the browser to gather a pool of potential ICE candidates to help
-          ensure rapid media setup. When setLocalDescription is eventually
-          called, and the browser goes to gather the needed ICE candidates, it
-          SHOULD start by checking if any candidates are available in the pool.
-          If there are candidates in the pool, they SHOULD be handed to the 
-          application immediately via the ICE candidate callback.
-          If the pool becomes depleted, either because a larger-than-expected 
-          number of media streams is used, or because the pool has not had enough
-          time to gather candidates, the remaining candidates are gathered as 
-          usual.
+          is where the app specifies the number of media streams, and thereby
+          ICE components, for which to gather candidates. However, to accelerate
+          cases where the application knows the number of ICE components to use
+          ahead of time, it may ask the browser to gather a pool of potential
+          ICE candidates to help ensure rapid media setup.
+          </t>
+          <t>When setLocalDescription is eventually called, and the
+          browser goes to gather the needed ICE candidates, it SHOULD start by
+          checking if any candidates are available in the pool.  If there are
+          candidates in the pool, they SHOULD be handed to the application
+          immediately via the ICE candidate callback.  If the pool becomes
+          depleted, either because a larger-than-expected number of ICE
+          components is used, or because the pool has not had enough time to
+          gather candidates, the remaining candidates are gathered as usual.
+          </t>
+          <t>One example of where this concept is useful is an application that
+          expects an incoming call at some point in the future, and wants to
+          minimize the time it takes to establish connectivity, to avoid
+          clipping of initial media. By pre-gathering candidates into the pool,
+          it can exchange and start sending connectivity checks from these
+          candidates almost immediately upon receipt of a call. Note though that
+          by holding on to these pre-gathered candidates, which will be kept
+          alive as long as they may be needed, the application will consume
+          resources on the STUN/TURN servers it is using.
           </t>
         </section>
 
@@ -497,7 +562,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <xref target="RFC3261"></xref> defines both a "Parallel Search" and
         "Sequential Search". Although these are primarily signaling level
         issues that are outside the scope of JSEP, they do have some impact on
-        the configuration of the media plane which is relevant. When forking
+        the configuration of the media plane that is relevant. When forking
         happens at the signaling layer, the Javascript application responsible
         for the signaling needs to make the decisions about what media should
         be sent or received at any point of time, as well as which remote
@@ -505,7 +570,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         media engine can make the RTP and media perform as required by the
         application. The basic operations that the applications can have the
         media engine do are: <list style="symbols">
-            <t>Start exchanging media to a given remote peer, but keep all the
+            <t>Start exchanging media with a given remote peer, but keep all the
             resources reserved in the offer.</t>
 
             <t>Start exchanging media with a given remote peer, and free any
@@ -556,8 +621,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           wishes to simultaneously exchange media with multiple peers, the
           flow is slightly more complex, but the Javascript application can
           follow the strategy that <xref target="RFC3960"></xref> describes
-          using UPDATE. (It is worth noting that use cases where this is the
-          desired behavior are very unusual.) The UPDATE approach allows the
+          using UPDATE. The UPDATE approach allows the
           signaling to set up a separate media flow for each peer that it
           wishes to exchange media with. In JSEP, this offer used in the
           UPDATE would be formed by simply creating a new PeerConnection and
@@ -588,14 +652,44 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Constructor" anchor="sec.constructor">
           <t>The PeerConnection constructor allows the application to specify
           global parameters for the media session, such as the STUN/TURN servers
-          and credentials to use when gathering candidates. The size of the 
-          ICE candidate pool can also be set, if desired; this indicates the 
-          number of ICE components to pre-gather candidates for. If the application
-          does not indicate a candidate pool size, the browser may
-          select any default candidate pool size.
+          and credentials to use when gathering candidates, as well as the 
+          initial ICE candidate policy and pool size, and also the BUNDLE
+          policy to use.</t>
+
+          <t>If an ICE candidate policy is specified, it functions as
+          described in <xref target="sec.ice-candidate-policy"/>, causing the 
+          browser to only surface the permitted candidates to the application, 
+          and only use those candidates for connectivity checks. The set of 
+          available policies is as follows:
+          <list style="hanging">
+                <t hangText="all:">All candidates will be gathered and used.</t>
+                <t></t>
+                <t hangText="public:">Candidates with private IP addresses
+                [RFC1918] will be filtered out. This prevents exposure of
+                internal network details, at the cost of requiring
+                relay usage even for intranet calls, if the NAT does not allow 
+                hairpinning as described in [RFC4787], section 6.</t>
+                <t></t>
+                <t hangText="relay:">All candidates except relay candidates will
+                be filtered out. This obfuscates the location information that 
+                might be ascertained by the remote peer from the received 
+                candidates. Depending on how the application deploys its relay 
+                servers, this could obfuscate location to a metro or possibly
+                even global level.</t>
+          </list>
+          Although it can be overridden by local policy, the default ICE
+          candidate policy MUST be set to allow all candidates, as this
+          minimizes use of application STUN/TURN server resources.</t>
+
+          <t>If a size is specified for the ICE candidate pool, this indicates
+          the number of ICE components to pre-gather candidates for. Because 
+          pre-gathering results in utilizing STUN/TURN server resources for 
+          potentially long periods of time, this must only
+          occur upon application request, and therefore the default
+          candidate pool size MUST be zero.
           </t>
 
-          <t>In addition, the
+          <t>Lastly, the
           application can specify its preferred policy regarding use of BUNDLE,
           the multiplexing mechanism defined in <xref
           target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>.
@@ -608,15 +702,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               multiple video MediaStreamTracks attached to a PeerConnection, all
               but the first audio and video tracks will be marked as
               bundle-only, and candidates will only be gathered for N media
-              streams, where N is the number of distinct media types. When 
+              streams, where N is the number of distinct media types. When
               talking to a non-BUNDLE-aware endpoint, only the non-bundle-only
               streams will be negotiated. This policy balances desire to
-              multiplex with the need to ensure basic audio and video still 
-              works in legacy cases.
+              multiplex with the need to ensure basic audio and video still
+              works in legacy cases. Data channels will be in a separate bundle
+              group.
               </t>
               <t></t>
-              <t hangText="max-bundle:">The application will BUNDLE all of its media 
-              streams on a single transport. All streams other than the first
+              <t hangText="max-bundle:">The application will BUNDLE all of its media
+              streams, including data channels,
+              on a single transport. All streams other than the first
               will be marked as bundle-only. This policy aims to minimize
               candidate gathering and maximize multiplexing, at the cost of less
               compatibility with legacy endpoints.
@@ -628,6 +724,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               candidates to be gathered for each media stream.
               </t>
             </list>
+            As it provides the best tradeoff between performance and
+            compatibility with legacy endpoints, the default BUNDLE policy
+            MUST be set to "balanced".
           </t>
         </section>
         <section title="createOffer" anchor="sec.createoffer">
@@ -651,7 +750,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </list>
           </t>
           <t>In the initial offer, the generated SDP will contain all desired
-          functionality for the session (certain parts that are supported but
+          functionality for the session (functionality that is supported but
           not desired by default may be omitted); for each SDP line, the
           generation of the SDP will follow the process defined for generating
           an initial offer from the document that specifies the given SDP
@@ -664,7 +763,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           session, e.g. adding or removing MediaStreams, or requesting an ICE
           restart. For each existing stream, the generation of each SDP line
           must follow the process defined for generating an updated offer from
-          the document that specifies the given SDP line. For each new stream,
+          the RFC that specifies the given SDP line. For each new stream,
           the generation of the SDP must follow the process of generating an
           initial offer, as mentioned above. If no changes have been made, or
           for SDP lines that are unaffected by the requested changes, the
@@ -690,7 +789,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The createAnswer method generates a blob of SDP that contains a
           <xref target="RFC3264"></xref> SDP answer with the supported
           configuration for the session that is compatible with the parameters
-          supplied in the offer. Like createOffer, the returned blob contains
+          supplied in the most recent call to setRemoteDescription, which MUST
+          have been called prior to calling createAnswer.
+          Like createOffer, the returned blob contains
           descriptions of the local MediaStreams attached to this
           PeerConnection, the codec/RTP/RTCP options negotiated for this
           session, and any candidates that have been gathered by the ICE
@@ -718,7 +819,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <section title="SessionDescriptionType" anchor="sec.sessiondescriptiontype">
           <t>Session description objects (RTCSessionDescription) may be of
-          type "offer", "pranswer", and "answer". These types provide
+          type "offer", "pranswer", or "answer". These types provide
           information as to how the description parameter should be parsed,
           and how the media state should be changed.</t>
 
@@ -762,28 +863,28 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <section title="Use of Provisional Answers" anchor="sec.use-of-provisional-answer">
             <t>Most web applications will not need to create answers using the
-            "pranswer" type. While it is good practice to send an immediate 
+            "pranswer" type. While it is good practice to send an immediate
             response to an "offer", in order to warm up the session transport
             and prevent media clipping, the preferred handling for a web
             application would be to create and send an "inactive" final answer
-            immediately after receiving the offer. Later, when the called 
-            user actually accepts the call, the application can create a new 
+            immediately after receiving the offer. Later, when the called
+            user actually accepts the call, the application can create a new
             "sendrecv" offer to update the previous offer/answer pair and start
             the media flow. While this could also be done with an inactive
             "pranswer", followed by a sendrecv "answer", the initial "pranswer"
-            leaves the offer-answer exchange open, which means the caller cannot
-            send an updated offer during this time.</t>
+            leaves the offer-answer exchange open, which means that
+            neither side can send an updated offer during this time.</t>
 
             <t>As an example, consider a typical web application that will
             set up a data channel, an audio channel, and a video channel. When
             an endpoint receives an offer with these channels, it could send an
-            answer accepting the data channel for two-way data, and accepting 
+            answer accepting the data channel for two-way data, and accepting
             the audio and video tracks as inactive or receive-only. It could
             then ask the user to accept the call, acquire the local media
             streams, and send a new offer to the remote side moving the audio
             and video to be two-way media. By the time the human has accepted
             the call and triggered the new offer, it is likely that the ICE and
-            DTLS handshaking for all the channels will already be set up.</t>
+            DTLS handshaking for all the channels will already have finished.</t>
 
             <t>Of course, some applications may not be able to perform this
             double offer-answer exchange, particularly ones that are attempting
@@ -805,15 +906,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             description. To support this, we introduce the concept of
             "rollback".</t>
 
-            <t>A rollback discards any proposed changes to the session, 
+            <t>A rollback discards any proposed changes to the session,
             returning the state machine to the stable state, and setting the
             modified local and/or remote description back to their previous
-            values. Any resources or candidates that were allocated by the 
+            values. Any resources or candidates that were allocated by the
             abandoned local description are discarded; any media that is
-            received will be processed according to the previous local and 
+            received will be processed according to the previous local and
             remote descriptions. Rollback can only be used to cancel proposed
             changes; there is no support for rolling back from a stable state to
-            a previous stable state.
+            a previous stable state. Note that this implies that once the answerer
+            has performed setLocalDescription with his answer, this cannot
+            be rolled back.
             </t>
 
             <t>A rollback is performed by supplying a session description of
@@ -865,8 +968,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>This API changes the local media state; among other things, it
           sets up local resources for sending and encoding media.</t>
 
-          <t>If setRemoteDescription was previously called with an offer, and
-          setLocalDescription is called with an answer (provisional or final),
+          <t>If setLocalDescription was previously called with an offer, and
+          setRemoteDescription is called with an answer (provisional or final),
           and the media directions are compatible, and media are available to
           send, this will result in the starting of media transmission.</t>
         </section>
@@ -926,20 +1029,38 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           interactions with a Trickle ICE-compatible agent.
           </t>
         </section>
-        <section title="updateIce" anchor="sec.updateice">
-          <t>The updateIce method allows the configuration of the ICE Agent to
-          be changed during the session, primarily for changing which types of
-          local candidates are provided to the application and used for
-          connectivity checks. A callee may initially configure the ICE Agent
-          to use only relay candidates, to avoid leaking location information,
-          but update this configuration to use all candidates once the call is
-          accepted.</t>
-
-          <t>Regardless of the configuration, the gathering process collects
-          all available candidates, but excluded candidates will not be
-          surfaced in onicecandidate callback or used for connectivity
-          checks.</t>
-
+        <section title="setConfiguration" anchor="sec.setconfiguration">
+          <t>The setConfiguration method allows the global configuration of the 
+          PeerConnection, which was initially set by constructor parameters, to
+          be changed during the session. The effects of this method call depend
+          on when it is invoked, and differ depending on which specific 
+          parameters are changed:</t>
+         <t><list style="symbols">
+            <t>Any changes to the STUN/TURN servers to use affect
+            the next gathering phase. If gathering has already occurred, this
+            will cause the next call to createOffer to generate new ICE 
+            credentials, for the purpose of forcing an ICE restart and kicking
+            off a new gathering phase, in which the new servers will be used.
+            If the ICE candidate pool has a nonzero size, any existing
+            candidates will be discarded, and new candidates will be gathered
+            from the new servers.
+            </t>
+            <t>Any changes to the ICE candidate policy also affect the next 
+            gathering phase, in similar fashion to the server changes described
+            above. Note though that changes to the policy have no effect on 
+            the candidate pool, because pooled candidates are not surfaced to
+            the application until a gathering phase occurs, and so any 
+            necessary filtering can still be done on any pooled candidates.
+            </t>
+            <t>Any changes to the ICE candidate pool size take effect 
+            immediately; if increased, additional candidates are pre-gathered;
+            if decreased, the now-superfluous candidates are discarded.
+            </t>
+            <t>Any changes to the BUNDLE policy take effect immediately, i.e.
+            any future tracks added to the PeerConnection will have their
+            bundle-only state marked accordingly.
+            </t>
+          </list></t>
           <t>This call may result in a change to the state of the ICE Agent,
           and may result in a change to media state if it results in
           connectivity being established.</t>
@@ -963,7 +1084,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       creating and parsing SDP objects.</t>
 
       <section title="Requirements Overview" anchor="sec.requirements-overview">
-        <t>JSEP implementations must comply with the specifications listed 
+        <t>JSEP implementations must comply with the specifications listed
         below that govern the creation and processing of offers and answers.
         </t>
         <t>The first set of specifications is the "mandatory-to-implement" set.
@@ -973,10 +1094,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <t>The second set of specifications is the "mandatory-to-use" set.
         The local JSEP endpoint and any remote endpoint must indicate support
         for these specifications in their session descriptions.</t>
-        
+
         <section title="Implementation Requirements" anchor="sec.implementation-requiremen">
-            <t>This list of mandatory-to-implement specifications is derived 
-            from the requirements outlined in 
+            <t>This list of mandatory-to-implement specifications is derived
+            from the requirements outlined in
             <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>.
             <list style="format R-%d">
                 <t><xref target="RFC4566"></xref> is the base SDP specification
@@ -996,8 +1117,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t><xref target="RFC4568"></xref> MUST NOT be implemented to
                 signal SDES SRTP keying information.</t>
 
-                <t>The <xref target="RFC5888"></xref> grouping framework MUST 
-                be implemented for signaling grouping information, and MUST be 
+                <t>The <xref target="RFC5888"></xref> grouping framework MUST
+                be implemented for signaling grouping information, and MUST be
                 used to identify m= lines via the a=mid attribute.</t>
 
                 <t><xref target="I-D.ietf-mmusic-msid"></xref> MUST be
@@ -1027,9 +1148,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t><xref target="RFC5506"></xref> MUST be implemented to signal
                 reduced-size RTCP messages.</t>
 
-                <t><xref target="RFC3556"></xref> with bandwidth modifiers MAY 
+                <t><xref target="RFC3556"></xref> with bandwidth modifiers MAY
                 be supported for specifying RTCP bandwidth as a fraction of the
-                media bandwidth, RTCP fraction allocated to the senders and 
+                media bandwidth, RTCP fraction allocated to the senders and
                 setting maximum media bit-rate boundaries.</t>
             </list></t>
 
@@ -1038,7 +1159,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
 
         <section title="Usage Requirements" anchor="sec.usage-requirements">
-            <t>All session descriptions handled by JSEP endpoints, 
+            <t>All session descriptions handled by JSEP endpoints,
             both local and remote, MUST indicate support for the following
             specifications. If any of these are absent, this omission MUST be
             treated as an error. <list style="format R-%d">
@@ -1046,10 +1167,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 profile, as specified in <xref target="RFC5764"></xref>,
                 MUST be used.</t>
                 <t>ICE, as specified in <xref target="RFC5245"></xref>,
-                MUST be used. Note that the remote endpoint MAY use a Lite
-                implementation.</t>
+                MUST be used. Note that the remote endpoint may use a Lite
+                implementation; implementations MUST properly handle remote
+                endpoints which do ICE-Lite.</t>
                 <t>DTLS-SRTP, as specified in <xref target="RFC5763"></xref>,
-                MUST be used.</t> 
+                MUST be used.</t>
             </list></t>
         </section>
       </section>
@@ -1087,7 +1209,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>The third SDP line MUST be a "s=" line, as specified in <xref
               target="RFC4566"></xref>, Section 5.3; to match the "o=" line, a
-              single dash SHOULD be used as the session name, e.g. "s=-".</t>
+              single dash SHOULD be used as the session name, e.g. "s=-".
+              Note that this differs from the advice in <xref target="RFC4566"/>
+              which proposes a single space, but as both "o=" and "s="
+              are meaningless, having the same meaningless value seems clearer.
+              </t>
 
               <t>Session Information ("i="), URI ("u="), Email Address ("e="),
               Phone Number ("p="), Bandwidth ("b="), Repeat Times ("r="), and
@@ -1105,15 +1231,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="I-D.ietf-mmusic-msid"></xref>, Section 4.</t>
             </list></t>
 
-          <t>The next step is to generate m= sections for each
+          <t>The next step is to generate m= sections, as specified in
+          <xref target="RFC4566"/> Section 5.14, for each
           MediaStreamTrack that has been added to the PeerConnection via the
           addStream method. (Note that this method takes a MediaStream, which
           can contain multiple MediaStreamTracks, and therefore multiple m=
-          sections can be generated even if addStream is only called once.) 
-          m=sections MUST be sorted first by the order
-          the order in which the MediaStreams were added to the PeerConnection, and
+          sections can be generated even if addStream is only called once.)
+          m=sections MUST be sorted first by the order in which the
+          MediaStreams were added to the PeerConnection, and
           then by the alphabetical ordering of the media type for the MediaStreamTrack.
-          For example, if a MediaStream containing both an audio and a video 
+          For example, if a MediaStream containing both an audio and a video
           MediaStreamTrack is added to a PeerConnection, the resultant m=audio
           section will precede the m=video section. If a second MediaStream
           containing an audio MediaStreamTrack was added, it would follow
@@ -1122,14 +1249,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Each m= section, provided it is not being bundled into
           another m= section, MUST generate a unique set of ICE credentials
           and gather its own unique set of ICE candidates. Otherwise, it MUST
-          use the same ICE credentials and candidates that were used in the
-          m= section that it is being bundled into.
-          [[OPEN ISSUE: This seems incorrect for credentials.
-          https://github.com/rtcweb-wg/jsep/issues/17]]</t>
+          use the same ICE credentials and candidates as the m= section
+          into which it is being bundled. Note that this means
+          that for offers, any m= sections which are not bundle-only
+          MUST have unique ICE credentials and candidates, since it is
+          possible that the answerer will accept them without bundling
+          them.
+          </t>
 
           <t>For DTLS, all m= sections MUST use the certificate for the
           identity that has been specified for the PeerConnection; as a result,
-          they MUST all have the same <xref target="RFC4572"></xref>fingerprint
+          they MUST all have the same <xref target="RFC4572"></xref> fingerprint
           value, or this value MUST be a session-level attribute.</t>
 
           <t>Each m= section should be generated as specified in <xref
@@ -1141,7 +1271,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
             Section 5.1.</t>
             <t>To properly indicate use of DTLS, the &lt;proto&gt; field MUST
-            be set to "UDP/TLS/RTP/SAVPF", as specified in 
+            be set to "UDP/TLS/RTP/SAVPF", as specified in
             <xref target="RFC5764"/>, Section 8.</t>
             </list>
           </t>
@@ -1174,7 +1304,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>For each primary codec where RTP retransmission should be
               used, a corresponding "a=rtpmap" line indicating "rtx" with the
               clock rate of the primary codec and an "a=fmtp" line that
-              references the payload type fo the primary codec, as specified
+              references the payload type of the primary codec, as specified
               in <xref target="RFC4588"></xref>, Section 8.1.</t>
 
               <t>For each supported FEC mechanism, a corresponding "a=rtpmap"
@@ -1188,7 +1318,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 4.</t>
 
               <t>An "a=fingerprint" line, as specified in <xref
-              target="RFC4572"></xref>, Section 5; the algorithm used for the 
+              target="RFC4572"></xref>, Section 5; the algorithm used for the
               fingerprint MUST match that used in the certificate signature.
               </t>
 
@@ -1221,10 +1351,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC5576"></xref>, Section 4.1, indicating the SSRC to be
               used for sending media, along with the mandatory "cname" source
               attribute, as specified in Section 6.1, indicating the CNAME for
-              the source. The CNAME must be generated in accordance with 
+              the source. The CNAME must be generated in accordance with
               <xref target="RFC7022"></xref>. [OPEN ISSUE: How are CNAMEs
               specified for MSTs? Are they randomly generated for each
-              MediaStream? If so, can two MediaStreams be synced?]</t>
+              MediaStream? If so, can two MediaStreams be synced?
+              See: https://github.com/rtcweb-wg/jsep/issues/4]</t>
 
               <t>If RTX is supported for this media type, another "a=ssrc"
               line with the RTX SSRC, and an "a=ssrc-group" line, as specified
@@ -1238,7 +1369,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>[OPEN ISSUE: Handling of a=imageattr]</t>
 
-              <t>If the BUNDLE policy for this PeerConnection is set to 
+              <t>If the BUNDLE policy for this PeerConnection is set to
               "max-bundle", and this is not the first m= section, or the BUNDLE
               policy is set to "balanced", and this is not the first m= section
               for this media type, an "a=bundle-only" line.</t>
@@ -1262,11 +1393,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           "a=group" attribute MUST be added as specified in <xref
           target="RFC5888"></xref>. This attribute MUST have semantics
           "BUNDLE", and MUST include the mid identifiers of each m= section.
+          The effect of this is that the browser offers all m= sections as one
+          BUNDLE group. However, whether the m= sections are bundle-only
+          or not depends on the BUNDLE policy.
           </t>
 
-          <t>Attributes that are common between all m= sections MAY be moved
-          to session-level, if explicitly defined to be valid at
-          session-level.</t>
+          <t>Attributes which SDP permits to either be at the session
+          level or the media level SHOULD generally be at the media
+          level even if they are identical. This promotes readability,
+          especially if one of a set of initially identical attributes
+          is subsequently changed.
+          </t>
 
           <t>Attributes other than the ones specified above MAY be included,
           except for the following attributes which are specifically
@@ -1302,7 +1439,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           following restriction: <list style="symbols">
             <t>The fields of the "o=" line MUST stay the same except for the
             &lt;session-version&gt; field, which MUST increment if the session
-            description changes in any way, including the addition of 
+            description changes in any way, including the addition of
             ICE candidates.</t>
             </list>
           </t>
@@ -1323,10 +1460,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Each "a=mid" line MUST stay the same.</t>
 
               <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
-              same unless the "IceRestart" option (<xref target="sec.options-handling"/>
-              was specified. Note that it's not clear why you would actually
-              want to do this, since at this point ICE has not yet started
-              and is thus unlikely to need a restart.
+              same, unless the ICE configuration has changed (either changes to
+              the supported STUN/TURN servers, or the ICE candidate policy), or
+              the "IceRestart" option (<xref target="sec.icerestart"/>
+              was specified. 
               </t>
 
               <t>Within each m= section, for each candidate that has
@@ -1350,12 +1487,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               and "a=ssrc-group" lines MUST be removed from the associated m=
               sections.</t>
 
-              <t>If any MediaStreamTracks have been added, and there exist 
-              m= sections of the appropriate media type with no associated 
+              <t>If any MediaStreamTracks have been added, and there exist
+              m= sections of the appropriate media type with no associated
               MediaStreamTracks (i.e. as described in the preceding paragraph),
               those m= sections MUST be recycled by adding the new
               MediaStreamTrack to the m= section. This is done by adding the
-              necessary "a=msid", "a=ssrc", and "a=ssrc-group" lines to the 
+              necessary "a=msid", "a=ssrc", and "a=ssrc-group" lines to the
               recycled m= section, and removing the "a=recvonly" attribute.
               </t>
             </list></t>
@@ -1371,23 +1508,24 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>If a m= section exists in the current local description, but
               does not have an associated local MediaStreamTrack (possibly
               because said MediaStreamTrack was removed since the last
-              exchange), a m= section MUST still be generated in the new offer, 
+              exchange), a m= section MUST still be generated in the new offer,
               as indicated in <xref target="RFC3264"></xref>, Section 8. The
-              disposition of this section will depend on the state of the 
+              disposition of this section will depend on the state of the
               remote MediaStreamTrack associated with this m= section. If one
               exists, and it is still in the "live" state, the new m= section
-              MUST be marked as "a=recvonly", with no "a=msid" or related 
-              attributes present. If no remote MediaStreamTrack 
+              MUST be marked as "a=recvonly", with no "a=msid" or related
+              attributes present. If no remote MediaStreamTrack
               exists, or it is in the "ended" state, the m= section MUST be
               marked as rejected, by setting the port to zero, as indicated in
               <xref target="RFC3264"></xref>, Section 8.2.</t>
 
               <t>If any MediaStreamTracks have been added, and there exist
               recvonly m= sections of the appropriate media type with no
-              associated MediaStreamTracks, or rejected m= sections of any 
-              media type, those m= sections MUST be recycled, and the
-              local MediaStreamTracks associated with these recycled m=
-              sections. This includes any recvonly or rejected m= sections
+              associated MediaStreamTracks, or rejected m= sections of any
+              media type, those m= sections MUST be recycled, and a
+              local MediaStreamTrack associated with these recycled m=
+              sections until all such existing m= sections have been
+              used. This includes any recvonly or rejected m= sections
               created by the preceding paragraph.</t>
             </list></t>
 
@@ -1413,7 +1551,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>The "a=group:BUNDLE" attribute MUST include the mid identifiers
             specified in the BUNDLE group in the most recent answer, minus any
-            m= sections that have been marked as rejected, plus any newly added 
+            m= sections that have been marked as rejected, plus any newly added
             or re-enabled m= sections. In other words, the BUNDLE attribute must
             contain all m= sections that were previously bundled, as long as
             they are still alive, as well as any new m= sections.</t>
@@ -1425,52 +1563,68 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           description if the following constraints are present.</t>
 
           <section title="OfferToReceiveAudio" anchor="sec.offertoreceiveaudio">
-            <t>If the "OfferToReceiveAudio" option is specified, with a
-            value of "N", the offer MUST include N non-rejected m= sections
-            with media type "audio", even if fewer than N audio 
+            <t>If the "OfferToReceiveAudio" option is specified, with an integer
+            value of N, the offer MUST include N non-rejected m= sections
+            with media type "audio", even if fewer than N audio
             MediaStreamTracks have been added to the PeerConnection. This allows
             the offerer to receive audio, including multiple independent
             streams, even when not sending it; accordingly, the directional
             attribute on the audio m= sections without associated
-            MediaStreamTracks MUST be set to recvonly. If this option is 
-            specified in the case where at least N audio MediaStreamTracks have 
+            MediaStreamTracks MUST be set to recvonly. If this option is
+            specified in the case where at least N audio MediaStreamTracks have
             already been added to the PeerConnection, or N non-rejected
             m= sections with media type "audio" would otherwise be generated,
-            it has no effect. For backwards compatibility, a value of "true"
+            it has no effect. For backwards compatibility with pre-standard
+            versions of this specification, a value of "true"
             is interpreted as equivalent to N=1.</t>
           </section>
 
           <section title="OfferToReceiveVideo" anchor="sec.offertoreceivevideo">
-            <t>If the "OfferToReceiveVideo" option is specified, with a
-            value of "N", the offer MUST include N non-rejected m= sections
-            with media type "video", even if fewer than N video 
+            <t>If the "OfferToReceiveVideo" option is specified, with an integer
+            value of N, the offer MUST include N non-rejected m= sections
+            with media type "video", even if fewer than N video
             MediaStreamTracks have been added to the PeerConnection. This allows
             the offerer to receive video, including multiple independent
             streams, even when not sending it; accordingly, the directional
             attribute on the video m= sections without associated
-            MediaStreamTracks MUST be set to recvonly. If this option is 
-            specified in the case where at least N video MediaStreamTracks have 
+            MediaStreamTracks MUST be set to recvonly. If this option is
+            specified in the case where at least N video MediaStreamTracks have
             already been added to the PeerConnection, or N non-rejected
             m= sections with media type "video" would otherwise be generated,
-            it has no effect. For backwards compatibility, a value of "true"
+            it has no effect. For backwards compatibility with pre-standard
+            versions of this specification, a value of "true"
             is interpreted as equivalent to N=1.</t>
           </section>
 
           <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection">
             <t>If the "VoiceActivityDetection" option is specified, with a
             value of "true", the offer MUST indicate support for silence
-            suppression by including comfort noise ("CN") codecs for each
-            supported clock rate, as specified in <xref
-            target="RFC3389"></xref>, Section 5.1.</t>
+            suppression in the audio it receives by including comfort noise
+            ("CN") codecs for each offered audio codec, as specified in <xref
+            target="RFC3389"></xref>, Section 5.1, except for codecs that have their
+            own internal silence suppression support. For codecs that have their own
+            internal silence suppression support, the appropriate fmtp parameters
+            for that codec MUST be specified to indicate that silence suppression for
+            received audio is desired. For example, when using the Opus codec, the
+            "usedtx=1" parameter would be specified in the offer.
+            This option allows the endpoint to significantly reduce the amount of
+            audio bandwidth it receives, at the cost of some fidelity, depending on
+            the quality of the remote VAD algorithm.</t>
           </section>
 
           <section title="IceRestart" anchor="sec.icerestart">
             <t>If the "IceRestart" option is specified, with a value of
             "true", the offer MUST indicate an ICE restart by generating new
-            ICE ufrag and pwd attributes, as specified in RFC5245, Section
+            ICE ufrag and pwd attributes, as specified in <xref
+            target="RFC5245"></xref>, Section
             9.1.1.1. If this option is specified on an initial offer, it
             has no effect (since a new ICE ufrag and pwd are already
-            generated).</t>
+            generated). Similarly, if the ICE configuration has changed, this
+            option has no effect, since new ufrag and pwd attributes will be
+            generated automatically. This option is primarily useful for
+            reestablishing connectivity in cases where failures are detected by 
+            the application.
+            </t>
           </section>
         </section>
       </section>
@@ -1492,8 +1646,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           a JSEP endpoint and may not conform to all the requirements listed
           in <xref target="sec-create-offer"></xref>. For many cases, this is
           not a problem. However, if any mandatory SDP attributes are missing,
-          or functionality listed as mandatory-to-use above is not present, 
-          this MUST be treated as an error, and MUST cause the affected 
+          or functionality listed as mandatory-to-use above is not present,
+          this MUST be treated as an error, and MUST cause the affected
           m= sections to be marked as rejected.</t>
 
           <t>The first step in generating an initial answer is to generate
@@ -1507,11 +1661,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           valid as media-level attributes SHALL be considered to be present in
           each m= section.</t>
 
-          <t>For each offered m= section of a given media type, if there
-          is a local MediaStreamTrack of the specified type which has been
+          <t>The next step is to go through each offered m= section.
+          If there is a local MediaStreamTrack of the same type which has been
           added to the PeerConnection via addStream and not yet associated
           with a m= section, and the specific m= section is either sendrecv or
-          recvonly, the MediaStreamTrack is associated with the m=
+          recvonly, the MediaStreamTrack will be associated with the m=
           section at this time. MediaStreamTracks are assigned to m=
           sections using the canonical order described in
           <xref target="sec.initial-offers"/>. If there are more m= sections of a certain
@@ -1523,9 +1677,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           offer.</t>
 
           <t>For each offered m= section, if the associated remote
-          MediaStreamTrack has been stopped, and is therefore in state "ended", 
+          MediaStreamTrack has been stopped, and is therefore in state "ended",
           and no local MediaStreamTrack has been associated, the corresponding
-          m= section in the answer MUST be marked as rejected by setting the 
+          m= section in the answer MUST be marked as rejected by setting the
           port in the m= line to zero, as indicated in
           <xref target="RFC3264"></xref>, Section 6., and further processing for
           this m= section can be skipped.</t>
@@ -1569,13 +1723,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Depending on the directionality of the offer, the disposition
               of any associated remote MediaStreamTrack, and the presence of an
               associated local MediaStreamTrack, the appropriate directionality
-              attribute, as specified in <xref target="RFC3264"></xref>, 
+              attribute, as specified in <xref target="RFC3264"></xref>,
               Section 6.1. If the offer was sendrecv, and the remote
-              MediaStreamTrack is still "live", and there a local
-              MediaStreamTrack has been associated, the directionality MUST be 
-              set as sendrecv. If the offer was sendonly, and the remote 
-              MediaStreamTrack is still "live", the directionality MUST be set 
-              as recvonly. If the offer was recvonly, and a local 
+              MediaStreamTrack is still "live", and there is a local
+              MediaStreamTrack that has been associated, the directionality MUST be
+              set as sendrecv. If the offer was sendonly, and the remote
+              MediaStreamTrack is still "live", the directionality MUST be set
+              as recvonly. If the offer was recvonly, and a local
               MediaStreamTrack has been associated, the directionality MUST be
               set as sendonly. If the offer was inactive, the directionality
               MUST be set as inactive.</t>
@@ -1585,7 +1739,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC4566"></xref>, Section 6, and <xref
               target="RFC3264"></xref>, Section 6.1. For audio, the codecs
               specified in <xref target="I-D.ietf-rtcweb-audio"></xref>,
-              Section 3, MUST be be supported. Note that for simplicity, the
+              Section 3, MUST be supported. Note that for simplicity, the
               answerer MAY use different payload types for codecs than the
               offerer, as it is not prohibited by Section 6.1.</t>
 
@@ -1593,7 +1747,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               where RTP retransmission should be used, a corresponding
               "a=rtpmap" line indicating "rtx" with the clock rate of the
               primary codec and an "a=fmtp" line that references the payload
-              type fo the primary codec, as specified in <xref
+              type of the primary codec, as specified in <xref
               target="RFC4588"></xref>, Section 8.1.</t>
 
               <t>For each supported FEC mechanism that is present in the
@@ -1609,7 +1763,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               4.</t>
 
               <t>An "a=fingerprint" line, as specified in <xref
-              target="RFC4572"></xref>, Section 5; the algorithm used for the 
+              target="RFC4572"></xref>, Section 5; the algorithm used for the
               fingerprint MUST match that used in the certificate signature.
               </t>
 
@@ -1673,11 +1827,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           of this document is missing this information.]</t>
 
           <t>If "a=group" attributes with semantics of "BUNDLE" are offered,
-          corresponding session-level "a=group" attributes MUST be added as 
+          corresponding session-level "a=group" attributes MUST be added as
           specified in <xref target="RFC5888"></xref>. These attributes MUST
           have semantics "BUNDLE", and MUST include the all mid identifiers from
-          the offered BUNDLE groups that have not been rejected. 
-          Note that regardless of the presence of "a=bundle-only" in the offer, 
+          the offered BUNDLE groups that have not been rejected.
+          Note that regardless of the presence of "a=bundle-only" in the offer,
           no m= sections in the answer should have an "a=bundle-only" line.
           </t>
 
@@ -1704,10 +1858,20 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </section>
 
     <section title="Configurable SDP Parameters" anchor="sec.configurable-sdp-paramete">
-      <t>Note: This section is still very early and is likely to significantly
-      change as we get a better understanding of a) the use cases for this b)
-      the implications at the protocol level c) feedback from implementors on
-      what they can do.</t>
+      <t>
+        It is possible to change elements in the SDP returned from createOffer
+        before passing it to setLocalDescription. When an implementation
+        receives modified SDP it MUST either:
+      </t>
+      <t>
+        <list style="symbols">
+          <t>Accept the changes and adjust its behavior to match the SDP.</t>
+          <t>Reject the changes and return an error via the error callback.</t>
+        </list>
+      </t>
+      <t>
+        Changes MUST NOT be silently ignored.
+      </t>
 
       <t>The following elements of the SDP media description MUST NOT be
       changed between the createOffer and the setLocalDescription, since they
@@ -1715,7 +1879,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       the browser MUST NOT honor an attempt to change them:</t>
 
       <t><list style="symbols">
-          <t>The number, type and port number of m-lines.</t>
+          <t>The number, type and port number of m= lines.</t>
 
           <t>The generated ICE credentials (a=ice-ufrag and a=ice-pwd).</t>
 
@@ -1738,33 +1902,23 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       resolution greater than what the endpoint can encode):</t>
 
       <t><list style="symbols">
-          <t>disable BUNDLE (a=group)</t>
+       <t>[[OPEN ISSUE: This is a placeholder for other modifications, which
+       we may continue adding as use cases appear.]]</t></list></t>
 
-          <t>disable RTCP mux (a=rtcp-mux)</t>
-
-          <t>change send resolution or frame rate</t>
-
-          <t>change desired recv resolution or frame rate</t>
-
-          <t>change maximum total bandwidth (b=) [OPEN ISSUE: need to clarify
-          if this is CT or AS - see section 5.8 of <xref
-          target="RFC4566"></xref>]</t>
-
-          <t>remove desired AVPF mechanisms (a=rtcp-fb)</t>
-
-          <t>remove RTP header extensions (a=extmap)</t>
-
-          <t>change media send/recv state (a=sendonly/recvonly/inactive)</t>
-        </list></t>
-
-      <t>For example, an application could implement call hold by adding an
-      a=inactive attribute to its local description, and then applying and
-      signaling that description.</t>
+      <t>Implementations MAY choose to either honor or reject any elements not
+      listed in the above two categories, but must do so explicitly as
+      described at the beginning of this section. Note that future standards
+      may add new SDP elements to the list of elements which must be accepted
+      or rejected, but due to version skew, applications must be
+      prepared for implementations to accept changes which must be
+      rejected and vice versa.</t>
 
       <t>The application can also modify the SDP to reduce the capabilities in
-      the offer it sends to the far side in any way the application sees fit,
-      as long as it is a valid SDP offer and specifies a subset of what the
-      browser is expecting to do.</t>
+      the offer it sends to the far side or the offer that it installs from the
+      far side in any way the application sees fit, as long as it is a
+      valid SDP offer and specifies a subset of what was in the original offer.
+      This is safe because the answer is not permitted to expand capabilities
+      and therefore will just respond to what is actually in the offer.</t>
 
       <t>As always, the application is solely responsible for what it sends to
       the other party, and all incoming SDP will be processed by the browser
@@ -1776,12 +1930,41 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </section>
 
     <section title="Security Considerations" anchor="sec.security-considerations">
-      <t>The intent of the WebRTC protocol suite is to provide an environment
-      that is securable by default: all media is encrypted, keys are exchanged
-      in a secure fashion, and the Javascript API includes functions that can
-      be used to verify the identity of communication partners.</t>
+      <t>
+        The IETF has published separate documents
+        <xref target="I-D.ietf-rtcweb-security-arch"/>
+        <xref target="I-D.ietf-rtcweb-security"/>
+        describing the security architecture for WebRTC as a whole.
+        The remainder of this section describes security considerations
+        for this document.
+      </t>
+      <t>
+        While formally the JSEP interface is an API, it is better to
+        think of it is an Internet protocol, with the JS being untrustworthy
+        from the perspective of the browser. Thus, the threat model of <xref
+        target="RFC3552"/> applies.  In particular, JS can call the API in any
+        order and with any inputs, including malicious ones. This is
+        particularly relevant when we consider the SDP which is passed to
+        setLocalDescription(). While correct API usage requires that the
+        application pass in SDP which was derived from createOffer() or
+        createAnswer() (perhaps suitably modified as described in <xref
+        target="sec.configurable-sdp-paramete"/>, there is no guarantee that
+        applications do so. The browser MUST be prepared for the JS to pass in
+        bogus data instead.
+      </t>
+      <t>
+        Conversely, the application programmer MUST recognize that the
+        JS does not have complete control of browser behavior. One case that
+        bears particular mention is that editing ICE candidates out of the SDP
+        or suppressing trickled candidates does not have the expected
+        behavior: implementations will still perform checks from those
+        candidates even if they are not sent to the other side.  Thus, for
+        instance, it is not possible to prevent the remote peer from
+        learning your public IP address by removing server reflexive
+        candidates. Applications which wish to conceal their public IP address
+        should instead configure the ICE agent to use only relay candidates.
+      </t>
     </section>
-
     <section title="IANA Considerations" anchor="sec.iana-considerations">
       <t>This document requires no actions from IANA.</t>
     </section>
@@ -2159,15 +2342,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       <reference anchor='I-D.ietf-mmusic-sdp-mux-attributes'>
         <front>
           <title>A Framework for SDP Attributes when Multiplexing</title>
-          
+
           <author initials='S' surname='Nandakumar' fullname='Suhas Nandakumar'>
             <organization />
           </author>
-          
+
           <date month='February' day='14' year='2014' />
-          
+
         </front>
-        
+
         <seriesInfo name='Internet-Draft' value='draft-ietf-mmusic-sdp-mux-attributes-01' />
         <format type='TXT'
                 target='http://www.ietf.org/internet-drafts/draft-ietf-mmusic-sdp-mux-attributes-01.txt' />
@@ -2375,13 +2558,64 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <seriesInfo name='RFC' value='7022' />
         <format type='TXT' octets='21717' target='http://www.rfc-editor.org/rfc/rfc7022.txt' />
       </reference>
-      
+
       <!-- NORM 16 -->
 
+      <reference anchor='I-D.ietf-rtcweb-security'>
+        <front>
+          <title>Security Considerations for WebRTC</title>
+
+          <author initials='E' surname='Rescorla' fullname='Eric Rescorla'>
+            <organization />
+          </author>
+
+          <date month='January' day='21' year='2014' />
+
+          <abstract><t>The Real-Time Communications on the Web (RTCWEB) working group is tasked with standardizing protocols for real-time communications between Web browsers, generally called "WebRTC".  The major use cases for WebRTC technology are real-time audio and/or video calls, Web conferencing, and direct data transfer.  Unlike most conventional real-time systems (e.g., SIP-based soft phones) WebRTC communications are directly controlled by a Web server, which poses new security challenges.  For instance, a Web browser might expose a JavaScript API which allows a server to place a video call.  Unrestricted access to such an API would allow any site which a user visited to "bug" a user's computer, capturing any activity which passed in front of their camera.  This document defines the WebRTC threat model and analyzes the security threats of WebRTC in that model.</t></abstract>
+
+        </front>
+
+        <seriesInfo name='Internet-Draft' value='draft-ietf-rtcweb-security-06' />
+        <format type='TXT'
+                target='http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-security-06.txt' />
+      </reference>
+
       <!-- NORM 17 -->
+      <reference anchor='I-D.ietf-rtcweb-security-arch'>
+        <front>
+          <title>WebRTC Security Architecture</title>
+
+          <author initials='E' surname='Rescorla' fullname='Eric Rescorla'>
+            <organization />
+          </author>
+
+          <date month='February' day='14' year='2014' />
+
+          <abstract><t>The Real-Time Communications on the Web (RTCWEB) working group is tasked with standardizing protocols for enabling real-time communications within user-agents using web technologies (commonly called "WebRTC").  This document defines the security architecture for WebRTC.</t></abstract>
+
+        </front>
+
+        <seriesInfo name='Internet-Draft' value='draft-ietf-rtcweb-security-arch-09' />
+        <format type='TXT'
+                target='http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-security-arch-09.txt' />
+      </reference>
 
       <!-- NORM 18 -->
+      <reference anchor='RFC3552'>
+        <front>
+          <title>Guidelines for Writing RFC Text on Security Considerations</title>
+          <author initials='E.' surname='Rescorla' fullname='E. Rescorla'>
+          <organization /></author>
+          <author initials='B.' surname='Korver' fullname='B. Korver'>
+          <organization /></author>
+          <date year='2003' month='July' />
+          <abstract>
+        <t>All RFCs are required to have a Security Considerations section.  Historically, such sections have been relatively weak.  This document provides guidelines to RFC authors on how to write a good Security Considerations section.  This document specifies an Internet Best Current Practices for the Internet Community, and requests discussion and suggestions for improvements.</t></abstract></front>
 
+        <seriesInfo name='BCP' value='72' />
+        <seriesInfo name='RFC' value='3552' />
+        <format type='TXT' octets='110393' target='http://www.rfc-editor.org/rfc/rfc3552.txt' />
+      </reference>
       <!-- NORM 19 -->
 
       <reference anchor="RFC2119">
@@ -2476,6 +2710,41 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <format octets="108820"
                 target="http://www.rfc-editor.org/rfc/rfc4566.txt" type="TXT" />
+      </reference>
+
+      <reference anchor="I-D.ietf-rtcweb-data-protocol">
+        <front>
+          <title>WebRTC Data Channel Protocol</title>
+
+          <author fullname="Randell Jesup" initials="R" surname="Jesup">
+            <organization></organization>
+          </author>
+
+          <author fullname="Salvatore Loreto" initials="S" surname="Loreto">
+            <organization></organization>
+          </author>
+
+          <author fullname="Michael Tuexen" initials="M" surname="Tuexen">
+            <organization></organization>
+          </author>
+
+          <date day="26" month="February" year="2013" />
+
+          <abstract>
+            <t>The Web Real-Time Communication (WebRTC) working group is
+            charged to provide protocols to support for direct interactive
+            rich communication using audio, video, and data between two peers'
+            web- browsers. This document specifies an actual (minor) protocol
+            for how the JS-layer DataChannel objects provide the data channels
+            between the peers.</t>
+          </abstract>
+        </front>
+
+        <seriesInfo name="Internet-Draft"
+                    value="draft-ietf-rtcweb-data-protocol-04" />
+
+        <format target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-data-protocol-04.txt"
+                type="TXT" />
       </reference>
     </references>
 
@@ -2623,40 +2892,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <!-- INFORM 5 -->
 
-      <reference anchor="I-D.ietf-rtcweb-data-protocol">
-        <front>
-          <title>WebRTC Data Channel Protocol</title>
-
-          <author fullname="Randell Jesup" initials="R" surname="Jesup">
-            <organization></organization>
-          </author>
-
-          <author fullname="Salvatore Loreto" initials="S" surname="Loreto">
-            <organization></organization>
-          </author>
-
-          <author fullname="Michael Tuexen" initials="M" surname="Tuexen">
-            <organization></organization>
-          </author>
-
-          <date day="26" month="February" year="2013" />
-
-          <abstract>
-            <t>The Web Real-Time Communication (WebRTC) working group is
-            charged to provide protocols to support for direct interactive
-            rich communication using audio, video, and data between two peers'
-            web- browsers. This document specifies an actual (minor) protocol
-            for how the JS-layer DataChannel objects provide the data channels
-            between the peers.</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-ietf-rtcweb-data-protocol-04" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-data-protocol-04.txt"
-                type="TXT" />
-      </reference>
 
       <!-- INFORM 6 -->
 
@@ -2766,6 +3001,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 type="TXT" />
       </reference>
 
+
       <!-- INFORM 9 -->
 
       <!-- INFORM 10 -->
@@ -2779,49 +3015,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       <!-- INFORM 14 -->
 
       <!-- INFORM 15 -->
-
-      <reference anchor="I-D.jennings-rtcweb-signaling">
-        <front>
-          <title>RTCWeb Offer/Answer Protocol (ROAP)</title>
-
-          <author fullname="Cullen Jennings" initials="C" surname="Jennings">
-            <organization></organization>
-          </author>
-
-          <author fullname="Jonathan Rosenberg" initials="J"
-                  surname="Rosenberg">
-            <organization></organization>
-          </author>
-
-          <author fullname="Randell Jesup" initials="R" surname="Jesup">
-            <organization></organization>
-          </author>
-
-          <date day="30" month="October" year="2011" />
-
-          <abstract>
-            <t>This document describes an protocol used to negotiate media
-            between browsers or other compatible devices. This protocol
-            provides the state machinery needed to implement the offer/answer
-            model (RFC 3264), and defines the semantics and necessary
-            attributes of messages that must be exchanged. The protocol uses
-            an abstract transport in that it does not actually define how
-            these messages are exchanged. Rather, such exchanges are handled
-            through web-based transports like HTTP or WebSockets. The protocol
-            focuses solely on media negotiation and does not handle call
-            control, call processing, or other functions.</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-jennings-rtcweb-signaling-01" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.txt"
-                type="TXT" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-jennings-rtcweb-signaling-01.pdf"
-                type="PDF" />
-      </reference>
 
       <!-- INFORM 16 -->
 
@@ -2908,7 +3101,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </reference>
 
       <reference anchor='RFC5764'>
-      
+
       <front>
       <title>Datagram Transport Layer Security (DTLS) Extension to Establish Keys for the Secure Real-time Transport Protocol (SRTP)</title>
       <author initials='D.' surname='McGrew' fullname='D. McGrew'>
@@ -2918,7 +3111,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       <date year='2010' month='May' />
       <abstract>
       <t>This document describes a Datagram Transport Layer Security (DTLS) extension to establish keys for Secure RTP (SRTP) and Secure RTP Control Protocol (SRTCP) flows.  DTLS keying happens on the media path, independent of any out-of-band signalling channel present. [STANDARDS-TRACK]</t></abstract></front>
-      
+
       <seriesInfo name='RFC' value='5764' />
       <format type='TXT' octets='60590' target='http://www.rfc-editor.org/rfc/rfc5764.txt' />
       </reference>
@@ -2949,8 +3142,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 target="http://www.rfc-editor.org/rfc/rfc4568.txt" type="TXT" />
       </reference>
 
-      <reference anchor="W3C.WD-webrtc-20111027"
-                 target="http://www.w3.org/TR/2011/WD-webrtc-20111027">
+      <reference anchor="W3C.WD-webrtc-20140617"
+                 target="http://www.w3.org/TR/2011/WD-webrtc-20140617">
         <front>
           <title>WebRTC 1.0: Real-time Communication Between Browsers</title>
 
@@ -2970,13 +3163,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <organization></organization>
           </author>
 
-          <date day="27" month="October" year="2011" />
+          <date day="17" month="June" year="2014" />
         </front>
 
         <seriesInfo name="World Wide Web Consortium WD"
-                    value="WD-webrtc-20111027" />
+                    value="WD-webrtc-20140617" />
 
-        <format target="http://www.w3.org/TR/2011/WD-webrtc-20111027"
+        <format target="http://www.w3.org/TR/2011/WD-webrtc-20140617"
                 type="HTML" />
       </reference>
     </references>
@@ -3255,7 +3448,7 @@ a=rtcp-rsize
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
-a=setup:actpass              
+a=setup:actpass
 a=rtpmap:111 opus/48000/2
 a=fmtp:111 minptime=10
 a=rtpmap:0 PCMU/8000
@@ -3263,7 +3456,7 @@ a=rtpmap:8 PCMA/8000
 a=rtpmap:126 telephone-event/8000
 a=maxptime:60
 a=ssrc:1732846380 cname:EocUG1f0fcg/yvY7
-a=msid:47017fee-b6c1-4162-929c-a25110252400 
+a=msid:47017fee-b6c1-4162-929c-a25110252400
        f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9
 m=video 56502 UDP/TLS/RTP/SAVPF 100 115 116 117
 c=IN IP4 192.0.2.1
@@ -3298,7 +3491,7 @@ a=ssrc:1366781084 cname:EocUG1f0fcg/yvY7
 a=ssrc:1366781085 cname:EocUG1f0fcg/yvY7
 a=ssrc-group:FID 1366781083 1366781084
 a=ssrc-group:FEC 1366781083 1366781085
-a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae 
+a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae
        f30bdb4a-5db8-49b5-bcdc-e0c9a23172e0
 m=application 56504 DTLS/SCTP 5000
 c=IN IP4 192.0.2.1
