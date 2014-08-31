@@ -1261,12 +1261,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Each m= section MUST include the following attribute lines:
               <list style="symbols">
               <t>An "a=mid" line, as specified in <xref
-              target="RFC5888"></xref>, Section 4.</t>
+              target="RFC5888"></xref>, Section 4. When generating mid values,
+              it is RECOMMENDED that the values be 3 bytes or less, to allow
+              them to efficiently fit into the RTP header extension defined in
+              <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>,
+              Section 11.</t>
 
               <t>An "a=msid" line, as specified in <xref
               target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
-
-              <t>[OPEN ISSUE: Use of AppID]</t>
 
               <t>An "a=sendrecv" line, as specified in <xref
               target="RFC3264"></xref>, Section 5.1.</t>
@@ -1276,6 +1278,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               audio, the codecs specified in <xref
               target="I-D.ietf-rtcweb-audio"></xref>, Section 3, MUST be be
               supported.</t>
+
+              <t>If this m= section is for media with configurable frame sizes,
+              e.g. audio, an "a=maxptime" line, indicating the smallest of the
+              maximum supported frame sizes out of all codecs included above, as
+              specified in <xref target="RFC4566"></xref>, Section 6.</t>
 
               <t>For each primary codec where RTP retransmission should be
               used, a corresponding "a=rtpmap" line indicating "rtx" with the
@@ -1323,7 +1330,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               as specified in <xref target="RFC5285"></xref>, Section 5. The
               list of header extensions that SHOULD/MUST be supported is
               specified in <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>,
-              Section 5.2. Any header extensions that require encryption MUST
+              Section 5.2. [TODO: ensure that urn:ietf:params:rtp-hdrext:sdes:mid
+              appears either there or here]
+              Any header extensions that require encryption MUST
               be specified as indicated in <xref target="RFC6904"></xref>,
               Section 4.</t>
 
@@ -1671,8 +1680,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               line, as specified in <xref
               target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
 
-              <t>[OPEN ISSUE: Use of AppID]</t>
-
               <t>Depending on the directionality of the offer, the disposition
               of any associated remote MediaStreamTrack, and the presence of an
               associated local MediaStreamTrack, the appropriate directionality
@@ -1695,6 +1702,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 3, MUST be supported. Note that for simplicity, the
               answerer MAY use different payload types for codecs than the
               offerer, as it is not prohibited by Section 6.1.</t>
+
+              <t>If this m= section is for media with configurable frame sizes,
+              e.g. audio, an "a=maxptime" line, indicating the smallest of the
+              maximum supported frame sizes out of all codecs included above, as
+              specified in <xref target="RFC4566"></xref>, Section 6.</t>
 
               <t>If "rtx" is present in the offer, for each primary codec
               where RTP retransmission should be used, a corresponding
@@ -1746,7 +1758,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the offer, an "a=extmap" line, as specified in <xref
               target="RFC5285"></xref>, Section 5. The list of header
               extensions that SHOULD/MUST be supported is specified in <xref
-              target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section 5.2. Any
+              target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section 5.2. 
+              [TODO: Ensure this contains MID header] Any
               header extensions that require encryption MUST be specified as
               indicated in <xref target="RFC6904"></xref>, Section 4.</t>
 
