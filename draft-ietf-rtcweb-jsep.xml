@@ -1009,6 +1009,33 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           yet been established, or if the PeerConnection has been closed.</t>
         </section>
 
+        <section title="canTrickle" anchor="sec.cantrickle">
+          <t>
+            [[TODO: Revise if the W3C API uses different stuff here.]]
+            The canTrickle property indicates whether the remote side supports
+            receiving trickled candidates. There are three potential values:
+            <list style="hanging">
+              <t hangText="null:">No SDP has been received from the other side,
+              so it is not known if it can handle trickle. This is the initial
+              value before setRemoteDescription() is called.</t>
+              <t hangText="true:">SDP has been received from the other side
+              indicating that it can support trickle.</t>
+              <t hangText="false:">SDP has been received from the other side
+              indicating that it cannot support trickle.</t>
+            </list>
+          </t>
+          <t>As described in <xref target="sec.ice-candidate-trickling"/>, 
+          JSEP implementations always provide candidates to the application
+          individually, consistent with what is needed for Trickle ICE. 
+          However, applications can use the canTrickle property to determine 
+          whether they can actually do Trickle ICE, i.e. safely send an initial
+          offer or answer followed later by candidates as they are gathered.
+          As "true" is the only value that definitively indicates remote Trickle
+          ICE support, an application which compares canTrickle against "true" 
+          will by default attempt Half Trickle on initial offers and Full Trickle
+          on subsequent interactions with a Trickle ICE-compatible agent.
+          </t>
+        </section>
         <section title="setConfiguration" anchor="sec.setconfiguration">
           <t>The setConfiguration method allows the global configuration of the 
           PeerConnection, which was initially set by constructor parameters, to
@@ -1041,7 +1068,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             bundle-only state marked accordingly.
             </t>
           </list></t>
-         
           <t>This call may result in a change to the state of the ICE Agent,
           and may result in a change to media state if it results in
           connectivity being established.</t>
@@ -1246,20 +1272,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Each m= section should be generated as specified in <xref
           target="RFC4566"></xref>, Section 5.14. For the m= line itself, the
           following rules MUST be followed:<list style="symbols">
-            <t>The port value is set to the port of the default ICE candidate
-            for this m= section; if this m= section is not being bundled into
-            another m= section, the port value MUST be unique. If no candidates
-            have yet been gathered, and a 'null' port value is being used, as
+            <t>The port value is set to the port of the default ICE candidate 
+            for this m= section, but given that no candidates have yet been
+            gathered, the "dummy" port value of 9 (Discard) MUST be used, as
             indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-            Section 5.1., this port MUST still be unique.</t>
+            Section 5.1.</t>
             <t>To properly indicate use of DTLS, the &lt;proto&gt; field MUST
             be set to "UDP/TLS/RTP/SAVPF", as specified in
             <xref target="RFC5764"/>, Section 8.</t>
             </list>
           </t>
 
+          <t>The m= line MUST be followed immediately by a "c=" line, as specified 
+          in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
+          have yet been gathered, the "c=" line must contain the "dummy" value
+          "IN IP6 ::", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          Section 5.1.</t>
+            
           <t>Each m= section MUST include the following attribute lines:
-              <list style="symbols">
+            <list style="symbols">
               <t>An "a=mid" line, as specified in <xref
               target="RFC5888"></xref>, Section 4. When generating mid values,
               it is RECOMMENDED that the values be 3 bytes or less, to allow
@@ -1299,16 +1330,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>An "a=ice-options" line, with the "trickle" option, as
               specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
               Section 4.</t>
-
-              <t>For each candidate that has been gathered during the most
-              recent gathering phase, an "a=candidate" line, as specified in
-              <xref target="RFC5245"></xref>, Section 4.3., paragraph 3.</t>
-
-              <t>For the current default candidate, a "c=" line, as specified
-              in <xref target="RFC5245"></xref>, Section 4.3., paragraph 6.
-              If no candidates have been gathered yet, the default candidate
-              should be set to the 'null' value defined in <xref
-              target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 5.1.</t>
 
               <t>An "a=fingerprint" line, as specified in <xref
               target="RFC4572"></xref>, Section 5; the algorithm used for the
@@ -1366,16 +1387,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>If the BUNDLE policy for this PeerConnection is set to
               "max-bundle", and this is not the first m= section, or the BUNDLE
-              policy is set to "default", and this is not the first m= section
+              policy is set to "balanced", and this is not the first m= section
               for this media type, an "a=bundle-only" line.</t>
             </list></t>
 
           <t>Lastly, if a data channel has been created, a m= section MUST be
           generated for data. The &lt;media&gt; field MUST be set to
           "application" and the &lt;proto&gt; field MUST be set to
-          "DTLS/SCTP", as specified in <xref
+          "DTLS/SCTP" [TODO: fix this in profile PR], as specified in <xref
           target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 3; the "fmt" value
-          MUST be set to the SCTP port number, as specified in Section 4.1.</t>
+          MUST be set to the SCTP port number, as specified in Section 4.1.
+          [TODO: update this to use a=sctp-port, as indicated in the latest
+          data channel docs]</t>
           <t>Within the data m= section, the "a=mid",
           "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate",
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
@@ -1446,6 +1469,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           with these exceptions: <list style="symbols">
               <t>The "s=" and "t=" lines MUST stay the same.</t>
 
+              <t>Each "m=" and c=" line MUST be filled in with the port and
+              address of the default candidate for the m= section, as described
+              in <xref target="RFC5245"></xref>, Section 4.3. If no candidates
+              have yet been gathered, the dummy values MUST be used, as described above.
+              [TODO: update profile UDP/TCP per default candidate]</t>
+
               <t>Each "a=mid" line MUST stay the same.</t>
 
               <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
@@ -1453,6 +1482,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the supported STUN/TURN servers, or the ICE candidate policy), or
               the "IceRestart" option (<xref target="sec.icerestart"/>
               was specified. 
+              </t>
+
+              <t>Within each m= section, for each candidate that has
+              been gathered during the most recent gathering phase
+              (see <xref target="sec.ice-gather-overview"></xref>),
+              an "a=candidate" line MUST be added, as specified in <xref
+              target="RFC5245"></xref>, Section 4.3., paragraph 3. If 
+              candidate gathering for the section has completed, an 
+              "a=end-of-candidates" attribute MUST be added, as described in 
+              <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 9.3.
               </t>
 
               <t>For MediaStreamTracks that are still present, the "a=msid",
@@ -1665,8 +1704,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>Provided that is not the case, each m= section in the answer should
           then be generated as specified in <xref
-          target="RFC3264"></xref>, Section 6.1. Because use of DTLS is
-          mandatory, the &lt;proto&gt; field MUST be set to "UDP/TLS/RTP/SAVPF".
+          target="RFC3264"></xref>, Section 6.1. For the m= line itself, the following
+          rules must be followed:<list style="symbols">
+          <t>The port value would normally be set to the port of the default ICE candidate 
+          for this m= section, but given that no candidates have yet been gathered,
+          the "dummy" port value of 9 (Discard) MUST be used, as
+          indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          Section 5.1.</t>
+          <t>Because use of DTLS is mandatory, the &lt;proto&gt; field MUST be set
+          to "UDP/TLS/RTP/SAVPF".</t>
+          </list>
+          </t>
+
+          <t>The m= line MUST be followed immediately by a "c=" line, as specified 
+          in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
+          have yet been gathered, the "c=" line must contain the "dummy" value
+          "IN IP6 ::", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          Section 5.1.</t>
+
+          <t>
           If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
           the same ICE credentials and candidates; all m= sections not being
           BUNDLEd must use unique ICE credentials and candidates. Each
@@ -1727,16 +1783,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
               4.</t>
 
-              <t>For each candidate that has been gathered during the most
-              recent gathering phase, an "a=candidate" line, as specified in
-              <xref target="RFC5245"></xref>, Section 4.3., paragraph 3.</t>
-
-              <t>For the current default candidate, a "c=" line, as specified
-              in <xref target="RFC5245"></xref>, Section 4.3., paragraph 6.
-              If no candidates have been gathered yet, the default candidate
-              should be set to the 'null' value defined in <xref
-              target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 5.1.</t>
-
               <t>An "a=fingerprint" line, as specified in <xref
               target="RFC4572"></xref>, Section 5; the algorithm used for the
               fingerprint MUST match that used in the certificate signature.
@@ -1791,9 +1837,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>If a data channel m= section has been offered, a m= section MUST
           also be generated for data. The &lt;media&gt; field MUST be set to
           "application" and the &lt;proto&gt; field MUST be set to
-          "DTLS/SCTP", as specified in <xref
+          "DTLS/SCTP" [TODO: fix this when fixing profiles], as specified in <xref
           target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 3; the "fmt" value
-          MUST be set to the SCTP port number, as specified in Section 4.1.</t>
+          MUST be set to the SCTP port number, as specified in Section 4.1.
+          [TODO: update this to use a=sctp-port, as indicated in the latest
+          data channel docs]</t>
           <t>Within the data m= section, the "a=mid",
           "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate",
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
