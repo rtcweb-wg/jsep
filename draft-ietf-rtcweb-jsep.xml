@@ -1156,6 +1156,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               "UDP/TLS/RTP/SAVPF" or "TCP/TLS/RTP/SAVPF". For example, even if
               "RTP/AVP" is indicated, the endpoint MUST assume that the peer is
               offering SRTP with feedback.
+              The reason for this requirement is that some implementations
+              send "a=rtcp-fb" (indicating the desire for RTCP Feedback or
+              "a=fingerprint" (indicating the desire for DTLS-SRTP) while using
+              an RTP/AVP profile. Permitting such profiles enhances interoperability.
+              Note that accepting such profile strings will not cause JSEP
+              endpoints to send inappropriate data to unsuspecting peers:
+              As required by <xref target="RFC4585"/>, JSEP
+              endpoints MUST only send RTCP FB mechanisms which are negotiated by
+              the "a=rtcp-fb" mechanism.
+              Similarly, if the peer does not offer "a=fingerprint", SDP negotaition
+              with a JSEP endpoint will fail because those endpoints require
+              DTLS-SRTP.
             </t>
             <t>
               For data m= sections, JSEP endpoints MUST support receiving the
