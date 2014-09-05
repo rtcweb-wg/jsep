@@ -1582,52 +1582,50 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <section title="OfferToReceiveAudio" anchor="sec.offertoreceiveaudio">
             <t>If the "OfferToReceiveAudio" option is specified, with an integer
-            value of N, the offer MUST include N non-rejected m= sections
-            with media type "audio", even if fewer than N audio
-            MediaStreamTracks have been added to the PeerConnection. This allows
-            the offerer to receive audio, including multiple independent
+            value of N, and M audio MediaStreamTracks have been added to the 
+            PeerConnection, the offer MUST include N non-rejected m= sections
+            with media type "audio", even if N is greater than M.
+            This allows the offerer to receive audio, including multiple independent
             streams, even when not sending it; accordingly, the directional
-            attribute on the audio m= sections without associated
-            MediaStreamTracks MUST be set to recvonly. If this option is
-            specified in the case where at least N audio MediaStreamTracks have
-            already been added to the PeerConnection, or N non-rejected
-            m= sections with media type "audio" would otherwise be generated,
-            it has no effect. For backwards compatibility with pre-standard
+            attribute on the N-M audio m= sections without associated
+            MediaStreamTracks MUST be set to recvonly.</t>
+            <t>If N is set to a value less than M, the offer MUST mark the
+            m= sections associated with the M-N most recently added
+            (since the last setLocalDescription) MediaStreamTracks as sendonly.
+            This allows the offerer to indicate that it does not want to receive
+            audio on some or all of its newly created streams.
+            For m= sections that have previously
+            been negotiated, this setting has no effect. [TODO: refer to
+            RTCRtpSender in the future]
+            </t>
+            <t>For backwards compatibility with pre-standard
             versions of this specification, a value of "true"
-            is interpreted as equivalent to N=1.</t>
+            is interpreted as equivalent to N=1, and "false" as N=0.
+            </t>
           </section>
 
           <section title="OfferToReceiveVideo" anchor="sec.offertoreceivevideo">
             <t>If the "OfferToReceiveVideo" option is specified, with an integer
-            value of N, the offer MUST include N non-rejected m= sections
-            with media type "video", even if fewer than N video
-            MediaStreamTracks have been added to the PeerConnection. This allows
-            the offerer to receive video, including multiple independent
+            value of N, and M video MediaStreamTracks have been added to the 
+            PeerConnection, the offer MUST include N non-rejected m= sections
+            with media type "video", even if N is greater than M.
+            This allows the offerer to receive video, including multiple independent
             streams, even when not sending it; accordingly, the directional
-            attribute on the video m= sections without associated
-            MediaStreamTracks MUST be set to recvonly. If this option is
-            specified in the case where at least N video MediaStreamTracks have
-            already been added to the PeerConnection, or N non-rejected
-            m= sections with media type "video" would otherwise be generated,
-            it has no effect. For backwards compatibility with pre-standard
+            attribute on the N-M video m= sections without associated
+            MediaStreamTracks MUST be set to recvonly.</t>
+            <t>If N is set to a value less than M, the offer MUST mark the
+            m= sections associated with the M-N most recently added
+            (since the last setLocalDescription) MediaStreamTracks as sendonly.
+            This allows the offerer to indicate that it does not want to receive
+            video on some or all of its newly created streams.
+            For m= sections that have previously
+            been negotiated, this setting has no effect. [TODO: refer to
+            RTCRtpSender in the future]
+            </t>
+            <t>For backwards compatibility with pre-standard
             versions of this specification, a value of "true"
-            is interpreted as equivalent to N=1.</t>
-          </section>
-
-          <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection">
-            <t>If the "VoiceActivityDetection" option is specified, with a
-            value of "true", the offer MUST indicate support for silence
-            suppression in the audio it receives by including comfort noise
-            ("CN") codecs for each offered audio codec, as specified in <xref
-            target="RFC3389"></xref>, Section 5.1, except for codecs that have their
-            own internal silence suppression support. For codecs that have their own
-            internal silence suppression support, the appropriate fmtp parameters
-            for that codec MUST be specified to indicate that silence suppression for
-            received audio is desired. For example, when using the Opus codec, the
-            "usedtx=1" parameter would be specified in the offer.
-            This option allows the endpoint to significantly reduce the amount of
-            audio bandwidth it receives, at the cost of some fidelity, depending on
-            the quality of the remote VAD algorithm.</t>
+            is interpreted as equivalent to N=1, and "false" as N=0.
+            </t>
           </section>
 
           <section title="IceRestart" anchor="sec.icerestart">
@@ -1643,6 +1641,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             reestablishing connectivity in cases where failures are detected by 
             the application.
             </t>
+          </section>
+          
+          <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection1">
+            <t>If the "VoiceActivityDetection" option is specified, with a
+            value of "true", the offer MUST indicate support for silence
+            suppression in the audio it receives by including comfort noise
+            ("CN") codecs for each offered audio codec, as specified in <xref
+            target="RFC3389"></xref>, Section 5.1, except for codecs that have their
+            own internal silence suppression support. For codecs that have their own
+            internal silence suppression support, the appropriate fmtp parameters
+            for that codec MUST be specified to indicate that silence suppression for
+            received audio is desired. For example, when using the Opus codec, the
+            "usedtx=1" parameter would be specified in the offer.
+            This option allows the endpoint to significantly reduce the amount of
+            audio bandwidth it receives, at the cost of some fidelity, depending on
+            the quality of the remote VAD algorithm.</t>
           </section>
         </section>
       </section>
@@ -1869,7 +1883,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <section title="Subsequent Answers" anchor="sec.subsequent-answers"></section>
 
-        <section title="Options Handling" anchor="sec.options-handling2"></section>
+        <section title="Options Handling" anchor="sec.options-handling2">
+          <t>The createOffer method takes as a parameter an RTCAnswerOptions
+          object. Special processing is performed when generating a SDP
+          description if the following constraints are present.</t>
+
+          <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection2">
+            <t>Handling of the "VoiceActivityDetection" option in answers is the same as is indicated for offers in <xref target="sec.voiceactivitydetection1"></xref>.</t>
+          </section>
+        </section>
       </section>
 
       <section title="Parsing an Offer" anchor="sec.parsing-an-offer"></section>
