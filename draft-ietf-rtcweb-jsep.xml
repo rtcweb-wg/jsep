@@ -710,6 +710,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               group.
               </t>
               <t></t>
+              <t hangText="max-compat:"> The application will offer BUNDLE, but mark none
+              of its streams as bundle-only. This policy will allow all streams
+              to be received by non-BUNDLE-aware endpoints, but require separate
+              candidates to be gathered for each media stream.
+              </t>
+              <t></t>  
               <t hangText="max-bundle:">The application will BUNDLE all of its media
               streams, including data channels,
               on a single transport. All streams other than the first
@@ -718,10 +724,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               compatibility with legacy endpoints.
               </t>
               <t></t>
-              <t hangText="max-compat:"> The application will offer BUNDLE, but mark none
-              of its streams as bundle-only. This policy will allow all streams
-              to be received by non-BUNDLE-aware endpoints, but require separate
-              candidates to be gathered for each media stream.
+              <t hangText="max-bundle-and-rtcpmux:">Similar to max-bundle,
+              but RTCP candidates are not gathered. This policy reduces the
+              candidates that must be gathered to the absolute minimum,
+              but will not be compatible with legacy endpoints that do not
+              support RTCP mux.
               </t>
             </list>
             As it provides the best tradeoff between performance and
@@ -1285,12 +1292,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Each m= section MUST include the following attribute lines:
             <list style="symbols">
               <t>An "a=mid" line, as specified in <xref
-              target="RFC5888"></xref>, Section 4.</t>
+              target="RFC5888"></xref>, Section 4. When generating mid values,
+              it is RECOMMENDED that the values be 3 bytes or less, to allow
+              them to efficiently fit into the RTP header extension defined in
+              <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>,
+              Section 11.</t>
+
+              <t>An "a=rtcp" line, as specified in <xref target="RFC3605"></xref>,
+              Section 2.1, containing the dummy value "9 IN IP6 ::", because
+              no candidates have yet been gathered.</t>
 
               <t>An "a=msid" line, as specified in <xref
               target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
-
-              <t>[OPEN ISSUE: Use of AppID]</t>
 
               <t>An "a=sendrecv" line, as specified in <xref
               target="RFC3264"></xref>, Section 5.1.</t>
@@ -1300,6 +1313,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               audio, the codecs specified in <xref
               target="I-D.ietf-rtcweb-audio"></xref>, Section 3, MUST be be
               supported.</t>
+
+              <t>If this m= section is for media with configurable frame sizes,
+              e.g. audio, an "a=maxptime" line, indicating the smallest of the
+              maximum supported frame sizes out of all codecs included above, as
+              specified in <xref target="RFC4566"></xref>, Section 6.</t>
 
               <t>For each primary codec where RTP retransmission should be
               used, a corresponding "a=rtpmap" line indicating "rtx" with the
@@ -1337,7 +1355,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               as specified in <xref target="RFC5285"></xref>, Section 5. The
               list of header extensions that SHOULD/MUST be supported is
               specified in <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>,
-              Section 5.2. Any header extensions that require encryption MUST
+              Section 5.2. [TODO: ensure that urn:ietf:params:rtp-hdrext:sdes:mid
+              appears either there or here]
+              Any header extensions that require encryption MUST
               be specified as indicated in <xref target="RFC6904"></xref>,
               Section 4.</t>
 
@@ -1455,8 +1475,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>Each "m=" and c=" line MUST be filled in with the port and
               address of the default candidate for the m= section, as described
-              in <xref target="RFC5245"></xref>, Section 4.3. If no candidates
-              have yet been gathered, the dummy values MUST be used, as described above.
+              in <xref target="RFC5245"></xref>, Section 4.3. Each 
+              "a=rtcp" attribute line MUST also be filled in with the port and
+              address of the appropriate default candidate; this MUST be the
+              default RTP or RTCP candidate, depending
+              on whether RTCP multiplexing is currently active or not. If RTCP
+              multiplexing is being offered, but not yet active, the default RTCP
+              candidate MUST be used, as indicated in <xref target="RFC5761"></xref>,
+              section 5.1.3. And if no candidates have yet been gathered, dummy
+              values MUST be used, as described above.
               [TODO: update profile UDP/TCP per default candidate]</t>
 
               <t>Each "a=mid" line MUST stay the same.</t>
@@ -1566,52 +1593,50 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <section title="OfferToReceiveAudio" anchor="sec.offertoreceiveaudio">
             <t>If the "OfferToReceiveAudio" option is specified, with an integer
-            value of N, the offer MUST include N non-rejected m= sections
-            with media type "audio", even if fewer than N audio
-            MediaStreamTracks have been added to the PeerConnection. This allows
-            the offerer to receive audio, including multiple independent
+            value of N, and M audio MediaStreamTracks have been added to the 
+            PeerConnection, the offer MUST include N non-rejected m= sections
+            with media type "audio", even if N is greater than M.
+            This allows the offerer to receive audio, including multiple independent
             streams, even when not sending it; accordingly, the directional
-            attribute on the audio m= sections without associated
-            MediaStreamTracks MUST be set to recvonly. If this option is
-            specified in the case where at least N audio MediaStreamTracks have
-            already been added to the PeerConnection, or N non-rejected
-            m= sections with media type "audio" would otherwise be generated,
-            it has no effect. For backwards compatibility with pre-standard
+            attribute on the N-M audio m= sections without associated
+            MediaStreamTracks MUST be set to recvonly.</t>
+            <t>If N is set to a value less than M, the offer MUST mark the
+            m= sections associated with the M-N most recently added
+            (since the last setLocalDescription) MediaStreamTracks as sendonly.
+            This allows the offerer to indicate that it does not want to receive
+            audio on some or all of its newly created streams.
+            For m= sections that have previously
+            been negotiated, this setting has no effect. [TODO: refer to
+            RTCRtpSender in the future]
+            </t>
+            <t>For backwards compatibility with pre-standard
             versions of this specification, a value of "true"
-            is interpreted as equivalent to N=1.</t>
+            is interpreted as equivalent to N=1, and "false" as N=0.
+            </t>
           </section>
 
           <section title="OfferToReceiveVideo" anchor="sec.offertoreceivevideo">
             <t>If the "OfferToReceiveVideo" option is specified, with an integer
-            value of N, the offer MUST include N non-rejected m= sections
-            with media type "video", even if fewer than N video
-            MediaStreamTracks have been added to the PeerConnection. This allows
-            the offerer to receive video, including multiple independent
+            value of N, and M video MediaStreamTracks have been added to the 
+            PeerConnection, the offer MUST include N non-rejected m= sections
+            with media type "video", even if N is greater than M.
+            This allows the offerer to receive video, including multiple independent
             streams, even when not sending it; accordingly, the directional
-            attribute on the video m= sections without associated
-            MediaStreamTracks MUST be set to recvonly. If this option is
-            specified in the case where at least N video MediaStreamTracks have
-            already been added to the PeerConnection, or N non-rejected
-            m= sections with media type "video" would otherwise be generated,
-            it has no effect. For backwards compatibility with pre-standard
+            attribute on the N-M video m= sections without associated
+            MediaStreamTracks MUST be set to recvonly.</t>
+            <t>If N is set to a value less than M, the offer MUST mark the
+            m= sections associated with the M-N most recently added
+            (since the last setLocalDescription) MediaStreamTracks as sendonly.
+            This allows the offerer to indicate that it does not want to receive
+            video on some or all of its newly created streams.
+            For m= sections that have previously
+            been negotiated, this setting has no effect. [TODO: refer to
+            RTCRtpSender in the future]
+            </t>
+            <t>For backwards compatibility with pre-standard
             versions of this specification, a value of "true"
-            is interpreted as equivalent to N=1.</t>
-          </section>
-
-          <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection">
-            <t>If the "VoiceActivityDetection" option is specified, with a
-            value of "true", the offer MUST indicate support for silence
-            suppression in the audio it receives by including comfort noise
-            ("CN") codecs for each offered audio codec, as specified in <xref
-            target="RFC3389"></xref>, Section 5.1, except for codecs that have their
-            own internal silence suppression support. For codecs that have their own
-            internal silence suppression support, the appropriate fmtp parameters
-            for that codec MUST be specified to indicate that silence suppression for
-            received audio is desired. For example, when using the Opus codec, the
-            "usedtx=1" parameter would be specified in the offer.
-            This option allows the endpoint to significantly reduce the amount of
-            audio bandwidth it receives, at the cost of some fidelity, depending on
-            the quality of the remote VAD algorithm.</t>
+            is interpreted as equivalent to N=1, and "false" as N=0.
+            </t>
           </section>
 
           <section title="IceRestart" anchor="sec.icerestart">
@@ -1627,6 +1652,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             reestablishing connectivity in cases where failures are detected by 
             the application.
             </t>
+          </section>
+          
+          <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection1">
+            <t>If the "VoiceActivityDetection" option is specified, with a
+            value of "true", the offer MUST indicate support for silence
+            suppression in the audio it receives by including comfort noise
+            ("CN") codecs for each offered audio codec, as specified in <xref
+            target="RFC3389"></xref>, Section 5.1, except for codecs that have their
+            own internal silence suppression support. For codecs that have their own
+            internal silence suppression support, the appropriate fmtp parameters
+            for that codec MUST be specified to indicate that silence suppression for
+            received audio is desired. For example, when using the Opus codec, the
+            "usedtx=1" parameter would be specified in the offer.
+            This option allows the endpoint to significantly reduce the amount of
+            audio bandwidth it receives, at the cost of some fidelity, depending on
+            the quality of the remote VAD algorithm.</t>
           </section>
         </section>
       </section>
@@ -1710,17 +1751,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
           the same ICE credentials and candidates; all m= sections not being
           BUNDLEd must use unique ICE credentials and candidates. Each
-          m= section MUST include the following: <list
-              style="symbols">
+          m= section MUST include the following: 
+            <list style="symbols">
               <t>If present in the offer, an "a=mid" line, as specified in
               <xref target="RFC5888"></xref>, Section 9.1. The "mid" value
               MUST match that specified in the offer.</t>
 
+              <t>An "a=rtcp" line, as specified in <xref target="RFC3605"></xref>,
+              Section 2.1, containing the dummy value "9 IN IP6 ::", because
+              no candidates have yet been gathered.</t>
+
               <t>If a local MediaStreamTrack has been associated, an "a=msid"
               line, as specified in <xref
               target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
-
-              <t>[OPEN ISSUE: Use of AppID]</t>
 
               <t>Depending on the directionality of the offer, the disposition
               of any associated remote MediaStreamTrack, and the presence of an
@@ -1744,6 +1787,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 3, MUST be supported. Note that for simplicity, the
               answerer MAY use different payload types for codecs than the
               offerer, as it is not prohibited by Section 6.1.</t>
+
+              <t>If this m= section is for media with configurable frame sizes,
+              e.g. audio, an "a=maxptime" line, indicating the smallest of the
+              maximum supported frame sizes out of all codecs included above, as
+              specified in <xref target="RFC4566"></xref>, Section 6.</t>
 
               <t>If "rtx" is present in the offer, for each primary codec
               where RTP retransmission should be used, a corresponding
@@ -1785,7 +1833,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the offer, an "a=extmap" line, as specified in <xref
               target="RFC5285"></xref>, Section 5. The list of header
               extensions that SHOULD/MUST be supported is specified in <xref
-              target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section 5.2. Any
+              target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section 5.2. 
+              [TODO: Ensure this contains MID header] Any
               header extensions that require encryption MUST be specified as
               indicated in <xref target="RFC6904"></xref>, Section 4.</t>
 
@@ -1849,7 +1898,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <section title="Subsequent Answers" anchor="sec.subsequent-answers"></section>
 
-        <section title="Options Handling" anchor="sec.options-handling2"></section>
+        <section title="Options Handling" anchor="sec.options-handling2">
+          <t>The createOffer method takes as a parameter an RTCAnswerOptions
+          object. Special processing is performed when generating a SDP
+          description if the following constraints are present.</t>
+
+          <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection2">
+            <t>Handling of the "VoiceActivityDetection" option in answers is the same as is indicated for offers in <xref target="sec.voiceactivitydetection1"></xref>.</t>
+          </section>
+        </section>
       </section>
 
       <section title="Parsing an Offer" anchor="sec.parsing-an-offer"></section>
@@ -2750,6 +2807,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <format target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-data-protocol-04.txt"
                 type="TXT" />
       </reference>
+
+      <reference anchor="RFC3605">
+        <front>
+          <title>
+            Real Time Control Protocol (RTCP) attribute in Session Description Protocol (SDP)
+          </title>
+          <author initials="C." surname="Huitema" fullname="C. Huitema">
+            <organization/>
+          </author>
+          <date year="2003" month="October"/>
+          <abstract>
+            <t>
+              The Session Description Protocol (SDP) is used to describe the parameters of media streams used in multimedia sessions. When a session requires multiple ports, SDP assumes that these ports have consecutive numbers. However, when the session crosses a network address translation device that also uses port mapping, the ordering of ports can be destroyed by the translation. To handle this, we propose an extension attribute to SDP.
+            </t>
+          </abstract>
+        </front>
+        <seriesInfo name="RFC" value="3605"/>
+        <format type="TXT" octets="17270" target="http://www.rfc-editor.org/rfc/rfc3605.txt"/>
+      </reference>
     </references>
 
     <references title="Informative References">
@@ -3602,7 +3678,36 @@ a=sctpmap:5000 webrtc-datachannel 16
     </section>
 
     <section title="Change log" anchor="sec.change-log">
+      <t>Changes in draft-07:
+      <list style="symbols">
+        <t>Expanded discussion of VAD and Opus DTX.</t>
 
+        <t>Added a security considerations section.</t>
+
+        <t>Rewrote the section on modifying SDP to require
+        implementations to clearly indicate whether any given
+        modification is allowed.</t>
+
+        <t>Clarified impact of IceRestart on CreateOffer in
+        local-offer state.</t>
+
+        <t>Guidance on whether attributes should be defined at the
+        media level or the session level.</t>
+
+        <t>Renamed "default" bundle policy to "balanced".</t>
+
+        <t>Removed default ICE candidate pool size and clarify how it works.</t>
+
+        <t>Defined a canonical order for assignment of MSTs to m= lines.</t>
+
+        <t>Removed discussion of rehydration.</t>
+
+        <t>Added Eric Rescorla as a draft editor.</t>
+
+        <t>Cleaned up references.</t>
+        
+        <t>Editorial cleanup</t>
+      </list></t>
       <t>Changes in draft-06: <list style="symbols">
           <t>Reworked handling of m= line recycling.</t>
 
