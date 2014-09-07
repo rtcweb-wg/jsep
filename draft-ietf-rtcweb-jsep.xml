@@ -2000,50 +2000,47 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
      <t><figure>
        <artwork><![CDATA[
-// Call is initiated from Alice to Bob
-AliceJS->AliceUA:   pc = new PeerConnection();
-AliceJS->AliceUA:   pc.addTrack(localStreamTrack);
-AliceJS->AliceUA:   offer = pc.createOffer(null);
-AliceJS->AliceUA:   pc.setLocalDescription(offer);
-AliceJS->AliceUA:   pc.startIce();
-AliceUA->AliceJS:   onicecandidate(candidate);
+AliceJS->AliceUA:   create new PeerConnection
+AliceJS->AliceUA:   add stream to add localStreamTrack
+AliceJS->AliceUA:   createOffer to get offer 
+AliceJS->AliceUA:   setLocalDescription with offer
+AliceJS->AliceUA:   startIce
+AliceUA->AliceJS:   multiple onicecandidate callbacks with candidates 
 
-// wait for ICE gathering to complete
-AliceUA->AliceJS:   onicecandidate(null);
-AliceJS->AliceUA:   offer1 = pc.localDescription; 
+//                  wait for ICE gathering to complete
+AliceUA->AliceJS:   onicecandidate callback with null candidate 
+AliceJS->AliceUA:   get offer1 from value of localDescription
 
-// offer1 is sent over signaling protocol to Bob
+//                  offer1 is sent over signaling protocol to Bob
 AliceJS->WebServer: signaling with offer1
 WebServer->BobJS:   signaling with offer1
 
-// offer1 arrives at Bob
-BobJS->BobUA: pc = new PeerConnection();
-BobJS->BobUA: pc.setRemoteDescription(offer1);
-BobUA->BobJS: onaddstream(remoteStream);
+//                  offer1 arrives at Bob
+BobJS->BobUA:       create a PeerConnection
+BobJS->BobUA:       setRemoteDescription with offer1 
+BobUA->BobJS:       onaddstream callback with remoteStream
 
-// Bob accepts call
-BobJS->BobUA: pc.addStream(localStream, null);
-BobJS->BobUA: answer = pc.createAnswer();
-BobJS->BobUA: pc.setLocalDescription(answer);
-BobUA->BobJS: onicecandidate(candidate);
+//                  Bob accepts call
+BobJS->BobUA:       addStream with localStream
+BobJS->BobUA:       createAnswer
+BobJS->BobUA:       setLocalDescription with answer
+BobUA->BobJS:       multiple onicecandidate callbacks with candidates
 
-// wait for ICE gathering to complete
-BobUA->BobJS: onicecandidate(null);
-BobJS->BobUA: answer1 = pc.localDescription; 
+//                  wait for ICE gathering to complete
+BobUA->BobJS:       onicecandidate callback with null candidate  
+BobJS->BobUA:       get answer1 from value of localDescription
 
-// answer1 is sent over signaling protocol to Alice
+//                  answer1 is sent over signaling protocol to Alice
 BobJS->WebServer:   signaling with answer1
 WebServer->AliceJS: signaling with answer1
 
-// answer1 arrives at Alice
-AliceJS->AliceUA:   pc.setRemoteDescription(answer1);
-AliceUA->AliceJS:   onaddstream(remoteStream);
+//                  answer1 arrives at Alice
+AliceJS->AliceUA:   setRemoteDescription with answer1
+AliceUA->AliceJS:   onaddstream callback with remoteStream
 
-// ICE completes (at Bob)
-BobUA->AliceUA:  Media
-
-// ICE completes (at Alice)
-AliceUA->BobUA:  Media
+//                  media Flows
+BobUA->AliceUA:     media sent from Bob to Alice 
+AliceUA->BobUA:     media send from Alice to Bob
 ]]></artwork>
      </figure></t>
 
@@ -2187,58 +2184,48 @@ a=msid:PI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1
 
      <t><figure>
        <artwork><![CDATA[
-// Call is initiated toward Answerer
-AliceJS->AliceUA:   pc = new PeerConnection();
-AliceJS->AliceUA:   pc.addStream(localStream, null);
-AliceJS->AliceUA:   offer2 = pc.createOffer(null);
-AliceJS->AliceUA:   pc.setLocalDescription(offer2);
+AliceJS->AliceUA:   create new PeerConnection
+AliceJS->AliceUA:   add audio stream to add localStreamTrack 
+AliceJS->AliceUA:   createOffer to get offer2
+AliceJS->AliceUA:   setLocalDescription with offer2
 
-// offer2 is sent over signaling protocol to Bob
+//                  offer2 is sent over signaling protocol to Bob
 AliceJS->WebServer: signaling with offer2
 WebServer->BobJS:   signaling with offer2
 
-// ice gathering is happening in parallel with stuff Bob is doing 
-AliceJS->AliceUA:   pc.startIce();
+//                  ice gathering is happening in parallel
+AliceJS->AliceUA:   startIce
+
+//                  offer2 arrives at Bob
+BobJS->BobUA:       create a PeerConnection
+BobJS->BobUA:       setRemoteDescription with offer2
+BobUA->BobJS:       onaddstream(remoteStream);
+
+//                  candidate2 is sent to Bob
 AliceUA->AliceJS:   onicecandidate(candidate2);
-
-// offer2 arrives at Bob
-BobJS->BobUA: pc = new PeerConnection();
-BobJS->BobUA: pc.setRemoteDescription(offer2);
-BobUA->BobJS: onaddstream(remoteStream);
-
-// candidate2 is sent over signaling protocol to Bob
 AliceJS->WebServer: signaling with candidate2
 WebServer->BobJS:   signaling with candidate2
+BobJS->BobUA:       onaddstream callback with remoteStream 
 
-// candidate2 arrives at Bob
-BobJS->BobUA: pc.addIceCandidate(candidate2);
-BobUA->BobJS: onicecandidate(candidate3)
+//                  candidate3 is sent to Alice
+BobUA->BobJS:       onicecandidate callback with candidate3
+BobJS->WebServer:   signaling with candidate3
+WebServer->AliceJS: signaling with candidate3
+AliceJS->AliceUA:   addIceCandidate with candidate3
 
-// candidate3 is sent over signaling protocol to Alice
-BobJS->WebServer: signaling with candidate3
-WebServer->AliceJS:   signaling with candidate3
+//                  Bob accepts call
+BobJS->BobUA:       addStream with local audio stream 
+BobJS->BobUA:       createAnswer to get answer2 
+BobJS->BobUA:       setLocalDescription with answer2
 
-// candidate arrives at Alice
-AliceJS->AliceUA:   pc.addIceCandidate(candidate3);
+//                  answer2 is sent to Alice
+BobJS->WebServer:   signaling with answer2
+WebServer->AliceJS: signaling with answer2
+AliceJS->AliceUA:   setRemoteDescription with answer2
+AliceUA->AliceJS:   onaddstream callback with remote audio stream 
 
-// Bob accepts call
-BobJS->BobUA: pc.addStream(localStream, null);
-BobJS->BobUA: answer2 = pc.createAnswer(offer, null);
-BobJS->BobUA: pc.setLocalDescription(answer2);
-
-// answer2 is sent over signaling protocol to Alice
-BobJS->WebServer: signaling with answer2
-WebServer->AliceJS:   signaling with answer2
-
-// answer2 arrives at Alice
-AliceJS->AliceUA:   pc.setRemoteDescription(answer2);
-AliceUA->AliceJS:   onaddstream(remoteStream);
-
-// ICE completes (at Bob)
-BobUA->AliceUA:  Media
-
-// ICE completes (at Alice)
-AliceUA->BobUA:  Media
+BobUA->AliceUA:     media sent from Bob to Alice  
+AliceUA->BobUA:     media send from Alice to Bob 
 
 TODO - add stuff to add in two video streams
 ]]></artwork>
