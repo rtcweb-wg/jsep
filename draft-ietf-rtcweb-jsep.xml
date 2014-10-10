@@ -1996,7 +1996,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       <t> Note that this example section shows several SDP fragments. To
       format in 72 columns, some of the lines in SDP have been split into
       multiple lines, where leading whitespace indicates that a line
-      is a continuation of the previous line.  </t>
+      is a continuation of the previous line.  In addition, some blank lines 
+      have been added to improve readability but are not valid in SDP.</t>
 
       <t> More examples of SDP for WebRTC call flows can be found in <xref
       target="I-D.nandakumar-rtcweb-sdp"></xref>. </t>
@@ -2015,7 +2016,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       server. The JS on both Alice's side and Bob's side waits
       for all candidates before sending the offer or answer,
       so the offers and answers are complete. Trickle ICE is
-      not used.</t>
+      not used. Both Alice and Bob are using the default policy of balanced. </t>
 
      <t><figure>
        <artwork><![CDATA[
@@ -2028,15 +2029,15 @@ AliceUA->AliceJS:   multiple onicecandidate callbacks with candidates
 
 //                  wait for ICE gathering to complete
 AliceUA->AliceJS:   onicecandidate callback with null candidate 
-AliceJS->AliceUA:   get offer-A1 from value of localDescription
+AliceJS->AliceUA:   get |offer-A1| from value of localDescription
 
-//                  offer-A1 is sent over signaling protocol to Bob
-AliceJS->WebServer: signaling with offer-A1
-WebServer->BobJS:   signaling with offer-A1
+//                  |offer-A1| is sent over signaling protocol to Bob
+AliceJS->WebServer: signaling with |offer-A1|
+WebServer->BobJS:   signaling with |offer-A1|
 
-//                  offer-A1 arrives at Bob
+//                  |offer-A1| arrives at Bob
 BobJS->BobUA:       create a PeerConnection
-BobJS->BobUA:       setRemoteDescription with offer-A1 
+BobJS->BobUA:       setRemoteDescription with |offer-A1| 
 BobUA->BobJS:       onaddstream callback with remoteStream
 
 //                  Bob accepts call
@@ -2047,24 +2048,24 @@ BobUA->BobJS:       multiple onicecandidate callbacks with candidates
 
 //                  wait for ICE gathering to complete
 BobUA->BobJS:       onicecandidate callback with null candidate  
-BobJS->BobUA:       get answer-A1 from value of localDescription
+BobJS->BobUA:       get |answer-A1| from value of localDescription
 
-//                  answer-A1 is sent over signaling protocol to Alice
-BobJS->WebServer:   signaling with answer-A1
-WebServer->AliceJS: signaling with answer-A1
+//                  |answer-A1| is sent over signaling protocol to Alice
+BobJS->WebServer:   signaling with |answer-A1|
+WebServer->AliceJS: signaling with |answer-A1|
 
-//                  answer-A1 arrives at Alice
-AliceJS->AliceUA:   setRemoteDescription with answer-A1
+//                  |answer-A1| arrives at Alice
+AliceJS->AliceUA:   setRemoteDescription with |answer-A1|
 AliceUA->AliceJS:   onaddstream callback with remoteStream
 
-//                  media Flows
+//                  media flows
 BobUA->AliceUA:     media sent from Bob to Alice 
 AliceUA->BobUA:     media sent from Alice to Bob
 ]]></artwork>
      </figure></t>
 
      <t>
-     The SDP for offer-A1 looks like: </t>
+     The SDP for |offer-A1| looks like: </t>
  
      <t>
        <figure>
@@ -2075,7 +2076,7 @@ TODO
       </t>
       
       <t>
-      The SDP for answer-A1 looks like: </t>
+      The SDP for |answer-A1| looks like: </t>
       
       <t>
 	<figure>
@@ -2091,7 +2092,10 @@ TODO
 
      <t> This section shows a typical example of a session between two
      browsers setting up an audio channel and a data channel. Trickle
-     ICE is used. Later two video flows are added to the session. 
+     ICE is used in full trickle mode with a policy of max-bundle-and-rtcpmux
+     and a single TURN server. 
+     Later, two video flows, one for the
+     presenter and one for screen sharing,  are added to the session. 
      This example shows Alice's browser initiating the
      session to Bob's browser. The messages from Alice's JS to Bob's
      JS are assumed to flow over some signaling protocol via a web
@@ -2103,45 +2107,53 @@ TODO
 AliceJS->AliceUA:   create new PeerConnection
 AliceJS->AliceUA:   addStream that contains audio track 
 AliceJS->AliceUA:   createDataChannel to get data channel
-AliceJS->AliceUA:   createOffer to get offer-B1
-AliceJS->AliceUA:   setLocalDescription with offer-B1
+AliceJS->AliceUA:   createOffer to get |offer-B1|
+AliceJS->AliceUA:   setLocalDescription with |offer-B1|
 
-//                  offer-B1 is sent over signaling protocol to Bob
-AliceJS->WebServer: signaling with offer-B1
-WebServer->BobJS:   signaling with offer-B1
+//                  |offer-B1| is sent over signaling protocol to Bob
+AliceJS->WebServer: signaling with |offer-B1|
+WebServer->BobJS:   signaling with |offer-B1|
 
-//                  offer-B1 arrives at Bob
+//                  |offer-B1| arrives at Bob
 BobJS->BobUA:       create a PeerConnection
-BobJS->BobUA:       setRemoteDescription with offer-B1
+BobJS->BobUA:       setRemoteDescription with |offer-B1|
 BobUA->BobJS:       onaddstream with audio track from Alice
 
-//                  candiate-B1 is sent to Bob
-AliceUA->AliceJS:   onicecandidate callback with candiate-B1
-AliceJS->WebServer: signaling with candiate-B1
-WebServer->BobJS:   signaling with candiate-B1
-BobJS->BobUA:       addIceCandidate with candidate-B1
+//                  |candidate-B1| is sent to Bob
+AliceUA->AliceJS:   onicecandidate callback with |candidate-B1|
+AliceJS->WebServer: signaling with |candidate-B1|
+WebServer->BobJS:   signaling with |candidate-B1|
+BobJS->BobUA:       addIceCandidate with |candidate-B1|
 
 //                  Bob accepts call
 BobJS->BobUA:       addStream with local audio stream  
 BobJS->BobUA:       createDataChannel to get data channel 
-BobJS->BobUA:       createAnswer to get answer-B1 
-BobJS->BobUA:       setLocalDescription with answer-B1
+BobJS->BobUA:       createAnswer to get |answer-B1| 
+BobJS->BobUA:       setLocalDescription with |answer-B1|
 
-//                  answer-B1 is sent to Alice  
-BobJS->WebServer:   signaling with answer-B1
-WebServer->AliceJS: signaling with answer-B1
-AliceJS->AliceUA:   setRemoteDescription with answer-B1
+//                  |answer-B1| is sent to Alice  
+BobJS->WebServer:   signaling with |answer-B1|
+WebServer->AliceJS: signaling with |answer-B1|
+AliceJS->AliceUA:   setRemoteDescription with |answer-B1|
 AliceUA->AliceJS:   onaddstream callback with audio track from Bob 
 
-//                  candidate-B2 is sent to Alice 
-BobUA->BobJS:       onicecandidate callback with candidate-B2 
-BobJS->WebServer:   signaling with candidate-B2 
-WebServer->AliceJS: signaling with candidate-B2 
-AliceJS->AliceUA:   addIceCandidate with candidate-B2 
+//                  |candidate-B2| is sent to Alice 
+BobUA->BobJS:       onicecandidate callback with |candidate-B2| 
+BobJS->WebServer:   signaling with |candidate-B2| 
+WebServer->AliceJS: signaling with |candidate-B2| 
+AliceJS->AliceUA:   addIceCandidate with |candidate-B2| 
+
+//                  |candidate-B3| is sent to Alice 
+BobUA->BobJS:       onicecandidate callback with |candidate-B3| 
+BobJS->WebServer:   signaling with |candidate-B3| 
+WebServer->AliceJS: signaling with |candidate-B3| 
+AliceJS->AliceUA:   addIceCandidate with |candidate-B3| 
 
 //                  data channel opens  
-BobUA->BobJS:       onopen
+BobUA->BobJS:       onopen 
 AliceUA->AliceJS:   onopen  
+BobUA->BobJS:       ondatachannel callback 
+AliceUA->AliceJS:   ondatachannel callback  
 
 //                  media is flowing between browsers 
 BobUA->AliceUA:     audio+data sent from Bob to Alice  
@@ -2150,22 +2162,22 @@ AliceUA->BobUA:     audio+data sent from Alice to Bob
 //                  some time later Bob adds two video streams  
 BobJS->BobUA:       addStream with first video stream  
 BobJS->BobUA:       addStream with second video stream  
-BobJS->BobUA:       createOffer to get offer-B2 
-BobJS->BobUA:       setLocalDescription with offer-B2
+BobJS->BobUA:       createOffer to get |offer-B2| 
+BobJS->BobUA:       setLocalDescription with |offer-B2|
 
-//                  offer-B2 is sent to Alice  
-BobJS->WebServer:   signaling with offer-B2
-WebServer->AliceJS: signaling with offer-B2
-AliceJS->AliceUA:   setRemoteDescription with offer-B2
+//                  |offer-B2| is sent to Alice  
+BobJS->WebServer:   signaling with |offer-B2|
+WebServer->AliceJS: signaling with |offer-B2|
+AliceJS->AliceUA:   setRemoteDescription with |offer-B2|
 AliceUA->AliceJS:   onaddstream callback with first video stream 
 AliceUA->AliceJS:   onaddstream callback with second video stream 
-AliceJS->AliceUA:   createAnswer to get answer-B2
-AliceJS->AliceUA:   setLocalDescription with answer-B2
+AliceJS->AliceUA:   createAnswer to get |answer-B2|
+AliceJS->AliceUA:   setLocalDescription with |answer-B2|
 
-//                  answer-B2 is sent over signaling protocol to Bob
-AliceJS->WebServer: signaling with answer-B2
-WebServer->BobJS:   signaling with answer-B2
-BobJS->BobUA:       setRemoteDescription with answer-B2
+//                  |answer-B2| is sent over signaling protocol to Bob
+AliceJS->WebServer: signaling with |answer-B2|
+WebServer->BobJS:   signaling with |answer-B2|
+BobJS->BobUA:       setRemoteDescription with |answer-B2|
 
 //                  media is flowing between browsers  
 BobUA->AliceUA:     audio+video+data sent from Bob to Alice  
@@ -2174,7 +2186,7 @@ AliceUA->BobUA:     audio+video+data sent from Alice to Bob
      </figure></t>
 
      <t>
-     The SDP for offer-B1 looks like: </t>
+     The SDP for |offer-B1| looks like: </t>
      
      <t>
        <figure>
@@ -2185,7 +2197,7 @@ TODO
      </t>
      
      <t>
-       The SDP for candiate-B1 looks like: </t>
+       The SDP for |candidate-B1| looks like: </t>
        <t> <figure>
 	 <artwork><![CDATA[
 TODO
@@ -2194,17 +2206,7 @@ TODO
      </t>
      
      <t>
-       The SDP for candidate-B2 looks like: </t>
-       <t> 
-       <figure>
-	 <artwork><![CDATA[
-TODO
-	 ]]></artwork>
-       </figure>
-     </t>
-     
-     <t>
-       The SDP for answer-B1 looks like: </t>
+       The SDP for |candidate-B2| looks like: </t>
        <t> 
        <figure>
 	 <artwork><![CDATA[
@@ -2214,7 +2216,27 @@ TODO
      </t>
      
      <t>
-       The SDP for offer-B2 looks like: </t>
+       The SDP for |candidate-B3| looks like: </t>
+       <t> 
+       <figure>
+	 <artwork><![CDATA[
+TODO 
+	 ]]></artwork>
+       </figure>
+     </t>
+     
+     <t>
+       The SDP for |answer-B1| looks like: </t>
+       <t> 
+       <figure>
+	 <artwork><![CDATA[
+TODO 
+	 ]]></artwork>
+       </figure>
+     </t>
+     
+     <t>
+       The SDP for |offer-B2| looks like: </t>
        <t> 
        <figure>
 	 <artwork><![CDATA[
@@ -2224,7 +2246,7 @@ TODO
      </t>
 
      <t>
-       The SDP for answer-B2 looks like: </t>
+       The SDP for |answer-B2| looks like: </t>
        <t> 
        <figure>
 	 <artwork><![CDATA[
