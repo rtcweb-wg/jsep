@@ -21,10 +21,13 @@ submit: $(next).txt
 idnits: $(next).txt
 	$(idnits) $<
 
+diff:  $(draft).diff.html
+
 clean:
-	-rm -f $(draft).txt $(draft).html
-	-rm -f $(next).txt $(next).html
+	-rm -f $(draft).txt $(draft).raw $(draft).old.raw $(draft).html
+	-rm -f $(next).txt $(next).raw $(next).html
 	-rm -f $(draft)-[0-9][0-9].xml
+
 
 $(next).xml: $(draft).xml
 	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
@@ -33,11 +36,16 @@ $(next).xml: $(draft).xml
 #	$(kramdown-rfc2629) $< > $@
 
 %.txt: %.xml
-	$(xml2rfc) $< $@
+	$(xml2rfc) $< --text --out $@
+
+%.raw: %.xml
+	$(xml2rfc) $< --raw --out $@
 
 %.html: %.xml
-	$(xml2rfc) --html $< $@
+	$(xml2rfc) $< --html --out $@
 
+$(draft).diff.html: $(draft).old.raw $(draft).raw 
+	htmlwdiff  $^ >  $@
 
 upload: $(draft).html $(draft).txt
 	python upload-draft.py $(draft).html
