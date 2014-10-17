@@ -24,7 +24,7 @@ idnits: $(next).txt
 diff:  $(draft).diff.html
 
 clean:
-	-rm -f $(draft).txt $(draft).raw $(draft).old.raw $(draft).html
+	-rm -f $(draft).txt $(draft).raw $(draft).old.raw $(draft).html $(draft).diff.html
 	-rm -f $(next).txt $(next).raw $(next).html
 	-rm -f $(draft)-[0-9][0-9].xml
 
