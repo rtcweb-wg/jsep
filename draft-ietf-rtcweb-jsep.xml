@@ -1111,8 +1111,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 and MUST be implemented.</t>
 
                 <t><xref target="RFC5764"></xref> MUST be supported for signaling
-                the UDP/TLS/RTP/SAVPF RTP profile.</t>
-
+                the UDP/TLS/RTP/SAVPF <xref target="RFC5764"/> and TCP/TLS/RTP/SAVPF
+                <xref target="I-D.nandakumar-mmusic-proto-iana-registration"/>
+                RTP profiles.
+                </t>
+                
                 <t><xref target="RFC5245"></xref> MUST be implemented for
                 signaling the ICE credentials and candidate lines corresponding
                 to each media stream. The ICE implementation MUST be a Full
@@ -1170,16 +1173,55 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             both local and remote, MUST indicate support for the following
             specifications. If any of these are absent, this omission MUST be
             treated as an error. <list style="format R-%d">
-                <t>Either the UDP/TLS/RTP/SAVP or the UDP/TLS/RTP/SAVPF RTP
-                profile, as specified in <xref target="RFC5764"></xref>,
-                MUST be used.</t>
-                <t>ICE, as specified in <xref target="RFC5245"></xref>,
-                MUST be used. Note that the remote endpoint may use a Lite
-                implementation; implementations MUST properly handle remote
-                endpoints which do ICE-Lite.</t>
-                <t>DTLS-SRTP, as specified in <xref target="RFC5763"></xref>,
-                MUST be used.</t>
+            <t>ICE, as specified in <xref target="RFC5245"></xref>,
+            MUST be used. Note that the remote endpoint may use a Lite
+            implementation; implementations MUST properly handle remote
+            endpoints which do ICE-Lite.</t>
+            <t>DTLS-SRTP, as specified in <xref target="RFC5763"></xref>,
+            MUST be used.</t>
             </list></t>
+        </section>
+
+        <section title="Profile Names and Interoperability" anchor="sec.profile-names">
+          <t>
+            For media m= sections, JSEP endpoints MUST support both the "UDP/TLS/
+            RTP/SAVPF" or "TCP/TLS/RTP/SAVPF" profiles and MUST indicate one of
+            these two profiles for each media m= line they produce in an offer.
+            For data m= sections, JSEP endpoints must support both the "UDP/TLS/SCTP"
+            and "TCP/TLS/SCTP" profiles and MUST indicate one of these two
+            profiles for each data m= line they produce in an offer.
+            Because ICE can select either TCP or UDP transport depending on
+            network conditions, an advertisement for either transport is actually
+            an advertisement for both.
+          </t>
+          <t>
+            Unfortunately, in an attempt at compatibility, some endpoints
+            generate other profile strings even when they mean to support one of
+            these profiles.  For instance, an endpoint might generate "RTP/AVP"
+            but supply "a="fingerprint" and "a=rtcp-fb" attributes, indicating
+            its willingness to support "(UDP,TCP)/TLS/RTP/SAVPF".  In order to
+            simplify compatibility with such endpoints, JSEP endpoints MUST
+            follow the following rules when processing an offer:
+          </t>
+          <t>
+            <list style="symbols">
+              <t>The profile in any "m=" line in any answer MUST match the profile
+              provided in the offer.</t>
+              <t>Any profile matching the following patterns MUST be accepted:
+              "RTP/[S]AVP[F]" and "(UDP/TCP)/TLS/RTP/SAVP[F]"</t>
+              <t>Because DTLS-SRTP is required, SAVP and AVP MUST be treated
+              identically as indicating DTLS-SRTP.</t>
+              <t>If AVPF is provided or "a=rtcp-fb" is present, then use the
+              negotiated feedback mechanisms with "trr-int=0".  Otherwise,
+              assume "trr-int=4".</t>
+              <t>For data m= sections, JSEP endpoints MUST support receiving the "UDP/
+              TLS/SCTP", "TCP/TLS/SCTP", or "DTLS/SCTP" (for backwards
+              compatibility) profiles.</t>
+            </list>
+          </t>
+          <t> Note that re-offers by JSEP endpoints MUST use the correct profile
+          strings even if the initial offer/answer exchange used an (incorrect)
+          older profile string.</t>
         </section>
       </section>
 
@@ -1279,7 +1321,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             Section 5.1.</t>
             <t>To properly indicate use of DTLS, the &lt;proto&gt; field MUST
             be set to "UDP/TLS/RTP/SAVPF", as specified in
-            <xref target="RFC5764"/>, Section 8.</t>
+            <xref target="RFC5764"/>, Section 8
+            if UDP transport is the default or "TCP/TLS/RTP/SAVPF",
+            as specified in<xref target="I-D.nandakumar-mmusic-proto-iana-registration"/>
+            if TCP transport is
+            the default.</t>
             </list>
           </t>
 
@@ -1398,8 +1444,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Lastly, if a data channel has been created, a m= section MUST be
           generated for data. The &lt;media&gt; field MUST be set to
           "application" and the &lt;proto&gt; field MUST be set to
-          "DTLS/SCTP" [TODO: fix this in profile PR], as specified in <xref
-          target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 3; the "fmt" value
+          "UDP/TLS/SCTP" if the default transport is UDP or "TCP/TLS/SCTP"
+          if the default transport is TCP, as specified in <xref
+          target="I-D.ietf-mmusic-sctp-sdp"></xref>. The "fmt" value
           MUST be set to the SCTP port number, as specified in Section 4.1.
           [TODO: update this to use a=sctp-port, as indicated in the latest
           data channel docs]</t>
@@ -1736,9 +1783,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           for this m= section, but given that no candidates have yet been gathered,
           the "dummy" port value of 9 (Discard) MUST be used, as
           indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-          Section 5.1.</t>
-          <t>Because use of DTLS is mandatory, the &lt;proto&gt; field MUST be set
-          to "UDP/TLS/RTP/SAVPF".</t>
+          Section 5.1. The &lt;proto&gt; field MUST be set to match the &lt;proto&gt;
+          field for the corresponding m= line in the offer.</t>
           </list>
           </t>
 
@@ -2028,7 +2074,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </t>
     </section>
     <section title="IANA Considerations" anchor="sec.iana-considerations">
-      <t>This document requires no actions from IANA.</t>
+      <t></t>
     </section>
 
     <section title="Acknowledgements" anchor="sec.acknowledgements">
@@ -2399,6 +2445,55 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <!-- NORM 6 -->
 
+      <reference anchor="I-D.nandakumar-mmusic-proto-iana-registration">
+        <front>
+          <title abbrev="SDP Proto Registrations">IANA registration of SDP 'proto' attribute 
+          for transporting RTP Media over TCP under various RTP profiles.</title>
+
+          <author fullname="Suhas Nandakumar" initials="S." surname="Nandakumar">
+            <organization>Cisco Systems Inc</organization>
+
+            <address>
+              <postal>
+                <street>707 Tasman Drive</street>
+
+                <city>San Jose</city>
+
+                <region>CA</region>
+
+                <code>95134</code>
+
+                <country>USA</country>
+              </postal>
+              
+              <email>snandaku@cisco.com</email>
+            </address>
+          </author>
+
+          <date day="18" month="September" year="2014" />
+
+          <area>RAI</area>
+
+          <workgroup>MMUSIC</workgroup>
+
+          <abstract>
+            <t>
+              RTP provides end-to-end network transport functions suitable for
+   	      applications transmitting real-time data, such as audio, video or
+   	      simulation data, over multicast or unicast network services. The data
+   	      transport is augmented by a control protocol (RTCP) to allow monitoring 
+   	      of the data delivery in a manner scalable to large multicast networks,
+   	      and to provide minimal control and identification functionality.
+   	    </t> 
+   	    <t>
+   	      This  document describes how to express RTP media transport over TCP 
+   	      in SDP (Session Description Protocol) under various configurations. 
+   	      This document defines 'TCP/RTP/AVPF', 'TCP/RTP/SAVP', 'TCP/RTP/SAVPF', 
+   	      'TCP/TLS/RTP/SAVP', 'TCP/TLS/RTP/SAVPF' protocol identifiers for SDP.
+            </t>
+          </abstract>
+        </front>
+      </reference>
       <!-- NORM 7 -->
 
       <reference anchor='I-D.ietf-mmusic-sdp-mux-attributes'>
