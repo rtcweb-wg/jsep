@@ -724,7 +724,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               compatibility with legacy endpoints.
               </t>
               <t></t>
-              <t hangText="max-bundle-and-rtcpmux:">Similar to max-bundle,
+              <t hangText="max-bundle-and-rtcp-mux:">Similar to max-bundle,
               but RTCP candidates are not gathered. This policy reduces the
               candidates that must be gathered to the absolute minimum,
               but will not be compatible with legacy endpoints that do not
@@ -2215,10 +2215,10 @@ a=end-of-candidates
 
      <t> This section shows a typical example of a session between two
      browsers setting up an audio channel and a data channel. Trickle
-     ICE is used in full trickle mode with a policy of max-bundle-and-rtcpmux
+     ICE is used in full trickle mode with a policy of max-bundle-and-rtcp-mux
      and a single TURN server. 
      Later, two video flows, one for the
-     presenter and one for screen sharing,  are added to the session. 
+     presenter and one for screen sharing, are added to the session. 
      This example shows Alice's browser initiating the
      session to Bob's browser. The messages from Alice's JS to Bob's
      JS are assumed to flow over some signaling protocol via a web
@@ -2242,13 +2242,14 @@ BobJS->BobUA:       create a PeerConnection
 BobJS->BobUA:       setRemoteDescription with |offer-B1|
 BobUA->BobJS:       onaddstream with audio track from Alice
 
-//                  candidates are sent to Bob: host, srflx, relay
-AliceUA->AliceJS:   onicecandidate callback with |candidate-B1|
-AliceJS->WebServer: signaling with |candidate-B1|
-AliceUA->AliceJS:   onicecandidate callback with |candidate-B2|
-AliceJS->WebServer: signaling with |candidate-B2|
-AliceUA->AliceJS:   onicecandidate callback with |candidate-B3|
+//                  candidates are sent to Bob
+AliceUA->AliceJS:   onicecandidate callback with |candidate-B1| (host)
+AliceJS->WebServer: signaling with |candidate-B1| 
+AliceUA->AliceJS:   onicecandidate callback with |candidate-B2| (srflx)
+AliceJS->WebServer: signaling with |candidate-B2| 
+AliceUA->AliceJS:   onicecandidate callback with |candidate-B3| (relay)
 AliceJS->WebServer: signaling with |candidate-B3|
+
 WebServer->BobJS:   signaling with |candidate-B1|
 BobJS->BobUA:       addIceCandidate with |candidate-B1|
 WebServer->BobJS:   signaling with |candidate-B2|
@@ -2268,18 +2269,19 @@ WebServer->AliceJS: signaling with |answer-B1|
 AliceJS->AliceUA:   setRemoteDescription with |answer-B1|
 AliceUA->AliceJS:   onaddstream callback with audio track from Bob 
 
-//                  candidates are sent to Alice: host, srflx, relay
-BobUA->BobJS:       onicecandidate callback with |candidate-B4| 
+//                  candidates are sent to Alice
+BobUA->BobJS:       onicecandidate callback with |candidate-B4| (host)
 BobJS->WebServer:   signaling with |candidate-B4|
-BobUA->BobJS:       onicecandidate callback with |candidate-B5| 
+BobUA->BobJS:       onicecandidate callback with |candidate-B5| (srflx)
 BobJS->WebServer:   signaling with |candidate-B5| 
-BobUA->BobJS:       onicecandidate callback with |candidate-B6| 
-BobJS->WebServer:   signaling with |candidate-B6| 
-WebServer->AliceJS: signaling with |candidate-B4| 
+BobUA->BobJS:       onicecandidate callback with |candidate-B6| (relay)
+BobJS->WebServer:   signaling with |candidate-B6|
+
+WebServer->AliceJS: signaling with |candidate-B4|
 AliceJS->AliceUA:   addIceCandidate with |candidate-B4|
-WebServer->AliceJS: signaling with |candidate-B5| 
+WebServer->AliceJS: signaling with |candidate-B5|
 AliceJS->AliceUA:   addIceCandidate with |candidate-B5| 
-WebServer->AliceJS: signaling with |candidate-B6| 
+WebServer->AliceJS: signaling with |candidate-B6|
 AliceJS->AliceUA:   addIceCandidate with |candidate-B6| 
 
 //                  data channel opens  
@@ -2293,7 +2295,7 @@ BobUA->AliceUA:     audio+data sent from Bob to Alice
 AliceUA->BobUA:     audio+data sent from Alice to Bob 
 
 //                  some time later Bob adds two video streams
-//                  note, no candidates exchanged because BUNDLE  
+//                  note, no candidates exchanged, because of BUNDLE
 BobJS->BobUA:       addStream with first video stream  
 BobJS->BobUA:       addStream with second video stream  
 BobJS->BobUA:       createOffer to get |offer-B2| 
@@ -2486,7 +2488,11 @@ candidate:3671762467 1 udp 41819903 66.77.88.99 50416 typ relay
      </t>
 
      <t>
-       The SDP for |offer-B2| looks like: </t>
+       The SDP for |offer-B2| looks like: 
+       (note the increment of the version number in the o= line,
+        and the c= and a=rtcp lines, which indicate the local candidate
+        that was selected)
+        </t>
        <t> 
        <figure>
 	 <artwork><![CDATA[
@@ -2514,7 +2520,7 @@ a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
 a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
-a=setup:active
+a=setup:actpass
 a=rtcp-mux
 a=rtcp-rsize
 a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
@@ -2537,7 +2543,7 @@ a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
 a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
-a=setup:active
+a=setup:actpass
 a=candidate:109270924 1 udp 2122194687 192.168.2.3 61665 typ host
 a=candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
             raddr 192.168.2.3 rport 61665
@@ -2616,7 +2622,11 @@ a=end-of-candidates
      </t>
 
      <t>
-       The SDP for |answer-B2| looks like: </t>
+       The SDP for |answer-B2| looks like: 
+       (note the use of setup:passive to maintain 
+        the existing DTLS roles, and the use of a=recvonly to 
+        indicate that the video streams are one-way)
+     </t>
        <t> 
        <figure>
 	 <artwork><![CDATA[
