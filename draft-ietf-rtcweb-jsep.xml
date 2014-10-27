@@ -1185,21 +1185,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Profile Names and Interoperability" anchor="sec.profile-names">
           <t>
             For media m= sections, JSEP endpoints MUST support both the "UDP/TLS/
-            RTP/SAVPF" or "TCP/TLS/RTP/SAVPF" profiles and MUST indicate one of
+            RTP/SAVPF" and "TCP/TLS/RTP/SAVPF" profiles and MUST indicate one of
             these two profiles for each media m= line they produce in an offer.
             For data m= sections, JSEP endpoints must support both the "UDP/TLS/SCTP"
             and "TCP/TLS/SCTP" profiles and MUST indicate one of these two
             profiles for each data m= line they produce in an offer.
             Because ICE can select either TCP or UDP transport depending on
-            network conditions, an advertisement for either transport is actually
-            an advertisement for both.
+            network conditions, both advertisements are consistent with
+            ICE eventually selecting either either UDP or TCP.
           </t>
           <t>
             Unfortunately, in an attempt at compatibility, some endpoints
             generate other profile strings even when they mean to support one of
             these profiles.  For instance, an endpoint might generate "RTP/AVP"
-            but supply "a="fingerprint" and "a=rtcp-fb" attributes, indicating
-            its willingness to support "(UDP,TCP)/TLS/RTP/SAVPF".  In order to
+            but supply "a=fingerprint" and "a=rtcp-fb" attributes, indicating
+            its willingness to support "(UDP,TCP)/TLS/RTP/SAVPF". In order to
             simplify compatibility with such endpoints, JSEP endpoints MUST
             follow the following rules when processing the media m= sections in
             an offer:
@@ -1210,13 +1210,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               provided in the offer.</t>
               <t>Any profile matching the following patterns MUST be accepted:
               "RTP/[S]AVP[F]" and "(UDP/TCP)/TLS/RTP/SAVP[F]"</t>
-              <t>Because DTLS-SRTP is required, SAVP and AVP MUST be treated
-              identically as indicating DTLS-SRTP.</t>
+              <t>Because DTLS-SRTP is REQUIRED, the choice of SAVP or
+              AVP has no effect; support for DTLS-SRTP is determined by the presence
+              of the "a=fingerprint" attribute. Note that lack of an "a=fingerprint"
+              attribute will lead to negotiation failure.
+              </t>
               <t>The use of AVPF or AVP simply controls the timing
               rules used for RTCP feedback. If AVPF is provided, or an "a=rtcp-fb"
               attribute is present, assume AVPF timing, i.e. a default value of
-              "trr-int=0". Otherwise, assume AVP timing, and a default value of
-              "trr-int=4".</t>
+              "trr-int=0". Otherwise, assume that AVPF is being used in
+              an AVP compatible mode and use AVP timing, i.e., "trr-int=4".</t>
               <t>For data m= sections, JSEP endpoints MUST support receiving the "UDP/
               TLS/SCTP", "TCP/TLS/SCTP", or "DTLS/SCTP" (for backwards
               compatibility) profiles.</t>
