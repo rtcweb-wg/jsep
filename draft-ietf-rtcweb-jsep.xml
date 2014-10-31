@@ -108,7 +108,7 @@
 
         <t>With these considerations in mind, this document describes the
         Javascript Session Establishment Protocol (JSEP) that allows for full
-        control of the signaling state machine from Javascript. 
+        control of the signaling state machine from Javascript.
         JSEP removes the browser almost entirely from the core signaling flow, which
         is instead handled by the Javascript making use of two interfaces:
         (1) passing in local and remote session descriptions and (2) interacting
@@ -411,7 +411,7 @@ setRemote(ANSWER) |                                   |
         <section title="ICE Gathering Overview" anchor="sec.ice-gather-overview">
           <t>JSEP gathers ICE candidates as needed by the application.
           Collection of ICE candidates is referred to as a gathering phase,
-          and this is triggered either by the addition of a new or recycled m= 
+          and this is triggered either by the addition of a new or recycled m=
           line to the local session description, or new ICE credentials in the
           description, indicating an ICE restart. Use of new ICE credentials can
           be triggered explicitly by the application, or implicitly by the
@@ -420,7 +420,7 @@ setRemote(ANSWER) |                                   |
           <t>When a new
           gathering phase starts, the ICE Agent will notify the application that
           gathering is occurring through a callback. Then, when each new ICE
-          candidate becomes available, the ICE Agent will supply it to the 
+          candidate becomes available, the ICE Agent will supply it to the
           application via an additional callback; these candidates will also
           automatically be added to the local session description. Finally, when
           all candidates have been gathered, a callback will be dispatched
@@ -478,7 +478,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             identified in one of two ways; either by a m= line index, or a MID.
             The m= line index is a zero-based index, with index N referring to the
             N+1th m= line in the SDP sent by the entity which sent the IceCandidate.
-            The MID uses the "media stream identification" attribute, as defined in 
+            The MID uses the "media stream identification" attribute, as defined in
             <xref target="RFC5888"></xref>, Section 4, to identify the m= line.
             JSEP implementations creating an ICE Candidate object MUST populate
             both of these fields. Implementations receiving an ICE Candidate
@@ -491,22 +491,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           all possible forms of initial candidates - host, server reflexive, and
           relay. However, in certain cases, applications may want to have more
           specific control over the gathering process, due to privacy or related
-          concerns. For example, one may want to suppress the use of host 
+          concerns. For example, one may want to suppress the use of host
           candidates, to avoid exposing information about the local network, or
-          go as far as only using relay candidates, to leak as little 
+          go as far as only using relay candidates, to leak as little
           location information as possible (note that these choices come with
-          corresponding operational costs). To accomplish this, the browser 
+          corresponding operational costs). To accomplish this, the browser
           MUST allow the application to restrict which ICE candidates are used
           in a session. In addition, administrators may also wish to control
-          the set of ICE candidates, and so the browser SHOULD also allow 
+          the set of ICE candidates, and so the browser SHOULD also allow
           control via local policy, with the most restrictive policy prevailing.
           </t>
-          
+
           <t>There may also be cases where the application wants to change which
-          types of candidates are used while the session is active. A prime 
+          types of candidates are used while the session is active. A prime
           example is where a callee may initially want to use only relay
           candidates, to avoid leaking location information to an arbitrary
-          caller, but then change to use all candidates (for lower operational 
+          caller, but then change to use all candidates (for lower operational
           cost) once the user has indicated they want to take the call. For this
           scenario, the browser MUST allow the candidate policy to be changed
           in mid-session, subject to the aforementioned interactions with local
@@ -515,11 +515,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>To administer the ICE candidate policy, the browser will
           determine the current setting at the start of each gathering phase.
           Then, during the gathering phase, the browser MUST NOT
-          expose candidates disallowed by the current policy to the 
-          application, use them as the source of connectivity checks, or 
+          expose candidates disallowed by the current policy to the
+          application, use them as the source of connectivity checks, or
           indirectly expose them via other fields, such as the raddr/rport
           attributes for other ICE candidates.
-          Later, if a different policy is specified by the application, the 
+          Later, if a different policy is specified by the application, the
           application can apply it by kicking off a new gathering phase via an
           ICE restart.
           </t>
@@ -652,14 +652,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Constructor" anchor="sec.constructor">
           <t>The PeerConnection constructor allows the application to specify
           global parameters for the media session, such as the STUN/TURN servers
-          and credentials to use when gathering candidates, as well as the 
+          and credentials to use when gathering candidates, as well as the
           initial ICE candidate policy and pool size, and also the BUNDLE
           policy to use.</t>
 
           <t>If an ICE candidate policy is specified, it functions as
-          described in <xref target="sec.ice-candidate-policy"/>, causing the 
-          browser to only surface the permitted candidates to the application, 
-          and only use those candidates for connectivity checks. The set of 
+          described in <xref target="sec.ice-candidate-policy"/>, causing the
+          browser to only surface the permitted candidates to the application,
+          and only use those candidates for connectivity checks. The set of
           available policies is as follows:
           <list style="hanging">
                 <t hangText="all:">All candidates will be gathered and used.</t>
@@ -667,13 +667,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t hangText="public:">Candidates with private IP addresses
                 [RFC1918] will be filtered out. This prevents exposure of
                 internal network details, at the cost of requiring
-                relay usage even for intranet calls, if the NAT does not allow 
+                relay usage even for intranet calls, if the NAT does not allow
                 hairpinning as described in [RFC4787], section 6.</t>
                 <t></t>
                 <t hangText="relay:">All candidates except relay candidates will
-                be filtered out. This obfuscates the location information that 
-                might be ascertained by the remote peer from the received 
-                candidates. Depending on how the application deploys its relay 
+                be filtered out. This obfuscates the location information that
+                might be ascertained by the remote peer from the received
+                candidates. Depending on how the application deploys its relay
                 servers, this could obfuscate location to a metro or possibly
                 even global level.</t>
           </list>
@@ -682,8 +682,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           minimizes use of application STUN/TURN server resources.</t>
 
           <t>If a size is specified for the ICE candidate pool, this indicates
-          the number of ICE components to pre-gather candidates for. Because 
-          pre-gathering results in utilizing STUN/TURN server resources for 
+          the number of ICE components to pre-gather candidates for. Because
+          pre-gathering results in utilizing STUN/TURN server resources for
           potentially long periods of time, this must only
           occur upon application request, and therefore the default
           candidate pool size MUST be zero.
@@ -715,7 +715,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               to be received by non-BUNDLE-aware endpoints, but require separate
               candidates to be gathered for each media stream.
               </t>
-              <t></t>  
+              <t></t>
               <t hangText="max-bundle:">The application will BUNDLE all of its media
               streams, including data channels,
               on a single transport. All streams other than the first
@@ -1037,29 +1037,29 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
         </section>
         <section title="setConfiguration" anchor="sec.setconfiguration">
-          <t>The setConfiguration method allows the global configuration of the 
+          <t>The setConfiguration method allows the global configuration of the
           PeerConnection, which was initially set by constructor parameters, to
           be changed during the session. The effects of this method call depend
-          on when it is invoked, and differ depending on which specific 
+          on when it is invoked, and differ depending on which specific
           parameters are changed:</t>
          <t><list style="symbols">
             <t>Any changes to the STUN/TURN servers to use affect
             the next gathering phase. If gathering has already occurred, this
-            will cause the next call to createOffer to generate new ICE 
+            will cause the next call to createOffer to generate new ICE
             credentials, for the purpose of forcing an ICE restart and kicking
             off a new gathering phase, in which the new servers will be used.
             If the ICE candidate pool has a nonzero size, any existing
             candidates will be discarded, and new candidates will be gathered
             from the new servers.
             </t>
-            <t>Any changes to the ICE candidate policy also affect the next 
+            <t>Any changes to the ICE candidate policy also affect the next
             gathering phase, in similar fashion to the server changes described
-            above. Note though that changes to the policy have no effect on 
+            above. Note though that changes to the policy have no effect on
             the candidate pool, because pooled candidates are not surfaced to
-            the application until a gathering phase occurs, and so any 
+            the application until a gathering phase occurs, and so any
             necessary filtering can still be done on any pooled candidates.
             </t>
-            <t>Any changes to the ICE candidate pool size take effect 
+            <t>Any changes to the ICE candidate pool size take effect
             immediately; if increased, additional candidates are pre-gathered;
             if decreased, the now-superfluous candidates are discarded.
             </t>
@@ -1115,7 +1115,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <xref target="I-D.nandakumar-mmusic-proto-iana-registration"/>
                 RTP profiles.
                 </t>
-                
+
                 <t><xref target="RFC5245"></xref> MUST be implemented for
                 signaling the ICE credentials and candidate lines corresponding
                 to each media stream. The ICE implementation MUST be a Full
@@ -1320,7 +1320,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Each m= section should be generated as specified in <xref
           target="RFC4566"></xref>, Section 5.14. For the m= line itself, the
           following rules MUST be followed:<list style="symbols">
-            <t>The port value is set to the port of the default ICE candidate 
+            <t>The port value is set to the port of the default ICE candidate
             for this m= section, but given that no candidates have yet been
             gathered, the "dummy" port value of 9 (Discard) MUST be used, as
             indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
@@ -1334,12 +1334,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </list>
           </t>
 
-          <t>The m= line MUST be followed immediately by a "c=" line, as specified 
+          <t>The m= line MUST be followed immediately by a "c=" line, as specified
           in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
           have yet been gathered, the "c=" line must contain the "dummy" value
           "IN IP6 ::", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
           Section 5.1.</t>
-            
+
           <t>Each m= section MUST include the following attribute lines:
             <list style="symbols">
               <t>An "a=mid" line, as specified in <xref
@@ -1527,7 +1527,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>Each "m=" and c=" line MUST be filled in with the port and
               address of the default candidate for the m= section, as described
-              in <xref target="RFC5245"></xref>, Section 4.3. Each 
+              in <xref target="RFC5245"></xref>, Section 4.3. Each
               "a=rtcp" attribute line MUST also be filled in with the port and
               address of the appropriate default candidate, either the
               default RTP or RTCP candidate, depending on whether RTCP multiplexing
@@ -1545,16 +1545,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               same, unless the ICE configuration has changed (either changes to
               the supported STUN/TURN servers, or the ICE candidate policy), or
               the "IceRestart" option (<xref target="sec.icerestart"/>
-              was specified. 
+              was specified.
               </t>
 
               <t>Within each m= section, for each candidate that has
               been gathered during the most recent gathering phase
               (see <xref target="sec.ice-gather-overview"></xref>),
               an "a=candidate" line MUST be added, as specified in <xref
-              target="RFC5245"></xref>, Section 4.3., paragraph 3. If 
-              candidate gathering for the section has completed, an 
-              "a=end-of-candidates" attribute MUST be added, as described in 
+              target="RFC5245"></xref>, Section 4.3., paragraph 3. If
+              candidate gathering for the section has completed, an
+              "a=end-of-candidates" attribute MUST be added, as described in
               <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 9.3.
               </t>
 
@@ -1646,7 +1646,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <section title="OfferToReceiveAudio" anchor="sec.offertoreceiveaudio">
             <t>If the "OfferToReceiveAudio" option is specified, with an integer
-            value of N, and M audio MediaStreamTracks have been added to the 
+            value of N, and M audio MediaStreamTracks have been added to the
             PeerConnection, the offer MUST include N non-rejected m= sections
             with media type "audio", even if N is greater than M.
             This allows the offerer to receive audio, including multiple independent
@@ -1670,7 +1670,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <section title="OfferToReceiveVideo" anchor="sec.offertoreceivevideo">
             <t>If the "OfferToReceiveVideo" option is specified, with an integer
-            value of N, and M video MediaStreamTracks have been added to the 
+            value of N, and M video MediaStreamTracks have been added to the
             PeerConnection, the offer MUST include N non-rejected m= sections
             with media type "video", even if N is greater than M.
             This allows the offerer to receive video, including multiple independent
@@ -1702,11 +1702,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             generated). Similarly, if the ICE configuration has changed, this
             option has no effect, since new ufrag and pwd attributes will be
             generated automatically. This option is primarily useful for
-            reestablishing connectivity in cases where failures are detected by 
+            reestablishing connectivity in cases where failures are detected by
             the application.
             </t>
           </section>
-          
+
           <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection1">
             <t>If the "VoiceActivityDetection" option is specified, with a
             value of "true", the offer MUST indicate support for silence
@@ -1784,7 +1784,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           then be generated as specified in <xref
           target="RFC3264"></xref>, Section 6.1. For the m= line itself, the following
           rules must be followed:<list style="symbols">
-          <t>The port value would normally be set to the port of the default ICE candidate 
+          <t>The port value would normally be set to the port of the default ICE candidate
           for this m= section, but given that no candidates have yet been gathered,
           the "dummy" port value of 9 (Discard) MUST be used, as
           indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
@@ -1794,7 +1794,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </list>
           </t>
 
-          <t>The m= line MUST be followed immediately by a "c=" line, as specified 
+          <t>The m= line MUST be followed immediately by a "c=" line, as specified
           in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
           have yet been gathered, the "c=" line must contain the "dummy" value
           "IN IP6 ::", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
@@ -1804,7 +1804,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
           the same ICE credentials and candidates; all m= sections not being
           BUNDLEd must use unique ICE credentials and candidates. Each
-          m= section MUST include the following: 
+          m= section MUST include the following:
             <list style="symbols">
               <t>If present in the offer, an "a=mid" line, as specified in
               <xref target="RFC5888"></xref>, Section 9.1. The "mid" value
@@ -1886,7 +1886,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the offer, an "a=extmap" line, as specified in <xref
               target="RFC5285"></xref>, Section 5. The list of header
               extensions that SHOULD/MUST be supported is specified in <xref
-              target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section 5.2. 
+              target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section 5.2.
               [TODO: Ensure this contains MID header] Any
               header extensions that require encryption MUST be specified as
               indicated in <xref target="RFC6904"></xref>, Section 4.</t>
@@ -2041,13 +2041,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       remote offer or answer, unmodified SDP coming from any other
       implementation of this specification.</t>
     </section>
-  
+
     <section title="Examples" anchor="sec.examples">
 
       <t> Note that this example section shows several SDP fragments. To
       format in 72 columns, some of the lines in SDP have been split into
       multiple lines, where leading whitespace indicates that a line
-      is a continuation of the previous line.  In addition, some blank lines 
+      is a continuation of the previous line.  In addition, some blank lines
       have been added to improve readability but are not valid in SDP.</t>
 
       <t> More examples of SDP for WebRTC call flows can be found in <xref
@@ -2073,13 +2073,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
        <artwork><![CDATA[
 //                  set up local media state
 AliceJS->AliceUA:   create new PeerConnection
-AliceJS->AliceUA:   addStream with stream containing audio and video 
-AliceJS->AliceUA:   createOffer to get offer 
+AliceJS->AliceUA:   addStream with stream containing audio and video
+AliceJS->AliceUA:   createOffer to get offer
 AliceJS->AliceUA:   setLocalDescription with offer
-AliceUA->AliceJS:   multiple onicecandidate callbacks with candidates 
+AliceUA->AliceJS:   multiple onicecandidate callbacks with candidates
 
 //                  wait for ICE gathering to complete
-AliceUA->AliceJS:   onicecandidate callback with null candidate 
+AliceUA->AliceJS:   onicecandidate callback with null candidate
 AliceJS->AliceUA:   get |offer-A1| from value of localDescription
 
 //                  |offer-A1| is sent over signaling protocol to Bob
@@ -2088,7 +2088,7 @@ WebServer->BobJS:   signaling with |offer-A1|
 
 //                  |offer-A1| arrives at Bob
 BobJS->BobUA:       create a PeerConnection
-BobJS->BobUA:       setRemoteDescription with |offer-A1| 
+BobJS->BobUA:       setRemoteDescription with |offer-A1|
 BobUA->BobJS:       onaddstream callback with remoteStream
 
 //                  Bob accepts call
@@ -2098,7 +2098,7 @@ BobJS->BobUA:       setLocalDescription with answer
 BobUA->BobJS:       multiple onicecandidate callbacks with candidates
 
 //                  wait for ICE gathering to complete
-BobUA->BobJS:       onicecandidate callback with null candidate  
+BobUA->BobJS:       onicecandidate callback with null candidate
 BobJS->BobUA:       get |answer-A1| from value of localDescription
 
 //                  |answer-A1| is sent over signaling protocol to Alice
@@ -2110,17 +2110,17 @@ AliceJS->AliceUA:   setRemoteDescription with |answer-A1|
 AliceUA->AliceJS:   onaddstream callback with remoteStream
 
 //                  media flows
-BobUA->AliceUA:     media sent from Bob to Alice 
+BobUA->AliceUA:     media sent from Bob to Alice
 AliceUA->BobUA:     media sent from Alice to Bob
 ]]></artwork>
      </figure></t>
 
      <t>
      The SDP for |offer-A1| looks like: </t>
- 
+
      <t>
        <figure>
-	 <artwork><![CDATA[
+         <artwork><![CDATA[
 v=0
 o=- 4962303333179871722 1 IN IP4 0.0.0.0
 s=-
@@ -2153,7 +2153,7 @@ a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
 a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
 a=ssrc:1732846380 cname:EocUG1f0fcg/yvY7
 a=candidate:3348148302 1 udp 2113937151 192.0.2.1 56500
-            typ host 
+            typ host
 a=candidate:3348148302 2 udp 2113937151 192.0.2.1 56501
             typ host
 a=end-of-candidates
@@ -2189,16 +2189,16 @@ a=candidate:3348148302 1 udp 2113937151 192.0.2.1 56502
 a=candidate:3348148302 2 udp 2113937151 192.0.2.1 56503
             typ host
 a=end-of-candidates
-	  ]]></artwork>
-	</figure>
+          ]]></artwork>
+        </figure>
       </t>
-      
+
       <t>
       The SDP for |answer-A1| looks like: </t>
-      
+
       <t>
-	<figure>
-	  <artwork><![CDATA[
+        <figure>
+          <artwork><![CDATA[
 v=0
 o=- 6729291447651054566 1 IN IP4 0.0.0.0
 s=-
@@ -2256,10 +2256,10 @@ a=ssrc-group:FID 3229706345 3229706346
 a=candidate:2299743422 1 udp 2113937151 192.0.2.2 20001
             typ host
 a=end-of-candidates
-	  ]]></artwork>
-	</figure>
+          ]]></artwork>
+        </figure>
       </t>
-      
+
     </section>
 
     <section title="Normal Examples" anchor="sec.normal-examples">
@@ -2267,9 +2267,9 @@ a=end-of-candidates
      <t> This section shows a typical example of a session between two
      browsers setting up an audio channel and a data channel. Trickle
      ICE is used in full trickle mode with a policy of max-bundle-and-rtcp-mux
-     and a single TURN server. 
+     and a single TURN server.
      Later, two video flows, one for the
-     presenter and one for screen sharing, are added to the session. 
+     presenter and one for screen sharing, are added to the session.
      This example shows Alice's browser initiating the
      session to Bob's browser. The messages from Alice's JS to Bob's
      JS are assumed to flow over some signaling protocol via a web
@@ -2279,7 +2279,7 @@ a=end-of-candidates
        <artwork><![CDATA[
 //                  set up local media state
 AliceJS->AliceUA:   create new PeerConnection
-AliceJS->AliceUA:   addStream that contains audio track 
+AliceJS->AliceUA:   addStream that contains audio track
 AliceJS->AliceUA:   createDataChannel to get data channel
 AliceJS->AliceUA:   createOffer to get |offer-B1|
 AliceJS->AliceUA:   setLocalDescription with |offer-B1|
@@ -2295,9 +2295,9 @@ BobUA->BobJS:       onaddstream with audio track from Alice
 
 //                  candidates are sent to Bob
 AliceUA->AliceJS:   onicecandidate callback with |candidate-B1| (host)
-AliceJS->WebServer: signaling with |candidate-B1| 
+AliceJS->WebServer: signaling with |candidate-B1|
 AliceUA->AliceJS:   onicecandidate callback with |candidate-B2| (srflx)
-AliceJS->WebServer: signaling with |candidate-B2| 
+AliceJS->WebServer: signaling with |candidate-B2|
 AliceUA->AliceJS:   onicecandidate callback with |candidate-B3| (relay)
 AliceJS->WebServer: signaling with |candidate-B3|
 
@@ -2309,55 +2309,55 @@ WebServer->BobJS:   signaling with |candidate-B3|
 BobJS->BobUA:       addIceCandidate with |candidate-B3|
 
 //                  Bob accepts call
-BobJS->BobUA:       addStream with local audio stream  
-BobJS->BobUA:       createDataChannel to get data channel 
-BobJS->BobUA:       createAnswer to get |answer-B1| 
+BobJS->BobUA:       addStream with local audio stream
+BobJS->BobUA:       createDataChannel to get data channel
+BobJS->BobUA:       createAnswer to get |answer-B1|
 BobJS->BobUA:       setLocalDescription with |answer-B1|
 
-//                  |answer-B1| is sent to Alice  
+//                  |answer-B1| is sent to Alice
 BobJS->WebServer:   signaling with |answer-B1|
 WebServer->AliceJS: signaling with |answer-B1|
 AliceJS->AliceUA:   setRemoteDescription with |answer-B1|
-AliceUA->AliceJS:   onaddstream callback with audio track from Bob 
+AliceUA->AliceJS:   onaddstream callback with audio track from Bob
 
 //                  candidates are sent to Alice
 BobUA->BobJS:       onicecandidate callback with |candidate-B4| (host)
 BobJS->WebServer:   signaling with |candidate-B4|
 BobUA->BobJS:       onicecandidate callback with |candidate-B5| (srflx)
-BobJS->WebServer:   signaling with |candidate-B5| 
+BobJS->WebServer:   signaling with |candidate-B5|
 BobUA->BobJS:       onicecandidate callback with |candidate-B6| (relay)
 BobJS->WebServer:   signaling with |candidate-B6|
 
 WebServer->AliceJS: signaling with |candidate-B4|
 AliceJS->AliceUA:   addIceCandidate with |candidate-B4|
 WebServer->AliceJS: signaling with |candidate-B5|
-AliceJS->AliceUA:   addIceCandidate with |candidate-B5| 
+AliceJS->AliceUA:   addIceCandidate with |candidate-B5|
 WebServer->AliceJS: signaling with |candidate-B6|
-AliceJS->AliceUA:   addIceCandidate with |candidate-B6| 
+AliceJS->AliceUA:   addIceCandidate with |candidate-B6|
 
-//                  data channel opens  
-BobUA->BobJS:       ondatachannel callback 
-AliceUA->AliceJS:   ondatachannel callback 
-BobUA->BobJS:       onopen 
-AliceUA->AliceJS:   onopen  
- 
-//                  media is flowing between browsers 
-BobUA->AliceUA:     audio+data sent from Bob to Alice  
-AliceUA->BobUA:     audio+data sent from Alice to Bob 
+//                  data channel opens
+BobUA->BobJS:       ondatachannel callback
+AliceUA->AliceJS:   ondatachannel callback
+BobUA->BobJS:       onopen
+AliceUA->AliceJS:   onopen
+
+//                  media is flowing between browsers
+BobUA->AliceUA:     audio+data sent from Bob to Alice
+AliceUA->BobUA:     audio+data sent from Alice to Bob
 
 //                  some time later Bob adds two video streams
 //                  note, no candidates exchanged, because of BUNDLE
-BobJS->BobUA:       addStream with first video stream  
-BobJS->BobUA:       addStream with second video stream  
-BobJS->BobUA:       createOffer to get |offer-B2| 
+BobJS->BobUA:       addStream with first video stream
+BobJS->BobUA:       addStream with second video stream
+BobJS->BobUA:       createOffer to get |offer-B2|
 BobJS->BobUA:       setLocalDescription with |offer-B2|
 
-//                  |offer-B2| is sent to Alice  
+//                  |offer-B2| is sent to Alice
 BobJS->WebServer:   signaling with |offer-B2|
 WebServer->AliceJS: signaling with |offer-B2|
 AliceJS->AliceUA:   setRemoteDescription with |offer-B2|
-AliceUA->AliceJS:   onaddstream callback with first video stream 
-AliceUA->AliceJS:   onaddstream callback with second video stream 
+AliceUA->AliceJS:   onaddstream callback with first video stream
+AliceUA->AliceJS:   onaddstream callback with second video stream
 AliceJS->AliceUA:   createAnswer to get |answer-B2|
 AliceJS->AliceUA:   setLocalDescription with |answer-B2|
 
@@ -2366,18 +2366,18 @@ AliceJS->WebServer: signaling with |answer-B2|
 WebServer->BobJS:   signaling with |answer-B2|
 BobJS->BobUA:       setRemoteDescription with |answer-B2|
 
-//                  media is flowing between browsers  
-BobUA->AliceUA:     audio+video+data sent from Bob to Alice  
-AliceUA->BobUA:     audio+video+data sent from Alice to Bob 
+//                  media is flowing between browsers
+BobUA->AliceUA:     audio+video+data sent from Bob to Alice
+AliceUA->BobUA:     audio+video+data sent from Alice to Bob
 ]]></artwork>
      </figure></t>
 
      <t>
      The SDP for |offer-B1| looks like: </t>
-     
+
      <t>
        <figure>
-	 <artwork><![CDATA[
+         <artwork><![CDATA[
 v=0
 o=- 4962303333179871723 1 IN IP4 0.0.0.0
 s=-
@@ -2421,46 +2421,46 @@ a=ice-options:trickle
 a=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
                      :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-	 ]]></artwork>
+         ]]></artwork>
        </figure>
      </t>
-     
+
      <t>
        The SDP for |candidate-B1| looks like: </t>
        <t> <figure>
-	 <artwork><![CDATA[
+         <artwork><![CDATA[
 candidate:109270923 1 udp 2122194687 192.168.1.2 51556 typ host
-	 ]]></artwork>
+         ]]></artwork>
        </figure>
      </t>
-     
+
      <t>
        The SDP for |candidate-B2| looks like: </t>
-       <t> 
+       <t>
        <figure>
-	 <artwork><![CDATA[
+         <artwork><![CDATA[
 candidate:4036177503 1 udp 1685987071 11.22.33.44 52546 typ srflx
           raddr 192.168.1.2 rport 51556
-	 ]]></artwork>
+         ]]></artwork>
        </figure>
      </t>
-     
+
      <t>
        The SDP for |candidate-B3| looks like: </t>
-       <t> 
+       <t>
        <figure>
-	 <artwork><![CDATA[
+         <artwork><![CDATA[
 candidate:3671762466 1 udp 41819903 22.33.44.55 61405 typ relay
-          raddr 11.22.33.44 rport 52546 
-	 ]]></artwork>
+          raddr 11.22.33.44 rport 52546
+         ]]></artwork>
        </figure>
      </t>
-     
+
      <t>
        The SDP for |answer-B1| looks like: </t>
-       <t> 
+       <t>
        <figure>
-	 <artwork><![CDATA[
+         <artwork><![CDATA[
 v=0
 o=- 7729291447651054566 1 IN IP4 0.0.0.0
 s=-
@@ -2502,11 +2502,11 @@ a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
 a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
-a=setup:active 
-	 ]]></artwork>
+a=setup:active
+         ]]></artwork>
        </figure>
      </t>
-     
+
      <t>
        The SDP for |candidate-B4| looks like: </t>
        <t> <figure>
@@ -2515,10 +2515,10 @@ candidate:109270924 1 udp 2122194687 192.168.2.3 61665 typ host
      ]]></artwork>
        </figure>
      </t>
-     
+
      <t>
        The SDP for |candidate-B5| looks like: </t>
-       <t> 
+       <t>
        <figure>
      <artwork><![CDATA[
 candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
@@ -2526,10 +2526,10 @@ candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
      ]]></artwork>
        </figure>
      </t>
-     
+
      <t>
        The SDP for |candidate-B6| looks like: </t>
-       <t> 
+       <t>
        <figure>
      <artwork><![CDATA[
 candidate:3671762467 1 udp 41819903 66.77.88.99 50416 typ relay
@@ -2539,14 +2539,14 @@ candidate:3671762467 1 udp 41819903 66.77.88.99 50416 typ relay
      </t>
 
      <t>
-       The SDP for |offer-B2| looks like: 
+       The SDP for |offer-B2| looks like:
        (note the increment of the version number in the o= line,
         and the c= and a=rtcp lines, which indicate the local candidate
         that was selected)
         </t>
-       <t> 
+       <t>
        <figure>
-	 <artwork><![CDATA[
+         <artwork><![CDATA[
 v=0
 o=- 7729291447651054566 2 IN IP4 0.0.0.0
 s=-
@@ -2581,7 +2581,7 @@ a=candidate:109270924 1 udp 2122194687 192.168.2.3 61665 typ host
 a=candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
             raddr 192.168.2.3 rport 61665
 a=candidate:3671762467 1 udp 41819903 66.77.88.99 50416 typ relay
-            raddr 55.66.77.88 rport 64532 
+            raddr 55.66.77.88 rport 64532
 a=end-of-candidates
 
 m=application 64532 UDP/TLS/SCTP webrtc-datachannel
@@ -2599,7 +2599,7 @@ a=candidate:109270924 1 udp 2122194687 192.168.2.3 61665 typ host
 a=candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
             raddr 192.168.2.3 rport 61665
 a=candidate:3671762467 1 udp 41819903 66.77.88.99 50416 typ relay
-            raddr 55.66.77.88 rport 64532 
+            raddr 55.66.77.88 rport 64532
 a=end-of-candidates
 
 m=video 64532 UDP/TLS/RTP/SAVPF 100 101
@@ -2632,7 +2632,7 @@ a=candidate:109270924 1 udp 2122194687 192.168.2.3 61665 typ host
 a=candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
             raddr 192.168.2.3 rport 61665
 a=candidate:3671762467 1 udp 41819903 66.77.88.99 50416 typ relay
-            raddr 55.66.77.88 rport 64532 
+            raddr 55.66.77.88 rport 64532
 a=end-of-candidates
 
 m=video 64532 UDP/TLS/RTP/SAVPF 100 101
@@ -2665,22 +2665,22 @@ a=candidate:109270924 1 udp 2122194687 192.168.2.3 61665 typ host
 a=candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
             raddr 192.168.2.3 rport 61665
 a=candidate:3671762467 1 udp 41819903 66.77.88.99 50416 typ relay
-            raddr 55.66.77.88 rport 64532 
+            raddr 55.66.77.88 rport 64532
 a=end-of-candidates
 
-	 ]]></artwork>
+         ]]></artwork>
        </figure>
      </t>
 
      <t>
-       The SDP for |answer-B2| looks like: 
-       (note the use of setup:passive to maintain 
-        the existing DTLS roles, and the use of a=recvonly to 
+       The SDP for |answer-B2| looks like:
+       (note the use of setup:passive to maintain
+        the existing DTLS roles, and the use of a=recvonly to
         indicate that the video streams are one-way)
      </t>
-       <t> 
+       <t>
        <figure>
-	 <artwork><![CDATA[
+         <artwork><![CDATA[
 v=0
 o=- 4962303333179871723 2 IN IP4 0.0.0.0
 s=-
@@ -2792,7 +2792,7 @@ a=candidate:4036177503 1 udp 1685987071 11.22.33.44 52546 typ srflx
 a=candidate:3671762466 1 udp 41819903 22.33.44.55 61405 typ relay
             raddr 11.22.33.44 rport 52546
 a=end-of-candidates
-	 ]]></artwork>
+         ]]></artwork>
        </figure>
      </t>
 
@@ -3210,7 +3210,7 @@ a=end-of-candidates
 
       <reference anchor="I-D.nandakumar-mmusic-proto-iana-registration">
         <front>
-          <title abbrev="SDP Proto Registrations">IANA registration of SDP 'proto' attribute 
+          <title abbrev="SDP Proto Registrations">IANA registration of SDP 'proto' attribute
           for transporting RTP Media over TCP under various RTP profiles.</title>
 
           <author fullname="Suhas Nandakumar" initials="S." surname="Nandakumar">
@@ -3228,7 +3228,7 @@ a=end-of-candidates
 
                 <country>USA</country>
               </postal>
-              
+
               <email>snandaku@cisco.com</email>
             </address>
           </author>
@@ -3242,17 +3242,17 @@ a=end-of-candidates
           <abstract>
             <t>
               RTP provides end-to-end network transport functions suitable for
-   	      applications transmitting real-time data, such as audio, video or
-   	      simulation data, over multicast or unicast network services. The data
-   	      transport is augmented by a control protocol (RTCP) to allow monitoring 
-   	      of the data delivery in a manner scalable to large multicast networks,
-   	      and to provide minimal control and identification functionality.
-   	    </t> 
-   	    <t>
-   	      This  document describes how to express RTP media transport over TCP 
-   	      in SDP (Session Description Protocol) under various configurations. 
-   	      This document defines 'TCP/RTP/AVPF', 'TCP/RTP/SAVP', 'TCP/RTP/SAVPF', 
-   	      'TCP/TLS/RTP/SAVP', 'TCP/TLS/RTP/SAVPF' protocol identifiers for SDP.
+              applications transmitting real-time data, such as audio, video or
+              simulation data, over multicast or unicast network services. The data
+              transport is augmented by a control protocol (RTCP) to allow monitoring
+              of the data delivery in a manner scalable to large multicast networks,
+              and to provide minimal control and identification functionality.
+            </t>
+            <t>
+              This  document describes how to express RTP media transport over TCP
+              in SDP (Session Description Protocol) under various configurations.
+              This document defines 'TCP/RTP/AVPF', 'TCP/RTP/SAVP', 'TCP/RTP/SAVPF',
+              'TCP/TLS/RTP/SAVP', 'TCP/TLS/RTP/SAVPF' protocol identifiers for SDP.
             </t>
           </abstract>
         </front>
@@ -4115,14 +4115,14 @@ a=end-of-candidates
     </references>
 
     <section title="Change log" anchor="sec.change-log">
-       
+
       <t> Note: This section will be removed by RFC Editor before publication. </t>
 
       <t>Changes in draft-08:
       <list style="symbols">
-        
+
         <t> Added new example section and removed old examples in appendix. </t>
-        
+
         <t>Fixed &lt;proto&gt; field handling.</t>
 
         <t>Added text describing a=rtcp attribute.</t>
@@ -4134,18 +4134,18 @@ a=end-of-candidates
         discussion at interim.</t>
 
         <t>Added max-bundle-and-rtcp-mux policy.</t>
-        
+
         <t>Added description of maxptime handling.</t>
 
         <t>Updated ICE candidate pool default to 0.</t>
-        
+
         <t>Resolved open issues around AppID/receiver-ID.</t>
 
         <t>Reworked and expanded how changes to the ICE configuration are handled.</t>
         <t>Some reference updates.</t>
 
         <t>Editorial clarification.</t>
-  
+
       </list></t>
 
       <t>Changes in draft-07:
@@ -4175,7 +4175,7 @@ a=end-of-candidates
         <t>Added Eric Rescorla as a draft editor.</t>
 
         <t>Cleaned up references.</t>
-        
+
         <t>Editorial cleanup</t>
       </list></t>
       <t>Changes in draft-06: <list style="symbols">
