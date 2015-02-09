@@ -689,7 +689,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           candidate pool size MUST be zero.
           </t>
 
-          <t>Lastly, the
+          <t>The
           application can specify its preferred policy regarding use of BUNDLE,
           the multiplexing mechanism defined in <xref
           target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>.
@@ -723,18 +723,26 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               candidate gathering and maximize multiplexing, at the cost of less
               compatibility with legacy endpoints.
               </t>
-              <t></t>
-              <t hangText="max-bundle-and-rtcp-mux:">Similar to max-bundle,
-              but RTCP candidates are not gathered. This policy reduces the
-              candidates that must be gathered to the absolute minimum,
-              but will not be compatible with legacy endpoints that do not
-              support RTCP mux.
-              </t>
             </list>
             As it provides the best tradeoff between performance and
             compatibility with legacy endpoints, the default BUNDLE policy
             MUST be set to "balanced".
           </t>
+
+          <t>The
+          application can specify its preferred policy regarding use of RTP/RTCP
+          multiplexing <xref target="RFC5761"/> using one of the following policies:
+          <list style="hanging">
+            <t hangText="max-compat:">The browser will gather both RTP and
+            RTCP candidates but also will offer "a=rtcp-mux", thus allowing
+            for compatibility with either multiplexing or non-multiplexing endpoints.</t>
+
+            <t hangText="max-mux:">The browser will only gather RTP candidates
+            and when acting as answerer will reject any m= section that does not
+            provide an "a=rtcp-mux" attribute.</t>
+          </list>
+          </t>
+          
         </section>
         <section title="createOffer" anchor="sec.createoffer">
           <t>The createOffer method generates a blob of SDP that contains a
@@ -1064,10 +1072,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             immediately; if increased, additional candidates are pre-gathered;
             if decreased, the now-superfluous candidates are discarded.
             </t>
-            <t>Any changes to the BUNDLE policy take effect immediately, i.e.
+            <t>Any changes to the BUNDLE or RTCP multiplexing policies take effect immediately, i.e.
             any future tracks added to the PeerConnection will have their
-            bundle-only state marked accordingly.
+            bundle-only and RTP/RTCP multiplexing state marked accordingly.
             </t>
+            
           </list></t>
           <t>This call may result in a change to the state of the ICE Agent,
           and may result in a change to media state if it results in
@@ -1893,7 +1902,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the "active" role is RECOMMENDED.</t>
 
               <t>If present in the offer, an "a=rtcp-mux" line, as specified
-              in <xref target="RFC5761"></xref>, Section 5.1.1.</t>
+              in <xref target="RFC5761"></xref>, Section 5.1.1. If the
+              "max-mux" RTCP multiplexing policy is set and no "a=rtcp-mux"
+              line is present in the offer,  then the m=line MUST be
+              marked as rejected by setting the port in the m= line to zero, as
+              indicated in <xref target="RFC3264"></xref>, Section 6.
+              </t>
 
               <t>If present in the offer, an "a=rtcp-rsize" line, as specified
               in <xref target="RFC5506"></xref>, Section 5.</t>
@@ -2286,8 +2300,8 @@ a=end-of-candidates
 
      <t> This section shows a typical example of a session between two
      browsers setting up an audio channel and a data channel. Trickle
-     ICE is used in full trickle mode with a policy of max-bundle-and-rtcp-mux
-     and a single TURN server.
+     ICE is used in full trickle mode with a bundle policy of max-bundle,
+     an RTCP mux policy of max-mux, and a single TURN server.
      Later, two video flows, one for the
      presenter and one for screen sharing, are added to the session.
      This example shows Alice's browser initiating the
