@@ -1148,7 +1148,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 implemented to signal information about media direction.</t>
 
                 <t><xref target="RFC5576"></xref> MUST be implemented to signal
-                RTP SSRC values.</t>
+                RTP SSRC values and grouping semantics.</t>
 
                 <t><xref target="RFC4585"></xref> MUST be implemented to signal
                 RTCP based feedback.</t>
@@ -1158,6 +1158,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
                 <t><xref target="RFC5506"></xref> MUST be implemented to signal
                 reduced-size RTCP messages.</t>
+
+                <t><xref target="RFC4588"></xref> MUST be implemented to signal
+                RTX payload type associations.</t>
 
                 <t><xref target="RFC3556"></xref> with bandwidth modifiers MAY
                 be supported for specifying RTCP bandwidth as a fraction of the
@@ -1362,7 +1365,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as
               specified in <xref target="RFC4566"></xref>, Section 6.
-              The REQUIRED audio and video codecs to support are specified in <xref
+              The mandatory audio and video codecs that MUST be supported are
+              specified in <xref
               target="I-D.ietf-rtcweb-audio"></xref> (see Section 3) and <xref
               target="I-D.ietf-rtcweb-video"></xref> (see Section 5).</t>
 
@@ -1377,8 +1381,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               references the payload type of the primary codec, as specified
               in <xref target="RFC4588"></xref>, Section 8.1.</t>
 
-              <t>For each supported FEC mechanism, a corresponding "a=rtpmap"
-              line indicating the desired FEC codec.</t>
+              <t>For each supported FEC mechanism, "a=rtpmap" and "a=fmtp" lines,
+              as specified in <xref target="RFC4566"></xref>, Section 6. The
+              mandatory FEC mechanisms that MUST be supported are specified in
+              <xref target="I-D.ietf-rtcweb-fec"></xref>, Section 6, and
+              specific usage for each media type is outlined in Sections 4
+              and 5.</t>
 
               <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref
               target="RFC5245"></xref>, Section 15.4.</t>
@@ -1437,7 +1445,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>If FEC is supported for this media type, another "a=ssrc"
               line with the FEC SSRC, and an "a=ssrc-group" line, as specified
               in <xref target="RFC5576"></xref>, section 4.2, with semantics
-              set to "FEC" and including the primary and FEC SSRCs.</t>
+              set to "FEC-FR" and including the primary and FEC SSRCs. For
+              simplicity, if both RTX and FEC are supported, the FEC SSRC
+              MUST be the same as the RTX SSRC.</t>
 
               <t>[OPEN ISSUE: Handling of a=imageattr]</t>
 
@@ -1836,8 +1846,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>For each supported codec that is present in the offer,
               "a=rtpmap" and "a=fmtp" lines, as specified in <xref
               target="RFC4566"></xref>, Section 6, and <xref
-              target="RFC3264"></xref>, Section 6.1. 
-              The REQUIRED audio and video codecs to support are specified in <xref
+              target="RFC3264"></xref>, Section 6.1.
+              The madatory audio and video codecs that MUST be supported are
+              specified in <xref
               target="I-D.ietf-rtcweb-audio"></xref> (see Section 3) and <xref
               target="I-D.ietf-rtcweb-video"></xref> (see Section 5).
               Note that for simplicity, the
@@ -1856,9 +1867,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               type of the primary codec, as specified in <xref
               target="RFC4588"></xref>, Section 8.1.</t>
 
-              <t>For each supported FEC mechanism that is present in the
-              offer, a corresponding "a=rtpmap" line indicating the desired
-              FEC codec.</t>
+              <t>For each supported FEC mechanism, "a=rtpmap" and "a=fmtp" lines,
+              as specified in <xref target="RFC4566"></xref>, Section 6. The
+              mandatory FEC mechanisms that MUST be supported are specified in
+              <xref target="I-D.ietf-rtcweb-fec"></xref>, Section 6, and
+              specific usage for each media type is outlined in Sections 4
+              and 5.</t>
 
               <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref
               target="RFC5245"></xref>, Section 15.4.</t>
@@ -1914,7 +1928,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               been negotiated for this m= section, another "a=ssrc" line with
               the FEC SSRC, and an "a=ssrc-group" line, as specified in <xref
               target="RFC5576"></xref>, section 4.2, with semantics set to
-              "FEC" and including the primary and FEC SSRCs.</t>
+              "FEC-FR" and including the primary and FEC SSRCs. For
+              simplicity, if both RTX and FEC are supported, the FEC SSRC
+              MUST be the same as the RTX SSRC.</t>
 
               <t>[OPEN ISSUE: Handling of a=imageattr]</t>
             </list></t>
@@ -3744,6 +3760,24 @@ a=end-of-candidates
 
         <format target="http://www.ietf.org/internet-drafts/draft-ivov-mmusic-trickle-ice-00.txt"
                 type="TXT" />
+      </reference>
+
+      <reference anchor="I-D.ietf-rtcweb-fec">
+        <front>
+          <title>WebRTC Forward Error Correction Requirements</title>
+          <author initials="J" surname="Uberti" fullname="Justin Uberti">
+            <organization/>
+          </author>
+          <date month="February" day="6" year="2015"/>
+          <abstract>
+            <t>
+              This document makes recommendations for how Forward Error
+              Correction (FEC) should be used by WebRTC applications.
+            </t>
+          </abstract>
+        </front>
+        <seriesInfo name="Internet-Draft" value="draft-ietf-rtcweb-fec-00"/>
+        <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-fec-00.txt"/>
       </reference>
 
     </references>
