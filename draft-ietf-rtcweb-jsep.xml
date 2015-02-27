@@ -733,13 +733,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           application can specify its preferred policy regarding use of RTP/RTCP
           multiplexing <xref target="RFC5761"/> using one of the following policies:
           <list style="hanging">
-            <t hangText="max-compat:">The browser will gather both RTP and
+            <t hangText="negotiate:">The browser will gather both RTP and
             RTCP candidates but also will offer "a=rtcp-mux", thus allowing
             for compatibility with either multiplexing or non-multiplexing endpoints.</t>
 
-            <t hangText="max-mux:">The browser will only gather RTP candidates
+            <t hangText="require:">The browser will only gather RTP candidates
             and when acting as answerer will reject any m= section that does not
-            provide an "a=rtcp-mux" attribute.</t>
+            provide an "a=rtcp-mux" attribute. This halves the number of candidates
+            that the offerer needs to gather.</t>
           </list>
           </t>
           
@@ -1072,9 +1073,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             immediately; if increased, additional candidates are pre-gathered;
             if decreased, the now-superfluous candidates are discarded.
             </t>
-            <t>Any changes to the BUNDLE or RTCP multiplexing policies take effect immediately, i.e.
-            any future tracks added to the PeerConnection will have their
-            bundle-only and RTP/RTCP multiplexing state marked accordingly.
+            <t>The BUNDLE and RTCP-multiplexing policies MUST NOT be
+            changed after the construction of the PeerConnection.
             </t>
             
           </list></t>
