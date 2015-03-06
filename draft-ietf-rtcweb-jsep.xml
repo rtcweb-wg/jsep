@@ -1650,7 +1650,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Options Handling" anchor="sec.options-handling1">
           <t>The createOffer method takes as a parameter an RTCOfferOptions
           object. Special processing is performed when generating a SDP
-          description if the following constraints are present.</t>
+          description if the following options are present.</t>
 
           <section title="OfferToReceiveAudio" anchor="sec.offertoreceiveaudio">
             <t>If the "OfferToReceiveAudio" option is specified, with an integer
@@ -2016,26 +2016,27 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>For MediaStreamTracks that are still present, the "a=msid",
               "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</t>
-            </list></t>
+            </list>
+          </t>
         </section>
 
         <section title="Options Handling" anchor="sec.options-handling2">
           <t>The createAnswer method takes as a parameter an RTCAnswerOptions
-          object. Special processing is performed when generating a SDP
-          description if the following constraints are present.</t>
+          object. The set of parameters for RTCAnswerOptions is different than
+          those supported in RTCOfferOptions;
+          the OfferToReceiveAudio, OfferToReceiveVideo, and IceRestart
+          options mentioned in <xref target="sec.options-handling1"></xref> are
+          meaningless in the context of generating an answer, as there is no need
+          to generate extra m= lines in an answer, and ICE credentials
+          will automatically be changed for all m= lines where the offerer chose
+          to perform ICE restart.</t>
+          <t>The following options are supported in RTCAnswerOptions.</t>
 
           <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection2">
             <t>Silence suppression in the answer is handled as described in
               <xref target="sec.voiceactivitydetection1"></xref>.
             </t>
           </section>
-
-          <t>The OfferToReceiveAudio, OfferToReceiveVideo, and IceRestart
-          options mentioned in <xref target="sec.options-handling1"></xref> are
-          meaningless in the context of generating an answer; there is no need
-          to generate extra m= lines in an answer, and ICE credentials
-          will automatically be changed for all m= lines where the offerer chose
-          to perform ICE restart.</t>
         </section>
       </section>
 
@@ -2089,7 +2090,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Remove or reorder codecs (m=)</t>
         </list></t>
 
-      <t>The following parameters may be controlled by constraints passed into
+      <t>The following parameters may be controlled by options passed into
       createOffer/createAnswer. As an open issue, these changes may also be be
       performed by manipulating the SDP returned from
       createOffer/createAnswer, as indicated above, as long as the
