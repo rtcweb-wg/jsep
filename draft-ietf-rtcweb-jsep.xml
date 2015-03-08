@@ -1995,7 +1995,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             stop and an error MUST be returned.</t>
             <t>Next, the SessionDescription is parsed into a data structure,
               as described in the
-              <xref target="sec.parsing-a-desc"/> section below.
+              <xref target="sec.parsing-a-desc"/> section below. If parsing
+              fails for any reason, processing MUST stop and an error MUST be
+              returned.
             </t>
             <t>Finally, the parsed SessionDescription is applied as described in
               the <xref target="sec.applying-a-local-desc"/> section below.</t>
@@ -2021,7 +2023,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             stop and an error MUST be returned.</t>
             <t>Next, the SessionDescription is parsed into a data structure,
               as described in the
-              <xref target="sec.parsing-a-desc"/> section below.
+              <xref target="sec.parsing-a-desc"/> section below. If parsing
+              fails for any reason, processing MUST stop and an error MUST be
+              returned.
             </t>
             <t>Finally, the parsed SessionDescription is applied as described in
               the <xref target="sec.applying-a-remote-desc"/> section below.</t>
@@ -2035,43 +2039,57 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         reject it if it is invalid. The exact details of this
         process are explained below.</t>
         <t>The SDP contained in the session description object consists of a
-        sequence of text lines, each containing a key=value expression.
+        sequence of text lines, each containing a key-value expression,
+        as described in <xref target="RFC4566"/>, Section 5.
         The SDP is read,
         line-by-line, and converted to a data structure that contains the
-        deserialized information. However, SDP supports various fields that are not relevant to JSEP applications, and so these fields can be ignored.
+        deserialized information. However, SDP allows many types of lines, not
+        all of which are relevant to JSEP applications, and the ones that are
+        not relevant can be ignored.
         For each line, the implementation will first ensure it is syntactically
-        correct, and then either parse the data to store for later use,
-        or discard the line and move on. If the line is not well-formed, or
-        cannot be parsed as described, the specified the parser MUST stop with an error and reject the session decription. This ensures that implementations do not accidentally misinterpret ambiguous SDP.</t>
+        correct, and then either parse the data value to store for later use,
+        or ignore the value and move on. The implementation MAY store ignored
+        lines for diagnostic purposes or other reasons, but the data contained
+        within will not be used in any future JSEP processing. If the line is
+        not well-formed, or cannot be parsed as described, the parser MUST stop
+        with an error and reject the session decription. This ensures that
+        implementations do not accidentally misinterpret ambiguous SDP.</t>
 
         <section title="Session-Level Parsing">
           <t>First, the session-level lines are checked and parsed. These
-            lines MUST occur in a specific order, and with a specific syntax, as defined in <xref target="RFC4566"/>, Section 5. </t>
-          <t>For non-attribute (a=) lines, their sequencing and syntax are checked,
+            lines MUST occur in a specific order, and with a specific syntax, as
+            defined in <xref target="RFC4566"/>, Section 5. Note that while
+            the specific line types (e.g. "v=", "c=") MUST occur in the defined
+            order, lines of the same type (typically "a=") can occur in any order,
+            and their ordering is not meaningful.</t>
+          <t>For non-attribute (non-"a=") lines, their sequencing and syntax are checked,
             as mentioned above, but all values MUST be discarded. For example,
-            because the use of ICE is mandatory, the c= line is superfluous and its value MUST be discarded; similarly, because session-level bandwidth is ambiguous when multiple media streams are present, a b= line at session
+            because the use of ICE is mandatory, the "c=" line is superfluous and its
+            value MUST be discarded; similarly, because session-level bandwidth is
+            ambiguous when multiple media streams are present, a "b=" line at session
             level is not useful and its value MUST be discarded.</t>
           <t>Specific processing is applied for the following session-level
-            attribute (a=) lines:
+            attribute ("a=") lines:
             <list style="symbols">
-              <t>Any a=group lines are parsed as specified in [TBD], and, if
-                valid, the group's semantics and mids are stored. [OPEN ISSUE: is
-                validation, e.g. of valid mids, done at this stage?]</t>
-              <t>If present, an a=ice-ufrag line is parsed as specified in
-                [TBD], and, if valid, the ufrag value is stored.</t>
-              <t>If present, an a=ice-pwd line is parsed as specified in
-                [TBD], and, if valid, the pwd value is stored.</t>
-              <t>If present, an a=ice-lite line is parsed as specified in
-                [TBD], and, if valid, a value indicating the presence of ice-lite
+              <t>Any "a=group" lines are parsed as specified in
+                <xref target="RFC5888"/>, Section 5, and, if
+                valid, the group's semantics and mids are stored.</t>
+               <t>If present, an "a=ice-lite" line is parsed as specified in
+                <xref target="RFC5245/">, Section 15.3, and, if valid, a value indicating the presence of ice-lite is stored.</t>
+              <t>If present, an "a=ice-ufrag" line is parsed as specified in
+                <xref target="RFC5245/">, Section 15.4, and, if valid,
+                the ufrag value is stored.</t>
+              <t>If present, an "a=ice-pwd" line is parsed as specified in
+                <xref target="RFC5245/">, Section 15.4, and, if valid, the pwd
+                value is stored.</t>
+              <t>If present, an "a=ice-options" line is parsed as specified in
+                <xref target="RFC5245/">, Section 15.5, and, if valid, the set of specified options is stored.</t>
+              <t>If present, any "a=fingerprint" lines are parsed as specified in
+                <xref target="RFC4572"/>, Section 5, and, if valid, the set of fingerprint and algorithm values is stored.</t>
+              <t>If present, an "a=setup" line is parsed as specified in
+                <xref target="RFC4145"/>, Section 4, and, if valid, the value
                 is stored.</t>
-              <t>If present, an a=ice-options is parsed as specified in
-                [TBD], and, if valid, the set of specified options is stored.</t>
-              <t>If present, any a=fingerprint lines are parsed as specified in
-                [TBD], and, if valid, the set of fingerprint and algorithm
-                values is stored.</t>
-              <t>If present, any a=setup attribute is parsed as specified in
-                [TBD], and, if valid, the value is stored.</t>
-              <t>TODO: msid-semantic and related values</t>
+              <t>TODO: msid-semantic, identity, extmap and related values</t>
             </list>
             Once all the session-level lines have been parsed, processing
             continues with the lines in media sections.
@@ -2151,6 +2169,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
        <t>The following steps are performed at the media engine level to apply a local
        description. For each m= section, do the following: [TODO - expand]
          For all m= sections:
+         [TODO: consistency check against generated values/Section 6]
          <list style="symbols">
           <t>If ufrag/pwd changed, trigger ICE restart</t>
          </list>
