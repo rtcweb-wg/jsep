@@ -1166,6 +1166,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 be supported for specifying RTCP bandwidth as a fraction of the
                 media bandwidth, RTCP fraction allocated to the senders and
                 setting maximum media bit-rate boundaries.</t>
+                <t>TODO: any others?</t>
             </list></t>
 
             <t>As required by <xref target="RFC4566"></xref>, Section 5.13, JSEP
@@ -2034,6 +2035,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
 
       <section title="Parsing a Session Description" anchor="sec.parsing-a-desc">
+        <t>[The behavior described herein is a draft version, and needs
+            more discussion to resolve various open issues.]</t>
         <t>When a SessionDescription of any type is supplied to
         setLocal/RemoteDescription, the implementation must parse it and
         reject it if it is invalid. The exact details of this
@@ -2047,9 +2050,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         all of which are relevant to JSEP applications, and the ones that are
         not specifically referenced below MAY be ignored. Implementations MAY
         also act on such lines, in accordance with the specification that
-        defines them, instead.
+        defines them.
         For each line, the implementation will first ensure it is syntactically
-        correct, and then either parse the data value to store for later use,
+        correct according its defining ABNF [TODO: reference], and then either parse
+        the data value to store for later use,
         or ignore the value and move on. If the line is
         not well-formed, or cannot be parsed as described, the parser MUST stop
         with an error and reject the session description. This ensures that
@@ -2064,34 +2068,41 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             and their ordering is not meaningful.</t>
           <t>For non-attribute (non-"a=") lines, their sequencing and syntax are checked,
             as mentioned above, but the only line whose value MUST be parsed and
-            stored is the "c=" line. Note that because session-level bandwidth is
+            stored is the "c=" line. For example, because session-level bandwidth is
             ambiguous when multiple media streams are present, a "b=" line at session
-            level is not useful and its value SHOULD be ignored.</t>
+            level is not useful and its value SHOULD be ignored.
+            [OPEN ISSUE: is this WG consensus? Are there other non-a= lines that
+             we need to do more than just syntactical validation, e.g. v=?]
+         </t>
           <t>Specific processing MUST be applied for the following session-level
             attribute ("a=") lines:
             <list style="symbols">
               <t>Any "a=group" lines are parsed as specified in
-                <xref target="RFC5888"/>, Section 5, and, if
-                valid, the group's semantics and mids are stored.</t>
-               <t>If present, an "a=ice-lite" line is parsed as specified in
-                <xref target="RFC5245"/>, Section 15.3, and, if valid, a value indicating the presence of ice-lite is stored.</t>
-              <t>If present, an "a=ice-ufrag" line is parsed as specified in
-                <xref target="RFC5245"/>, Section 15.4, and, if valid,
-                the ufrag value is stored.</t>
-              <t>If present, an "a=ice-pwd" line is parsed as specified in
-                <xref target="RFC5245"/>, Section 15.4, and, if valid, the pwd
+                <xref target="RFC5888"/>, Section 5, and the group's semantics
+                and mids are stored.</t>
+              <t>If present, a single "a=ice-lite" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.3, and a value indicating
+                the presence of ice-lite is stored.</t>
+              <t>If present, a single "a=ice-ufrag" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.4, and the ufrag value is
+                stored.</t>
+              <t>If present, a single "a=ice-pwd" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.4, and the password
                 value is stored.</t>
-              <t>If present, an "a=ice-options" line is parsed as specified in
-                <xref target="RFC5245"/>, Section 15.5, and, if valid, the set of specified options is stored.</t>
-              <t>If present, any "a=fingerprint" lines are parsed as specified in
-                <xref target="RFC4572"/>, Section 5, and, if valid, the set of fingerprint and algorithm values is stored.</t>
-              <t>If present, an "a=setup" line is parsed as specified in
-                <xref target="RFC4145"/>, Section 4, and, if valid, the value
+              <t>If present, a single "a=ice-options" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.5, and the set of specified
+                options is stored.</t>
+              <t>Any "a=fingerprint" lines are parsed as specified in
+                <xref target="RFC4572"/>, Section 5, and the set of fingerprint
+                and algorithm values is stored.</t>
+              <t>If present, a single "a=setup" line is parsed as specified in
+                <xref target="RFC4145"/>, Section 4, and the setup value
                 is stored.</t>
               <t>Any "a=extmap" lines are parsed as specified in
-                <xref target="RFC5285"/>, Section 5, and, if valid, their values
+                <xref target="RFC5285"/>, Section 5, and their values
                 are stored.</t>
-              <t>TODO: msid-semantic, identity,and related values.</t>
+              <t>TODO: msid-semantic, identity, rtcp-rsize, rtcp-mux,
+                and any other attribs valid at session level.</t>
             </list>
           </t>
           <t>
@@ -2117,13 +2128,23 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
           <t>Specific processing MUST also be applied for the following attribute lines:
             <list style="symbols">
-              <t>Any "ice-lite", "ice-ufrag", "ice-passwd", or "ice-options" lines
-                MUST be parsed as specified in <xref target="RFC5245"/>, Sections
-                15.3-15.5, and, if valid, their values are stored.</t>
+              <t>If present, a single "a=ice-lite" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.3, and a value indicating
+                the presence of ice-lite is stored.</t>
+              <t>If present, a single "a=ice-ufrag" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.4, and the ufrag value is
+                stored.</t>
+              <t>If present, a single "a=ice-pwd" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.4, and the password
+                value is stored.</t>
+              <t>If present, a single "a=ice-options" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.5, and the set of specified
+                options is stored.</t>
               <t>Any "a=fingerprint" lines are parsed as specified in
-                <xref target="RFC4572"/>, Section 5, and, if valid, the set of fingerprint and algorithm values is stored.</t>
-              <t>If present, an "a=setup" line is parsed as specified in
-                <xref target="RFC4145"/>, Section 4, and, if valid, the value
+                <xref target="RFC4572"/>, Section 5, and the set of fingerprint
+                 and algorithm values is stored.</t>
+              <t>If present, a single "a=setup" line is parsed as specified in
+                <xref target="RFC4145"/>, Section 4, and the setup value
                 is stored.</t>
             </list>
           </t>
@@ -2133,9 +2154,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <list style="symbols">
               <t>The "m=" fmt value MUST be parsed as specified in <xref target="RFC4566"/>,
               Section 5.14, and the individual values stored.</t>
-              <t>Any "a=rtpmap", a=fmtp", "a=ptime", or directional attributes
+              <t>Any "a=rtpmap" or "a=fmtp" lines
               MUST be parsed as specified in <xref target="RFC4566"/>, Section 6,
               and their values stored.</t>
+              <t>If present, a single "a=ptime" line MUST be parsed as described in
+              <xref target="RFC4566"/>, Section 6, and its value stored.</t>
+              <t>If present, a single direction attribute line (e.g. "a=sendrecv")
+              MUST be parsed as described in
+              <xref target="RFC4566"/>, Section 6, and its value stored.</t>
               <t>Any "a=ssrc" or "a=ssrc-group" attributes MUST be parsed as
               specified in <xref target="RFC5576"/>, Sections 4.1-4.2, and their
               values stored.</t>
@@ -2146,6 +2172,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Any "a=rtcp-mux" attribute MUST be parsed as specified in
                 <xref target="RFC5761"/>, Section 5.1.1, and its presence or
                 absence flagged and stored.</t>
+              <t>TODO: a=rtcp-rsize, a=rtcp, a=msid, a=candidate, a=end-of-candidates</t>
             </list>
           </t>
           <t>Otherwise, if the "m=" proto value indicats use of SCTP, the following
@@ -2157,6 +2184,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>An "a=sctp-port" attribute MUST be present, and it MUST be
                 parsed as specified in <xref target="I-D.ietf-mmusic-sctp-sdp"/>,
                 Section 5.2, and the value stored.</t>
+              <t>TODO: max message size</t>
             </list>
           </t>
         </section>
