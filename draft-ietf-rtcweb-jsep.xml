@@ -2045,14 +2045,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         line-by-line, and converted to a data structure that contains the
         deserialized information. However, SDP allows many types of lines, not
         all of which are relevant to JSEP applications, and the ones that are
-        not relevant can be ignored.
+        not specifically referenced below MAY be ignored. Implementations MAY
+        also act on such lines, in accordance with the specification that
+        defines them, instead.
         For each line, the implementation will first ensure it is syntactically
         correct, and then either parse the data value to store for later use,
-        or ignore the value and move on. The implementation MAY store ignored
-        lines for diagnostic purposes or other reasons, but the data contained
-        within will not be used in any future JSEP processing. If the line is
+        or ignore the value and move on. If the line is
         not well-formed, or cannot be parsed as described, the parser MUST stop
-        with an error and reject the session decription. This ensures that
+        with an error and reject the session description. This ensures that
         implementations do not accidentally misinterpret ambiguous SDP.</t>
 
         <section title="Session-Level Parsing">
@@ -2063,12 +2063,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             order, lines of the same type (typically "a=") can occur in any order,
             and their ordering is not meaningful.</t>
           <t>For non-attribute (non-"a=") lines, their sequencing and syntax are checked,
-            as mentioned above, but all values MUST be discarded. For example,
-            because the use of ICE is mandatory, the "c=" line is superfluous and its
-            value MUST be discarded; similarly, because session-level bandwidth is
+            as mentioned above, but the only line whose value MUST be parsed and
+            stored is the "c=" line. Note that because session-level bandwidth is
             ambiguous when multiple media streams are present, a "b=" line at session
-            level is not useful and its value MUST be discarded.</t>
-          <t>Specific processing is applied for the following session-level
+            level is not useful and its value SHOULD be ignored.</t>
+          <t>Specific processing MUST be applied for the following session-level
             attribute ("a=") lines:
             <list style="symbols">
               <t>Any "a=group" lines are parsed as specified in
@@ -2091,6 +2090,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 is stored.</t>
               <t>TODO: msid-semantic, identity, extmap and related values</t>
             </list>
+          </t>
+          <t>
             Once all the session-level lines have been parsed, processing
             continues with the lines in media sections.
           </t>
@@ -2102,10 +2103,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Parse m=:
             <list style="symbols">
               <t>Check port (i.e. rejected), read protocol</t>
-              <t>Read codec ordering</t>
+              <t>Read fmt</t>
             </list>
           </t>
-          <t>Ignore c=</t>
+          <t>Store c=</t>
           <t>Parse b= as max send bandwidth</t>
           <t>Parse the following a=:
             <list style="symbols">
@@ -2115,6 +2116,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Read fingerprint and setup</t>
               <t>Handle RTP attributes:
                 <list style="symbols">
+                  <t>Parse fmt as codec ordering</t>
                   <t>Read fmtp attributes</t>
                   <t>Read ssrc-group attributes</t>
                   <t>Read ssrc attributes</t>
@@ -2127,6 +2129,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               </t>
               <t>Handle SCTP attributes:
                 <list style="symbols">
+                  <t>Parse fmt as DC type</t>
                   <t>Read sctpmap/port attributes</t>
                 </list>
               </t>
@@ -2147,16 +2150,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     <t>DTLS fingerprint and setup values</t>
                   </list>
                 </t>
-                <t>If a BUNDLE group is present, the referenced m= sections MUST
-                exist. If multiple BUNDLE groups exist, each referenced m=
-                section MUST only exist in a single BUNDLE group. [TODO: should this apply to all groups?]</t>
               </list>
           </t>
           <t>If this session description is of type "pranswer" or "answer", the
           following additional checks are applied:
             <list style="symbols">
-              <t>The number of m= sections MUST exactly match the number of m=
-              sections in the associated offer.</t>
+              <t>The session description must follow the rules defined in
+                <xref target="RFC3264"/>, Section 6.</t>
               <t>For each m= section, the protocol value MUST exactly match the
               protocol value in the corresponding m= section in the associated
               offer.</t>
@@ -2187,6 +2187,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Set local SCTP pseudo-port</t>
          </list>
          Lastly, if the type of this local description is pranswer/answer,
+         apply BUNDLE if appropriate, and
          start transmission of any new MediaStreams, if permitted by direction, and ICE/DTLS are active.
          [TODO: Also, update the canTrickle attribute accordingly.]
         </t>
