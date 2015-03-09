@@ -2047,13 +2047,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         The SDP is read,
         line-by-line, and converted to a data structure that contains the
         deserialized information. However, SDP allows many types of lines, not
-        all of which are relevant to JSEP applications many of them
-        have no useful function in JSEP contexts.
+        all of which are relevant to JSEP applications.
         For each line, the implementation will first ensure it is syntactically
-        correct according its defining ABNF [TODO: reference], and check
+        correct according its defining ABNF [TODO: reference], check
         that it conforms to <xref target="RFC4566"/> and <xref target="RFC3264"/>
-        semantics and then process it (discarding, checking and discarding, or
-        storing) as described below.
+        semantics, and then either parse and store or discard the provided value,
+        as described below.
         [TODO: ensure that every line is listed below.]
         If the line is not well-formed, or cannot be parsed as described, the parser MUST stop
         with an error and reject the session description. This ensures that
@@ -2068,11 +2067,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             and their ordering is not meaningful.</t>
           <t>For non-attribute (non-"a=") lines, their sequencing, syntax,
             and semantics, are checked, as mentioned above. The following
-            lines ([TODO]) are not meaningful in the JSEP context and
-            MAY be discarded once they have been checked. The remaining
-            lines are processed as follows:
+            lines are not meaningful in the JSEP context and
+            MAY be discarded once they have been checked.
+            <list>
+              <t>TODO</t>
+            </list>
           </t>
-          <t>
+          <t>The remaining lines are processed as follows:
             <list>
               <t>The "c=" line MUST be parsed and stored.</t>
               <t>[OPEN ISSUE: For example, because session-level bandwidth is
