@@ -2055,7 +2055,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         with an error and reject the session description. This ensures that
         implementations do not accidentally misinterpret ambiguous SDP.</t>
 
-        <section title="Session-Level Parsing">
+        <section title="Session-Level Parsing" anchor="sec.session-level-parse">
           <t>First, the session-level lines are checked and parsed. These
             lines MUST occur in a specific order, and with a specific syntax, as
             defined in <xref target="RFC4566"/>, Section 5. Note that while
@@ -2088,7 +2088,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>If present, an "a=setup" line is parsed as specified in
                 <xref target="RFC4145"/>, Section 4, and, if valid, the value
                 is stored.</t>
-              <t>TODO: msid-semantic, identity, extmap and related values</t>
+              <t>Any "a=extmap" lines are parsed as specified in
+                <xref target="RFC5285"/>, Section 5, and, if valid, their values
+                are stored.</t>
+              <t>TODO: msid-semantic, identity,and related values.</t>
             </list>
           </t>
           <t>
@@ -2100,39 +2103,60 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Like the session-level lines, the media session lines MUST occur
             in the specific order and with the specific syntax defined in
             <xref target="RFC4566"/>, Section 5.</t>
-          <t>Parse m=:
+          <t>The "m=" line itself MUST be parsed as described in <xref target="RFC4566"/>,
+            Section 5.14, and the media, port, proto, and fmt values stored.</t>
+          <t>Following the "m=" line, specific processing MUST be applied for the
+            following non-attribute lines:
             <list style="symbols">
-              <t>Check port (i.e. rejected), read protocol</t>
-              <t>Read fmt</t>
+              <t>The "c=" line, if present, MUST be parsed as specified in
+                <xref target="RFC4566"/>, Section 5.7, and its contents stored.</t>
+              <t>The "b=" line, if present, MUST be parsed as specified in
+                <xref target="RFC4566"/>, Section 5.8, and the bwtype and
+                bandwidth values stored.</t>
             </list>
           </t>
-          <t>Store c=</t>
-          <t>Parse b= as max send bandwidth</t>
-          <t>Parse the following a=:
+          <t>Specific processing MUST also be applied for the following attribute lines:
             <list style="symbols">
-              <t>Read mid as id for desc</t>
-              <t>Read ICE ufrag/pwd and save</t>
-              <t>Read ICE options</t>
-              <t>Read fingerprint and setup</t>
-              <t>Handle RTP attributes:
-                <list style="symbols">
-                  <t>Parse fmt as codec ordering</t>
-                  <t>Read fmtp attributes</t>
-                  <t>Read ssrc-group attributes</t>
-                  <t>Read ssrc attributes</t>
-                  <t>Read ptime, maxptime</t>
-                  <t>Read header extensions</t>
-                  <t>Read rtcp-fb</t>
-                  <t>Read direction attribs (recvonly, etc)</t>
-                  <t>Read rtcp-mux</t>
-                </list>
-              </t>
-              <t>Handle SCTP attributes:
-                <list style="symbols">
-                  <t>Parse fmt as DC type</t>
-                  <t>Read sctpmap/port attributes</t>
-                </list>
-              </t>
+              <t>Any "ice-lite", "ice-ufrag", "ice-passwd", or "ice-options" lines
+                MUST be parsed as specified in <xref target="RFC5245"/>, Sections
+                15.3-15.5, and, if valid, their values are stored.</t>
+              <t>Any "a=fingerprint" lines are parsed as specified in
+                <xref target="RFC4572"/>, Section 5, and, if valid, the set of fingerprint and algorithm values is stored.</t>
+              <t>If present, an "a=setup" line is parsed as specified in
+                <xref target="RFC4145"/>, Section 4, and, if valid, the value
+                is stored.</t>
+            </list>
+          </t>
+          <t>If the "m=" proto value indicates use of RTP, as decribed in
+            the <xref target="sec.profile-names"/> section above, the following
+            attribute lines MUST be processed:
+            <list style="symbols">
+              <t>The "m=" fmt value MUST be parsed as specified in <xref target="RFC4566"/>,
+              Section 5.14, and the individual values stored.</t>
+              <t>Any "a=rtpmap", a=fmtp", "a=ptime", or directional attributes
+              MUST be parsed as specified in <xref target="RFC4566"/>, Section 6,
+              and their values stored.</t>
+              <t>Any "a=ssrc" or "a=ssrc-group" attributes MUST be parsed as
+              specified in <xref target="RFC5576"/>, Sections 4.1-4.2, and their
+              values stored.</t>
+              <t>Any "a=extmap" attributes MUST be parsed as specified in
+                <xref target="RFC5285"/>, Section 5, and their values stored.</t>
+              <t>Any "a=rtcp-fb" attributes MUST be parsed as specified in
+                <xref target="RFC4585"/>, Section 4.2., and their values stored.</t>
+              <t>Any "a=rtcp-mux" attribute MUST be parsed as specified in
+                <xref target="RFC5761"/>, Section 5.1.1, and its presence or
+                absence flagged and stored.</t>
+            </list>
+          </t>
+          <t>Otherwise, if the "m=" proto value indicats use of SCTP, the following
+            attribute lines MUST be processed:
+            <list style="symbols">
+              <t>The "m=" fmt value MUST be parsed as specified in
+                <xref target="I-D.ietf-mmusic-sctp-sdp"/>, Section 4.3, and
+                the application protocol value stored.</t>
+              <t>An "a=sctp-port" attribute MUST be present, and it MUST be
+                parsed as specified in <xref target="I-D.ietf-mmusic-sctp-sdp"/>,
+                Section 5.2, and the value stored.</t>
             </list>
           </t>
         </section>
@@ -2166,34 +2190,50 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
 
       <section title="Applying a Local Description" anchor="sec.applying-a-local-desc">
-       <t>The following steps are performed at the media engine level to apply a local
-       description. For each m= section, do the following: [TODO - expand]
-         For all m= sections:
-         [TODO: consistency check against generated values/Section 6]
-         <list style="symbols">
-          <t>If ufrag/pwd changed, trigger ICE restart</t>
-         </list>
-         For RTP m= sections:
-         <list style="symbols">
-           <t>Set RTCP mux receive state</t>
-           <t>Set RTP header extension receive state, ensure all are known</t>
-           <t>Set PT demux</t>
-           <t>Set receive codecs, ensure all are known</t>
-           <t>Set up RTX (verify apt)</t>
-           <t>Set local directional state</t>
-         </list>
-         For SCTP m= sections:
-         <list style="symbols">
-          <t>Set local SCTP pseudo-port</t>
-         </list>
-         Lastly, if the type of this local description is pranswer/answer,
-         apply BUNDLE if appropriate, and
-         start transmission of any new MediaStreams, if permitted by direction, and ICE/DTLS are active.
-         [TODO: Also, update the canTrickle attribute accordingly.]
+        <t>The following steps are performed at the media engine level to apply a local
+        description.</t>
+        <t>First, the parsed parameters are checked to ensure that any modifications
+        performed fall within those explicitly permitted by
+        <xref target="sec.configurable-sdp-paramete"/>; otherwise, processing
+        MUST stop and an error MUST be returned.</t>
+        <t>Next, media sections are processed. For each media section,
+        the following steps MUST be performed; if any parameters are out of
+        bounds, or cannot be applied, processing MUST stop and an error MUST be
+        returned.
+          <list style="symbols">
+            <t>If the ICE ufrag and password values changed, trigger the ICE Agent
+              to start an ICE restart and begin gathering new candidates, as defined
+              in <xref target="RFC5245"/>, Section X.Y.</t>
+          </list>
         </t>
+        <t>If the media section proto value indicates use of RTP:
+          <list style="symbols">
+            <t>If the RTCP mux parameter is set, discard any RTCP transport,
+             and begin muxing RTCP over the RTP transport, as specified in
+             <xref target="RFC5761"/>, Section X.Y. [if answer]
+            </t>
+            <t>Set RTP header extension receive state, ensure all are known</t>
+            <t>Set PT demux</t>
+            <t>Set receive codecs, ensure all are known</t>
+            <t>Set up RTX (verify apt)</t>
+            <t>Set local directional state</t>
+          </list>
+        </t>
+        <t>If the media section proto value indicates use of SCTP:
+          <list style="symbols">
+            <t>Set local SCTP pseudo-port</t>
+          </list>
+        </t>
+        <t>Finally, if this description is of type "pranswer" or "answer", follow
+        the processing defined in the <xref target="sec.applying-an-answer"/>
+        section below.</t>
       </section>
 
       <section title="Applying a Remote Description" anchor="sec.applying-a-remote-desc">
+        <t>TODO</t>
+      </section>
+
+      <section title="Applying an Answer" anchor="sec.applying-an-answer">
         <t>TODO</t>
       </section>
     </section>
