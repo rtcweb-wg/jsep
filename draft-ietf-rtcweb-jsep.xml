@@ -1176,6 +1176,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 be supported for specifying RTCP bandwidth as a fraction of the
                 media bandwidth, RTCP fraction allocated to the senders and
                 setting maximum media bit-rate boundaries.</t>
+                <t>TODO: any others?</t>
             </list></t>
 
             <t>As required by <xref target="RFC4566"></xref>, Section 5.13, JSEP
@@ -2053,13 +2054,282 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
       </section>
 
-      <section title="Parsing an Offer" anchor="sec.parsing-an-offer"></section>
+      <section title="Processing a Local Description" anchor="sec.processing-a-local-desc">
+        <t>When a SessionDescription is supplied to setLocalDescription, the
+            following steps MUST be performed:
+          <list style="symbols">
+            <t>First, the type of the SessionDescription is checked against the
+                  current state of the PeerConnection:
+              <list style="symbols">
+                <t>If the type is "offer", the PeerConnection state MUST be
+                      either "stable" or "have-local-offer".</t>
+                <t>If the type is "pranswer" or "answer", the PeerConnection
+                      state MUST be either "have-remote-offer" or
+                      "have-local-pranswer".</t>
+              </list>
+            </t>
+            <t>If the type is not correct for the current state, processing MUST
+            stop and an error MUST be returned.</t>
+            <t>Next, the SessionDescription is parsed into a data structure,
+              as described in the
+              <xref target="sec.parsing-a-desc"/> section below. If parsing
+              fails for any reason, processing MUST stop and an error MUST be
+              returned.
+            </t>
+            <t>Finally, the parsed SessionDescription is applied as described in
+              the <xref target="sec.applying-a-local-desc"/> section below.</t>
+          </list>
+        </t>
+      </section>
 
-      <section title="Parsing an Answer" anchor="sec.parsing-an-answer"></section>
+      <section title="Processing a Remote Description" anchor="sec.processing-a-remote-desc">
+        <t>When a SessionDescription is supplied to setRemoteDescription, the
+            following steps MUST be performed:
+          <list style="symbols">
+            <t>First, the type of the SessionDescription is checked against the
+                  current state of the PeerConnection:
+              <list style="symbols">
+                <t>If the type is "offer", the PeerConnection state MUST be
+                      either "stable" or "have-remote-offer".</t>
+                <t>If the type is "pranswer" or "answer", the PeerConnection
+                      state MUST be either "have-local-offer" or
+                      "have-remote-pranswer".</t>
+              </list>
+            </t>
+            <t>If the type is not correct for the current state, processing MUST
+            stop and an error MUST be returned.</t>
+            <t>Next, the SessionDescription is parsed into a data structure,
+              as described in the
+              <xref target="sec.parsing-a-desc"/> section below. If parsing
+              fails for any reason, processing MUST stop and an error MUST be
+              returned.
+            </t>
+            <t>Finally, the parsed SessionDescription is applied as described in
+              the <xref target="sec.applying-a-remote-desc"/> section below.</t>
+          </list>
+        </t>
+      </section>
 
-      <section title="Applying a Local Description" anchor="sec.applying-a-local-descript"></section>
+      <section title="Parsing a Session Description" anchor="sec.parsing-a-desc">
+        <t>[The behavior described herein is a draft version, and needs
+            more discussion to resolve various open issues.]</t>
+        <t>When a SessionDescription of any type is supplied to
+        setLocal/RemoteDescription, the implementation must parse it and
+        reject it if it is invalid. The exact details of this
+        process are explained below.</t>
+        <t>The SDP contained in the session description object consists of a
+        sequence of text lines, each containing a key-value expression,
+        as described in <xref target="RFC4566"/>, Section 5.
+        The SDP is read,
+        line-by-line, and converted to a data structure that contains the
+        deserialized information. However, SDP allows many types of lines, not
+        all of which are relevant to JSEP applications.
+        For each line, the implementation will first ensure it is syntactically
+        correct according its defining ABNF [TODO: reference], check
+        that it conforms to <xref target="RFC4566"/> and <xref target="RFC3264"/>
+        semantics, and then either parse and store or discard the provided value,
+        as described below.
+        [TODO: ensure that every line is listed below.]
+        If the line is not well-formed, or cannot be parsed as described, the parser MUST stop
+        with an error and reject the session description. This ensures that
+        implementations do not accidentally misinterpret ambiguous SDP.</t>
 
-      <section title="Applying a Remote Description" anchor="sec.applying-a-remote-descrip"></section>
+        <section title="Session-Level Parsing" anchor="sec.session-level-parse">
+          <t>First, the session-level lines are checked and parsed. These
+            lines MUST occur in a specific order, and with a specific syntax, as
+            defined in <xref target="RFC4566"/>, Section 5. Note that while
+            the specific line types (e.g. "v=", "c=") MUST occur in the defined
+            order, lines of the same type (typically "a=") can occur in any order,
+            and their ordering is not meaningful.</t>
+          <t>For non-attribute (non-"a=") lines, their sequencing, syntax,
+            and semantics, are checked, as mentioned above. The following
+            lines are not meaningful in the JSEP context and
+            MAY be discarded once they have been checked.
+            <list>
+              <t>TODO</t>
+            </list>
+          </t>
+          <t>The remaining lines are processed as follows:
+            <list>
+              <t>The "c=" line MUST be parsed and stored.</t>
+              <t>[OPEN ISSUE: For example, because session-level bandwidth is
+              ambiguous when multiple media streams are present, a "b=" line at session
+              level is not useful and its value SHOULD be ignored.
+              [OPEN ISSUE: is this WG consensus? Are there other non-a= lines that
+              we need to do more than just syntactical validation, e.g. v=?]
+              </t>
+            </list>
+          </t>
+          <t>Specific processing MUST be applied for the following session-level
+            attribute ("a=") lines:
+            <list style="symbols">
+              <t>Any "a=group" lines are parsed as specified in
+                <xref target="RFC5888"/>, Section 5, and the group's semantics
+                and mids are stored.</t>
+              <t>If present, a single "a=ice-lite" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.3, and a value indicating
+                the presence of ice-lite is stored.</t>
+              <t>If present, a single "a=ice-ufrag" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.4, and the ufrag value is
+                stored.</t>
+              <t>If present, a single "a=ice-pwd" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.4, and the password
+                value is stored.</t>
+              <t>If present, a single "a=ice-options" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.5, and the set of specified
+                options is stored.</t>
+              <t>Any "a=fingerprint" lines are parsed as specified in
+                <xref target="RFC4572"/>, Section 5, and the set of fingerprint
+                and algorithm values is stored.</t>
+              <t>If present, a single "a=setup" line is parsed as specified in
+                <xref target="RFC4145"/>, Section 4, and the setup value
+                is stored.</t>
+              <t>Any "a=extmap" lines are parsed as specified in
+                <xref target="RFC5285"/>, Section 5, and their values
+                are stored.</t>
+              <t>TODO: msid-semantic, identity, rtcp-rsize, rtcp-mux,
+                and any other attribs valid at session level.</t>
+            </list>
+          </t>
+          <t>
+            Once all the session-level lines have been parsed, processing
+            continues with the lines in media sections.
+          </t>
+        </section>
+        <section title="Media Section Parsing">
+          <t>Like the session-level lines, the media session lines MUST occur
+            in the specific order and with the specific syntax defined in
+            <xref target="RFC4566"/>, Section 5.</t>
+          <t>The "m=" line itself MUST be parsed as described in <xref target="RFC4566"/>,
+            Section 5.14, and the media, port, proto, and fmt values stored.</t>
+          <t>Following the "m=" line, specific processing MUST be applied for the
+            following non-attribute lines:
+            <list style="symbols">
+              <t>The "c=" line, if present, MUST be parsed as specified in
+                <xref target="RFC4566"/>, Section 5.7, and its contents stored.</t>
+              <t>The "b=" line, if present, MUST be parsed as specified in
+                <xref target="RFC4566"/>, Section 5.8, and the bwtype and
+                bandwidth values stored.</t>
+            </list>
+          </t>
+          <t>Specific processing MUST also be applied for the following attribute lines:
+            <list style="symbols">
+              <t>If present, a single "a=ice-lite" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.3, and a value indicating
+                the presence of ice-lite is stored.</t>
+              <t>If present, a single "a=ice-ufrag" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.4, and the ufrag value is
+                stored.</t>
+              <t>If present, a single "a=ice-pwd" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.4, and the password
+                value is stored.</t>
+              <t>If present, a single "a=ice-options" line is parsed as specified in
+                <xref target="RFC5245"/>, Section 15.5, and the set of specified
+                options is stored.</t>
+              <t>Any "a=fingerprint" lines are parsed as specified in
+                <xref target="RFC4572"/>, Section 5, and the set of fingerprint
+                 and algorithm values is stored.</t>
+              <t>If present, a single "a=setup" line is parsed as specified in
+                <xref target="RFC4145"/>, Section 4, and the setup value
+                is stored.</t>
+            </list>
+          </t>
+          <t>If the "m=" proto value indicates use of RTP, as decribed in
+            the <xref target="sec.profile-names"/> section above, the following
+            attribute lines MUST be processed:
+            <list style="symbols">
+              <t>The "m=" fmt value MUST be parsed as specified in <xref target="RFC4566"/>,
+              Section 5.14, and the individual values stored.</t>
+              <t>Any "a=rtpmap" or "a=fmtp" lines
+              MUST be parsed as specified in <xref target="RFC4566"/>, Section 6,
+              and their values stored.</t>
+              <t>If present, a single "a=ptime" line MUST be parsed as described in
+              <xref target="RFC4566"/>, Section 6, and its value stored.</t>
+              <t>If present, a single direction attribute line (e.g. "a=sendrecv")
+              MUST be parsed as described in
+              <xref target="RFC4566"/>, Section 6, and its value stored.</t>
+              <t>Any "a=ssrc" or "a=ssrc-group" attributes MUST be parsed as
+              specified in <xref target="RFC5576"/>, Sections 4.1-4.2, and their
+              values stored.</t>
+              <t>Any "a=extmap" attributes MUST be parsed as specified in
+                <xref target="RFC5285"/>, Section 5, and their values stored.</t>
+              <t>Any "a=rtcp-fb" attributes MUST be parsed as specified in
+                <xref target="RFC4585"/>, Section 4.2., and their values stored.</t>
+              <t>If present, a single "a=rtcp-mux" line MUST be parsed as specified in
+                <xref target="RFC5761"/>, Section 5.1.1, and its presence or
+                absence flagged and stored.</t>
+              <t>TODO: a=rtcp-rsize, a=rtcp, a=msid, a=candidate, a=end-of-candidates</t>
+            </list>
+          </t>
+          <t>Otherwise, if the "m=" proto value indicats use of SCTP, the following
+            attribute lines MUST be processed:
+            <list style="symbols">
+              <t>The "m=" fmt value MUST be parsed as specified in
+                <xref target="I-D.ietf-mmusic-sctp-sdp"/>, Section 4.3, and
+                the application protocol value stored.</t>
+              <t>An "a=sctp-port" attribute MUST be present, and it MUST be
+                parsed as specified in <xref target="I-D.ietf-mmusic-sctp-sdp"/>,
+                Section 5.2, and the value stored.</t>
+              <t>TODO: max message size</t>
+            </list>
+          </t>
+        </section>
+        <section title="Semantics Verification">
+          <t>Assuming parsing completes successfully, the parsed description is
+            then evaluated to ensure internal consistency as well as proper support
+            for mandatory features. Specifically, the following checks are
+            performed:
+              <list style="symbols">
+                <t>For each m= section, valid values for each of the
+                mandatory-to-use features enumerated in <xref target="sec.usage-requirements"/> MUST be present. These values MAY either be present at the
+                media level, or inherited from the session level.
+                  <list style="symbols">
+                    <t>ICE ufrag and password values</t>
+                    <t>DTLS fingerprint and setup values</t>
+                  </list>
+                </t>
+              </list>
+          </t>
+          <t>If this session description is of type "pranswer" or "answer", the
+          following additional checks are applied:
+            <list style="symbols">
+              <t>The session description must follow the rules defined in
+                <xref target="RFC3264"/>, Section 6.</t>
+              <t>For each m= section, the protocol value MUST exactly match the
+              protocol value in the corresponding m= section in the associated
+              offer.</t>
+            </list>
+          </t>
+        </section>
+      </section>
+
+      <section title="Applying a Local Description" anchor="sec.applying-a-local-desc">
+        <t>The following steps are performed at the media engine level to apply a local
+        description.</t>
+        <t>First, the parsed parameters are checked to ensure that any modifications
+        performed fall within those explicitly permitted by
+        <xref target="sec.configurable-sdp-paramete"/>; otherwise, processing
+        MUST stop and an error MUST be returned.</t>
+        <t>Next, media sections are processed. For each media section,
+        the following steps MUST be performed; if any parameters are out of
+        bounds, or cannot be applied, processing MUST stop and an error MUST be
+        returned.
+          <list style="symbols">
+            <t>TODO</t>
+          </list>
+        </t>
+        <t>Finally, if this description is of type "pranswer" or "answer", follow
+        the processing defined in the <xref target="sec.applying-an-answer"/>
+        section below.</t>
+      </section>
+
+      <section title="Applying a Remote Description" anchor="sec.applying-a-remote-desc">
+        <t>TODO</t>
+      </section>
+
+      <section title="Applying an Answer" anchor="sec.applying-an-answer">
+        <t>TODO</t>
+      </section>
     </section>
 
     <section title="Configurable SDP Parameters" anchor="sec.configurable-sdp-paramete">
@@ -4317,6 +4587,9 @@ a=end-of-candidates
           Added section on subsequent answers and, answer options.
         </t>
 
+        <t>
+          Added text defining set{Local,Remote}Description behavior.
+        </t>
       </list>
       </t>
       <t>Changes in draft-08:
