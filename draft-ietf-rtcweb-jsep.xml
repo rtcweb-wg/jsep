@@ -2047,15 +2047,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         The SDP is read,
         line-by-line, and converted to a data structure that contains the
         deserialized information. However, SDP allows many types of lines, not
-        all of which are relevant to JSEP applications, and the ones that are
-        not specifically referenced below MAY be ignored. Implementations MAY
-        also act on such lines, in accordance with the specification that
-        defines them.
+        all of which are relevant to JSEP applications many of them
+        have no useful function in JSEP contexts.
         For each line, the implementation will first ensure it is syntactically
-        correct according its defining ABNF [TODO: reference], and then either parse
-        the data value to store for later use,
-        or ignore the value and move on. If the line is
-        not well-formed, or cannot be parsed as described, the parser MUST stop
+        correct according its defining ABNF [TODO: reference], and check
+        that it conforms to <xref target="RFC4566"/> and <xref target="RFC3264"/>
+        semantics and then process it (discarding, checking and discarding, or
+        storing) as described below.
+        [TODO: ensure that every line is listed below.]
+        If the line is not well-formed, or cannot be parsed as described, the parser MUST stop
         with an error and reject the session description. This ensures that
         implementations do not accidentally misinterpret ambiguous SDP.</t>
 
@@ -2066,14 +2066,23 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the specific line types (e.g. "v=", "c=") MUST occur in the defined
             order, lines of the same type (typically "a=") can occur in any order,
             and their ordering is not meaningful.</t>
-          <t>For non-attribute (non-"a=") lines, their sequencing and syntax are checked,
-            as mentioned above, but the only line whose value MUST be parsed and
-            stored is the "c=" line. For example, because session-level bandwidth is
-            ambiguous when multiple media streams are present, a "b=" line at session
-            level is not useful and its value SHOULD be ignored.
-            [OPEN ISSUE: is this WG consensus? Are there other non-a= lines that
-             we need to do more than just syntactical validation, e.g. v=?]
-         </t>
+          <t>For non-attribute (non-"a=") lines, their sequencing, syntax,
+            and semantics, are checked, as mentioned above. The following
+            lines ([TODO]) are not meaningful in the JSEP context and
+            MAY be discarded once they have been checked. The remaining
+            lines are processed as follows:
+          </t>
+          <t>
+            <list>
+              <t>The "c=" line MUST be parsed and stored.</t>
+              <t>[OPEN ISSUE: For example, because session-level bandwidth is
+              ambiguous when multiple media streams are present, a "b=" line at session
+              level is not useful and its value SHOULD be ignored.
+              [OPEN ISSUE: is this WG consensus? Are there other non-a= lines that
+              we need to do more than just syntactical validation, e.g. v=?]
+              </t>
+            </list>
+          </t>
           <t>Specific processing MUST be applied for the following session-level
             attribute ("a=") lines:
             <list style="symbols">
