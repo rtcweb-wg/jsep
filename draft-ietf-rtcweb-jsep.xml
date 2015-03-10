@@ -744,7 +744,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             that the offerer needs to gather.</t>
           </list>
           </t>
-          
+
         </section>
         <section title="createOffer" anchor="sec.createoffer">
           <t>The createOffer method generates a blob of SDP that contains a
@@ -1077,7 +1077,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>The BUNDLE and RTCP-multiplexing policies MUST NOT be
             changed after the construction of the PeerConnection.
             </t>
-            
+
           </list></t>
           <t>This call may result in a change to the state of the ICE Agent,
           and may result in a change to media state if it results in
@@ -2315,7 +2315,27 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         bounds, or cannot be applied, processing MUST stop and an error MUST be
         returned.
           <list style="symbols">
-            <t>TODO</t>
+            <t>If the ICE ufrag and password values changed, trigger the ICE Agent
+              to start an ICE restart and begin gathering new candidates, as defined
+              in <xref target="RFC5245"/>, Section X.Y.</t>
+          </list>
+        </t>
+        <t>If the media section proto value indicates use of RTP:
+          <list style="symbols">
+            <t>If the RTCP mux parameter is set, discard any RTCP transport,
+             and begin muxing RTCP over the RTP transport, as specified in
+             <xref target="RFC5761"/>, Section X.Y. [if answer]
+            </t>
+            <t>Set RTP header extension receive state, ensure all are known</t>
+            <t>Set PT demux</t>
+            <t>Set receive codecs, ensure all are known</t>
+            <t>Set up RTX (verify apt)</t>
+            <t>Set local directional state</t>
+          </list>
+        </t>
+        <t>If the media section proto value indicates use of SCTP:
+          <list style="symbols">
+            <t>Set local SCTP pseudo-port</t>
           </list>
         </t>
         <t>Finally, if this description is of type "pranswer" or "answer", follow
