@@ -697,8 +697,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           control how aggressively it will try to BUNDLE media streams together.
           The set of available policies is as follows:
           <list style="hanging">
-              <t hangText="balanced:">The application will BUNDLE all media streams of
-              the same type together. That is, if there are multiple audio and
+              <t hangText="balanced:">The application will bundle all media streams into
+              a single bundle group. All but the first media stream of each
+              type will be marked as bundle-only. That is, if there are multiple audio and
               multiple video MediaStreamTracks attached to a PeerConnection, all
               but the first audio and video tracks will be marked as
               bundle-only, and candidates will only be gathered for N media
@@ -706,8 +707,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               talking to a non-BUNDLE-aware endpoint, only the non-bundle-only
               streams will be negotiated. This policy balances desire to
               multiplex with the need to ensure basic audio and video still
-              works in legacy cases. Data channels will be in a separate bundle
-              group.
+              works in legacy cases.
               </t>
               <t></t>
               <t hangText="max-compat:"> The application will offer BUNDLE, but mark none
