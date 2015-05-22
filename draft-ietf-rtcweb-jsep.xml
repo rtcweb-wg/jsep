@@ -693,32 +693,36 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           application can specify its preferred policy regarding use of BUNDLE,
           the multiplexing mechanism defined in <xref
           target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>.
-          By specifying a policy from the list below, the application can
-          control how aggressively it will try to BUNDLE media streams together.
+          Regardless of policy, the application will always try to negotiate BUNDLE
+          onto a single transport, 
+          and will offer a single BUNDLE group across all media sections.
+          However, by specifying a policy from the list below, the application can
+          control how aggressively it will try to BUNDLE media streams together,
+          which affects how it will interoperate with a non-BUNDLE-aware endpoint.
+          When negotiating with a non-BUNDLE-aware endpoint, only the streams not
+          marked as bundle-only streams will be established.
+              
           The set of available policies is as follows:
           <list style="hanging">
-              <t hangText="balanced:">The offer will include a single bundle
-              group across all media sections. The first media section of each type
+              <t hangText="balanced:"> The first media section of each type
               (audio, video, or application) will contain transport parameters,
               which will allow an answerer to unbundle that section.
               The second and any subsequent media section of each type
               will be marked bundle-only. The result is that if there are N
-              distinct media types then candidates will be gathered for for N media
-              streams. When negotiating with a non-BUNDLE-aware endpoint, only the
-              non-bundle-only streams will be negotiated. This policy balances
+              distinct media types, then candidates will be gathered for for N media
+              streams. This policy balances
               desire to multiplex with the need to ensure basic audio and video can
               still be negotiated in legacy cases.
               </t>
               <t></t>
-              <t hangText="max-compat:"> The application will offer BUNDLE, but mark none
-              of its streams as bundle-only. This policy will allow all streams
+              <t hangText="max-compat:"> All media sections will contain transport 
+              parameters; none will be marked as bundle-only. This policy will allow all streams
               to be received by non-BUNDLE-aware endpoints, but require separate
               candidates to be gathered for each media stream.
               </t>
               <t></t>
-              <t hangText="max-bundle:">The application will BUNDLE all of its media
-              streams, including data channels,
-              on a single transport. All streams other than the first
+              <t hangText="max-bundle:">Only the first media section will contain
+              transport parameters; all streams other than the first
               will be marked as bundle-only. This policy aims to minimize
               candidate gathering and maximize multiplexing, at the cost of less
               compatibility with legacy endpoints.
