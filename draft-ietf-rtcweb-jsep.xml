@@ -408,17 +408,23 @@ setRemote(ANSWER) |                                   |
 
         <section title="CNAME Semantics" anchor="sec.cname">
           
-	  <t> RTP CNAME values provide a canonical name for the RTP
-	  endpoint, allowing other RTP endpoints to determine which
+	      <t> RTP CNAME values provide a canonical name for the RTP
+	      endpoint, allowing other RTP endpoints to determine which
           RTP streams are using the same clock and thus which clock
-	  sources can be used that to synchronize media playout. </t>
+          sources can be used that to synchronize media playout. </t>
 
-	  <t> Any MediaStreamTracks which have different clock sources
-	  MUST have different CNAMEs. Any MediaStreamTracks which are
-	  in different PeerConnection objects MUST have different
-	  CNAMEs. All MediaStreamTracks in the same PeerConnection
-	  which have the same clock source SHOULD have the same
-	  CNAME. </t>
+	      <t> Any MediaStreamTracks which have different clock sources MUST have
+	      different CNAMEs. Any MediaStreamTracks which are in different
+	      PeerConnection objects MUST have different CNAMEs. All
+	      MediaStreamTracks in the same PeerConnection which have the same clock
+	      source SHOULD have the same CNAME.  The reason for theses choices are
+	      a few design guidelines: a) things that have different clock sources
+	      have to have different CNAMEs b) for privacy reasons, have different
+	      PeerConnections have different CNAMEs so they can not be
+	      correlated. c) for simplicity of the receiver, have all everything
+	      inside a given PeerConnection that can use the same CNAME go ahead and
+	      use the same CNAME.
+          </t>
           
         </section>
         
