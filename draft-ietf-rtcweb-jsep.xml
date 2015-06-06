@@ -2151,7 +2151,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
           <t>The remaining lines are processed as follows:
             <list>
-              <t>The "c=" line MUST be parsed and stored.</t>
+              <t>The "c=" line MUST be checked for syntax but its value SHOULD be ignored.
+              This supersedes the guidance in <xref target="RFC5245"/> Section 6.1,
+              to use "ice-mismatch" to indicate mismatches between "c=" and
+              the candidate lines. Because JSEP always uses ICE--and generally
+              uses trickle ICE--"ice-mismatch" is not useful in this case.
+              </t>
               <t>[OPEN ISSUE: For example, because session-level bandwidth is
               ambiguous when multiple media streams are present, a "b=" line at session
               level is not useful and its value SHOULD be ignored.
@@ -2205,8 +2210,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Following the "m=" line, specific processing MUST be applied for the
             following non-attribute lines:
             <list style="symbols">
-              <t>The "c=" line, if present, MUST be parsed as specified in
-                <xref target="RFC4566"/>, Section 5.7, and its contents stored.</t>
+              <t>
+                As with the "c=" line at the session level, 
+                the "c=" line MUST be parsed according to
+                <xref target="RFC4566"/>, Section 5.7, but its value SHOULD be
+              ignored.</t>
               <t>The "b=" line, if present, MUST be parsed as specified in
                 <xref target="RFC4566"/>, Section 5.8, and the bwtype and
                 bandwidth values stored.</t>
