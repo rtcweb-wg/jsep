@@ -556,6 +556,65 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       </section>
 
+      <section anchor="sec.imageattr" title="Video Size Negotiation">
+        <t>Video size negotiation is the process through which a receiver can
+          use the "a=imageattr" SDP attribute <xref target="RFC6236"/> to indicate
+          what video frame sizes it is capable of receiving. A receiver may have
+          hard limits on what its video decoder can process, or it may wish to
+          constrain what it receives due to application preferences, e.g. a
+          specific size for the window in which the video will be displayed.
+        </t>
+
+        <section title="Creating an imageattr Attribute">
+          <t>In order to determine the limits on what video resolution a
+            receiver wants to receive, it will intersect its decoder hard
+            limits with any mandatory constraints that have been applied to
+            the associated MediaStreamTrack. The resulting resolution space
+            will be used as the x= and y= values for the generated "a=imageattr"
+            attribute. The q= value is not important; it SHOULD be set to 1.0.
+          </t>
+          <t>If the intersection is the null
+            set, i.e., there are no resolutions that
+            are permitted by both the decoder and the mandatory constraints, this
+            should be represented using x=0 and y=0 values.</t>
+          <t>The "a=imageattr" field is payload type specific.
+            When all video codecs supported have the same capabilities, use of a
+            single attribute, with the wildcard payload type (*), is RECOMMENDED.
+            However, when the supported video codecs have differing capabilities,
+            a specific "a=imageattr" attribute is inserted for each payload
+            type.
+          </t>
+          <t>As an example, consider a system with a HD-capable, multiformat
+          video decoder, where the application has constrained the received
+          track to at most 360p. In this case, the implemention would generate this
+          attribute:</t>
+          <t>a=imageattr:* recv [x=[16:640],y=[16:360],q=1.0]</t>
+          </section>
+        </section>
+
+        <section title="Interpreting an imageattr Attribute">
+          <t>
+            <xref target="RFC6236"/> defines "a=imageattr" to be an advisory
+            field. This means that it does not absolutely constrain the video
+            formats that the sender can use, but gives an indication of the
+            preferred values.</t>
+            <t>This specification attempts to define more specific behavior.
+            When a sender of a given MediaStreamTrack, which is producing video
+            of a certain resolution, receives an "a=imageattr recv"
+            attribute, it will first check to see if the original resolution
+            meets the criteria specified in the attribute, and transmit it
+            untouched if so. If the original resolution is too large for the
+            attribute criteria, the sender SHOULD apply downscaling to the
+            output of the MediaStreamTrack in order to satisfy the criteria.
+            In rare cases, where a receiver requires a specific resolution, the
+            sender MAY apply upscaling in order to provide that resolution.
+            However, if there is no appropriate scaling mechanism that allows
+            the received criteria to be satisfied, the sender MUST NOT transmit
+            the track.
+           </t>
+        </section>
+      </section>
+
       <section title="Interactions With Forking" anchor="sec.interactions-with-forking">
         <t>Some call signaling systems allow various types of forking where an
         SDP Offer may be provided to more than one device. For example, SIP
@@ -694,14 +753,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           the multiplexing mechanism defined in <xref
           target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>.
           Regardless of policy, the application will always try to negotiate BUNDLE
-          onto a single transport, 
+          onto a single transport,
           and will offer a single BUNDLE group across all media sections.
           However, by specifying a policy from the list below, the application can
           control how aggressively it will try to BUNDLE media streams together,
           which affects how it will interoperate with a non-BUNDLE-aware endpoint.
           When negotiating with a non-BUNDLE-aware endpoint, only the streams not
           marked as bundle-only streams will be established.
-              
+
           The set of available policies is as follows:
           <list style="hanging">
               <t hangText="balanced:"> The first media section of each type
@@ -715,7 +774,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               still be negotiated in legacy cases.
               </t>
               <t></t>
-              <t hangText="max-compat:"> All media sections will contain transport 
+              <t hangText="max-compat:"> All media sections will contain transport
               parameters; none will be marked as bundle-only. This policy will allow all streams
               to be received by non-BUNDLE-aware endpoints, but require separate
               candidates to be gathered for each media stream.
@@ -749,7 +808,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </t>
           </list>
           </t>
-          
+
         </section>
         <section title="createOffer" anchor="sec.createoffer">
           <t>The createOffer method generates a blob of SDP that contains a
@@ -1082,7 +1141,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>The BUNDLE and RTCP-multiplexing policies MUST NOT be
             changed after the construction of the PeerConnection.
             </t>
-            
+
           </list></t>
           <t>This call may result in a change to the state of the ICE Agent,
           and may result in a change to media state if it results in
