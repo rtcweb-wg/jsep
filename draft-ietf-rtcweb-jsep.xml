@@ -569,14 +569,26 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>In order to determine the limits on what video resolution a
             receiver wants to receive, it will intersect its decoder hard
             limits with any mandatory constraints that have been applied to
-            the associated MediaStreamTrack. The resulting resolution space
+            the associated MediaStreamTrack. For the answerer, these mandatory
+            constraints can be applied to the remote MediaStreamTracks that
+            are created by a setRemoteDescription call, and will affect the
+            output of the ensuing createAnswer call. For the offerer, since it
+            does not know about any remote MediaStreamTracks until it receives
+            theanswer, this implies that it can only set these constraints after
+            the initial offer-answer exchange is complete, and as a result, a
+            new offer-answer is needed to communicate them.
+
+          <t>The resulting resolution space formed by intersecting the decoder
+            hard limits with any mandatory constraints
             will be used as the x= and y= values for the generated "a=imageattr"
-            attribute. The q= value is not important; it SHOULD be set to 1.0.
+            attribute for the associated MediaStreamTrack.
+            With only one set of preferences expressed, the q= value is not
+            important; it SHOULD be set to 1.0.
           </t>
           <t>If the intersection is the null
             set, i.e., there are no resolutions that
-            are permitted by both the decoder and the mandatory constraints, this
-            should be represented using x=0 and y=0 values.</t>
+            are permitted by both the decoder and the mandatory constraints,
+            this SHOULD be represented using x=0 and y=0 values.</t>
           <t>The "a=imageattr" field is payload type specific.
             When all video codecs supported have the same capabilities, use of a
             single attribute, with the wildcard payload type (*), is RECOMMENDED.
@@ -597,19 +609,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             field. This means that it does not absolutely constrain the video
             formats that the sender can use, but gives an indication of the
             preferred values.</t>
-            <t>This specification attempts to define more specific behavior.
+            <t>This specification prescribes more specific behavior.
             When a sender of a given MediaStreamTrack, which is producing video
             of a certain resolution, receives an "a=imageattr recv"
-            attribute, it will first check to see if the original resolution
+            attribute, it MUST first check to see if the original resolution
             meets the criteria specified in the attribute, and transmit it
             untouched if so. If the original resolution is too large for the
             attribute criteria, the sender SHOULD apply downscaling to the
             output of the MediaStreamTrack in order to satisfy the criteria.
-            In rare cases, where a receiver requires a specific resolution, the
-            sender MAY apply upscaling in order to provide that resolution.
-            However, if there is no appropriate scaling mechanism that allows
+            In rare cases, where a receiver requires a minimum resolution which
+            is greater than the native resolution of the video, the
+            sender SHOULD apply upscaling in order to provide that resolution.
+            The sender SHOULD NOT apply upscaling in any other cases.
+            </t>
+            <t>If there is no appropriate scaling mechanism that allows
             the received criteria to be satisfied, the sender MUST NOT transmit
             the track.
+           </t>
+           <t>In the special case of receiving a maximum resolution of [0, 0],
+           as described above, the sender MUST NOT transmit the track.
            </t>
         </section>
       </section>
@@ -1450,6 +1468,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               maximum supported frame sizes out of all codecs included above, as
               specified in <xref target="RFC4566"></xref>, Section 6.</t>
 
+              <t>If this m= section is for video media, an "a=imageattr"
+              line, as specified in <xref target="sec.imageattr"></xref>.
+              </t>
+
               <t>For each primary codec where RTP retransmission should be
               used, a corresponding "a=rtpmap" line indicating "rtx" with the
               clock rate of the primary codec and an "a=fmtp" line that
@@ -1931,6 +1953,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               e.g. audio, an "a=maxptime" line, indicating the smallest of the
               maximum supported frame sizes out of all codecs included above, as
               specified in <xref target="RFC4566"></xref>, Section 6.</t>
+
+              <t>If this m= section is for video media, an "a=imageattr"
+              line, as specified in <xref target="sec.imageattr"></xref>.
+              </t>
 
               <t>If "rtx" is present in the offer, for each primary codec
               where RTP retransmission should be used, a corresponding
