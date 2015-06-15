@@ -572,11 +572,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the associated MediaStreamTrack. For the answerer, these mandatory
             constraints can be applied to the remote MediaStreamTracks that
             are created by a setRemoteDescription call, and will affect the
-            output of the ensuing createAnswer call. For the offerer, since it
+            output of the ensuing createAnswer call. Any constraints set
+            after setLocalDescription is used to set the answer will result
+            in a new offer-answer exchange. For the offerer, because it
             does not know about any remote MediaStreamTracks until it receives
-            theanswer, this implies that it can only set these constraints after
-            the initial offer-answer exchange is complete, and as a result, a
-            new offer-answer is needed to communicate them.</t>
+            the answer, the offer can only reflect decoder hard limits.
+            If the offerer wishes to set mandatory constraints on video
+            resolution, it must do so after receiving the answer and the result
+            will be a new offer-answer to communicate them.</t>
 
           <t>The resulting resolution space formed by intersecting the decoder
             hard limits with any mandatory constraints
