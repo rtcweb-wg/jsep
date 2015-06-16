@@ -572,6 +572,87 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         have the same clock source SHOULD have the same CNAME.
         </t>
       </section>
+      <section anchor="sec.imageattr" title="Video Size Negotiation">
+        <t>Video size negotiation is the process through which a receiver can
+          use the "a=imageattr" SDP attribute <xref target="RFC6236"/> to indicate
+          what video frame sizes it is capable of receiving. A receiver may have
+          hard limits on what its video decoder can process, or it may wish to
+          constrain what it receives due to application preferences, e.g. a
+          specific size for the window in which the video will be displayed.
+        </t>
+
+        <section title="Creating an imageattr Attribute">
+          <t>In order to determine the limits on what video resolution a
+            receiver wants to receive, it will intersect its decoder hard
+            limits with any mandatory constraints that have been applied to
+            the associated MediaStreamTrack. If the decoder limits
+            are unknown, e.g. when using a software decoder, the mandatory
+            constraints are used directly. For the answerer, these mandatory
+            constraints can be applied to the remote MediaStreamTracks that
+            are created by a setRemoteDescription call, and will affect the
+            output of the ensuing createAnswer call. Any constraints set
+            after setLocalDescription is used to set the answer will result
+            in a new offer-answer exchange. For the offerer, because it
+            does not know about any remote MediaStreamTracks until it receives
+            the answer, the offer can only reflect decoder hard limits.
+            If the offerer wishes to set mandatory constraints on video
+            resolution, it must do so after receiving the answer, and the result
+            will be a new offer-answer to communicate them.</t>
+
+          <t>If there are no known decoder limits
+            or mandatory constraints, the "a=imageattr" attribute SHOULD be
+            omitted.</t>
+          <t>Otherwise, an "a=imageattr" attribute is created with "recv"
+            direction, and the resulting resolution space formed by intersecting
+            the decoder limits and constraints is used to specify its minimum
+            and maximum x= and y= values. If the intersection is the null
+            set, i.e., there are no resolutions that
+            are permitted by both the decoder and the mandatory constraints,
+            this SHOULD be represented by x=0 and y=0 values.</t>
+          <t>The rules here express a single set of preferences, and therefore,
+            the "a=imageattr" q= value is not important. It SHOULD be set to 1.0.</t>
+          <t>The "a=imageattr" field is payload type specific.
+            When all video codecs supported have the same capabilities, use of a
+            single attribute, with the wildcard payload type (*), is RECOMMENDED.
+            However, when the supported video codecs have differing capabilities,
+            specific "a=imageattr" attributes MUST be inserted for each payload
+            type.
+          </t>
+          <t>As an example, consider a system with a HD-capable, multiformat
+          video decoder, where the application has constrained the received
+          track to at most 360p. In this case, the implemention would generate this
+          attribute:</t>
+          <t>a=imageattr:* recv [x=[16:640],y=[16:360],q=1.0]</t>
+        </section>
+
+        <section title="Interpreting an imageattr Attribute">
+          <t>
+            <xref target="RFC6236"/> defines "a=imageattr" to be an advisory
+            field. This means that it does not absolutely constrain the video
+            formats that the sender can use, but gives an indication of the
+            preferred values.</t>
+            <t>This specification prescribes more specific behavior.
+            When a sender of a given MediaStreamTrack, which is producing video
+            of a certain resolution, receives an "a=imageattr recv"
+            attribute, it MUST first check to see if the original resolution
+            meets the criteria specified in the attribute, and transmit it
+            untouched if so. If the original resolution is too large for the
+            attribute criteria, the sender SHOULD apply downscaling to the
+            output of the MediaStreamTrack in order to satisfy the criteria.
+            In rare cases, where a receiver requires a minimum resolution which
+            is greater than the native resolution of the video, the
+            sender SHOULD apply upscaling in order to provide that resolution.
+            The sender SHOULD NOT apply upscaling in any other cases.
+            </t>
+            <t>If there is no appropriate scaling mechanism that allows
+            the received criteria to be satisfied, the sender MUST NOT transmit
+            the track.
+           </t>
+           <t>In the special case of receiving a maximum resolution of [0, 0],
+           as described above, the sender MUST NOT transmit the track.
+           </t>
+        </section>
+      </section>
 
       <section title="Interactions With Forking" anchor="sec.interactions-with-forking">
         <t>Some call signaling systems allow various types of forking where an
@@ -1409,6 +1490,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               maximum supported frame sizes out of all codecs included above, as
               specified in <xref target="RFC4566"></xref>, Section 6.</t>
 
+              <t>If this m= section is for video media, an "a=imageattr"
+              line, as specified in <xref target="sec.imageattr"></xref>.
+              </t>
+
               <t>For each primary codec where RTP retransmission should be
               used, a corresponding "a=rtpmap" line indicating "rtx" with the
               clock rate of the primary codec and an "a=fmtp" line that
@@ -1907,6 +1992,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               e.g. audio, an "a=maxptime" line, indicating the smallest of the
               maximum supported frame sizes out of all codecs included above, as
               specified in <xref target="RFC4566"></xref>, Section 6.</t>
+
+              <t>If this m= section is for video media, an "a=imageattr"
+              line, as specified in <xref target="sec.imageattr"></xref>.
+              </t>
 
               <t>If "rtx" is present in the offer, for each primary codec
               where RTP retransmission should be used, a corresponding
@@ -4185,6 +4274,31 @@ a=end-of-candidates
 
         <seriesInfo name='RFC' value='6347' />
         <format type='TXT' octets='73546' target='http://www.rfc-editor.org/rfc/rfc6347.txt' />
+      </reference>
+
+
+      <reference anchor="RFC6236">
+
+        <front>
+          <title>Negotiation of Generic Image Attributes in the Session Description Protocol (SDP)</title>
+          <author initials="I." surname="Johansson" fullname="I. Johansson">
+          <organization/></author>
+          <author initials="K." surname="Jung" fullname="K. Jung">
+          <organization/></author>
+          <date year="2011" month="May"/>
+          <abstract>
+            <t>This document proposes a new generic session setup
+            attribute to make it possible to negotiate different image
+            attributes such as image size.  A possible use case is to make
+            it possible for a \%low-end \%hand- held terminal to display
+            video without the need to rescale the image, something that
+            may consume large amounts of memory and processing power.  The
+            document also helps to maintain an optimal bitrate for video
+            as only the image size that is desired by the receiver is
+        transmitted. [STANDARDS-TRACK]</t></abstract></front>
+
+        <seriesInfo name="RFC" value="6236"/>
+        <format type="TXT" octets="49356" target="http://www.rfc-editor.org/rfc/rfc6236.txt"/>
       </reference>
 
     </references>
