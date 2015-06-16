@@ -582,18 +582,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             hard limits with any mandatory constraints
             will be used as the x= and y= values for the generated "a=imageattr"
             attribute for the associated MediaStreamTrack.
-            With only one set of preferences expressed, the q= value is not
-            important; it SHOULD be set to 1.0.
           </t>
           <t>If the intersection is the null
             set, i.e., there are no resolutions that
             are permitted by both the decoder and the mandatory constraints,
-            this SHOULD be represented using x=0 and y=0 values.</t>
+            this SHOULD be represented by an "a=imageattr" attribute with
+            x=0 and y=0 values.</t>
+          <t>
+            If the decoder limits
+            are unknown, e.g. when using a software decoder, the mandatory
+            constraints are used directly. If there are no known decoder limits
+            or mandatory constraints, the "a=imageattr" attribute SHOULD be
+            omitted.</t>
+          <t>The rules here express a single set of preferences, and therefore,
+            the "a=imageattr" q= value is not important. It SHOULD be set to 1.0.</t>
           <t>The "a=imageattr" field is payload type specific.
             When all video codecs supported have the same capabilities, use of a
             single attribute, with the wildcard payload type (*), is RECOMMENDED.
             However, when the supported video codecs have differing capabilities,
-            a specific "a=imageattr" attribute is inserted for each payload
+            specific "a=imageattr" attributes MUST be inserted for each payload
             type.
           </t>
           <t>As an example, consider a system with a HD-capable, multiformat
