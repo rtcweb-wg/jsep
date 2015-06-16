@@ -569,7 +569,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>In order to determine the limits on what video resolution a
             receiver wants to receive, it will intersect its decoder hard
             limits with any mandatory constraints that have been applied to
-            the associated MediaStreamTrack. For the answerer, these mandatory
+            the associated MediaStreamTrack. If the decoder limits
+            are unknown, e.g. when using a software decoder, the mandatory
+            constraints are used directly. For the answerer, these mandatory
             constraints can be applied to the remote MediaStreamTracks that
             are created by a setRemoteDescription call, and will affect the
             output of the ensuing createAnswer call. Any constraints set
@@ -578,25 +580,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             does not know about any remote MediaStreamTracks until it receives
             the answer, the offer can only reflect decoder hard limits.
             If the offerer wishes to set mandatory constraints on video
-            resolution, it must do so after receiving the answer and the result
+            resolution, it must do so after receiving the answer, and the result
             will be a new offer-answer to communicate them.</t>
 
-          <t>The resulting resolution space formed by intersecting the decoder
-            hard limits with any mandatory constraints
-            will be used as the x= and y= values for the generated "a=imageattr"
-            attribute for the associated MediaStreamTrack.
-          </t>
-          <t>If the intersection is the null
-            set, i.e., there are no resolutions that
-            are permitted by both the decoder and the mandatory constraints,
-            this SHOULD be represented by an "a=imageattr" attribute with
-            x=0 and y=0 values.</t>
-          <t>
-            If the decoder limits
-            are unknown, e.g. when using a software decoder, the mandatory
-            constraints are used directly. If there are no known decoder limits
+          <t>If there are no known decoder limits
             or mandatory constraints, the "a=imageattr" attribute SHOULD be
             omitted.</t>
+          <t>Otherwise, an "a=imageattr" attribute is created with "recv"
+            direction, and the resulting resolution space formed by intersecting
+            the decoder limits and constraints is used to specify its minimum
+            and maximum x= and y= values. If the intersection is the null
+            set, i.e., there are no resolutions that
+            are permitted by both the decoder and the mandatory constraints,
+            this SHOULD be represented by x=0 and y=0 values.</t>
           <t>The rules here express a single set of preferences, and therefore,
             the "a=imageattr" q= value is not important. It SHOULD be set to 1.0.</t>
           <t>The "a=imageattr" field is payload type specific.
