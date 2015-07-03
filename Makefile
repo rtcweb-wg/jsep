@@ -1,7 +1,7 @@
 xml2rfc ?= xml2rfc -v
 kramdown-rfc2629 ?= kramdown-rfc2629
 idnits ?= idnits
-branch ?= $(shell git symbolic-ref -q --short HEAD)
+
 draft := draft-ietf-rtcweb-jsep
 
 current_ver := $(shell git tag | grep "$(draft)" | tail -1 | sed -e"s/.*-//")
@@ -48,7 +48,4 @@ $(draft).diff.html: $(draft).old.raw $(draft).raw
 	htmlwdiff  $^ >  $@
 
 upload: $(draft).html $(draft).txt
-	@if [ $(branch) = "master" ]; then\
-	    echo "Uploading"; \
-	    python upload-draft.py $(draft).html;\
-	fi
+	python upload-draft.py $(draft).html
