@@ -49,5 +49,6 @@ $(draft).diff.html: $(draft).old.raw $(draft).raw
 
 upload: $(draft).html $(draft).txt
 	@if [ $(branch) = "master" ]; then\
+	    echo "Uploading"; \
 	    python upload-draft.py $(draft).html;\
 	fi
