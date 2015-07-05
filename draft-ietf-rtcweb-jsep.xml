@@ -1888,10 +1888,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 	  <t>The next step is to generate session-level lip sync
 	  groups as defined in <xref target="RFC5888"/>, Section
 	  7. All Tracks in the same MediaStream need to be placed in
-	  the same LS group.  RFC5888 only allows the groups in the
-	  answer to be a subset of what was in the offer. JSEP does
-          not currently offer a good way to add tracks to an LS group
-          without addition additional m= sections [[OPEN ISSUE:
+	  the same "LS" group as long as theses tracks were in the
+	  offered to by synchronized in the offer.
+	  RFC5888 only allows the groups in the
+	  answer to be a subset of what was in the offer. If there are
+	  tracks that the same MediaStream that can not be added to
+	  the "LS" group, once the state moves back to "stable" the
+	  browser SHOULD initiate another offer/answer negotiation put
+	  all the tracks in the MediaStream into the "LS" group. [[OPEN ISSUE:
           https://github.com/rtcweb-wg/jsep/issues/162]]</t>
 
           <t>The next step is to generate m= sections for each m= section that
