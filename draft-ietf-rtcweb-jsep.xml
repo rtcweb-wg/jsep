@@ -1403,7 +1403,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           MediaStreamTrack is added to a PeerConnection, the resultant m=audio
           section will precede the m=video section. If a second MediaStream
           containing an audio MediaStreamTrack was added, it would follow
-          the m=video section.</t>
+          the m=video section. If any extra m= sections are required because
+          OfferToReceiveAudio (<xref target="sec.offertoreceiveaudio"/>
+          or
+          OfferToReceiveVideo (<xref target="sec.offertoreceivevideo"/>
+          were used, then these m= sections MUST be added at the end of the
+          list with all the extra audio m= sections preceding all the extra
+          video m= sections.</t>
 
           <t>Each m= section, provided it is not being bundled into
           another m= section, MUST generate a unique set of ICE credentials
@@ -1724,7 +1730,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               local MediaStreamTrack associated with these recycled m=
               sections until all such existing m= sections have been
               used. This includes any recvonly or rejected m= sections
-              created by the preceding paragraph.</t>
+              created by the preceding paragraph. If an additional m= sections
+              are required by increases in OfferToReceiveAudio or
+              OfferToReceiveVideo, they are added at the end as described
+              in <xref target="sec.initial-offers"/>.
+              </t>
             </list></t>
 
           <t>In addition, for each non-recycled, non-rejected m=
