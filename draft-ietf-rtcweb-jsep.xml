@@ -555,7 +555,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
 
       </section>
-      
+
       <section anchor="sec.imageattr" title="Video Size Negotiation">
         <t>Video size negotiation is the process through which a receiver can
           use the "a=imageattr" SDP attribute <xref target="RFC6236"/> to indicate
@@ -622,13 +622,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             meets the criteria specified in the attribute, and transmit it
             untouched if so. If the original resolution is too large for the
             attribute criteria, the sender SHOULD apply downscaling to the
-            output of the MediaStreamTrack in order to satisfy the criteria.
-            In rare cases, where a receiver requires a minimum resolution which
-            is greater than the native resolution of the video, the
-            sender SHOULD apply upscaling in order to provide that resolution.
-            The sender SHOULD NOT apply upscaling in any other cases.
+            output of the MediaStreamTrack in order to satisfy the criteria.</t>
+            <t>
+            If the receiver requires a minimum resolution which is greater than the
+            native resolution of the video, upscaling is needed, but this may
+            not be appropriate in all cases. To address this concern, the
+            application can set an upscaling policy for each sent track.
+            For this case, if upscaling is permitted by policy, the sender
+            SHOULD apply upscaling in order to provide the desired resolution.
+            Otherwise, the sender MUST NOT apply upscaling.
+            The sender SHOULD NOT upscale in other cases, even if the policy
+            permits it.
             </t>
-            <t>If there is no appropriate scaling mechanism that allows
+            <t>If there is no appropriate and permitted scaling mechanism that allows
             the received criteria to be satisfied, the sender MUST NOT transmit
             the track.
            </t>
@@ -1549,7 +1555,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               specified in <xref target="RFC5956"></xref>, section 4.3. For
               simplicity, if both RTX and FEC are supported, the FEC SSRC
               MUST be the same as the RTX SSRC.</t>
-              
+
               <t>If the BUNDLE policy for this PeerConnection is set to
               "max-bundle", and this is not the first m= section, or the BUNDLE
               policy is set to "balanced", and this is not the first m= section
@@ -2335,7 +2341,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             following non-attribute lines:
             <list style="symbols">
               <t>
-                As with the "c=" line at the session level, 
+                As with the "c=" line at the session level,
                 the "c=" line MUST be parsed according to
                 <xref target="RFC4566"/>, Section 5.7, but its value is not
                 used.</t>
