@@ -2281,23 +2281,35 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             performed:
               <list style="symbols">
                 <t>For each m= section, valid values for each of the
-                mandatory-to-use features enumerated in <xref target="sec.usage-requirements"/> MUST be present. These values MAY either be present at the
+                mandatory-to-use features enumerated in <xref target="sec.usage-requirements"/>
+                MUST be present. These values MAY either be present at the
                 media level, or inherited from the session level.
                   <list style="symbols">
-                    <t>ICE ufrag and password values</t>
-                    <t>DTLS fingerprint and setup values</t>
+                    <t>ICE ufrag and password values, which MUST comply with the
+                      size limits specified in <xref target="RFC5245"/>, Section 15.4.</t>
+                    <t>DTLS setup value, which MUST be set according to the rules
+                      specified in <xref target="RFC5763"/>, Section 5, and MUST
+                      be consistent with the selected role of the current DTLS
+                      connection, if one exists.[TODO: may need revision, i.e. use of actpass</t>
+                    <t>DTLS fingerprint values, where at least one fingerprint
+                      MUST be present.</t>
                   </list>
                 </t>
+                <t>Each m= section is also checked to ensure prohibited features
+                  are not used. If this is a local description, the ICE Lite
+                  setting MUST NOT be specified.</t>
               </list>
           </t>
           <t>If this session description is of type "pranswer" or "answer", the
           following additional checks are applied:
             <list style="symbols">
               <t>The session description must follow the rules defined in
-                <xref target="RFC3264"/>, Section 6.</t>
-              <t>For each m= section, the protocol value MUST exactly match the
-              protocol value in the corresponding m= section in the associated
-              offer.</t>
+                <xref target="RFC3264"/>, Section 6, including the requirement
+                that the number of m= sections MUST exactly match the number
+                of m= sections in the associated offer.</t>
+              <t>For each m= section, the media type and protocol values MUST
+              exactly match the media type and protocol values in the
+              corresponding m= section in the associated offer.</t>
             </list>
           </t>
         </section>
@@ -2315,15 +2327,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         bounds, or cannot be applied, processing MUST stop and an error MUST be
         returned.
           <list style="symbols">
-            <t>Basic sanity checking is applied for the following attributes in the media section:
-              <list style="symbols">
-                <t>ICE lite: MUST NOT be present.</t>
-                <t>ICE ufrag: MUST be present, and MUST meet the length criteria from [TODO: ref]</t>
-                <t>ICE pwd: MUST be present, and MUST meet the length criteria from [TODO: ref]</t>
-                <t>DTLS fingerprint: MUST be present, and, for existing media sections, MUST be unchanged.</t>
-                <t>DTLS setup: for new media sections, MUST follow the guidance from [TODO: ref]; for existing media sections, MUST be unchanged. [TODO: check whether this is what we agreed on (vs actpass)]</t>
-              </list>
-            </t>
             <t>If this media section is new, begin gathering candidates for it,
              as defined in <xref target="RFC5245"/>, Section X.Y.,
              unless it has been marked as bundle-only.</t>
@@ -2336,9 +2339,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>If RTCP mux is indicated, prepare to demux RTP and RTCP from the RTP
                   ICE component. [TODO: ref]</t>
                 <t>For each specified RTP header extension, establish a mapping between
-                  the extension ID and URI. If any RTP header extension is unknown, this
+                  the extension ID and URI. If any indicated RTP header extension is unknown, this
                   MUST result in an error. [TODO: ref]</t>
-                <t>Prepare to demux RTP data intended for this media section based on
+                <t>If the MID header extension is supported, prepare to demux
+                  RTP data intended for this media section based on
                   the MID header extension. [TODO: ref]</t>
                 <t>For each specified payload type, establish a mapping between the
                   payload type ID and the actual media format. [TODO: ref] If any indicated payload
@@ -2347,7 +2351,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   the RTX payload type and its associated primary payload type. [TODO: ref] If any
                   referenced primary payload types are not present, this MUST result in an error.</t>
                 <t>If the directional attribute is of type "sendrecv" or
-                  "recvonly", enable receipt, decoding, and playout of media.
+                  "recvonly", enable receipt and decoding of media.
                 </t>
               </list>
             </t>
@@ -2366,14 +2370,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         bounds, or cannot be applied, processing MUST stop and an error MUST be
         returned.
           <list style="symbols">
-            <t>Basic sanity checking is applied for the following attributes in the media section:
-              <list style="symbols">
-                <t>ICE ufrag: MUST be present, and MUST meet the length criteria from [TODO: ref]</t>
-                <t>ICE pwd: MUST be present, and MUST meet the length criteria from [TODO: ref]</t>
-                <t>DTLS fingerprint: MUST be present.</t>
-                <t>DTLS setup: for new media sections, MUST follow the guidance from [TODO: ref]; for existing media sections, MUST be unchanged.</t>
-              </list>
-            </t>
             <t>If the description is of type "offer", and the ICE ufrag or password changed
               from the previous remote description, [TODO: ref], mark that an ICE restart is needed.</t>
             <t>Configure the ICE components associated with this media section to use
@@ -2386,7 +2382,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>For each specified payload type that is also supported by the local implementation,
                   establish a mapping between the
                   payload type ID and the actual media format. [TODO: ref] If any indicated payload
-                  type is unknown, it MUST be ignored.</t>
+                  type is unknown, it MUST be ignored. [TODO: should fail on answers]</t>
                 <t>For each specified "rtx" media format, establish a mapping between
                   the RTX payload type and its associated primary payload type. [TODO: ref] If any
                   referenced primary payload types are not present, this MUST result in an error.</t>
@@ -2394,14 +2390,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   enable them on the associated payload types.</t>
                 <t>For each specified RTCP feedback mechanism that is supported by the local implementation,
                   enable them on the associated payload types.</t>
-                <t>For any specified "b=AS" or "b=TIAS" bandwidth value, record this value
-                  as the maximum value that the remote side wishes to receive for this media section.
-                  [TODO: convert AS to TIAS].</t>
+                <t>For any specified "TIAS" bandwidth value, set this value
+                  as the maximum RTP bitrate to be used when sending media. If
+                  a "TIAS" value is not present, but an "AS" value is, generate
+                  a TIAS a value using this formula: [TODO: convert AS to TIAS].</t>
                 <t>[TODO: handling of CN, telephone-event, "red"]</t>
                 <t>If the media section if of type audio:
                   <list style="symbols">
-                    <t>For any specified "ptime" value, configure the avaialble payload types to
-                      use the specified packet size.</t>
+                    <t>For any specified "ptime" value, configure the available payload types to
+                      use the specified packet size. If the specified size is
+                      not supported for a payload type, use the next closest
+                      value instead.</t>
                   </list>
                 </t>
               </list>
@@ -2438,10 +2437,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   RTCP transmission for this media section to use reduced-size RTCP,
                   as specified in [TODO: ref]</t>
                 <t>If the directional attribute in the answer is of type "sendrecv" or
-                  "sendonly", start transmitting media using the specified primary SSRC
+                  "sendonly", prepare to start transmitting media using the specified primary SSRC
                   and one of the selected payload types, once the underlying transport
                   layers have been established. Otherwise, stop transmitting RTP media,
-                  although RTCP will still be sent. [TODO: ref]</t>
+                  although RTCP should still be sent. [TODO: ref]</t>
               </list>
             </t>
             <t>If the media section proto value indicates use of SCTP:
