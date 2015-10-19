@@ -76,7 +76,7 @@
     </author>
 
 
-    <date day="9" month="March" year="2015" />
+    <date day="5" month="July" year="2015" />
 
     <area>RAI</area>
 
@@ -225,7 +225,7 @@
     <section title="Semantics and Syntax" anchor="sec.semantics-and-syntax">
       <section title="Signaling Model" anchor="sec.signaling-model">
         <t>JSEP does not specify a particular signaling model or state
-        machine, other than the generic need to exchange SDP media
+        machine, other than the generic need to exchange session
         descriptions in the fashion described by <xref
         target="RFC3264"></xref> (offer/answer) in order for both sides of the
         session to know how to conduct the session. JSEP provides mechanisms
@@ -556,6 +556,94 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       </section>
 
+      <section anchor="sec.imageattr" title="Video Size Negotiation">
+        <t>Video size negotiation is the process through which a receiver can
+          use the "a=imageattr" SDP attribute <xref target="RFC6236"/> to indicate
+          what video frame sizes it is capable of receiving. A receiver may have
+          hard limits on what its video decoder can process, or it may wish to
+          constrain what it receives due to application preferences, e.g. a
+          specific size for the window in which the video will be displayed.
+        </t>
+
+        <section title="Creating an imageattr Attribute">
+          <t>In order to determine the limits on what video resolution a
+            receiver wants to receive, it will intersect its decoder hard
+            limits with any mandatory constraints that have been applied to
+            the associated MediaStreamTrack. If the decoder limits
+            are unknown, e.g. when using a software decoder, the mandatory
+            constraints are used directly. For the answerer, these mandatory
+            constraints can be applied to the remote MediaStreamTracks that
+            are created by a setRemoteDescription call, and will affect the
+            output of the ensuing createAnswer call. Any constraints set
+            after setLocalDescription is used to set the answer will result
+            in a new offer-answer exchange. For the offerer, because it
+            does not know about any remote MediaStreamTracks until it receives
+            the answer, the offer can only reflect decoder hard limits.
+            If the offerer wishes to set mandatory constraints on video
+            resolution, it must do so after receiving the answer, and the result
+            will be a new offer-answer to communicate them.</t>
+
+          <t>If there are no known decoder limits
+            or mandatory constraints, the "a=imageattr" attribute SHOULD be
+            omitted.</t>
+          <t>Otherwise, an "a=imageattr" attribute is created with "recv"
+            direction, and the resulting resolution space formed by intersecting
+            the decoder limits and constraints is used to specify its minimum
+            and maximum x= and y= values. If the intersection is the null
+            set, i.e., there are no resolutions that
+            are permitted by both the decoder and the mandatory constraints,
+            this SHOULD be represented by x=0 and y=0 values.</t>
+          <t>The rules here express a single set of preferences, and therefore,
+            the "a=imageattr" q= value is not important. It SHOULD be set to 1.0.</t>
+          <t>The "a=imageattr" field is payload type specific.
+            When all video codecs supported have the same capabilities, use of a
+            single attribute, with the wildcard payload type (*), is RECOMMENDED.
+            However, when the supported video codecs have differing capabilities,
+            specific "a=imageattr" attributes MUST be inserted for each payload
+            type.
+          </t>
+          <t>As an example, consider a system with a HD-capable, multiformat
+          video decoder, where the application has constrained the received
+          track to at most 360p. In this case, the implemention would generate this
+          attribute:</t>
+          <t>a=imageattr:* recv [x=[16:640],y=[16:360],q=1.0]</t>
+        </section>
+
+        <section title="Interpreting an imageattr Attribute">
+          <t>
+            <xref target="RFC6236"/> defines "a=imageattr" to be an advisory
+            field. This means that it does not absolutely constrain the video
+            formats that the sender can use, but gives an indication of the
+            preferred values.</t>
+            <t>This specification prescribes more specific behavior.
+            When a sender of a given MediaStreamTrack, which is producing video
+            of a certain resolution, receives an "a=imageattr recv"
+            attribute, it MUST first check to see if the original resolution
+            meets the criteria specified in the attribute, and transmit it
+            untouched if so. If the original resolution is too large for the
+            attribute criteria, the sender SHOULD apply downscaling to the
+            output of the MediaStreamTrack in order to satisfy the criteria.</t>
+            <t>
+            If the receiver requires a minimum resolution which is greater than the
+            native resolution of the video, upscaling is needed, but this may
+            not be appropriate in all cases. To address this concern, the
+            application can set an upscaling policy for each sent track.
+            For this case, if upscaling is permitted by policy, the sender
+            SHOULD apply upscaling in order to provide the desired resolution.
+            Otherwise, the sender MUST NOT apply upscaling.
+            The sender SHOULD NOT upscale in other cases, even if the policy
+            permits it.
+            </t>
+            <t>If there is no appropriate and permitted scaling mechanism that allows
+            the received criteria to be satisfied, the sender MUST NOT transmit
+            the track.
+           </t>
+           <t>In the special case of receiving a maximum resolution of [0, 0],
+           as described above, the sender MUST NOT transmit the track.
+           </t>
+        </section>
+      </section>
+
       <section title="Interactions With Forking" anchor="sec.interactions-with-forking">
         <t>Some call signaling systems allow various types of forking where an
         SDP Offer may be provided to more than one device. For example, SIP
@@ -693,32 +781,37 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           application can specify its preferred policy regarding use of BUNDLE,
           the multiplexing mechanism defined in <xref
           target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>.
-          By specifying a policy from the list below, the application can
-          control how aggressively it will try to BUNDLE media streams together.
+          Regardless of policy, the application will always try to negotiate BUNDLE
+          onto a single transport,
+          and will offer a single BUNDLE group across all media section; use of
+          this single transport is contingent upon the answerer accepting BUNDLE.
+          However, by specifying a policy from the list below, the application can
+          control exactly how aggressively it will try to BUNDLE media streams together,
+          which affects how it will interoperate with a non-BUNDLE-aware endpoint.
+          When negotiating with a non-BUNDLE-aware endpoint, only the streams not
+          marked as bundle-only streams will be established.
+
           The set of available policies is as follows:
           <list style="hanging">
-              <t hangText="balanced:">The application will BUNDLE all media streams of
-              the same type together. That is, if there are multiple audio and
-              multiple video MediaStreamTracks attached to a PeerConnection, all
-              but the first audio and video tracks will be marked as
-              bundle-only, and candidates will only be gathered for N media
-              streams, where N is the number of distinct media types. When
-              talking to a non-BUNDLE-aware endpoint, only the non-bundle-only
-              streams will be negotiated. This policy balances desire to
-              multiplex with the need to ensure basic audio and video still
-              works in legacy cases. Data channels will be in a separate bundle
-              group.
+              <t hangText="balanced:"> The first media section of each type
+              (audio, video, or application) will contain transport parameters,
+              which will allow an answerer to unbundle that section.
+              The second and any subsequent media section of each type
+              will be marked bundle-only. The result is that if there are N
+              distinct media types, then candidates will be gathered for for N media
+              streams. This policy balances
+              desire to multiplex with the need to ensure basic audio and video can
+              still be negotiated in legacy cases.
               </t>
               <t></t>
-              <t hangText="max-compat:"> The application will offer BUNDLE, but mark none
-              of its streams as bundle-only. This policy will allow all streams
+              <t hangText="max-compat:"> All media sections will contain transport
+              parameters; none will be marked as bundle-only. This policy will allow all streams
               to be received by non-BUNDLE-aware endpoints, but require separate
               candidates to be gathered for each media stream.
               </t>
               <t></t>
-              <t hangText="max-bundle:">The application will BUNDLE all of its media
-              streams, including data channels,
-              on a single transport. All streams other than the first
+              <t hangText="max-bundle:">Only the first media section will contain
+              transport parameters; all streams other than the first
               will be marked as bundle-only. This policy aims to minimize
               candidate gathering and maximize multiplexing, at the cost of less
               compatibility with legacy endpoints.
@@ -738,10 +831,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             for compatibility with either multiplexing or non-multiplexing endpoints.</t>
 
             <t hangText="require:">The browser will only gather RTP candidates.
-            [[OPEN ISSUE: how should the answerer behave.
-            https://github.com/rtcweb-wg/jsep/issues/114]]
             This halves the number of candidates
-            that the offerer needs to gather.</t>
+            that the offerer needs to gather.
+            When acting as answerer, the browser will reject any m= section that does
+            not provide an "a=rtcp-mux" attribute.
+            </t>
           </list>
           </t>
 
@@ -836,7 +930,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <section title="SessionDescriptionType" anchor="sec.sessiondescriptiontype">
           <t>Session description objects (RTCSessionDescription) may be of
-          type "offer", "pranswer", or "answer". These types provide
+          type "offer", "pranswer", "answer" or "rollback". These types provide
           information as to how the description parameter should be parsed,
           and how the media state should be changed.</t>
 
@@ -858,7 +952,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           answer, the offer-answer exchange should be considered complete, and
           any resources (decoders, candidates) that are no longer needed can
           be released. A description used as an "answer" may be applied as a
-          response to a "offer", or an update to a previously sent
+          response to an "offer", or an update to a previously sent
           "pranswer".</t>
 
           <t>The only difference between a provisional and final answer is
@@ -947,8 +1041,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <section title="setLocalDescription" anchor="sec.setlocaldescription">
           <t>The setLocalDescription method instructs the PeerConnection to
-          apply the supplied SDP blob as its local configuration. The type
-          field indicates whether the blob should be processed as an offer,
+          apply the supplied session description as its local configuration. The type
+          field indicates whether the description should be processed as an offer,
           provisional answer, or final answer; offers and answers are checked
           differently, using the various rules that exist for each SDP
           line.</t>
@@ -978,8 +1072,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <section title="setRemoteDescription" anchor="sec.setremotedescription">
           <t>The setRemoteDescription method instructs the PeerConnection to
-          apply the supplied SDP blob as the desired remote configuration. As
-          in setLocalDescription, the type field of the indicates how the blob
+          apply the supplied session description as the desired remote configuration. As
+          in setLocalDescription, the type field of the description indicates how it
           should be processed.</t>
 
           <t>This API changes the local media state; among other things, it
@@ -1228,7 +1322,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               "RTP/[S]AVP[F]" and "(UDP/TCP)/TLS/RTP/SAVP[F]"</t>
               <t>Because DTLS-SRTP is REQUIRED, the choice of SAVP or
               AVP has no effect; support for DTLS-SRTP is determined by the presence
-              of the "a=fingerprint" attribute. Note that lack of an "a=fingerprint"
+              of one or more "a=fingerprint" attribute. Note that lack of an "a=fingerprint"
               attribute will lead to negotiation failure.
               </t>
               <t>The use of AVPF or AVP simply controls the timing
@@ -1353,8 +1447,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The m= line MUST be followed immediately by a "c=" line, as specified
           in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
           have yet been gathered, the "c=" line must contain the "dummy" value
-          "IN IP6 ::", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-          Section 5.1.</t>
+          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          Section 5.1. [[NOTE: This has not yet changed in the trickle ICE draft.]]</t>
 
           <t>Each m= section MUST include the following attribute lines:
             <list style="symbols">
@@ -1366,7 +1460,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 11.</t>
 
               <t>An "a=rtcp" line, as specified in <xref target="RFC3605"></xref>,
-              Section 2.1, containing the dummy value "9 IN IP6 ::", because
+              Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because
               no candidates have yet been gathered.</t>
 
               <t>An "a=msid" line, as specified in <xref
@@ -1387,6 +1481,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               maximum supported frame sizes out of all codecs included above, as
               specified in <xref target="RFC4566"></xref>, Section 6.</t>
 
+              <t>If this m= section is for video media, and there are known
+              limitations on the size of images which can be decoded, an "a=imageattr"
+              line, as specified in <xref target="sec.imageattr"></xref>.
+              </t>
+
               <t>For each primary codec where RTP retransmission should be
               used, a corresponding "a=rtpmap" line indicating "rtx" with the
               clock rate of the primary codec and an "a=fmtp" line that
@@ -1400,16 +1499,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               specific usage for each media type is outlined in Sections 4
               and 5.</t>
 
-              <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref
+              <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <xref
               target="RFC5245"></xref>, Section 15.4.</t>
 
               <t>An "a=ice-options" line, with the "trickle" option, as
               specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
               Section 4.</t>
 
-              <t>An "a=fingerprint" line, as specified in <xref
-              target="RFC4572"></xref>, Section 5; the algorithm used for the
-              fingerprint MUST match that used in the certificate signature.
+              <t>An "a=fingerprint" line for each of the endpoint's
+              certificates, as specified in <xref target="RFC4572"></xref>,
+              Section 5; the digest algorithm used for the fingerprint MUST
+              match that used in the certificate signature.
               </t>
 
               <t>An "a=setup" line, as specified in <xref
@@ -1441,11 +1541,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC5576"></xref>, Section 4.1, indicating the SSRC to be
               used for sending media, along with the mandatory "cname" source
               attribute, as specified in Section 6.1, indicating the CNAME for
-              the source. The CNAME must be generated in accordance with
-              <xref target="RFC7022"></xref>. [OPEN ISSUE: How are CNAMEs
-              specified for MSTs? Are they randomly generated for each
-              MediaStream? If so, can two MediaStreams be synced?
-              See: https://github.com/rtcweb-wg/jsep/issues/4]</t>
+              the source. The CNAME MUST be generated in accordance with
+             Section 4.9 of <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
 
               <t>If RTX is supported for this media type, another "a=ssrc"
               line with the RTX SSRC, and an "a=ssrc-group" line, as specified
@@ -1459,8 +1556,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               simplicity, if both RTX and FEC are supported, the FEC SSRC
               MUST be the same as the RTX SSRC.</t>
 
-              <t>[OPEN ISSUE: Handling of a=imageattr]</t>
-
               <t>If the BUNDLE policy for this PeerConnection is set to
               "max-bundle", and this is not the first m= section, or the BUNDLE
               policy is set to "balanced", and this is not the first m= section
@@ -1473,16 +1568,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           "UDP/DTLS/SCTP" if the default candidate uses UDP transport,
           or "TCP/DTLS/SCTP" if the default candidate uses TCP transport <xref
           target="I-D.ietf-mmusic-sctp-sdp"></xref>. The "fmt" value
-          MUST be set to the SCTP port number, as specified in Section 4.1.
-          [TODO: update this to use a=sctp-port, as indicated in the latest
-          data channel docs]</t>
+          MUST be set to "webrtc-datachannel" as specified in 
+          <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 4.1.
+          </t>
           <t>Within the data m= section, the "a=mid",
           "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate",
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
-          above, along with an "a=sctpmap" line referencing the SCTP port number
-          and specifying the application protocol indicated in <xref
-          target="I-D.ietf-rtcweb-data-protocol"></xref>. [OPEN ISSUE: the -01
-          of this document is missing this information.]</t>
+          above, along with an "a=fmtp:webrtc-datachannel" line
+          and an "a=sctp-port" line referencing the SCTP port number
+          as defined in <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 4.1.</t>
 
           <t>Once all m= sections have been generated, a session-level
           "a=group" attribute MUST be added as specified in <xref
@@ -1492,6 +1586,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           BUNDLE group. However, whether the m= sections are bundle-only
           or not depends on the BUNDLE policy.
           </t>
+
+          <t>The next step is to generate session-level lip sync groups as
+          defined in <xref target="RFC5888"/>, Section 7.  For each MediaStream
+          with more than one MediaStreamTrack, a group of type "LS" MUST be
+          added that contains the mid values for each MediaStreamTrack in that
+          MediaStream. </t>
 
           <t>Attributes which SDP permits to either be at the session
           level or the media level SHOULD generally be at the media
@@ -1548,7 +1648,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>Each "m=" and c=" line MUST be filled in with the port, protocol,
               and address of the default candidate for the m= section, as described
-              in <xref target="RFC5245"></xref>, Section 4.3. Each
+              in <xref target="RFC5245"></xref>, Section 4.3. If ICE checking
+              has already completed for one or more candidate pairs and a candidate
+              pair is in active use, then that pair MUST be used, even if ICE
+              has not yet completed. Note that this differs from the guidance in
+              <xref target="RFC5245"/>, Section 9.1.2.2, which only refers to
+              offers created when ICE has completed. Each
               "a=rtcp" attribute line MUST also be filled in with the port and
               address of the appropriate default candidate, either the
               default RTP or RTCP candidate, depending on whether RTCP multiplexing
@@ -1605,7 +1710,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           "remote-pranswer" or "stable" states, an offer is generated based on
           the negotiated session descriptions by following the steps mentioned
           for the "local-offer" state above, along with these exceptions:
-          [OPEN ISSUE: should this be permitted in the remote-pranswer state?]
+          [OPEN ISSUE: should this be permitted in the remote-pranswer state?
+          https://github.com/rtcweb-wg/jsep/issues/143]
           <list style="symbols">
               <t>If a m= section exists in the current local description, but
               does not have an associated local MediaStreamTrack (possibly
@@ -1657,6 +1763,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             or re-enabled m= sections. In other words, the BUNDLE attribute must
             contain all m= sections that were previously bundled, as long as
             they are still alive, as well as any new m= sections.</t>
+
+	    <t>The "LS" groups are generated in the same way as with initial offers.</t>
+
         </section>
 
         <section title="Options Handling" anchor="sec.options-handling1">
@@ -1770,6 +1879,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           session-level attributes. The process here is identical to that
           indicated in the Initial Offers section above.</t>
 
+	  <t>The next step is to generate lip sync groups as defined
+	  in <xref target="RFC5888"/>, Section 7.  For each
+	  MediaStream with more than one MediaStreamTrack, a group
+	  of type "LS" MUST be added that contains the mid values for
+	  each MediaStreamTrack in that MediaStream. In some cases
+	  this may result in adding a mid to a given LS group that
+	  was not in that LS group in the associated offer. Although
+	  this is not allowed by <xref target="RFC5888"/>, it is
+	  allowed when implementing this specification.
+          [[OPEN ISSUE: This is still under discussion. See:
+          https://github.com/rtcweb-wg/jsep/issues/162.]]
+          </t>
+
           <t>The next step is to generate m= sections for each m= section that
           is present in the remote offer, as specified in <xref
           target="RFC3264"></xref>, Section 6. For the purposes of this
@@ -1817,7 +1939,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The m= line MUST be followed immediately by a "c=" line, as specified
           in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
           have yet been gathered, the "c=" line must contain the "dummy" value
-          "IN IP6 ::", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
           Section 5.1.</t>
 
           <t>
@@ -1831,7 +1953,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               MUST match that specified in the offer.</t>
 
               <t>An "a=rtcp" line, as specified in <xref target="RFC3605"></xref>,
-              Section 2.1, containing the dummy value "9 IN IP6 ::", because
+              Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because
               no candidates have yet been gathered.</t>
 
               <t>If a local MediaStreamTrack has been associated, an "a=msid"
@@ -1869,6 +1991,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               maximum supported frame sizes out of all codecs included above, as
               specified in <xref target="RFC4566"></xref>, Section 6.</t>
 
+              <t>If this m= section is for video media, and there are known
+              limitations on the size of images which can be decoded, an "a=imageattr"
+              line, as specified in <xref target="sec.imageattr"></xref>.
+              </t>
+
               <t>If "rtx" is present in the offer, for each primary codec
               where RTP retransmission should be used, a corresponding
               "a=rtpmap" line indicating "rtx" with the clock rate of the
@@ -1891,9 +2018,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
               4.</t>
 
-              <t>An "a=fingerprint" line, as specified in <xref
-              target="RFC4572"></xref>, Section 5; the algorithm used for the
-              fingerprint MUST match that used in the certificate signature.
+              <t>An "a=fingerprint" line for each of the endpoint's
+              certificates, as specified in <xref target="RFC4572"></xref>,
+              Section 5; the digest algorithm used for the fingerprint MUST
+              match that used in the certificate signature.
               </t>
 
               <t>An "a=setup" line, as specified in <xref
@@ -1929,7 +2057,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>If a local MediaStreamTrack has been associated, an "a=ssrc"
               line, as specified in <xref target="RFC5576"></xref>, Section
-              4.1, indicating the SSRC to be used for sending media.</t>
+              4.1, indicating the SSRC to be used for sending media, along with
+              the mandatory "cname" source attribute, as specified in Section
+              6.1, indicating the CNAME for the source.
+	      The CNAME MUST be generated in accordance with
+             Section 4.9 of <xref
+	     target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
 
               <t>If a local MediaStreamTrack has been associated, and RTX has
               been negotiated for this m= section, another "a=ssrc" line with
@@ -1944,24 +2077,20 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="RFC5956"></xref>, section 4.3. For
               simplicity, if both RTX and FEC are supported, the FEC SSRC
               MUST be the same as the RTX SSRC.</t>
-
-              <t>[OPEN ISSUE: Handling of a=imageattr]</t>
             </list></t>
 
           <t>If a data channel m= section has been offered, a m= section MUST
           also be generated for data. The &lt;media&gt; field MUST be set to
-          "application" and the &lt;proto&gt; field MUST be set to
-          exactly match the field in the offer; the "fmt" value
-          MUST be set to the SCTP port number, as specified in Section 4.1.
-          [TODO: update this to use a=sctp-port, as indicated in the latest
-          data channel docs]</t>
+          "application" and the &lt;proto&gt; and "fmt" fields MUST be set to
+          exactly match the fields in the offer.</t>
+
           <t>Within the data m= section, the "a=mid",
           "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate",
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
-          above, along with an "a=sctpmap" line referencing the SCTP port number
-          and specifying the application protocol indicated in <xref
-          target="I-D.ietf-rtcweb-data-protocol"></xref>. [OPEN ISSUE: the -01
-          of this document is missing this information.]</t>
+          above, along with an "a=fmtp:webrtc-datachannel" line
+          and an "a=sctp-port" line referencing the SCTP port number
+          as defined in <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 4.1.
+          </t>
 
           <t>If "a=group" attributes with semantics of "BUNDLE" are offered,
           corresponding session-level "a=group" attributes MUST be added as
@@ -2146,15 +2275,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             lines are not meaningful in the JSEP context and
             MAY be discarded once they have been checked.
             <list>
+              <t>The "c=" line MUST be checked for syntax but its
+              value is not used.  This supersedes the guidance in <xref
+              target="RFC5245"/>, Section 6.1, to use "ice-mismatch" to indicate
+              mismatches between "c=" and the candidate lines;
+              because JSEP always uses ICE, "ice-mismatch" is not useful in this context.
+              </t>
               <t>TODO</t>
             </list>
           </t>
           <t>The remaining lines are processed as follows:
             <list>
-              <t>The "c=" line MUST be parsed and stored.</t>
-              <t>[OPEN ISSUE: For example, because session-level bandwidth is
-              ambiguous when multiple media streams are present, a "b=" line at session
-              level is not useful and its value SHOULD be ignored.
+              <t>The "b=" line, if present, MUST be parsed as specified in
+                <xref target="RFC4566"/>, Section 5.8, and the bwtype and
+                bandwidth values stored.</t>
+              <t>
               [OPEN ISSUE: is this WG consensus? Are there other non-a= lines that
               we need to do more than just syntactical validation, e.g. v=?]
               </t>
@@ -2205,8 +2340,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Following the "m=" line, specific processing MUST be applied for the
             following non-attribute lines:
             <list style="symbols">
-              <t>The "c=" line, if present, MUST be parsed as specified in
-                <xref target="RFC4566"/>, Section 5.7, and its contents stored.</t>
+              <t>
+                As with the "c=" line at the session level,
+                the "c=" line MUST be parsed according to
+                <xref target="RFC4566"/>, Section 5.7, but its value is not
+                used.</t>
               <t>The "b=" line, if present, MUST be parsed as specified in
                 <xref target="RFC4566"/>, Section 5.8, and the bwtype and
                 bandwidth values stored.</t>
@@ -2214,9 +2352,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
           <t>Specific processing MUST also be applied for the following attribute lines:
             <list style="symbols">
-              <t>If present, a single "a=ice-lite" line is parsed as specified in
-                <xref target="RFC5245"/>, Section 15.3, and a value indicating
-                the presence of ice-lite is stored.</t>
               <t>If present, a single "a=ice-ufrag" line is parsed as specified in
                 <xref target="RFC5245"/>, Section 15.4, and the ufrag value is
                 stored.</t>
@@ -2480,7 +2615,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         Changes MUST NOT be silently ignored.
       </t>
 
-      <t>The following elements of the SDP media description MUST NOT be
+      <t>The following elements of the session description MUST NOT be
       changed between the createOffer and the setLocalDescription (or between
       the createAnswer and the setLocalDescription), since they
       reflect transport attributes that are solely under browser control, and
@@ -2494,6 +2629,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The set of ICE candidates and their parameters (a=candidate).</t>
 
           <t>The DTLS fingerprint(s) (a=fingerprint).</t>
+
+          <t>The contents of BUNDLE groups, bundle-only parameters, or
+          "a=rtcp-mux" parameters.</t>
         </list></t>
 
       <t>The following modifications, if done by the browser to a description
@@ -2882,8 +3020,8 @@ t=0 0
 a=msid-semantic:WMS
 a=group:BUNDLE a1 d1
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
-c=IN IP6 ::
-a=rtcp:9 IN IP6 ::
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
 a=mid:a1
 a=msid:57017fee-b6c1-4162-929c-a25110252400
        e83006c5-a0ff-4e0a-9ed9-d3e6747be7d9
@@ -2908,7 +3046,7 @@ a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
 a=ssrc:1732846380 cname:FocUG1f0fcg/yvY7
 
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
-c=IN IP6 ::
+c=IN IP4 0.0.0.0
 a=mid:d1
 a=fmtp:webrtc-datachannel max-message-size=65536
 a=sctp-port 5000
@@ -2965,8 +3103,8 @@ t=0 0
 a=msid-semantic:WMS
 a=group:BUNDLE a1 d1
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
-c=IN IP6 ::
-a=rtcp:9 IN IP6 ::
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
 a=mid:a1
 a=msid:QI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1
        QI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1a0
@@ -2990,7 +3128,7 @@ a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
 a=ssrc:4429951804 cname:Q/NWs1ao1HmN4Xa5
 
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
-c=IN IP6 ::
+c=IN IP4 0.0.0.0
 a=mid:d1
 a=fmtp:webrtc-datachannel max-message-size=65536
 a=sctp-port 5000
@@ -4268,6 +4406,31 @@ a=end-of-candidates
 
         <seriesInfo name='RFC' value='6347' />
         <format type='TXT' octets='73546' target='http://www.rfc-editor.org/rfc/rfc6347.txt' />
+      </reference>
+
+
+      <reference anchor="RFC6236">
+
+        <front>
+          <title>Negotiation of Generic Image Attributes in the Session Description Protocol (SDP)</title>
+          <author initials="I." surname="Johansson" fullname="I. Johansson">
+          <organization/></author>
+          <author initials="K." surname="Jung" fullname="K. Jung">
+          <organization/></author>
+          <date year="2011" month="May"/>
+          <abstract>
+            <t>This document proposes a new generic session setup
+            attribute to make it possible to negotiate different image
+            attributes such as image size.  A possible use case is to make
+            it possible for a \%low-end \%hand- held terminal to display
+            video without the need to rescale the image, something that
+            may consume large amounts of memory and processing power.  The
+            document also helps to maintain an optimal bitrate for video
+            as only the image size that is desired by the receiver is
+        transmitted. [STANDARDS-TRACK]</t></abstract></front>
+
+        <seriesInfo name="RFC" value="6236"/>
+        <format type="TXT" octets="49356" target="http://www.rfc-editor.org/rfc/rfc6236.txt"/>
       </reference>
 
     </references>
