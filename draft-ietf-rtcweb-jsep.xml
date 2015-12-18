@@ -1403,6 +1403,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>An "a=msid-semantic:WMS" line MUST be added, as specified in
               <xref target="I-D.ietf-mmusic-msid"></xref>, Section 4.</t>
+
+              <t>An "a=ice-options" line, with the "trickle" option MUST be
+              added, as specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+              Section 4.</t>
             </list></t>
 
           <t>The next step is to generate m= sections, as specified in
@@ -1511,10 +1515,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <xref
               target="RFC5245"></xref>, Section 15.4.</t>
 
-              <t>An "a=ice-options" line, with the "trickle" option, as
-              specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-              Section 4.</t>
-
               <t>An "a=fingerprint" line for each of the endpoint's
               certificates, as specified in <xref target="RFC4572"></xref>,
               Section 5; the digest algorithm used for the fingerprint MUST
@@ -1581,8 +1581,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 4.1.
           </t>
           <t>Within the data m= section, the "a=mid",
-          "a=ice-ufrag", "a=ice-pwd", "a=ice-options",
-          "a=fingerprint", and "a=setup" lines MUST be included as mentioned
+          "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", and "a=setup" lines MUST be included as mentioned
           above, along with an "a=fmtp:webrtc-datachannel" line
           and an "a=sctp-port" line referencing the SCTP port number
           as defined in <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 4.1.</t>
@@ -1886,8 +1885,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The first step in generating an initial answer is to generate
           session-level attributes. The process here is identical to that
-          indicated in the Initial Offers section above.</t>
-
+          indicated in the Initial Offers section above, except
+          that the "a=ice-options" line, with the "trickle" option, as specified in
+          <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
+          4, is only included if such an option was present in the offer.</t>
+          
 	  <t>The next step is to generate lip sync groups as defined
 	  in <xref target="RFC5888"/>, Section 7.  For each
 	  MediaStream with more than one MediaStreamTrack, a group
@@ -2022,11 +2024,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <xref
               target="RFC5245"></xref>, Section 15.4.</t>
 
-              <t>If the "trickle" ICE option is present in the offer, an
-              "a=ice-options" line, with the "trickle" option, as specified in
-              <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
-              4.</t>
-
               <t>An "a=fingerprint" line for each of the endpoint's
               certificates, as specified in <xref target="RFC4572"></xref>,
               Section 5; the digest algorithm used for the fingerprint MUST
@@ -2094,7 +2091,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           exactly match the fields in the offer.</t>
 
           <t>Within the data m= section, the "a=mid",
-          "a=ice-ufrag", "a=ice-pwd", "a=ice-options", "a=candidate",
+          "a=ice-ufrag", "a=ice-pwd", "a=candidate",
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
           above, along with an "a=fmtp:webrtc-datachannel" line
           and an "a=sctp-port" line referencing the SCTP port number
@@ -2509,6 +2506,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
 
       <section title="Applying a Remote Description" anchor="sec.applying-a-remote-desc">
+        <t>If the answer contains any "a=ice-options" attributes where "trickle"
+          is listed as an attribute, update the PeerConnection
+          canTrickle property to be true. Otherwise, set this property to false.</t>
+        
         <t>The following steps are performed at the media engine level to apply a remote
         description.</t>
         <t>For each media section,
@@ -2602,9 +2603,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <t>If the answer contains valid BUNDLE groups, discard any ICE components
            for the m= sections that will be bundled onto the primary ICE components
            in each BUNDLE, and begin muxing these m= sections accordingly. [TODO: ref]</t>
-        <t>If the answer contains any "a=ice-options" attributes where "trickle"
-          is listed as an attribute, update the PeerConnection
-          canTrickle property to be true. Otherwise, set this property to false.</t>
       </section>
     </section>
 
@@ -2771,6 +2769,7 @@ s=-
 t=0 0
 a=msid-semantic:WMS
 a=group:BUNDLE a1 v1
+a=ice-options:trickle
 m=audio 56500 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 192.0.2.1
 a=mid:a1
@@ -2786,7 +2785,6 @@ a=rtpmap:98 telephone-event/48000
 a=maxptime:120
 a=ice-ufrag:ETEn1v9DoTMB9J4r
 a=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -2814,7 +2812,6 @@ a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
 a=ice-ufrag:BGKkWnG5GmiUpdIV
 a=ice-pwd:mqyWsAjvtKwTGnvhPztQ9mIf
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3028,6 +3025,7 @@ s=-
 t=0 0
 a=msid-semantic:WMS
 a=group:BUNDLE a1 d1
+a=ice-options:trickle
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
@@ -3043,7 +3041,6 @@ a=rtpmap:98 telephone-event/48000
 a=maxptime:120
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3061,7 +3058,6 @@ a=fmtp:webrtc-datachannel max-message-size=65536
 a=sctp-port 5000
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
                      :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
@@ -3111,6 +3107,7 @@ s=-
 t=0 0
 a=msid-semantic:WMS
 a=group:BUNDLE a1 d1
+a=ice-options:trickle
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
@@ -3126,7 +3123,6 @@ a=rtpmap:98 telephone-event/48000
 a=maxptime:120
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
@@ -3143,7 +3139,6 @@ a=fmtp:webrtc-datachannel max-message-size=65536
 a=sctp-port 5000
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
@@ -3197,6 +3192,7 @@ s=-
 t=0 0
 a=msid-semantic:WMS
 a=group:BUNDLE a1 d1 v1 v2
+a=ice-options:trickle
 m=audio 64532 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 55.66.77.88
 a=rtcp:64532 IN IP4 55.66.77.88
@@ -3212,7 +3208,6 @@ a=rtpmap:98 telephone-event/48000
 a=maxptime:120
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:actpass
@@ -3235,7 +3230,6 @@ a=fmtp:webrtc-datachannel max-message-size=65536
 a=sctp-port 5000
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:actpass
@@ -3258,7 +3252,6 @@ a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3291,7 +3284,6 @@ a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3331,6 +3323,7 @@ s=-
 t=0 0
 a=msid-semantic:WMS
 a=group:BUNDLE a1 d1 v1 v2
+a=ice-options:trickle
 m=audio 52546 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 11.22.33.44
 a=rtcp:52546 IN IP4 11.22.33.44
@@ -3346,7 +3339,6 @@ a=rtpmap:98 telephone-event/48000
 a=maxptime:120
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3370,7 +3362,6 @@ a=fmtp:webrtc-datachannel max-message-size=65536
 a=sctp-port 5000
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
                      :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:passive
@@ -3391,7 +3382,6 @@ a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3419,7 +3409,6 @@ a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
