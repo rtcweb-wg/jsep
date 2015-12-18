@@ -1403,6 +1403,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>An "a=msid-semantic:WMS" line MUST be added, as specified in
               <xref target="I-D.ietf-mmusic-msid"></xref>, Section 4.</t>
+
+              <t>An "a=ice-options" line, with the "trickle" option, as
+              specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+              Section 4.</t>
             </list></t>
 
           <t>The next step is to generate m= sections, as specified in
@@ -1511,10 +1515,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <xref
               target="RFC5245"></xref>, Section 15.4.</t>
 
-              <t>An "a=ice-options" line, with the "trickle" option, as
-              specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-              Section 4.</t>
-
               <t>An "a=fingerprint" line for each of the endpoint's
               certificates, as specified in <xref target="RFC4572"></xref>,
               Section 5; the digest algorithm used for the fingerprint MUST
@@ -1581,8 +1581,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 4.1.
           </t>
           <t>Within the data m= section, the "a=mid",
-          "a=ice-ufrag", "a=ice-pwd", "a=ice-options",
-          "a=fingerprint", and "a=setup" lines MUST be included as mentioned
+          "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", and "a=setup" lines MUST be included as mentioned
           above, along with an "a=fmtp:webrtc-datachannel" line
           and an "a=sctp-port" line referencing the SCTP port number
           as defined in <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 4.1.</t>
@@ -1886,8 +1885,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The first step in generating an initial answer is to generate
           session-level attributes. The process here is identical to that
-          indicated in the Initial Offers section above.</t>
-
+          indicated in the Initial Offers section above, except
+          that the "a=ice-options" line, with the "trickle" option, as specified in
+          <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
+          4 is only included if such an option was present in the offer.</t>
+          
 	  <t>The next step is to generate lip sync groups as defined
 	  in <xref target="RFC5888"/>, Section 7.  For each
 	  MediaStream with more than one MediaStreamTrack, a group
@@ -2022,11 +2024,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <xref
               target="RFC5245"></xref>, Section 15.4.</t>
 
-              <t>If the "trickle" ICE option is present in the offer, an
-              "a=ice-options" line, with the "trickle" option, as specified in
-              <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
-              4.</t>
-
               <t>An "a=fingerprint" line for each of the endpoint's
               certificates, as specified in <xref target="RFC4572"></xref>,
               Section 5; the digest algorithm used for the fingerprint MUST
@@ -2094,7 +2091,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           exactly match the fields in the offer.</t>
 
           <t>Within the data m= section, the "a=mid",
-          "a=ice-ufrag", "a=ice-pwd", "a=ice-options", "a=candidate",
+          "a=ice-ufrag", "a=ice-pwd", "a=candidate",
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
           above, along with an "a=fmtp:webrtc-datachannel" line
           and an "a=sctp-port" line referencing the SCTP port number
@@ -2509,6 +2506,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
 
       <section title="Applying a Remote Description" anchor="sec.applying-a-remote-desc">
+        <t>If the answer contains any "a=ice-options" attributes where "trickle"
+          is listed as an attribute, update the PeerConnection
+          canTrickle property to be true. Otherwise, set this property to false.</t>
+        
         <t>The following steps are performed at the media engine level to apply a remote
         description.</t>
         <t>For each media section,
@@ -2602,9 +2603,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <t>If the answer contains valid BUNDLE groups, discard any ICE components
            for the m= sections that will be bundled onto the primary ICE components
            in each BUNDLE, and begin muxing these m= sections accordingly. [TODO: ref]</t>
-        <t>If the answer contains any "a=ice-options" attributes where "trickle"
-          is listed as an attribute, update the PeerConnection
-          canTrickle property to be true. Otherwise, set this property to false.</t>
       </section>
     </section>
 
