@@ -2266,19 +2266,39 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         correct according its defining ABNF, check
         that it conforms to <xref target="RFC4566"/> and <xref target="RFC3264"/>
         semantics, and then either parse and store or discard the provided value,
-        as described below. A partial list of ABNFs for SDP can found in
-	Section 9 of <xref target="RFC4566"/>,
-	Section 2 of <xref target="I-D.ietf-mmusic-msid"/>,
-	Section 2.1 of<xref target=" RFC3605"/>,
-	Section 3, 4, and 5 of <xref target="RFC4145"/>,
-	Section 5 of <xref target="RFC4572"/>,
-	Section 4.2 of <xref target="RFC4585"/>,
-	Section 15 of <xref target="RFC5245"/>,
-	Section 7 of <xref target="RFC5285"/>,
-	Section 4 and 5 of <xref target="RFC5888"/>,
-	Section 3.1 of <xref target="RFC6236"/>,
-	Section 4 of <xref target="RFC6904"/>.
-        [TODO: ensure that every line is listed below.]
+        as described below. A partial list of ABNFs for SDP can found in:</t>
+
+        <texttable anchor="sdp_abnf" title="SDP ABNF References">
+          <ttcol align='left'>Attribute</ttcol>
+          <ttcol align='left'>Reference</ttcol>
+          
+	      <c> TBD  </c><c> <xref target="RFC4566"/> Section 9  </c>
+          
+		  <c> TBD  </c><c> <xref target="I-D.ietf-mmusic-msid"/> Section 2  </c>
+
+	      <c> TBD  </c><c> <xref target=" RFC3605"/> Section 2.1 </c>
+
+          <c> TBD  </c><c> 	<xref target="RFC4145"/> Section 3, 4, and 5 </c>
+
+          <c> TBD  </c><c>  <xref target="RFC4572"/> Section 5 </c>
+
+          <c> TBD  </c><c>  <xref target="RFC4585"/> Section 4.2 </c>
+
+          <c> TBD  </c><c>  <xref target="RFC5245"/> Section 15 </c>
+
+          <c> TBD  </c><c>  <xref target="RFC5285"/> Section 7 </c>
+
+          <c> TBD  </c><c>  <xref target="RFC5888"/> Section 4 and 5 </c>
+
+          <c> TBD  </c><c>  <xref target="RFC6236"/> Section 3.1 </c>
+
+          <c> TBD  </c><c>  <xref target="RFC6904"/> Section 4 </c>
+          
+        </texttable>
+        
+        <t>  [TODO: ensure that every line is listed below.] </t>
+        
+        <t>
         If the line is not well-formed, or cannot be parsed as described, the parser MUST stop
         with an error and reject the session description. This ensures that
         implementations do not accidentally misinterpret ambiguous SDP.</t>
@@ -2496,18 +2516,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   If RTCP mux is not indicated, but was indicated in a previous
                   description, this MUST result in an error.</t>
                 <t>For each specified RTP header extension, establish a mapping between
-                  the extension ID and URI. If any indicated RTP header extension is unknown, this
-                  MUST result in an error. See section 6 of <xref target="RFC5285"/>.</t>
+                  the extension ID and URI as described in section 6 of <xref
+                  target="RFC5285"/>.
+                  If any indicated RTP header extension is unknown, this
+                  MUST result in an error. </t>
                 <t>If the MID header extension is supported, prepare to demux
                   RTP data intended for this media section based on
-                  the MID header extension. See <xref target="I-D.ietf-mmusic-msid"/>. </t>
+                  the MID header extension as described in <xref
+                  target="I-D.ietf-mmusic-msid"/>, Section 3.2. </t>
                 <t>For each specified payload type, establish a mapping between the
-                  payload type ID and the actual media format. See
+                  payload type ID and the actual media format as descibed in
 		  <xref target="RFC3264"/>.  If any indicated payload
                   type is unknown, this MUST result in an error.</t>
                 <t>For each specified "rtx" media format, establish a mapping between
                   the RTX payload type and its associated primary
-		  payload type. See <xref target="RFC4588"/>. If any
+		  payload type as described in <xref target="RFC4588"/>, Section 8.6 and 8.7. If any
                   referenced primary payload types are not present, this MUST result in an error.</t>
                 <t>If the directional attribute is of type "sendrecv" or
                   "recvonly", enable receipt and decoding of media.
@@ -2535,7 +2558,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Configure the ICE components associated with this media section to use
               the supplied ICE remote ufrag and password for their connectivity checks.</t>
             <t>Pair any supplied ICE candidates with any gathered local candidates, as described
-            in [TODO: ref to <xref target="RFC5245"/> or something else ???]
+            in Section 5.7 of <xref target="RFC5245"/>
             and start connectivity checks with the appropriate credentials.</t>
             <t>If the media section proto value indicates use of RTP:
               <list style="symbols">
@@ -2543,12 +2566,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>For each specified payload type that is also supported by the local implementation,
                   establish a mapping between the
                   payload type ID and the actual media format.
-                  [TODO: ref to ??? goes here]
+                  [TODO - Justin to add more to explain mapping.]
                   If any indicated payload
                   type is unknown, it MUST be ignored. [TODO: should fail on answers]</t>
                 <t>For each specified "rtx" media format, establish a mapping between
-                the RTX payload type and its associated primary payload type.
-                See <xref target="RFC4588"/>. If any
+                the RTX payload type and its associated primary payload type
+                as described in <xref target="RFC4588"/>. If any
                   referenced primary payload types are not present, this MUST result in an error.</t>
                 <t>For each specified fmtp parameter that is supported by the local implementation,
                   enable them on the associated payload types.</t>
@@ -2605,8 +2628,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   "sendonly", prepare to start transmitting media using the specified primary SSRC
                   and one of the selected payload types, once the underlying transport
                   layers have been established. Otherwise, stop transmitting RTP media,
-                  although RTCP should still be sent.
-                  See Section 5.1 of <xref target="RFC3264"/>. </t>
+                  although RTCP should still be sent as described in 
+                  Section 5.1 of <xref target="RFC3264"/>. </t>
               </list>
             </t>
             <t>If the media section proto value indicates use of SCTP:
@@ -2614,16 +2637,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>If no SCTP association yet exists, prepare to initiate a SCTP association
                 over the associated ICE component and DTLS connection, using the local
                 SCTP port value from the local description, and the remote SCTP port value
-                from the remote description. See <xref
-                target="I-D.ietf-mmusic-sctp-sdp"/>.</t>
+                from the remote description as described in <xref
+                target="I-D.ietf-mmusic-sctp-sdp"/>, Section 10.2.</t>
               </list>
             </t>
           </list>
         </t>
         <t>If the answer contains valid BUNDLE groups, discard any ICE components
            for the m= sections that will be bundled onto the primary ICE components
-           in each BUNDLE, and begin muxing these m= sections accordingly.
-        See <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />.</t>
+           in each BUNDLE, and begin muxing these m= sections accordingly
+        as described in <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />, Section 8.2.</t>
         <t>If the answer contains any "a=ice-options" attributes where "trickle"
           is listed as an attribute, update the PeerConnection
           canTrickle property to be true. Otherwise, set this property to false.</t>
