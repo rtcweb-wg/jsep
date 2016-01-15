@@ -76,7 +76,7 @@
     </author>
 
 
-    <date day="15" month="June" year="2015" />
+    <date day="18" month="October" year="2015" />
 
     <area>RAI</area>
 
@@ -556,22 +556,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       </section>
 
-      <section title="RTP CNAME Semantics" anchor="sec.cname">
-	<t>RTP CNAME values provide a canonical name for the RTP
-	endpoint, allowing other RTP endpoints to determine which
-        RTP streams are using the same clock and thus which clock
-        sources can be used that to synchronize media playout.
-        </t>
-
-	<t>Any MediaStreamTracks which have different clock sources
-        MUST have different CNAMEs [TODO: need a reference for this.]
-        Any MediaStreamTracks which are in different PeerConnection objects
-        MUST have different CNAMEs; this prevents peers from linking calls
-        from multiple remote PeerConnections based on the CNAME.
-        For simplicity, MediaStreamTracks in the same PeerConnection which
-        have the same clock source SHOULD have the same CNAME.
-        </t>
-      </section>
       <section anchor="sec.imageattr" title="Video Size Negotiation">
         <t>Video size negotiation is the process through which a receiver can
           use the "a=imageattr" SDP attribute <xref target="RFC6236"/> to indicate
@@ -638,13 +622,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             meets the criteria specified in the attribute, and transmit it
             untouched if so. If the original resolution is too large for the
             attribute criteria, the sender SHOULD apply downscaling to the
-            output of the MediaStreamTrack in order to satisfy the criteria.
-            In rare cases, where a receiver requires a minimum resolution which
-            is greater than the native resolution of the video, the
-            sender SHOULD apply upscaling in order to provide that resolution.
-            The sender SHOULD NOT apply upscaling in any other cases.
+            output of the MediaStreamTrack in order to satisfy the criteria.</t>
+            <t>
+            If the receiver requires a minimum resolution which is greater than the
+            native resolution of the video, upscaling is needed, but this may
+            not be appropriate in all cases. To address this concern, the
+            application can set an upscaling policy for each sent track.
+            For this case, if upscaling is permitted by policy, the sender
+            SHOULD apply upscaling in order to provide the desired resolution.
+            Otherwise, the sender MUST NOT apply upscaling.
+            The sender SHOULD NOT upscale in other cases, even if the policy
+            permits it.
             </t>
-            <t>If there is no appropriate scaling mechanism that allows
+            <t>If there is no appropriate and permitted scaling mechanism that allows
             the received criteria to be satisfied, the sender MUST NOT transmit
             the track.
            </t>
@@ -775,7 +765,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 servers, this could obfuscate location to a metro or possibly
                 even global level.</t>
           </list>
-          Although it can be overridden by local policy, the default ICE
+          </t>
+          <t>Although it can be overridden by local policy, the default ICE
           candidate policy MUST be set to allow all candidates, as this
           minimizes use of application STUN/TURN server resources.</t>
 
@@ -793,14 +784,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>.
           Regardless of policy, the application will always try to negotiate BUNDLE
           onto a single transport,
-          and will offer a single BUNDLE group across all media sections.
+          and will offer a single BUNDLE group across all media section; use of
+          this single transport is contingent upon the answerer accepting BUNDLE.
           However, by specifying a policy from the list below, the application can
-          control how aggressively it will try to BUNDLE media streams together,
+          control exactly how aggressively it will try to BUNDLE media streams together,
           which affects how it will interoperate with a non-BUNDLE-aware endpoint.
           When negotiating with a non-BUNDLE-aware endpoint, only the streams not
           marked as bundle-only streams will be established.
-
-          The set of available policies is as follows:
+          </t>
+          
+          <t>The set of available policies is as follows:
           <list style="hanging">
               <t hangText="balanced:"> The first media section of each type
               (audio, video, or application) will contain transport parameters,
@@ -826,6 +819,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               compatibility with legacy endpoints.
               </t>
             </list>
+          </t>
+          <t>
             As it provides the best tradeoff between performance and
             compatibility with legacy endpoints, the default BUNDLE policy
             MUST be set to "balanced".
@@ -846,6 +841,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             not provide an "a=rtcp-mux" attribute.
             </t>
           </list>
+          </t>
+          <t>
+          The default multiplexing policy MUST be set to
+          "require". Implementations MAY choose to reject attempts by the
+          application to set the multiplexing policy to "negotiate".
           </t>
 
         </section>
@@ -1331,7 +1331,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               "RTP/[S]AVP[F]" and "(UDP/TCP)/TLS/RTP/SAVP[F]"</t>
               <t>Because DTLS-SRTP is REQUIRED, the choice of SAVP or
               AVP has no effect; support for DTLS-SRTP is determined by the presence
-              of the "a=fingerprint" attribute. Note that lack of an "a=fingerprint"
+              of one or more "a=fingerprint" attribute. Note that lack of an "a=fingerprint"
               attribute will lead to negotiation failure.
               </t>
               <t>The use of AVPF or AVP simply controls the timing
@@ -1401,8 +1401,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC4566"></xref>, Section 5.9; both &lt;start-time&gt;
               and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t>
 
-              <t>An "a=msid-semantic:WMS" line MUST be added, as specified in
-              <xref target="I-D.ietf-mmusic-msid"></xref>, Section 4.</t>
+              <t>An "a=ice-options" line, with the "trickle" option, as
+              specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+              Section 4.</t>
             </list></t>
 
           <t>The next step is to generate m= sections, as specified in
@@ -1456,8 +1457,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The m= line MUST be followed immediately by a "c=" line, as specified
           in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
           have yet been gathered, the "c=" line must contain the "dummy" value
-          "IN IP6 ::", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-          Section 5.1.</t>
+          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          Section 5.1. [[NOTE: This has not yet changed in the trickle ICE draft.]]</t>
 
           <t>Each m= section MUST include the following attribute lines:
             <list style="symbols">
@@ -1469,7 +1470,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 11.</t>
 
               <t>An "a=rtcp" line, as specified in <xref target="RFC3605"></xref>,
-              Section 2.1, containing the dummy value "9 IN IP6 ::", because
+              Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because
               no candidates have yet been gathered.</t>
 
               <t>An "a=msid" line, as specified in <xref
@@ -1511,13 +1512,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <xref
               target="RFC5245"></xref>, Section 15.4.</t>
 
-              <t>An "a=ice-options" line, with the "trickle" option, as
-              specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-              Section 4.</t>
-
-              <t>An "a=fingerprint" line, as specified in <xref
-              target="RFC4572"></xref>, Section 5; the algorithm used for the
-              fingerprint MUST match that used in the certificate signature.
+              <t>An "a=fingerprint" line for each of the endpoint's
+              certificates, as specified in <xref target="RFC4572"></xref>,
+              Section 5; the digest algorithm used for the fingerprint MUST
+              match that used in the certificate signature.
               </t>
 
               <t>An "a=setup" line, as specified in <xref
@@ -1549,8 +1547,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC5576"></xref>, Section 4.1, indicating the SSRC to be
               used for sending media, along with the mandatory "cname" source
               attribute, as specified in Section 6.1, indicating the CNAME for
-              the source. The CNAME must be generated in accordance with
-              <xref target="RFC7022"></xref> and <xref target="sec.cname"></xref>.</t>
+              the source. The CNAME MUST be generated in accordance with
+             Section 4.9 of <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
 
               <t>If RTX is supported for this media type, another "a=ssrc"
               line with the RTX SSRC, and an "a=ssrc-group" line, as specified
@@ -1564,8 +1562,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               simplicity, if both RTX and FEC are supported, the FEC SSRC
               MUST be the same as the RTX SSRC.</t>
 
-              <t>[OPEN ISSUE: Handling of a=imageattr]</t>
-
               <t>If the BUNDLE policy for this PeerConnection is set to
               "max-bundle", and this is not the first m= section, or the BUNDLE
               policy is set to "balanced", and this is not the first m= section
@@ -1578,16 +1574,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           "UDP/DTLS/SCTP" if the default candidate uses UDP transport,
           or "TCP/DTLS/SCTP" if the default candidate uses TCP transport <xref
           target="I-D.ietf-mmusic-sctp-sdp"></xref>. The "fmt" value
-          MUST be set to the SCTP port number, as specified in Section 4.1.
-          [TODO: update this to use a=sctp-port, as indicated in the latest
-          data channel docs]</t>
+          MUST be set to "webrtc-datachannel" as specified in
+          <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 4.1.
+          </t>
           <t>Within the data m= section, the "a=mid",
-          "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate",
-          "a=fingerprint", and "a=setup" lines MUST be included as mentioned
-          above, along with an "a=sctpmap" line referencing the SCTP port number
-          and specifying the application protocol indicated in <xref
-          target="I-D.ietf-rtcweb-data-protocol"></xref>. [OPEN ISSUE: the -01
-          of this document is missing this information.]</t>
+          "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", and "a=setup" lines MUST be included as mentioned
+          above, along with an "a=fmtp:webrtc-datachannel" line
+          and an "a=sctp-port" line referencing the SCTP port number
+          as defined in <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 4.1.</t>
 
           <t>Once all m= sections have been generated, a session-level
           "a=group" attribute MUST be added as specified in <xref
@@ -1659,7 +1653,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>Each "m=" and c=" line MUST be filled in with the port, protocol,
               and address of the default candidate for the m= section, as described
-              in <xref target="RFC5245"></xref>, Section 4.3. Each
+              in <xref target="RFC5245"></xref>, Section 4.3. If ICE checking
+              has already completed for one or more candidate pairs and a candidate
+              pair is in active use, then that pair MUST be used, even if ICE
+              has not yet completed. Note that this differs from the guidance in
+              <xref target="RFC5245"/>, Section 9.1.2.2, which only refers to
+              offers created when ICE has completed. Each
               "a=rtcp" attribute line MUST also be filled in with the port and
               address of the appropriate default candidate, either the
               default RTP or RTCP candidate, depending on whether RTCP multiplexing
@@ -1883,19 +1882,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The first step in generating an initial answer is to generate
           session-level attributes. The process here is identical to that
-          indicated in the Initial Offers section above.</t>
+          indicated in the Initial Offers section above, except
+          that the "a=ice-options" line, with the "trickle" option, as specified in
+          <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
+          4 is only included if such an option was present in the offer.</t>
 
-	  <t>The next step is to generate session-level lip sync
-	  groups as defined in <xref target="RFC5888"/>, Section
-	  7. All Tracks in the same MediaStream need to be placed in
-	  the same "LS" group as long as theses tracks were in the
-	  offered to by synchronized in the offer.
-	  RFC5888 only allows the groups in the
-	  answer to be a subset of what was in the offer. If there are
-	  tracks that the same MediaStream that can not be added to
-	  the "LS" group, once the state moves back to "stable" the
-	  browser SHOULD initiate another offer/answer negotiation put
-	  all the tracks in the MediaStream into the "LS" group. [[OPEN ISSUE:
+ 	      <t>The next step is to generate session-level lip sync
+	      groups as defined in <xref target="RFC5888"/>, Section
+	      7. All Tracks in the same MediaStream need to be placed in
+	      the same "LS" group as long as theses tracks were in the
+	      offered to by synchronized in the offer.
+	      RFC5888 only allows the groups in the
+	      answer to be a subset of what was in the offer. If there are
+	      tracks that the same MediaStream that can not be added to
+	      the "LS" group, once the state moves back to "stable" the
+	      browser SHOULD initiate another offer/answer negotiation put
+	      all the tracks in the MediaStream into the "LS" group. [[OPEN ISSUE:
           https://github.com/rtcweb-wg/jsep/issues/162]]</t>
 
           <t>The next step is to generate m= sections for each m= section that
@@ -1945,7 +1947,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The m= line MUST be followed immediately by a "c=" line, as specified
           in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
           have yet been gathered, the "c=" line must contain the "dummy" value
-          "IN IP6 ::", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
           Section 5.1.</t>
 
           <t>
@@ -1954,12 +1956,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           BUNDLEd must use unique ICE credentials and candidates. Each
           m= section MUST include the following:
             <list style="symbols">
-              <t>If present in the offer, an "a=mid" line, as specified in
+              <t>If and only if present in the offer, an "a=mid" line, as specified in
               <xref target="RFC5888"></xref>, Section 9.1. The "mid" value
               MUST match that specified in the offer.</t>
 
               <t>An "a=rtcp" line, as specified in <xref target="RFC3605"></xref>,
-              Section 2.1, containing the dummy value "9 IN IP6 ::", because
+              Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because
               no candidates have yet been gathered.</t>
 
               <t>If a local MediaStreamTrack has been associated, an "a=msid"
@@ -1997,7 +1999,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               maximum supported frame sizes out of all codecs included above, as
               specified in <xref target="RFC4566"></xref>, Section 6.</t>
 
-              <t>If this m= section is for video media, an "a=imageattr"
+              <t>If this m= section is for video media, and there are known
+              limitations on the size of images which can be decoded, an "a=imageattr"
               line, as specified in <xref target="sec.imageattr"></xref>.
               </t>
 
@@ -2015,17 +2018,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               specific usage for each media type is outlined in Sections 4
               and 5.</t>
 
-              <t>"a=ice-ufrag" and "a=ice-passwd" lines, as specified in <xref
+              <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <xref
               target="RFC5245"></xref>, Section 15.4.</t>
 
-              <t>If the "trickle" ICE option is present in the offer, an
-              "a=ice-options" line, with the "trickle" option, as specified in
-              <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
-              4.</t>
-
-              <t>An "a=fingerprint" line, as specified in <xref
-              target="RFC4572"></xref>, Section 5; the algorithm used for the
-              fingerprint MUST match that used in the certificate signature.
+              <t>An "a=fingerprint" line for each of the endpoint's
+              certificates, as specified in <xref target="RFC4572"></xref>,
+              Section 5; the digest algorithm used for the fingerprint MUST
+              match that used in the certificate signature.
               </t>
 
               <t>An "a=setup" line, as specified in <xref
@@ -2063,9 +2062,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               line, as specified in <xref target="RFC5576"></xref>, Section
               4.1, indicating the SSRC to be used for sending media, along with
               the mandatory "cname" source attribute, as specified in Section
-              6.1, indicating the CNAME for the source. The CNAME must be
-              generated in accordance with <xref target="RFC7022"></xref>
-              and <xref target="sec.cname"></xref>.</t>
+              6.1, indicating the CNAME for the source.
+	      The CNAME MUST be generated in accordance with
+             Section 4.9 of <xref
+	     target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
 
               <t>If a local MediaStreamTrack has been associated, and RTX has
               been negotiated for this m= section, another "a=ssrc" line with
@@ -2080,24 +2080,20 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="RFC5956"></xref>, section 4.3. For
               simplicity, if both RTX and FEC are supported, the FEC SSRC
               MUST be the same as the RTX SSRC.</t>
-
-              <t>[OPEN ISSUE: Handling of a=imageattr]</t>
             </list></t>
 
           <t>If a data channel m= section has been offered, a m= section MUST
           also be generated for data. The &lt;media&gt; field MUST be set to
-          "application" and the &lt;proto&gt; field MUST be set to
-          exactly match the field in the offer; the "fmt" value
-          MUST be set to the SCTP port number, as specified in Section 4.1.
-          [TODO: update this to use a=sctp-port, as indicated in the latest
-          data channel docs]</t>
+          "application" and the &lt;proto&gt; and "fmt" fields MUST be set to
+          exactly match the fields in the offer.</t>
+
           <t>Within the data m= section, the "a=mid",
-          "a=ice-ufrag", "a=ice-passwd", "a=ice-options", "a=candidate",
+          "a=ice-ufrag", "a=ice-pwd", "a=candidate",
           "a=fingerprint", and "a=setup" lines MUST be included as mentioned
-          above, along with an "a=sctpmap" line referencing the SCTP port number
-          and specifying the application protocol indicated in <xref
-          target="I-D.ietf-rtcweb-data-protocol"></xref>. [OPEN ISSUE: the -01
-          of this document is missing this information.]</t>
+          above, along with an "a=fmtp:webrtc-datachannel" line
+          and an "a=sctp-port" line referencing the SCTP port number
+          as defined in <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section 4.1.
+          </t>
 
           <t>If "a=group" attributes with semantics of "BUNDLE" are offered,
           corresponding session-level "a=group" attributes MUST be added as
@@ -2329,7 +2325,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Any "a=extmap" lines are parsed as specified in
                 <xref target="RFC5285"/>, Section 5, and their values
                 are stored.</t>
-              <t>TODO: msid-semantic, identity, rtcp-rsize, rtcp-mux,
+              <t>TODO: identity, rtcp-rsize, rtcp-mux,
                 and any other attribs valid at session level.</t>
             </list>
           </t>
@@ -2348,7 +2344,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             following non-attribute lines:
             <list style="symbols">
               <t>
-                As with the "c=" line at the session level, 
+                As with the "c=" line at the session level,
                 the "c=" line MUST be parsed according to
                 <xref target="RFC4566"/>, Section 5.7, but its value is not
                 used.</t>
@@ -2423,23 +2419,35 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             performed:
               <list style="symbols">
                 <t>For each m= section, valid values for each of the
-                mandatory-to-use features enumerated in <xref target="sec.usage-requirements"/> MUST be present. These values MAY either be present at the
+                mandatory-to-use features enumerated in <xref target="sec.usage-requirements"/>
+                MUST be present. These values MAY either be present at the
                 media level, or inherited from the session level.
                   <list style="symbols">
-                    <t>ICE ufrag and password values</t>
-                    <t>DTLS fingerprint and setup values</t>
+                    <t>ICE ufrag and password values, which MUST comply with the
+                      size limits specified in <xref target="RFC5245"/>, Section 15.4.</t>
+                    <t>DTLS setup value, which MUST be set according to the rules
+                      specified in <xref target="RFC5763"/>, Section 5, and MUST
+                      be consistent with the selected role of the current DTLS
+                      connection, if one exists.[TODO: may need revision, i.e., use of actpass</t>
+                    <t>DTLS fingerprint values, where at least one fingerprint
+                      MUST be present.</t>
                   </list>
                 </t>
+                <t>Each m= section is also checked to ensure prohibited features
+                  are not used. If this is a local description, the "ice-lite"
+                  attribute MUST NOT be specified.</t>
               </list>
           </t>
           <t>If this session description is of type "pranswer" or "answer", the
           following additional checks are applied:
             <list style="symbols">
               <t>The session description must follow the rules defined in
-                <xref target="RFC3264"/>, Section 6.</t>
-              <t>For each m= section, the protocol value MUST exactly match the
-              protocol value in the corresponding m= section in the associated
-              offer.</t>
+                <xref target="RFC3264"/>, Section 6, including the requirement
+                that the number of m= sections MUST exactly match the number
+                of m= sections in the associated offer.</t>
+              <t>For each m= section, the media type and protocol values MUST
+              exactly match the media type and protocol values in the
+              corresponding m= section in the associated offer.</t>
             </list>
           </t>
         </section>
@@ -2457,7 +2465,36 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         bounds, or cannot be applied, processing MUST stop and an error MUST be
         returned.
           <list style="symbols">
-            <t>TODO</t>
+            <t>If this media section is new, begin gathering candidates for it,
+             as defined in <xref target="RFC5245"/>, Section 4.1.1,
+             unless it has been marked as bundle-only.</t>
+            <t>Or, if the ICE ufrag and password values have changed, trigger the ICE Agent
+              to start an ICE restart and begin gathering new candidates for the
+              media section, as defined in <xref target="RFC5245"/>, Section 9.1.1.1,
+              unless it has been marked as bundle-only.</t>
+            <t>If the media section proto value indicates use of RTP:
+              <list style="symbols">
+                <t>If RTCP mux is indicated, prepare to demux RTP and RTCP from the RTP
+                  ICE component, as specified in <xref target="RFC5761"/>, Section 5.1.1.
+                  If RTCP mux is not indicated, but was indicated in a previous
+                  description, this MUST result in an error.</t>
+                <t>For each specified RTP header extension, establish a mapping between
+                  the extension ID and URI. If any indicated RTP header extension is unknown, this
+                  MUST result in an error. [TODO: ref]</t>
+                <t>If the MID header extension is supported, prepare to demux
+                  RTP data intended for this media section based on
+                  the MID header extension. [TODO: ref]</t>
+                <t>For each specified payload type, establish a mapping between the
+                  payload type ID and the actual media format. [TODO: ref] If any indicated payload
+                  type is unknown, this MUST result in an error.</t>
+                <t>For each specified "rtx" media format, establish a mapping between
+                  the RTX payload type and its associated primary payload type. [TODO: ref] If any
+                  referenced primary payload types are not present, this MUST result in an error.</t>
+                <t>If the directional attribute is of type "sendrecv" or
+                  "recvonly", enable receipt and decoding of media.
+                </t>
+              </list>
+            </t>
           </list>
         </t>
         <t>Finally, if this description is of type "pranswer" or "answer", follow
@@ -2466,11 +2503,103 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
 
       <section title="Applying a Remote Description" anchor="sec.applying-a-remote-desc">
-        <t>TODO</t>
+        <t>If the answer contains any "a=ice-options" attributes where "trickle"
+          is listed as an attribute, update the PeerConnection
+          canTrickle property to be true. Otherwise, set this property to false.</t>
+        
+        <t>The following steps are performed at the media engine level to apply a remote
+        description.</t>
+        <t>For each media section,
+        the following steps MUST be performed; if any parameters are out of
+        bounds, or cannot be applied, processing MUST stop and an error MUST be
+        returned.
+          <list style="symbols">
+            <t>If the description is of type "offer", and the ICE ufrag or password changed
+              from the previous remote description, [TODO: ref], mark that an ICE restart is needed.</t>
+            <t>Configure the ICE components associated with this media section to use
+              the supplied ICE remote ufrag and password for their connectivity checks.</t>
+            <t>Pair any supplied ICE candidates with any gathered local candidates, as described
+              in [TODO: ref] and start connectivity checks with the appropriate credentials.</t>
+            <t>If the media section proto value indicates use of RTP:
+              <list style="symbols">
+                <t>[TODO: header extensions]</t>
+                <t>For each specified payload type that is also supported by the local implementation,
+                  establish a mapping between the
+                  payload type ID and the actual media format. [TODO: ref] If any indicated payload
+                  type is unknown, it MUST be ignored. [TODO: should fail on answers]</t>
+                <t>For each specified "rtx" media format, establish a mapping between
+                  the RTX payload type and its associated primary payload type. [TODO: ref] If any
+                  referenced primary payload types are not present, this MUST result in an error.</t>
+                <t>For each specified fmtp parameter that is supported by the local implementation,
+                  enable them on the associated payload types.</t>
+                <t>For each specified RTCP feedback mechanism that is supported by the local implementation,
+                  enable them on the associated payload types.</t>
+                <t>For any specified "TIAS" bandwidth value, set this value
+                  as the maximum RTP bitrate to be used when sending media. If
+                  a "TIAS" value is not present, but an "AS" value is, generate
+                  a TIAS a value using this formula: [TODO: convert AS to TIAS].</t>
+                <t>[TODO: handling of CN, telephone-event, "red"]</t>
+                <t>If the media section if of type audio:
+                  <list style="symbols">
+                    <t>For any specified "ptime" value, configure the available payload types to
+                      use the specified packet size. If the specified size is
+                      not supported for a payload type, use the next closest
+                      value instead.</t>
+                  </list>
+                </t>
+              </list>
+            </t>
+          </list>
+        </t>
+        <t>Finally, if this description is of type "pranswer" or "answer", follow
+        the processing defined in the <xref target="sec.applying-an-answer"/>
+        section below.</t>
       </section>
 
       <section title="Applying an Answer" anchor="sec.applying-an-answer">
-        <t>TODO</t>
+        <t>In addition to the steps mentioned above for processing a local or
+          remote description, the following steps are performed when processing
+          a description of type "pranswer" or "answer".</t>
+        <t>For each media section, the following steps MUST be performed:
+          <list style="symbols">
+            <t>If the media section has been rejected (i.e. port is set to zero in
+               the answer), stop any reception or transmission of media for this
+               section, and discard any associated ICE components. [TODO: ref]</t>
+            <t>If the remote DTLS fingerprint has been changed, tear down the existing
+              DTLS connection.</t>
+            <t>If no valid DTLS connection exists, prepare to start a DTLS connection,
+              using the specified roles and fingerprints, on any underlying ICE components,
+              once they are active.</t>
+            <t>If the media section proto value indicates use of RTP:
+              <list style="symbols">
+                <t>If the media section has RTCP mux enabled, discard any RTCP component,
+                   and begin or continue muxing RTCP over the RTP component, as specified in
+                   <xref target="RFC5761"/>, Section 5.1.3. Otherwise, transmit RTCP over
+                   the RTCP component; if no RTCP component exists, because RTCP mux
+                   was previously enabled, this MUST result in an error.</t>
+                <t>If the media section has reduced-size RTCP enabled, configure the
+                  RTCP transmission for this media section to use reduced-size RTCP,
+                  as specified in [TODO: ref]</t>
+                <t>If the directional attribute in the answer is of type "sendrecv" or
+                  "sendonly", prepare to start transmitting media using the specified primary SSRC
+                  and one of the selected payload types, once the underlying transport
+                  layers have been established. Otherwise, stop transmitting RTP media,
+                  although RTCP should still be sent. [TODO: ref]</t>
+              </list>
+            </t>
+            <t>If the media section proto value indicates use of SCTP:
+              <list style="symbols">
+                <t>If no SCTP association yet exists, prepare to initiate a SCTP association
+                over the associated ICE component and DTLS connection, using the local
+                SCTP port value from the local description, and the remote SCTP port value
+                from the remote description. [TODO: ref]</t>
+              </list>
+            </t>
+          </list>
+        </t>
+        <t>If the answer contains valid BUNDLE groups, discard any ICE components
+           for the m= sections that will be bundled onto the primary ICE components
+           in each BUNDLE, and begin muxing these m= sections accordingly. [TODO: ref]</t>
       </section>
     </section>
 
@@ -2504,6 +2633,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The set of ICE candidates and their parameters (a=candidate).</t>
 
           <t>The DTLS fingerprint(s) (a=fingerprint).</t>
+
+          <t>The contents of BUNDLE groups, bundle-only parameters, or
+          "a=rtcp-mux" parameters.</t>
         </list></t>
 
       <t>The following modifications, if done by the browser to a description
@@ -2632,8 +2764,8 @@ v=0
 o=- 4962303333179871722 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=msid-semantic:WMS
 a=group:BUNDLE a1 v1
+a=ice-options:trickle
 m=audio 56500 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 192.0.2.1
 a=mid:a1
@@ -2649,7 +2781,6 @@ a=rtpmap:98 telephone-event/48000
 a=maxptime:120
 a=ice-ufrag:ETEn1v9DoTMB9J4r
 a=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -2677,7 +2808,6 @@ a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
 a=ice-ufrag:BGKkWnG5GmiUpdIV
 a=ice-pwd:mqyWsAjvtKwTGnvhPztQ9mIf
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -2710,7 +2840,6 @@ v=0
 o=- 6729291447651054566 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=msid-semantic:WMS
 m=audio 20000 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 192.0.2.2
 a=mid:a1
@@ -2889,11 +3018,11 @@ v=0
 o=- 4962303333179871723 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=msid-semantic:WMS
 a=group:BUNDLE a1 d1
+a=ice-options:trickle
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
-c=IN IP6 ::
-a=rtcp:9 IN IP6 ::
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
 a=mid:a1
 a=msid:57017fee-b6c1-4162-929c-a25110252400
        e83006c5-a0ff-4e0a-9ed9-d3e6747be7d9
@@ -2906,7 +3035,6 @@ a=rtpmap:98 telephone-event/48000
 a=maxptime:120
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -2918,13 +3046,12 @@ a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
 a=ssrc:1732846380 cname:FocUG1f0fcg/yvY7
 
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
-c=IN IP6 ::
+c=IN IP4 0.0.0.0
 a=mid:d1
 a=fmtp:webrtc-datachannel max-message-size=65536
 a=sctp-port 5000
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
                      :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
@@ -2972,11 +3099,11 @@ v=0
 o=- 7729291447651054566 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=msid-semantic:WMS
 a=group:BUNDLE a1 d1
+a=ice-options:trickle
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
-c=IN IP6 ::
-a=rtcp:9 IN IP6 ::
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
 a=mid:a1
 a=msid:QI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1
        QI39StLS8W7ZbQl1sJsWUXkr3Zf12fJUvzQ1a0
@@ -2989,7 +3116,6 @@ a=rtpmap:98 telephone-event/48000
 a=maxptime:120
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
@@ -3000,13 +3126,12 @@ a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
 a=ssrc:4429951804 cname:Q/NWs1ao1HmN4Xa5
 
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
-c=IN IP6 ::
+c=IN IP4 0.0.0.0
 a=mid:d1
 a=fmtp:webrtc-datachannel max-message-size=65536
 a=sctp-port 5000
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
@@ -3058,8 +3183,8 @@ v=0
 o=- 7729291447651054566 2 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=msid-semantic:WMS
 a=group:BUNDLE a1 d1 v1 v2
+a=ice-options:trickle
 m=audio 64532 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 55.66.77.88
 a=rtcp:64532 IN IP4 55.66.77.88
@@ -3075,7 +3200,6 @@ a=rtpmap:98 telephone-event/48000
 a=maxptime:120
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:actpass
@@ -3098,7 +3222,6 @@ a=fmtp:webrtc-datachannel max-message-size=65536
 a=sctp-port 5000
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                      :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:actpass
@@ -3121,7 +3244,6 @@ a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3154,7 +3276,6 @@ a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
 a=ice-ufrag:7sFvz2gdLkEwjZEr
 a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3192,8 +3313,8 @@ v=0
 o=- 4962303333179871723 2 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=msid-semantic:WMS
 a=group:BUNDLE a1 d1 v1 v2
+a=ice-options:trickle
 m=audio 52546 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 11.22.33.44
 a=rtcp:52546 IN IP4 11.22.33.44
@@ -3209,7 +3330,6 @@ a=rtpmap:98 telephone-event/48000
 a=maxptime:120
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3233,7 +3353,6 @@ a=fmtp:webrtc-datachannel max-message-size=65536
 a=sctp-port 5000
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256 19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
                      :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:passive
@@ -3254,7 +3373,6 @@ a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3282,7 +3400,6 @@ a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
 a=ice-ufrag:ATEn1v9DoTMB9J4r
 a=ice-pwd:AtSK0WpNtpUjkY4+86js7ZQl
-a=ice-options:trickle
 a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
              :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -4727,6 +4844,36 @@ a=end-of-candidates
     <section title="Change log" anchor="sec.change-log">
 
       <t> Note: This section will be removed by RFC Editor before publication. </t>
+
+      <t>Changes in draft-12:</t>
+      <t>
+        <list style="symbols">
+          <t>Filled in sections on applying local and remote descriptions.</t>
+          <t>Discussed downscaling and upscaling to fulfill imageattr
+             requirements.</t>
+          <t>Updated what SDP can be modified by the application.</t>
+          <t>Updated to latest datachannel SDP.</t>
+          <t>Allowed multiple fingerprint lines.</t>
+          <t>Switched back to IPv4 for dummy candidates.</t>
+          <t>Added additional clarity on ICE default candidates.</t>
+        </list>
+      </t>
+
+      <t>Changes in draft-11:</t>
+       <t>
+        <list style="symbols">
+          <t>Clarified handling of RTP CNAMEs.</t>
+          <t>Updated what SDP lines should be processed or ignored.</t>
+          <t>Specified how a=imageattr should be used.</t>
+        </list>
+      </t>
+
+      <t>Changes in draft-10:</t>
+       <t>
+        <list style="symbols">
+          <t>TODO</t>
+        </list>
+      </t>
 
       <t>Changes in draft-09:</t>
       <t>
