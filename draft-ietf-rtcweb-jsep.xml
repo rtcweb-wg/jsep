@@ -1886,20 +1886,26 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           that the "a=ice-options" line, with the "trickle" option, as specified in
           <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
           4 is only included if such an option was present in the offer.</t>
-          
-	  <t>The next step is to generate lip sync groups as defined
-	  in <xref target="RFC5888"/>, Section 7.  For each
-	  MediaStream with more than one MediaStreamTrack, a group
-	  of type "LS" MUST be added that contains the mid values for
-	  each MediaStreamTrack in that MediaStream. In some cases
-	  this may result in adding a mid to a given LS group that
-	  was not in that LS group in the associated offer. Although
-	  this is not allowed by <xref target="RFC5888"/>, it is
-	  allowed when implementing this specification.
-          [[OPEN ISSUE: This is still under discussion. See:
-          https://github.com/rtcweb-wg/jsep/issues/162.]]
-          </t>
 
+ 	      <t>The next step is to generate session-level lip sync
+	      groups as defined in <xref target="RFC5888"/>, Section
+	      7. All Tracks in the same MediaStream need to be placed in
+	      the same "LS" group as long as theses tracks were in the
+	      offered to by synchronized in the offer.
+	      RFC5888 only allows the groups in the
+	      answer to be a subset of what was in the offer. If there are
+	      tracks that the same MediaStream that can not be added to
+	      the "LS" group, once the state moves back to "stable" the
+	      browser MAY initiate another offer/answer negotiation put
+	      all the tracks in the MediaStream into the "LS" group or they can be
+          left in a state that though answer wishes them to be synchronized, the
+          answer can not signal them as synchronized because the offer did put
+          them in the same LS group. The working group consider varios solution
+          to this rare corner condition and decided not to try to automatically
+          solve it. Applications that run into can do an additional round of
+          signaling reversing the offer / answer roles to resolve the issue if
+          it is critical for their use case. </t>
+          
           <t>The next step is to generate m= sections for each m= section that
           is present in the remote offer, as specified in <xref
           target="RFC3264"></xref>, Section 6. For the purposes of this
