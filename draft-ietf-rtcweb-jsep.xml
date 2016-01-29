@@ -1860,13 +1860,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             audio bandwidth it receives, at the cost of some fidelity, depending on
             the quality of the remote VAD algorithm.</t>
             <t>If the "VoiceActivityDetection" option is specified, with a value
-            of "false", the browser MUST negotiate the audio to not suppress any
-            audio. For opus this would use an "usedtx=0" parameter, while for
-            G.729 DTX would be not be used, and ("CN") would not be
-            negotiated. </t>
+            of "false", the browser MUST NOT omit "CN" codecs.
+            For codecs that have their own internal silence suppression support,
+            the appropriate fmtp parameters for that codec MUST be
+            specified to indicate that silence suppression for received audio is
+            not desired. For example, when using the Opus codec, the
+            "usedtx=0" parameter would be specified in the offer.</t>
             <t> The "VoiceActivityDetection" option does not have any impact on
-            the setting of the vad value in the client to mixer audio level
-            header extension described in <xref
+            the setting of the "vad" value in the signaling of the client to mixer
+            audio level header extension described in <xref
             target="RFC6464"></xref>, Section 4. </t>
           </section>
         </section>
@@ -2195,8 +2197,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection2">
             <t>Silence suppression in the answer is handled as described in
-              <xref target="sec.voiceactivitydetection1"></xref>.
-            </t>
+            <xref target="sec.voiceactivitydetection1"></xref>. Note that
+            setting the "VoiceActivityDetection" parameter on an answer has
+            no impact on whether the answerer does silence suppression for
+            audio it sends.</t>
           </section>
         </section>
       </section>
