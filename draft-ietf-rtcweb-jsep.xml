@@ -422,9 +422,10 @@ setRemote(ANSWER) |                                   |
           gathering is occurring through an event. Then, when each new ICE
           candidate becomes available, the ICE Agent will supply it to the
           application via an additional event; these candidates will also
-          automatically be added to the local session description. Finally, when
-          all candidates have been gathered, an event will be dispatched
-          to signal that the gathering process is complete.</t>
+          automatically be added to the current and/or pending local session
+          description. Finally, when all candidates have been gathered, an
+          event will be dispatched to signal that the gathering process is
+          complete.</t>
           <t>Note that gathering phases only gather the candidates needed by
           new/recycled/restarting m= lines; other m= lines continue to use their
           existing candidates.</t>
@@ -1028,8 +1029,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>A rollback discards any proposed changes to the session,
             returning the state machine to the stable state, and setting the
-            modified local and/or remote description back to their previous
-            values. Any resources or candidates that were allocated by the
+            pending local and/or remote description back to null.
+            Any resources or candidates that were allocated by the
             abandoned local description are discarded; any media that is
             received will be processed according to the previous local and
             remote descriptions. Rollback can only be used to cancel proposed
@@ -1061,11 +1062,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           to successfully handle scenarios where the application wants to
           offer to change from one media format to a different, incompatible
           format, the PeerConnection must be able to simultaneously support
-          use of both the old and new local descriptions (e.g. support codecs
-          that exist in both descriptions) until a final answer is received,
-          at which point the PeerConnection can fully adopt the new local
-          description, or roll back to the old description if the remote side
-          denied the change.</t>
+          use of both the current and pending local descriptions (e.g. support
+          codecs that exist in both descriptions) until a final answer is
+          received, at which point the PeerConnection can fully adopt the
+          pending local description, or roll back to the current description
+          if the remote side denied the change.</t>
 
           <t>This API indirectly controls the candidate gathering process.
           When a local description is supplied, and the number of transports
@@ -1073,7 +1074,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           the local description, the PeerConnection will create transports as
           needed and begin gathering candidates for them.</t>
 
-          <t>If setRemoteDescription was previous called with an offer, and
+          <t>If setRemoteDescription was previously called with an offer, and
           setLocalDescription is called with an answer (provisional or final),
           and the media directions are compatible, and media are available to
           send, this will result in the starting of media transmission.</t>
@@ -1205,9 +1206,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <section title="addIceCandidate" anchor="sec.addicecandidate">
           <t>The addIceCandidate method provides a remote candidate to the ICE
-          Agent, which, if parsed successfully, will be added to the remote
-          description according to the rules defined for Trickle ICE.
-          Connectivity checks will be sent to the new candidate.</t>
+          Agent, which, if parsed successfully, will be added to the current
+          and/or pending remote description according to the rules defined for
+          Trickle ICE. Connectivity checks will be sent to the new candidate.</t>
 
           <t>This call will result in a change to the state of the ICE Agent,
           and may result in a change to media state if it results in
