@@ -1866,13 +1866,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             specified to indicate that silence suppression for received audio is
             not desired. For example, when using the Opus codec, the
             "usedtx=0" parameter would be specified in the offer.</t>
-            <t>Note that setting the "VoiceActivityDetection" parameter on an
-            endpoint has no impact on whether that endpoint does silence
-            suppression for the audio it sends.</t>
-            <t> The "VoiceActivityDetection" option does not have any impact on
+            <t>Note that setting the "VoiceActivityDetection" parameter when
+            generating an offer is a request to receive audio with silence
+            suppression. It has no impact on whether the local endpoint does
+            silence suppression for the audio it sends.</t>
+            <t>The "VoiceActivityDetection" option does not have any impact on
             the setting of the "vad" value in the signaling of the client to mixer
             audio level header extension described in <xref
             target="RFC6464"></xref>, Section 4. </t>
+            <t>
+              Note that if silence suppression was not indicated in the offer,
+              via the omission of CN codecs or relevant fmtp parameters, the
+              VoiceActivityDetection parameter has no effect, and the answer
+              should be generated as if VoiceActivityDetection was set to
+              false.
+            </t>
           </section>
         </section>
       </section>
