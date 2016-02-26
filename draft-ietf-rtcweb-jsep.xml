@@ -498,9 +498,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           location information as possible (note that these choices come with
           corresponding operational costs). To accomplish this, the browser
           MUST allow the application to restrict which ICE candidates are used
-          in a session. In addition, administrators may also wish to control
-          the set of ICE candidates, and so the browser SHOULD also allow
-          control via local policy, with the most restrictive policy prevailing.
+          in a session. Note that this filtering is applied on top of any
+          restrictions the browser chooses to enforce regarding which IP
+          addresses are permitted for the application, as discussed in
+          <xref target="I-D.shieh-rtcweb-ip-handling"/>.
           </t>
 
           <t>There may also be cases where the application wants to change which
@@ -767,9 +768,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 even global level.</t>
           </list>
           </t>
-          <t>Although it can be overridden by local policy, the default ICE
-          candidate policy MUST be set to allow all candidates, as this
-          minimizes use of application STUN/TURN server resources.</t>
+          <t>The default ICE candidate policy MUST be set to allow all
+          candidates, as this is generally the desired policy, and also
+          typically reduces use of application TURN server
+          resources significantly.</t>
 
           <t>If a size is specified for the ICE candidate pool, this indicates
           the number of ICE components to pre-gather candidates for. Because
@@ -793,7 +795,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           When negotiating with a non-BUNDLE-aware endpoint, only the streams not
           marked as bundle-only streams will be established.
           </t>
-          
+
           <t>The set of available policies is as follows:
           <list style="hanging">
               <t hangText="balanced:"> The first media section of each type
@@ -4911,6 +4913,23 @@ a=end-of-candidates
 
         <format target="http://www.w3.org/TR/2011/WD-webrtc-20140617"
                 type="HTML" />
+      </reference>
+
+      <reference anchor="I-D.shieh-rtcweb-ip-handling">
+        <front>
+          <title>WebRTC IP Address Handling Recommendations</title>
+          <author initials="G" surname="Shieh" fullname="Guo-wei Shieh">
+            <organization/>
+          </author>
+          <author initials="J" surname="Uberti" fullname="Justin Uberti">
+            <organization/>
+          </author>
+          <date month="October" day="19" year="2015"/>
+        </front>
+        <seriesInfo name="Internet-Draft"
+                    value="draft-shieh-rtcweb-ip-handling-00"/>
+        <format type="TXT"
+                target="http://www.ietf.org/internet-drafts/draft-shieh-rtcweb-ip-handling-00.txt"/>
       </reference>
     </references>
 
