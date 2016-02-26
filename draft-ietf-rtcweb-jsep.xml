@@ -417,6 +417,12 @@ setRemote(ANSWER) |                                   |
           be triggered explicitly by the application, or implicitly by the
           browser in response to changes in the ICE configuration.
           </t>
+          <t>When the ICE configuration changes in a way that requires a new
+          gathering phase, a 'needs-ice-restart' bit is set. When this bit is
+          set, calls to the createOffer API will generate new ICE credentials.
+          This bit is cleared by a call to the setLocalDescription API with
+          new ICE credentials from either an offer or an answer, i.e., from either
+          a local- or remote-initiated ICE restart.</t>
           <t>When a new
           gathering phase starts, the ICE Agent will notify the application that
           gathering is occurring through an event. Then, when each new ICE
@@ -1177,20 +1183,24 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           parameters are changed:</t>
          <t><list style="symbols">
             <t>Any changes to the STUN/TURN servers to use affect
-            the next gathering phase. If gathering has already occurred, this
-            will cause the next call to createOffer to generate new ICE
-            credentials, for the purpose of forcing an ICE restart and kicking
-            off a new gathering phase, in which the new servers will be used.
-            If the ICE candidate pool has a nonzero size, any existing
-            candidates will be discarded, and new candidates will be gathered
-            from the new servers.
+            the next gathering phase. With the exception of the initial state
+            where ICE gathering has not yet occurred, the 'needs-ice-restart'
+            bit mentioned in <xref target="sec.ice-gather-overview"/>
+            will be set. This will cause the next call to createOffer to
+            generate new ICE credentials, for the purpose of forcing an ICE
+            restart and kicking off a new gathering phase, in which the new
+            servers will be used. If the ICE candidate pool has a nonzero size,
+            any existing candidates will be discarded, and new candidates will
+            be gathered from the new servers.
             </t>
             <t>Any changes to the ICE candidate policy also affect the next
-            gathering phase, in similar fashion to the server changes described
-            above. Note though that changes to the policy have no effect on
-            the candidate pool, because pooled candidates are not surfaced to
-            the application until a gathering phase occurs, and so any
-            necessary filtering can still be done on any pooled candidates.
+            gathering phase. If the policy is being made more liberal (i.e.,
+            more permitted candidates), the 'needs-ice-restart' bit will be set.
+            If the policy is being made more strict, no ICE restart is needed,
+            and the bit will not be set. Either way, changes to the policy have
+            no effect on the candidate pool, because pooled candidates are not
+            surfaced to the application until a gathering phase occurs, and so
+            any necessary filtering can still be done on any pooled candidates.
             </t>
             <t>Any changes to the ICE candidate pool size take effect
             immediately; if increased, additional candidates are pre-gathered;
