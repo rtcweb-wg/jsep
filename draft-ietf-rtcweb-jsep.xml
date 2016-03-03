@@ -611,10 +611,23 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             type.
           </t>
           <t>As an example, consider a system with a HD-capable, multiformat
-          video decoder, where the application has constrained the received
-          track to at most 360p. In this case, the implemention would generate this
-          attribute:</t>
+            video decoder, where the application has constrained the received
+            track to at most 360p. In this case, the implemention would generate this
+            attribute:</t>
           <t>a=imageattr:* recv [x=[16:640],y=[16:360],q=1.0]</t>
+          <t>Also to note, the above example implies that the receiver is capable 
+            of decoding all the image screen resolutions ranging from 16x16 
+            pixels up to 640x360 pixels.</t>
+          <t>In scenarios where the receiver would want to constrain the possible
+            image screen resolutions, it does so by including the 'step' and/or the
+            'par' imageattr parameters as shown:</t> 
+          <t>a=imageattr:* recv [x=[16:16:640],y=[16:8:360],q=1.0, par=1.2-1.8]</t> 
+          <t>Here, the x-axis resolution can take values from 16 up to 640 in 16 
+            pixels steps. The y-axis resolution similarly can take values from 16 
+            up to 360 in 8 pixels step. The par parameter limits the set of possible 
+            x and y screen resolution combinations such that 640x360 (ratio=1.777) is 
+            a valid combination while 640x16 (ratio=40) or 160x320 (ratio=0.5) are 
+            invalid combinations.</t>
         </section>
 
         <section title="Interpreting an imageattr Attribute">
