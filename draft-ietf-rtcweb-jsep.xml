@@ -1595,7 +1595,27 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               "max-bundle", and this is not the first m= section, or the BUNDLE
               policy is set to "balanced", and this is not the first m= section
               for this media type, an "a=bundle-only" line.</t>
-            </list></t>
+
+	      <t>If the RtpTransceiver's RtpSender is active, an "a=rid" line
+	      for each encoding specified by the application in the RtpSenders's
+	      parameters.  If no encodings have been specified, then one RID
+	      line is generated.  The rid line is specified in <xref
+	      target="I-D.ietf-mmusic-rid"></xref> and indicates the RID value
+	      used for sending media, as specified in <xref
+	      target="I-D.ietf-avtext-rid"></xref>.  The direction MUST be
+	      "send".  If the application has choosen a RID value, it MUST be
+	      used as the rid-identifier, otherwise a RID value MUST be chosen
+	      by the implemenatation.  Supported constraints MAY be included.
+	      </t>
+
+	      <t>If the RtpTransceiver's RtpSender is active and more than one
+	      "a=rid" line has been generated, an "a=simulcast" line, with
+	      direction "send" an d using the RID identification mechanism as
+	      defined in <xref target="I-D.ietf-mmusic-simulcsat">.  The list of
+	      RIDs SHOULD include all of the RID identifiers used in the "a=rid"
+	      lines for this m= section.</xref>
+	      </t>
+	    </list></t>
 
           <t>Lastly, if a data channel has been created, a m= section MUST be
           generated for data. The &lt;media&gt; field MUST be set to
@@ -1719,6 +1739,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>For MediaStreamTracks that are still present, the "a=msid",
               "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</t>
+
+	      <t>For RtpTransceivers that are still present, the "a=rid" lines
+	      MUST follow the rules for subsequent offers defined in <xref
+	      target="I-D.ietf-mmusic-rid"></xref>.</t>
+
+	      <t>For RtpTransceivers that are still present, the "a=simulcast"
+	      lines MUST follow the rules for subsequent offers defined in <xref
+	      target="I-D.ietf-mmusic-simulcast"></xref>.</t>
 
               <t>If any MediaStreamTracks have been removed, either through
               the removeStream method or by removing them from an added
@@ -2467,6 +2495,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>If present, a single "a=rtcp-mux" line MUST be parsed as specified in
                 <xref target="RFC5761"/>, Section 5.1.1, and its presence or
                 absence flagged and stored.</t>
+              <t>If present, the "a=rid" lines MUST be parsed as specified in
+	      <xref target="I-D.ietf-mmusic-rid"></xref>, and their values stored.</t>
+              <t>If present, the "a=simulcast" lines MUST be parsed as specified
+              in <xref target="I-D.ietf-mmusic-simulcast"></xref>, and their
+              values stored.</t>
               <t>TODO: a=rtcp-rsize, a=rtcp, a=msid, a=candidate, a=end-of-candidates</t>
             </list>
           </t>
@@ -2668,6 +2701,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   layers have been established. Otherwise, stop transmitting RTP media,
                   although RTCP should still be sent, as described in 
                   <xref target="RFC3264"/>, Section 5.1. </t>
+		<t>If the offer contained "a=rid" lines, then the "a=rid" lines,
+		or lack of "a=rid" lines in the answer must be processed
+		according to the rules in <xref
+		target="I-D.ietf-mmusic-rid"></xref>.
+		</t>
+		<t>If the offer contained an "a=simulcast" line, then the
+		"a=simulcast" lines, or lack of "a=simulcast" line in the answer
+		must be processed according to the rules in <xref
+		target="I-D.ietf-mmusic-rid"></xref>.
+		</t>
               </list>
             </t>
             <t>If the media section proto value indicates use of SCTP:
