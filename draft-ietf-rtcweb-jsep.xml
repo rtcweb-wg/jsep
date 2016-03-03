@@ -1776,31 +1776,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               MUST stay the same.</t>
 
               <t>If any RtpTransceiver has had its RtpSender or
-              RtpReceiver activated or deactivated, its m=
-              section MUST be marked so by changing the value of the
-              <xref target="RFC3264"></xref> directional attribute to
-              "a=sendrecv" if both are active, "a=sendonly" if only
-              the sender is active, "a=recvonly" if the only the
+              RtpReceiver activated or deactivated, the <xref
+              target="RFC3264"></xref> directional attribute MUST be
+              set to "a=sendrecv" if both are active, "a=sendonly" if
+              only the sender is active, "a=recvonly" if the only the
               receiver is active, and "a=inactive" if both are
               inactive.</t>
 
-              <t>If any RtpTransceivers has been stopped, its m=
-              section MUST be marked rejected by setting the port to
-              zero and removing the "a=msid", "a=ssrc", and
-              "a=ssrc-group" lines.</t>
+              <t>If any RtpTransceiver has been stopped, the port
+              MUST be set to zero and the "a=msid", "a=ssrc", and
+              "a=ssrc-group" lines MUST be removed.</t>
 
               <t>If any RtpTransceiver has been added, and there
-              exists an m= section of the appropriate media type with
-              no associated RtpTransceivers (i.e. as described in the
-              preceding paragraph), that m= section MUST be recycled
-              by adding the new RtpTransceiver to the m= section. This
-              is done by setting the port to a non-zero value. An m=
-              section may only be recycled if it is marked rejected in
-              the current local description.  If an m= section is not
-              marked rejected in the current local description,
-              perhaps because it was marked rejected by the steps in
-              the preceding paragraph, then the m= section may not be
-              reccyled.
+              exists an m= section with a zero port in the current
+              local description, that m= section MUST be recycled by
+              associating the added RtpTransceiver with the recycled m=
+              section.
 	      </t>
             </list></t>
 
