@@ -2604,20 +2604,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         bounds, or cannot be applied, processing MUST stop and an error MUST be
         returned.
         <list style="symbols">
-	  <t>For any specified CT bitrate at the session level, set
-	  this as a constraint on the maximum total rate for all the
-	  RTP combined together as specified in Section 5.8 of <xref
-	  target="RFC4566"></xref>.  The browser can decide how to
-	  allocate the available bandwidth between media section to
-	  simultaneously meet the constraints on each individual media
-	  flow as well as the session constraint on the sum all media
-	  sections combined.</t>
-	  <t>For any RR or RS bandwidth values at the
-	  session level, handle as specified in <xref
-	  target="RFC3556"></xref>. </t>
-	  <t> Any AS bitrate specified at the session level MUST 
-	  be ignored as the meaning of this is not well 
-	  defined. </t>
+	  <t>For any specified "CT" bandwidth value, set
+	  this as a limit for the maximum total bitrate for all m= sections,
+	  as specified in Section 5.8 of <xref
+	  target="RFC4566"></xref>. The implementation can decide how to
+	  allocate the available bandwidth between m= sections to
+	  simultaneously meet any limits on individual m= sections,
+	  as well as this overall session limit.</t>
+	  <t>For any specified "RR" or "RS" bandwidth values, handle as specified in <xref
+	  target="RFC3556"></xref>, Section 2.</t>
+	  <t>Any "AS" bandwidth value MUST be ignored, as the meaning of this
+	  construct at the session level is not well defined. </t>
 	</list>
 	</t>
         <t>For each media section,
@@ -2655,23 +2652,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 value as a constraint on the maximum RTP bitrate to be
                 used when sending media as specified in <xref
                 target="RFC3890"></xref>. If a "TIAS" value is not
-                present, but an "AS" value is specified at the media
-                lavel, generate a TIAS a value using this formula:
-		<list style="format ">
+                present, but an "AS" value is specified, generate a
+                "TIAS" value using this formula:
+		<list style="format">
 		  <t>
 		    TIAS = AS * 0.95 - 50 * 40 * 8 
 		  </t>
 		</list>
-		If a more accurate of controll of bandwidth is needed,
-		TIAS should be used instead of AS. The 50 is based on
-		50 packets per second, the 40 is based on estimate of
-		header size and the 0.95 is to allocate 5% to RTCP. </t>
-		<t> Any CT bitrate specified at the media MUST be 
-		ignored as the meaning of this is not well 
-		defined. </t>
-		<t>For any RR or RS bandwidth values at the
-		media level, handle as specified in <xref
-		target="RFC3556"></xref>. </t>
+		The 50 is based on 50 packets per second, the 40 is based on an estimate of
+		total header size, and the 0.95 is to allocate 5% to RTCP. If more
+		accurate control of bandwidth is needed,
+		"TIAS" should be used instead of "AS".</t>
+		<t>Any specified "CT" bandwidth value MUST be 
+		ignored, as the meaning of this construct at the media level is not well 
+		defined.</t>
+		<t>For any "RR" or "RS" bandwidth values, handle as specified in <xref
+		target="RFC3556"></xref>, Section 2.</t>
 		
                 <t>[TODO: handling of CN, telephone-event, "red"]</t>
                 <t>If the media section if of type audio:
