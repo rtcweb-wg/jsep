@@ -1866,7 +1866,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           those unmatched will need to be associated in a subsequent
           offer.</t>
 
-          <t>For each offered m= section, if the associated remote
+          <t>For each offered m= section, if the associated
           RtpTransceiver has been stopped, the corresponding
           m= section in the answer MUST be marked as rejected by setting the
           port in the m= line to zero, as indicated in
@@ -2465,6 +2465,20 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               unless it has been marked as bundle-only.</t>
             <t>If the media section proto value indicates use of RTP:
               <list style="symbols">
+                <t>If there is no RtpTransceiver associated with this m= section, either find one or
+                create to and associated it with this m= section according to the following steps:
+                <list style="symbols">
+                  <t>If there are RtpTransceivers that are not associated with any m= section, find
+                  the first (according to canonical order described in <xref
+                  target="sec.initial-offers"/>) such RtpTransceiver that is compatible (according to the
+                  definition in <xref target="sec.generating-an-answer"/>) with this m= section and
+                  associate that RtpTransceiver with this m= section.</t>
+
+                  <t>When an RtpTransceiver is associated with an m= section, the value of the
+                  RtpTransceiver.mid is set to the MID of the m= section.</t>
+                </list>
+                </t>
+
                 <t>If RTCP mux is indicated, prepare to demux RTP and RTCP from the RTP
                   ICE component, as specified in <xref target="RFC5761"/>, Section 5.1.1.
                   If RTCP mux is not indicated, but was indicated in a previous
@@ -2534,6 +2548,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   <t>If there are no such RtpTransceivers which can be associated with this m=
                   section, an RtpTransceiver MUST be created and associated with this m= section.  The
                   created RtpTransceiver MUST have an active RtpReceiver and inactive RtpSender. </t>
+
+                  <t>When an RtpTransceiver is associated with an m= section, the value of the
+                  RtpTransceiver.mid is set to the MID of the m= section.</t>
                 </list>
                 </t>
 
