@@ -1543,10 +1543,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because
               no candidates have yet been gathered.</t>
 
-              <t>If the RtpTransceiver's RtpSender is active, an "a=msid" line,
-              as specified in <xref target="I-D.ietf-mmusic-msid"></xref>,
-              Section 2.</t>
-
               <t>A direction attribute as specified in
               <xref target="RFC3264"></xref>, Section 6.1, according to the
               associated RtpTransceiver's disposition.
@@ -1623,32 +1619,39 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               SHOULD/MUST be supported is specified in <xref
               target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section 5.1.</t>
 
-              <t>If the RtpTransceiver's RtpSender is active, an "a=ssrc" line,
-              as specified in <xref target="RFC5576"></xref>, Section 4.1,
-              indicating the SSRC to be used for sending media, along with the
-              mandatory "cname" source attribute, as specified in Section 6.1,
-              indicating the CNAME for the source. The CNAME MUST be generated
-              in accordance with Section 4.9 of
-              <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
-
-              <t>If the RtpTransceiver's RtpSender is active and RTX is
-              supported for this media type, another "a=ssrc"
-              line with the RTX SSRC, and an "a=ssrc-group" line, as specified
-              in <xref target="RFC5576"></xref>, section 4.2, with semantics
-              set to "FID" and including the primary and RTX SSRCs.</t>
-
-              <t>If the RtpTransceiver's RtpSender is active and FEC is
-              supported for this media type, another "a=ssrc"
-              line with the FEC SSRC, and an "a=ssrc-group" line with semantics
-              set to "FEC-FR" and including the primary and FEC SSRCs, as
-              specified in <xref target="RFC5956"></xref>, section 4.3. For
-              simplicity, if both RTX and FEC are supported, the FEC SSRC
-              MUST be the same as the RTX SSRC.</t>
-
               <t>If the BUNDLE policy for this PeerConnection is set to
               "max-bundle", and this is not the first m= section, or the BUNDLE
               policy is set to "balanced", and this is not the first m= section
               for this media type, an "a=bundle-only" line.</t>
+
+              <t>If the RtpTransceiver's RtpSender is active:
+                <list style="symbols">
+                  <t>An "a=msid" line, as specified in <xref target=
+                  "I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
+
+                  <t>An "a=ssrc" line, as specified in <xref target=
+                  "RFC5576"></xref>, Section 4.1, indicating the SSRC to
+                  be used for sending media, along with the mandatory
+                  "cname" source attribute, as specified in Section 6.1,
+                  indicating the CNAME for the source. The CNAME MUST be
+                  generated in accordance with Section 4.9 of
+                  <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
+
+                  <t>If RTX is supported for this media type, another
+                  "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group"
+                  line, as specified in <xref target="RFC5576"></xref>,
+                  section 4.2, with semantics set to "FID" and including
+                  the primary and RTX SSRCs.</t>
+
+                  <t>If FEC is supported for this media type, another
+                  "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group"
+                  line with semantics set to "FEC-FR" and including the
+                  primary and FEC SSRCs, as specified in <xref target=
+                  "RFC5956"></xref>, section 4.3. For simplicity, if both
+                  RTX and FEC are supported, the FEC SSRC MUST be the
+                  same as the RTX SSRC.</t>
+                </list>
+              </t>
             </list></t>
 
           <t>Lastly, if a data channel has been created, a m= section MUST be
@@ -1974,10 +1977,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because
               no candidates have yet been gathered.</t>
 
-              <t>If the RtpTransceiver's RtpSender is active, an "a=msid"
-              line, as specified in <xref
-              target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
-
               <t>Depending on the directionality of the offer, and the
               disposition of the associated RtpTransceiver, a directionality
               attribute as specified in <xref target="RFC3264"></xref>,
@@ -2077,27 +2076,34 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               mechanisms that SHOULD/MUST be supported is specified in <xref
               target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section 5.1.</t>
 
-              <t>If the RtpTransceiver's RtpSender is active, an "a=ssrc"
-              line, as specified in <xref target="RFC5576"></xref>, Section
-              4.1, indicating the SSRC to be used for sending media, along with
-              the mandatory "cname" source attribute, as specified in Section
-              6.1, indicating the CNAME for the source.
-              The CNAME MUST be generated in accordance with Section 4.9 of
-              <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
+              <t>If the RtpTransceiver's RtpSender is active:
+                <list style="symbols">
+                  <t>An "a=msid" line, as specified in <xref target=
+                  "I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
 
-              <t>If the RtpTransceiver's RtpSender is active, and RTX has
-              been negotiated for this m= section, another "a=ssrc" line with
-              the RTX SSRC, and an "a=ssrc-group" line, as specified in <xref
-              target="RFC5576"></xref>, section 4.2, with semantics set to
-              "FID" and including the primary and RTX SSRCs.</t>
+                  <t>An "a=ssrc" line, as specified in <xref target=
+                  "RFC5576"></xref>, Section 4.1, indicating the SSRC to
+                  be used for sending media, along with the mandatory
+                  "cname" source attribute, as specified in Section 6.1,
+                  indicating the CNAME for the source. The CNAME MUST be
+                  generated in accordance with Section 4.9 of <xref
+                  target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
 
-              <t>If the RtpTransceiver's RtpSender is active, and FEC has
-              been negotiated for this m= section, another "a=ssrc" line with
-              the FEC SSRC, and an "a=ssrc-group" line with semantics set to
-              "FEC-FR" and including the primary and FEC SSRCs, as specified in
-              <xref target="RFC5956"></xref>, section 4.3. For
-              simplicity, if both RTX and FEC are supported, the FEC SSRC
-              MUST be the same as the RTX SSRC.</t>
+                  <t>If RTX has been negotiated for this m= section,
+                  another "a=ssrc" line with the RTX SSRC, and an
+                  "a=ssrc-group" line, as specified in <xref target=
+                  "RFC5576"></xref>, section 4.2, with semantics set to
+                  "FID" and including the primary and RTX SSRCs.</t>
+
+                  <t>If FEC has been negotiated for this m= section,
+                  another "a=ssrc" line with the FEC SSRC, and an
+                  "a=ssrc-group" line with semantics set to "FEC-FR" and
+                  including the primary and FEC SSRCs, as specified in
+                  <xref target="RFC5956"></xref>, section 4.3. For
+                  simplicity, if both RTX and FEC are supported, the FEC SSRC
+                  MUST be the same as the RTX SSRC.</t>
+                </list>
+              </t>
             </list></t>
 
           <t>If a data channel m= section has been offered, a m= section MUST
