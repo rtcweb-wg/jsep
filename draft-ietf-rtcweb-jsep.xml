@@ -1427,7 +1427,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The next step is to generate m= sections, as specified in
           <xref target="RFC4566"/> Section 5.14, for each
           RtpTransceiver that has been added to the PeerConnection via the
-          addTrack or addTransceiver methods. 
+          addTrack or addTransceiver methods.
           m=sections MUST be sorted first by the order in which the
           RtpTransceivers were added to the PeerConnection.</t>
 
@@ -1486,8 +1486,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>An "a=msid" line, as specified in <xref
               target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
 
-              <t>An "a=sendrecv" line, as specified in <xref
-              target="RFC3264"></xref>, Section 5.1.</t>
+              <t>The disposition of any associated RtpTransceiver, as
+              specified in <xref target="RFC3264"></xref>, Section
+              6.1.
+              If the RtpTransceiver's RtpReceiver and RtpSender are both active,
+              the directionality MUST be set as sendrecv.
+              If the RtpTransceiver's RtpReceiver is active, but the RtpSender is inactive,
+              the directionality MUST be set as recvonly.
+              If the RtpTransceiver's RtpSender is active but the RtpReceiver is inactive,
+              the directionality MUST be set as sendonly.
+              If RtpTransceiver's RtpReceiver and RtpSender are both inactive,
+              the directionality MUST be set as inactive.</t>
 
               <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as
               specified in <xref target="RFC4566"></xref>, Section 6.
@@ -1603,7 +1612,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
 
           <t>The next step is to generate session-level lip sync groups as
-          defined in <xref target="RFC5888"/>, Section 7.  For RtpTransceivers added with the same MediaStream, 
+          defined in <xref target="RFC5888"/>, Section 7.  For RtpTransceivers added with the same MediaStream,
           a group of type "LS" MUST be
           added that contains the mid values for each RtpTransceiver added with that MediaStream.</t>
 
@@ -1719,35 +1728,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               no associated RtpTransceivers (i.e. as described in the
               preceding paragraph), that m= section MUST be recycled
               by adding the new RtpTransceiver to the m= section. This
-              is done by setting the appropriate directional attribute
-              (TODO PT: Make this more precise).
+              is done by setting the port to a non-zero value.
               </t>
-            </list></t>
-
-          <t>If the initial offer was applied using setLocalDescription, and
-          an answer from the remote side has been applied using
-          setRemoteDescription, meaning the PeerConnection is in the
-          "remote-pranswer" or "stable" states, an offer is generated based on
-          the negotiated session descriptions by following the steps mentioned
-          for the "local-offer" state above, along with these exceptions:
-          [OPEN ISSUE: should this be permitted in the remote-pranswer state?
-          https://github.com/rtcweb-wg/jsep/issues/143]
-          <list style="symbols">
-              (TODO PT: This doesn't seem quite right)
-              <t>If an m= section exists in the current local description, but
-              does not have an associated RtpTransceiver (possibly
-              because said RtpTransceiver was stopped since the last
-              exchange), an m= section MUST still be generated in the new offer,
-              as indicated in <xref target="RFC3264"></xref>, Section 8.</t>
-
-              <t>If any RtpTransceivers have been added, and there
-              exist no compatible (TODO PT: define compatible) m= sections of
-              the appropriate media type, or rejected m= sections of any media
-              type, those m= sections MUST be recycled, and an
-              RtpTransceiver associated with these recycled m=
-              sections until all such existing m= sections have been
-              used. This includes any rejected m= sections
-              created by the preceding paragraph.</t>
             </list></t>
 
           <t>In addition, for each non-recycled, non-rejected m=
@@ -1867,20 +1849,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           valid as media-level attributes SHALL be considered to be present in
           each m= section.</t>
 
-          (TODO PT: This doesn't seem quite right)
           <t>The next step is to go through each offered m= section.
           If there is an RtpTransceiver of the same type which has been
           added to the PeerConnection and not yet associated
-          with a m= section, and the specific m= section is compabtible with (TODO PT: define compatible),
+          with an m= section, and the specific m= section is compabtible with (TODO PT: define compatible),
           the RtpTransceiver will be associated with the m=
           section at this time. RtpTransceivers are assigned to m=
           sections using the canonical order described in
-          <xref target="sec.initial-offers"/>. If there are more m= sections of a certain
-          type than RtpTransceivers, some m= sections will not have an
-          associated RtpTransceiver. If there are more RtpTransceivers of
-          a certain type than compatible m= sections, only the first N
-          RtpTransceivers will be able to be associated in the constructed
-          answer. The remainder will need to be associated in a subsequent
+          <xref target="sec.initial-offers"/>.
+
+          Since RtpTransceivers are created when necessary by
+          setRemoteDescription, there will always be at least as many RtpTransceivers as m= sections.
+
+          If there are more RtpTransceivers than there are m=sections
+          or some RtpTransceivers do not have a compatible m= section,
+          those unmatched will need to be associated in a subsequent
           offer.</t>
 
           <t>For each offered m= section, if the associated remote
@@ -1927,8 +1910,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>If an RtpTransceiver has been associated, an "a=msid"
               line, as specified in <xref
               target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
-              
-              (TODO PT: Is this right?)
+
               <t>Depending on the directionality of the offer, the disposition
               of any associated RtpTransceiver, as specified in <xref target="RFC3264"></xref>,
               Section 6.1.
