@@ -2201,12 +2201,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection2">
             <t>Silence suppression in the answer is handled as described in
-            <xref target="sec.voiceactivitydetection1"></xref>.</t>
-            <t>
-              Note that if support for silence suppression was not indicated in the offer,
+              <xref target="sec.voiceactivitydetection1"></xref>, with one exception:
+              if support for silence suppression was not indicated in the offer,
               the VoiceActivityDetection parameter has no effect, and the answer
               should be generated as if VoiceActivityDetection was set to
-              false.
+              false. This is done on a per-codec basis (e.g., if the offerer somehow
+              offered support for CN but set Opus' usedtx to 0, setting 
+              VoiceActivityDetection to true would result in an answer with CN
+              and usedtx=0).
             </t>
           </section>
         </section>
