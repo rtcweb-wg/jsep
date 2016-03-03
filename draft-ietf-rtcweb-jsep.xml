@@ -9,7 +9,6 @@
 <?rfc sortrefs="yes" ?>
 <?rfc colonspace="yes" ?>
 <?rfc rfcedstyle="no" ?>
-<?rfc docmapping="yes" ?>
 <?rfc tocdepth="4"?>
 
 <rfc category="std" docName="draft-ietf-rtcweb-jsep-latest" ipr="trust200902">
@@ -755,17 +754,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>If an ICE candidate policy is specified, it functions as
           described in <xref target="sec.ice-candidate-policy"/>, causing the
-          browser to only surface the permitted candidates to the application,
+          browser to only surface the permitted candidates (including
+          any internal browser filtering) to the application,
           and only use those candidates for connectivity checks. The set of
           available policies is as follows:
           <list style="hanging">
-                <t hangText="all:">All candidates will be gathered and used.</t>
-                <t></t>
-                <t hangText="public:">Candidates with private IP addresses
-                [RFC1918] will be filtered out. This prevents exposure of
-                internal network details, at the cost of requiring
-                relay usage even for intranet calls, if the NAT does not allow
-                hairpinning as described in [RFC4787], section 6.</t>
+                <t hangText="all:">All candidates permitted by browser policy
+                will be gathered and used.</t>
                 <t></t>
                 <t hangText="relay:">All candidates except relay candidates will
                 be filtered out. This obfuscates the location information that
@@ -775,8 +770,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 even global level.</t>
           </list>
           </t>
-          <t>The default ICE candidate policy MUST be set to allow all
-          candidates, as this is generally the desired policy, and also
+          <t>The default ICE candidate policy MUST be set to "all"
+          as this is generally the desired policy, and also
           typically reduces use of application TURN server
           resources significantly.</t>
 
@@ -1886,6 +1881,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             This option allows the endpoint to significantly reduce the amount of
             audio bandwidth it receives, at the cost of some fidelity, depending on
             the quality of the remote VAD algorithm.</t>
+            <t>If the "VoiceActivityDetection" option is specified, with a value
+            of "false", the browser MUST NOT omit "CN" codecs.
+            For codecs that have their own internal silence suppression support,
+            the appropriate fmtp parameters for that codec MUST be
+            specified to indicate that silence suppression for received audio is
+            not desired. For example, when using the Opus codec, the
+            "usedtx=0" parameter would be specified in the offer.</t>
+            <t>Note that setting the "VoiceActivityDetection" parameter when
+            generating an offer is a request to receive audio with silence
+            suppression. It has no impact on whether the local endpoint does
+            silence suppression for the audio it sends.</t>
+            <t>The "VoiceActivityDetection" option does not have any impact on
+            the setting of the "vad" value in the signaling of the client to mixer
+            audio level header extension described in <xref
+            target="RFC6464"></xref>, Section 4. </t>
           </section>
         </section>
       </section>
@@ -2211,7 +2221,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <section title="VoiceActivityDetection" anchor="sec.voiceactivitydetection2">
             <t>Silence suppression in the answer is handled as described in
-              <xref target="sec.voiceactivitydetection1"></xref>.
+              <xref target="sec.voiceactivitydetection1"></xref>, with one exception:
+              if support for silence suppression was not indicated in the offer,
+              the VoiceActivityDetection parameter has no effect, and the answer
+              should be generated as if VoiceActivityDetection was set to
+              false. This is done on a per-codec basis (e.g., if the offerer somehow
+              offered support for CN but set "usedtx=0" for Opus, setting 
+              VoiceActivityDetection to true would result in an answer with CN codecs
+              and "usedtx=0").
             </t>
           </section>
         </section>
@@ -4264,43 +4281,43 @@ a=end-of-candidates
         <front>
           <title abbrev="RFC Key Words">Key words for use in RFCs to Indicate
           Requirement Levels</title>
-
+          
           <author fullname="Scott Bradner" initials="S." surname="Bradner">
             <organization>Harvard University</organization>
-
+            
             <address>
               <postal>
                 <street>1350 Mass. Ave.</street>
-
+                
                 <street>Cambridge</street>
-
+                
                 <street>MA 02138</street>
               </postal>
-
+              
               <phone>- +1 617 495 3864</phone>
-
+              
               <email>sob@harvard.edu</email>
             </address>
           </author>
-
+          
           <date month="March" year="1997" />
-
+          
           <area>General</area>
-
+          
           <keyword>keyword</keyword>
         </front>
-
+        
         <seriesInfo name="BCP" value="14" />
-
+        
         <seriesInfo name="RFC" value="2119" />
-
+        
         <format octets="4723"
                 target="http://www.rfc-editor.org/rfc/rfc2119.txt" type="TXT" />
-
+        
         <format octets="17491"
                 target="http://xml.resource.org/public/rfc/html/rfc2119.html"
                 type="HTML" />
-
+        
         <format octets="5777"
                 target="http://xml.resource.org/public/rfc/xml/rfc2119.xml"
                 type="XML" />
@@ -4643,6 +4660,18 @@ a=end-of-candidates
 
       <!-- INFORM 2 -->
 
+      <reference  anchor='RFC6464' target='http://www.rfc-editor.org/info/rfc6464'>
+        <front>
+          <title>A Real-time Transport Protocol (RTP) Header Extension for Client-to-Mixer Audio Level Indication</title>
+          <author initials='J.' surname='Lennox' fullname='J. Lennox' role='editor'><organization /></author>
+          <author initials='E.' surname='Ivov' fullname='E. Ivov'><organization /></author>
+          <author initials='E.' surname='Marocco' fullname='E. Marocco'><organization /></author>
+          <date year='2011' month='December' />
+        </front>
+        <seriesInfo name='RFC' value='6464'/>
+        <seriesInfo name='DOI' value='10.17487/RFC6464'/>
+      </reference>
+      
       <!-- INFORM 3 -->
 
       <!-- INFORM 4 -->
