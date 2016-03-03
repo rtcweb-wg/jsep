@@ -407,6 +407,53 @@ setRemote(ANSWER) |                                   |
         sort of SessionDescription to produce.</t>
       </section>
 
+      <section title="Session Description control" anchor="sec.session-description-ctrl">
+	<t>JSEP defines the following objects as an API to allow the
+	application to control session descriptions: RtpTransceivers,
+	RtpSenders, and RtpReceivers.
+	</t>
+
+	<section title="RtpTransceivers" anchor="sec.rtptransceivers">
+	  <t>RtpTransceivers allow the application to control the RTP
+	  media associated with one m= section.  Each RtpTransceiver
+	  has an RtpSender and an RtpReceiver, described below, which
+	  an application may use to control the sending and receiving
+	  RTP media.  The application may also modify the
+	  RtpTransceiver directly, such as by closing it.</t>
+	  
+	  <t>RtpTransceivers can be created either by the application
+	  explicitly by methods to add them, or implicitly by calling
+	  setRemoteDescription with an offer that adds new m=
+	  sections.</t>
+
+	  <t>When first created, the transceiver may be in a state which
+	  is unassociated with any m= section, in which case it has a
+	  null RtpTransceiver.mid value.  Later, when it is associated
+	  to a specific m= section, its .mid value is set to the MID of
+	  the m= section.
+	  </t>
+	</section>
+
+	<section title="RtpSenders" anchor="sec.rtpsenders">
+	  <t>RtpSenders allow the application to control how RTP media
+	  is sent.  In particular, the application can control whether
+	  an RtpSender is active or not, which controls the
+	  directionality attribute of the associated m= section.</t>
+	</section>
+
+	<section title="RtpReceivers" anchor="sec.rtpreceivers">
+          <t>RtpReceivers allows the application to control how RTP
+          media is received.  In particular, the application can
+          control whether an RtpReceiver is active or not, which
+          controls the directionality attribute of the associated m=
+          section.</t>
+	</section>
+
+	<t> Changes to the RtpTransceiver, RtpSender, or RtpReceiver
+	may cause changes to the local session description which will
+	be reflected in the next call to createOffer or createAnswer.</t>
+      </section>
+
       <section title="ICE" anchor="sec.ice">
         <section title="ICE Gathering Overview" anchor="sec.ice-gather-overview">
           <t>JSEP gathers ICE candidates as needed by the application.
