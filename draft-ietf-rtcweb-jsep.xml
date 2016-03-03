@@ -419,10 +419,12 @@ setRemote(ANSWER) |                                   |
 	  <t>RtpTransceviers generally have a 1:1 mapping with m=
 	  sections, however there may be more RtpTransceivers than m=
 	  sections when RtpTransceivers are created but not yet
-	  associated with an m= section.  An RtpTransceiver is never
-	  associated with more than one m= section, and an m= section
-	  is always associated with exactly one RtpTransceiver once a
-	  session description is applied.</t>
+	  associated with an m= section, or if RtpTransceivers have
+	  been stopped and disassociated from m= sections. An
+	  RtpTransceiver is never associated with more than one m=
+	  section, and an m= section is always associated with exactly
+	  one RtpTransceiver once a session description is
+	  applied.</t>
 
 	  <t>RtpTransceivers allow the application to control the RTP
 	  media associated with one m= section.  Each RtpTransceiver
@@ -903,8 +905,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="createOffer" anchor="sec.createoffer">
           <t>The createOffer method generates a blob of SDP that contains a
           <xref target="RFC3264"></xref> offer with the supported
-          configurations for the session, including descriptions of the local
-          MediaStreams attached to this PeerConnection, the codec/RTP/RTCP
+          configurations for the session, including descriptions of the
+          RtpTranscivers added to this PeerConnection, the codec/RTP/RTCP
           options supported by this implementation, and any candidates that
           have been gathered by the ICE Agent. An options parameter may be
           supplied to provide additional control over the generated offer.
@@ -923,7 +925,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>In the event createOffer is called after the session is
           established, createOffer will generate an offer to modify the
           current session based on any changes that have been made to the
-          session, e.g. adding or removing MediaStreams, or requesting an ICE
+          session, e.g. adding or removing RtpTransceivers, or requesting an ICE
           restart. For each existing stream, the generation of each SDP line
           must follow the process defined for generating an updated offer from
           the RFC that specifies the given SDP line. For each new stream,
@@ -955,7 +957,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           supplied in the most recent call to setRemoteDescription, which MUST
           have been called prior to calling createAnswer.
           Like createOffer, the returned blob contains
-          descriptions of the local MediaStreams attached to this
+          descriptions of the RtpTransceivers added to this
           PeerConnection, the codec/RTP/RTCP options negotiated for this
           session, and any candidates that have been gathered by the ICE
           Agent. An options parameter may be supplied to provide additional
@@ -1484,10 +1486,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The next step is to generate m= sections, as specified in
           <xref target="RFC4566"/> Section 5.14, for each
-          RtpTransceiver that has been added to the PeerConnection via the
-          addTrack or addTransceiver methods. m=sections MUST be sorted
-          by the order in which the RtpTransceivers were added to the
-          PeerConnection.</t>
+          RtpTransceiver that has been added to the PeerConnection via
+          the addTrack or addTransceiver methods. m= sections are
+          generated in the order that their associated transceivers
+          were added to the PeerConnection.</t>
 
           <t>Each m= section, provided it is not being bundled into
           another m= section, MUST generate a unique set of ICE credentials
@@ -1673,11 +1675,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           or not depends on the BUNDLE policy.
           </t>
 
-          <t>The next step is to generate session-level lip sync groups as
-          defined in <xref target="RFC5888"/>, Section 7. For each MediaStream
-          with more than one associated RtpTransceiver, a group of type "LS"
-          MUST be added that contains the mid values for each RtpTransceiver
-          added with that MediaStream.</t>
+          <t>The next step is to generate session-level lip sync
+          groups as defined in <xref target="RFC5888"/>, Section
+          7. For each MediaStream referenced by more than one
+          transceiver, a group of type "LS" MUST be added that
+          contains the mid values for each RtpTransceiver.</t>
 
           <t>Attributes which SDP permits to either be at the session
           level or the media level SHOULD generally be at the media
