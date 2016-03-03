@@ -754,17 +754,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>If an ICE candidate policy is specified, it functions as
           described in <xref target="sec.ice-candidate-policy"/>, causing the
-          browser to only surface the permitted candidates to the application,
+          browser to only surface the permitted candidates (including
+          any internal browser filtering) to the application,
           and only use those candidates for connectivity checks. The set of
           available policies is as follows:
           <list style="hanging">
-                <t hangText="all:">All candidates will be gathered and used.</t>
-                <t></t>
-                <t hangText="public:">Candidates with private IP addresses
-                [RFC1918] will be filtered out. This prevents exposure of
-                internal network details, at the cost of requiring
-                relay usage even for intranet calls, if the NAT does not allow
-                hairpinning as described in [RFC4787], section 6.</t>
+                <t hangText="all:">All candidates permitted by browser policy
+                will be gathered and used.</t>
                 <t></t>
                 <t hangText="relay:">All candidates except relay candidates will
                 be filtered out. This obfuscates the location information that
@@ -774,8 +770,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 even global level.</t>
           </list>
           </t>
-          <t>The default ICE candidate policy MUST be set to allow all
-          candidates, as this is generally the desired policy, and also
+          <t>The default ICE candidate policy MUST be set to "all"
+          as this is generally the desired policy, and also
           typically reduces use of application TURN server
           resources significantly.</t>
 
