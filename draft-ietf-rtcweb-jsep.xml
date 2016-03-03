@@ -1094,8 +1094,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             MUST be set to null. It may also remove transceivers that
             were created created by applying a remote offer that was
             subsequently rolled back.  However, a transceiver MUST NOT
-            be removed if it the transceiver's RtpSender is
-            active. </t>
+            be removed if it the transceiver's RtpSender was activated
+            by the addTrack method. This is so that an application may
+            call addTrack, then setRemoteDescription with an offer,
+            then rollback that offer, then call createOffer and have
+            an m= section for the added track appear in the generated
+            offer.</t>
 
             <t>A rollback is performed by supplying a session description of
             type "rollback" with empty contents to either setLocalDescription or
