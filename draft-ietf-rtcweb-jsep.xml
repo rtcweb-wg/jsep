@@ -1184,8 +1184,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           parameters are changed:</t>
          <t><list style="symbols">
             <t>Any changes to the STUN/TURN servers to use affect
-            the next gathering phase. With the exception of the initial state
-            where ICE gathering has not yet occurred, the 'needs-ice-restart'
+            the next gathering phase. If an ICE gathering phase has already
+            started or completed, the 'needs-ice-restart'
             bit mentioned in <xref target="sec.ice-gather-overview"/>
             will be set. This will cause the next call to createOffer to
             generate new ICE credentials, for the purpose of forcing an ICE
@@ -1196,7 +1196,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </t>
             <t>Any changes to the ICE candidate policy also affect the next
             gathering phase. If the policy is being made more liberal (i.e.,
-            more permitted candidates), the 'needs-ice-restart' bit will be set.
+            more permitted candidates), and an ICE gathering phase has already
+            started or completed, the 'needs-ice-restart' bit will be set.
             If the policy is being made more strict, no ICE restart is needed,
             and the bit will not be set. Either way, changes to the policy have
             no effect on the candidate pool, because pooled candidates are not
@@ -1916,7 +1917,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           that the "a=ice-options" line, with the "trickle" option as specified in
           <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
           4, is only included if such an option was present in the offer.</t>
-          
+
 	  <t>The next step is to generate lip sync groups as defined
 	  in <xref target="RFC5888"/>, Section 7.  For each
 	  MediaStream with more than one MediaStreamTrack, a group
@@ -2295,7 +2296,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <texttable anchor="sdp_abnf" title="SDP ABNF References">
           <ttcol align='left'>Attribute</ttcol>
           <ttcol align='left'>Reference</ttcol>
-          
+
 	      <c> ptime  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> maxptime  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> rtpmap  </c><c> <xref target="RFC4566"/> Section 9  </c>
@@ -2306,7 +2307,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 	      <c> framerate  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> fmtp  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> quality  </c><c> <xref target="RFC4566"/> Section 9  </c>
-          
+
 		  <c> msid  </c><c> <xref target="I-D.ietf-mmusic-msid"/> Section 2  </c>
 
 	      <c> rtcp  </c><c> <xref target=" RFC3605"/> Section 2.1 </c>
@@ -2328,11 +2329,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <c> imageattr  </c><c>  <xref target="RFC6236"/> Section 3.1 </c>
 
           <c> extmap (encrypt option)  </c><c>  <xref target="RFC6904"/> Section 4 </c>
-          
+
         </texttable>
-        
+
         <t>  [TODO: ensure that every line is listed below.] </t>
-        
+
         <t>
         If the line is not well-formed, or cannot be parsed as described, the parser MUST stop
         with an error and reject the session description. This ensures that
@@ -2579,7 +2580,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <t>If the answer contains any "a=ice-options" attributes where "trickle"
           is listed as an attribute, update the PeerConnection
           canTrickle property to be true. Otherwise, set this property to false.</t>
-        
+
         <t>The following steps are performed at the media engine level to apply a remote
         description.</t>
         <t>For each media section,
@@ -2663,7 +2664,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   "sendonly", prepare to start transmitting media using the specified primary SSRC
                   and one of the selected payload types, once the underlying transport
                   layers have been established. Otherwise, stop transmitting RTP media,
-                  although RTCP should still be sent, as described in 
+                  although RTCP should still be sent, as described in
                   <xref target="RFC3264"/>, Section 5.1. </t>
               </list>
             </t>
@@ -2801,7 +2802,7 @@ AliceUA->AliceJS:   multiple onicecandidate events with candidates
 
 //                  wait for ICE gathering to complete
 AliceUA->AliceJS:   onicecandidate event with null candidate
-AliceJS->AliceUA:   get |offer-A1| from value of pendingLocalDescription
+AliceJS->AliceUA:   get |offer-A1| from pendingLocalDescription
 
 //                  |offer-A1| is sent over signaling protocol to Bob
 AliceJS->WebServer: signaling with |offer-A1|
@@ -2820,7 +2821,7 @@ BobUA->BobJS:       multiple onicecandidate events with candidates
 
 //                  wait for ICE gathering to complete
 BobUA->BobJS:       onicecandidate event with null candidate
-BobJS->BobUA:       get |answer-A1| from value of currentLocalDescription
+BobJS->BobUA:       get |answer-A1| from currentLocalDescription
 
 //                  |answer-A1| is sent over signaling protocol to Alice
 BobJS->WebServer:   signaling with |answer-A1|
