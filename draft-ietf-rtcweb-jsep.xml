@@ -462,9 +462,13 @@ setRemote(ANSWER) |                                   |
           <t>Upon receipt of trickled candidates, the receiving application
           will supply them to its ICE Agent. This triggers the ICE Agent to
           start using the new remote candidates for connectivity checks.
-          If BUNDLE is in use, each candidate is only supplied once, and
-          is associated with the m= section which matches the sender's
-          BUNDLE-tag.
+          </t>
+          
+          <t>
+            When BUNDLE is in use, candidates (both in-SDP and trickle)
+            are only exchanged for and
+            associated with the m= section referenced by the sender's BUNDLE-tag,
+            as described in <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation"/>
           </t>
 
           <section title="ICE Candidate Format" anchor="sec.ice-candidate-format">
@@ -1466,7 +1470,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Each m= section, provided it is not marked as
           bundle-only, MUST generate a unique set of ICE credentials and gather
           its own unique set of ICE candidates. Bundle-only m= sections MUST NOT
-          have any ICE credentials and MUST NOT gather any candidates.
+          contain any ICE credentials and MUST NOT gather any candidates.
           </t>
 
           <t>For DTLS, all m= sections MUST use the certificate for the
@@ -1709,7 +1713,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Each "a=mid" line MUST stay the same.</t>
 
               <t>If the m= section is not bundled into another m= section
-              (i.e., it is either not bundled or it is associated with the
+              (i.e., it is either not bundled or it possesses the
               sender's BUNDLE-tag) each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
               same, unless the ICE configuration has changed (either changes to
               the supported STUN/TURN servers, or the ICE candidate policy), or
@@ -2204,13 +2208,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               described in the initial answer section above.</t>
 
               <t>If the m= section is not bundled into another m= section
-              (i.e., it is either not bundled or it is associated with the
+              (i.e., it is either not bundled or it possesses the
               sender's BUNDLE-tag) each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
               same, unless the ICE configuration has changed (either changes to
               the supported STUN/TURN servers, or the ICE candidate policy), or
               the "IceRestart" option (<xref target="sec.icerestart"/>
               was specified. If the m= section is bundled into another
-              m= section, it MUST NOT have any ICE credentials.
+              m= section, it MUST NOT contain any ICE credentials.
               </t>
 
               <t>If the m= section is not bundled into another m= section,
