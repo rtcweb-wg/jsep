@@ -771,7 +771,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The PeerConnection constructor allows the application to specify
           global parameters for the media session, such as the STUN/TURN servers
           and credentials to use when gathering candidates, as well as the
-          initial ICE candidate policy and pool size, and also the BUNDLE
+          initial ICE candidate policy and pool size, and also the bundle
           policy to use.</t>
 
           <t>If an ICE candidate policy is specified, it functions as
@@ -806,17 +806,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
 
           <t>The
-          application can specify its preferred policy regarding use of BUNDLE,
+          application can specify its preferred policy regarding use of bundle,
           the multiplexing mechanism defined in <xref
           target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>.
-          Regardless of policy, the application will always try to negotiate BUNDLE
+          Regardless of policy, the application will always try to negotiate bundle
           onto a single transport,
-          and will offer a single BUNDLE group across all media section; use of
-          this single transport is contingent upon the answerer accepting BUNDLE.
+          and will offer a single bundle group across all media section; use of
+          this single transport is contingent upon the answerer accepting bundle.
           However, by specifying a policy from the list below, the application can
-          control exactly how aggressively it will try to BUNDLE media streams together,
-          which affects how it will interoperate with a non-BUNDLE-aware endpoint.
-          When negotiating with a non-BUNDLE-aware endpoint, only the streams not
+          control exactly how aggressively it will try to bundle media streams together,
+          which affects how it will interoperate with a non-bundle-aware endpoint.
+          When negotiating with a non-bundle-aware endpoint, only the streams not
           marked as bundle-only streams will be established.
           </t>
 
@@ -835,7 +835,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t></t>
               <t hangText="max-compat:"> All media sections will contain transport
               parameters; none will be marked as bundle-only. This policy will allow all streams
-              to be received by non-BUNDLE-aware endpoints, but require separate
+              to be received by non-bundle-aware endpoints, but require separate
               candidates to be gathered for each media stream.
               </t>
               <t></t>
@@ -849,7 +849,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
           <t>
             As it provides the best tradeoff between performance and
-            compatibility with legacy endpoints, the default BUNDLE policy
+            compatibility with legacy endpoints, the default bundle policy
             MUST be set to "balanced".
           </t>
 
@@ -1223,7 +1223,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             immediately; if increased, additional candidates are pre-gathered;
             if decreased, the now-superfluous candidates are discarded.
             </t>
-            <t>The BUNDLE and RTCP-multiplexing policies MUST NOT be
+            <t>The bundle and RTCP-multiplexing policies MUST NOT be
             changed after the construction of the PeerConnection.
             </t>
 
@@ -1614,8 +1614,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               simplicity, if both RTX and FEC are supported, the FEC SSRC
               MUST be the same as the RTX SSRC.</t>
 
-              <t>If the BUNDLE policy for this PeerConnection is set to
-              "max-bundle", and this is not the first m= section, or the BUNDLE
+              <t>If the bundle policy for this PeerConnection is set to
+              "max-bundle", and this is not the first m= section, or the bundle
               policy is set to "balanced", and this is not the first m= section
               for this media type, an "a=bundle-only" line.</t>
             </list></t>
@@ -1638,10 +1638,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Once all m= sections have been generated, a session-level
           "a=group" attribute MUST be added as specified in <xref
           target="RFC5888"></xref>. This attribute MUST have semantics
-          "BUNDLE", and MUST include the mid identifiers of each m= section.
+          "bundle", and MUST include the mid identifiers of each m= section.
           The effect of this is that the browser offers all m= sections as one
-          BUNDLE group. However, whether the m= sections are bundle-only
-          or not depends on the BUNDLE policy.
+          bundle group. However, whether the m= sections are bundle-only
+          or not depends on the bundle policy.
           </t>
 
           <t>The next step is to generate session-level lip sync groups as
@@ -1669,10 +1669,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>"a=ice-lite"</t>
             </list></t>
 
-          <t>Note that when BUNDLE is used, any additional attributes that are
+          <t>Note that when bundle is used, any additional attributes that are
           added MUST follow the advice in <xref
           target="I-D.ietf-mmusic-sdp-mux-attributes"></xref> on how
-          those attributes interact with BUNDLE.</t>
+          those attributes interact with bundle.</t>
 
           <t>Note that these requirements are in some cases stricter than those
           of SDP. Implementations MUST be prepared to accept compliant SDP
@@ -1813,9 +1813,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </list></t>
 
             <t>The "a=group:BUNDLE" attribute MUST include the mid identifiers
-            specified in the BUNDLE group in the most recent answer, minus any
+            specified in the bundle group in the most recent answer, minus any
             m= sections that have been marked as rejected, plus any newly added
-            or re-enabled m= sections. In other words, the BUNDLE attribute must
+            or re-enabled m= sections. In other words, the bundle attribute must
             contain all m= sections that were previously bundled, as long as
             they are still alive, as well as any new m= sections.</t>
 
@@ -2016,9 +2016,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           Section 5.1.</t>
 
           <t>
-          If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
+          If the offer supports bundle, all m= sections to be bundled must use
           the same ICE credentials and candidates; all m= sections not being
-          BUNDLEd must use unique ICE credentials and candidates. Each
+          bundled must use unique ICE credentials and candidates. Each
           m= section MUST include the following:
             <list style="symbols">
               <t>If and only if present in the offer, an "a=mid" line, as specified in
@@ -2162,7 +2162,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           corresponding session-level "a=group" attributes MUST be added as
           specified in <xref target="RFC5888"></xref>. These attributes MUST
           have semantics "BUNDLE", and MUST include the all mid identifiers from
-          the offered BUNDLE groups that have not been rejected.
+          the offered bundle groups that have not been rejected.
           Note that regardless of the presence of "a=bundle-only" in the offer,
           no m= sections in the answer should have an "a=bundle-only" line.
           </t>
@@ -2752,9 +2752,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </t>
           </list>
         </t>
-        <t>If the answer contains valid BUNDLE groups, discard any ICE components
+        <t>If the answer contains valid bundle groups, discard any ICE components
            for the m= sections that will be bundled onto the primary ICE components
-           in each BUNDLE, and begin muxing these m= sections accordingly,
+           in each bundle, and begin muxing these m= sections accordingly,
            as described in <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />, Section 8.2.</t>
       </section>
     </section>
@@ -2790,7 +2790,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The DTLS fingerprint(s) (a=fingerprint).</t>
 
-          <t>The contents of BUNDLE groups, bundle-only parameters, or
+          <t>The contents of bundle groups, bundle-only parameters, or
           "a=rtcp-mux" parameters.</t>
         </list></t>
 
@@ -3138,7 +3138,7 @@ BobUA->AliceUA:     audio+data sent from Bob to Alice
 AliceUA->BobUA:     audio+data sent from Alice to Bob
 
 //                  some time later Bob adds two video streams
-//                  note, no candidates exchanged, because of BUNDLE
+//                  note, no candidates exchanged, because of bundle
 BobJS->BobUA:       addStream with first video stream
 BobJS->BobUA:       addStream with second video stream
 BobJS->BobUA:       createOffer to get |offer-B2|
