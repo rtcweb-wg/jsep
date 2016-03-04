@@ -9,6 +9,7 @@
 <?rfc sortrefs="yes" ?>
 <?rfc colonspace="yes" ?>
 <?rfc rfcedstyle="no" ?>
+<?rfc docmapping="yes" ?>
 <?rfc tocdepth="4"?>
 
 <rfc category="std" docName="draft-ietf-rtcweb-jsep-latest" ipr="trust200902">
@@ -76,7 +77,7 @@
     </author>
 
 
-    <date day="29" month="January" year="2016" />
+    <date day="3" month="March" year="2016" />
 
     <area>RAI</area>
 
@@ -441,7 +442,7 @@ setRemote(ANSWER) |                                   |
           <t>Candidate trickling is a technique through which a caller may
           incrementally provide candidates to the callee after the initial
           offer has been dispatched; the semantics of "Trickle ICE" are
-          defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>. This
+          defined in <xref target="I-D.ietf-ice-trickle"></xref>. This
           process allows the callee to begin acting upon the call and setting
           up the ICE (and perhaps DTLS) connections immediately, without
           having to wait for the caller to gather all possible candidates.
@@ -1200,8 +1201,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           parameters are changed:</t>
          <t><list style="symbols">
             <t>Any changes to the STUN/TURN servers to use affect
-            the next gathering phase. With the exception of the initial state
-            where ICE gathering has not yet occurred, the 'needs-ice-restart'
+            the next gathering phase. If an ICE gathering phase has already
+            started or completed, the 'needs-ice-restart'
             bit mentioned in <xref target="sec.ice-gather-overview"/>
             will be set. This will cause the next call to createOffer to
             generate new ICE credentials, for the purpose of forcing an ICE
@@ -1210,11 +1211,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             any existing candidates will be discarded, and new candidates will
             be gathered from the new servers.
             </t>
-            <t>Any changes to the ICE candidate policy also affect the next
-            gathering phase. If the policy is being made more liberal (i.e.,
-            more permitted candidates), the 'needs-ice-restart' bit will be set.
-            If the policy is being made more strict, no ICE restart is needed,
-            and the bit will not be set. Either way, changes to the policy have
+            <t>Any change to the ICE candidate policy affects the next
+            gathering phase. If an ICE gathering phase has already
+            started or completed, the 'needs-ice-restart' bit will be set.
+            Either way, changes to the policy have
             no effect on the candidate pool, because pooled candidates are not
             surfaced to the application until a gathering phase occurs, and so
             any necessary filtering can still be done on any pooled candidates.
@@ -1271,8 +1271,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 and MUST be implemented.</t>
 
                 <t><xref target="RFC5764"></xref> MUST be supported for signaling
-                the UDP/TLS/RTP/SAVPF <xref target="RFC5764"/> and TCP/DTLS/RTP/SAVPF
-                <xref target="I-D.nandakumar-mmusic-proto-iana-registration"/>
+                the UDP/TLS/RTP/SAVPF <xref target="RFC5764"/>,
+		TCP/DTLS/RTP/SAVPF
+                <xref
+		    target="I-D.nandakumar-mmusic-proto-iana-registration"/>,
+		"UDP/DTLS/SCTP" <xref
+		    target="I-D.ietf-mmusic-sctp-sdp"/>, 
+            and "TCP/DTLS/SCTP" <xref
+		    target="I-D.ietf-mmusic-sctp-sdp"/>
                 RTP profiles.
                 </t>
 
@@ -1448,7 +1454,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t>
 
               <t>An "a=ice-options" line with the "trickle" option MUST be
-              added, as specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+              added, as specified in <xref target="I-D.ietf-ice-trickle"></xref>,
               Section 4.</t>
             </list></t>
 
@@ -1489,7 +1495,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>The port value is set to the port of the default ICE candidate
             for this m= section, but given that no candidates have yet been
             gathered, the "dummy" port value of 9 (Discard) MUST be used, as
-            indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+            indicated in <xref target="I-D.ietf-ice-trickle"></xref>,
             Section 5.1.</t>
             <t>To properly indicate use of DTLS, the &lt;proto&gt; field MUST
             be set to "UDP/TLS/RTP/SAVPF", as specified in
@@ -1503,8 +1509,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The m= line MUST be followed immediately by a "c=" line, as specified
           in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
           have yet been gathered, the "c=" line must contain the "dummy" value
-          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-          Section 5.1. [[NOTE: This has not yet changed in the trickle ICE draft.]]</t>
+          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-ice-trickle"></xref>,
+          Section 5.1.</t>
 
           <t>Each m= section MUST include the following attribute lines:
             <list style="symbols">
@@ -1731,7 +1737,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC5245"></xref>, Section 4.3., paragraph 3. If
               candidate gathering for the section has completed, an
               "a=end-of-candidates" attribute MUST be added, as described in
-              <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 9.3.
+              <xref target="I-D.ietf-ice-trickle"></xref>, Section 9.3.
               </t>
 
               <t>For MediaStreamTracks that are still present, the "a=msid",
@@ -1943,7 +1949,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           session-level attributes. The process here is identical to that
           indicated in the Initial Offers section above, except
           that the "a=ice-options" line, with the "trickle" option as specified in
-          <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
+          <xref target="I-D.ietf-ice-trickle"></xref>, Section
           4, is only included if such an option was present in the offer.</t>
 
 	  <t>The next step is to generate lip sync groups as defined
@@ -1996,7 +2002,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The port value would normally be set to the port of the default ICE candidate
           for this m= section, but given that no candidates have yet been gathered,
           the "dummy" port value of 9 (Discard) MUST be used, as
-          indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          indicated in <xref target="I-D.ietf-ice-trickle"></xref>,
           Section 5.1.</t>
           <t>The &lt;proto&gt; field MUST be set to exactly match the &lt;proto&gt;
           field for the corresponding m= line in the offer.</t>
@@ -2006,7 +2012,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The m= line MUST be followed immediately by a "c=" line, as specified
           in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
           have yet been gathered, the "c=" line must contain the "dummy" value
-          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-ice-trickle"></xref>,
           Section 5.1.</t>
 
           <t>
@@ -2049,9 +2055,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               specified in <xref
               target="I-D.ietf-rtcweb-audio"></xref> (see Section 3) and <xref
               target="I-D.ietf-rtcweb-video"></xref> (see Section 5).
-              Note that for simplicity, the
-              answerer MAY use different payload types for codecs than the
-              offerer, as it is not prohibited by Section 6.1.</t>
+              </t>
 
               <t>If this m= section is for media with configurable frame sizes,
               e.g. audio, an "a=maxptime" line, indicating the smallest of the
@@ -2216,7 +2220,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC5245"></xref>, Section 4.3., paragraph 3. If
               candidate gathering for the section has completed, an
               "a=end-of-candidates" attribute MUST be added, as described in
-              <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 9.3.
+              <xref target="I-D.ietf-ice-trickle"></xref>, Section 9.3.
               </t>
 
               <t>For MediaStreamTracks that are still present, the "a=msid",
@@ -2309,8 +2313,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
 
       <section title="Parsing a Session Description" anchor="sec.parsing-a-desc">
-        <t>[The behavior described herein is a draft version, and needs
-            more discussion to resolve various open issues.]</t>
         <t>When a SessionDescription of any type is supplied to
         setLocal/RemoteDescription, the implementation must parse it and
         reject it if it is invalid. The exact details of this
@@ -2873,7 +2875,7 @@ AliceUA->AliceJS:   multiple onicecandidate events with candidates
 
 //                  wait for ICE gathering to complete
 AliceUA->AliceJS:   onicecandidate event with null candidate
-AliceJS->AliceUA:   get |offer-A1| from value of pendingLocalDescription
+AliceJS->AliceUA:   get |offer-A1| from pendingLocalDescription
 
 //                  |offer-A1| is sent over signaling protocol to Bob
 AliceJS->WebServer: signaling with |offer-A1|
@@ -2892,7 +2894,7 @@ BobUA->BobJS:       multiple onicecandidate events with candidates
 
 //                  wait for ICE gathering to complete
 BobUA->BobJS:       onicecandidate event with null candidate
-BobJS->BobUA:       get |answer-A1| from value of currentLocalDescription
+BobJS->BobUA:       get |answer-A1| from currentLocalDescription
 
 //                  |answer-A1| is sent over signaling protocol to Alice
 BobJS->WebServer:   signaling with |answer-A1|
@@ -3620,8 +3622,8 @@ a=end-of-candidates
 
     <section title="Acknowledgements" anchor="sec.acknowledgements">
       <t>Significant text incorporated in the draft as well and review was
-      provided by Harald Alvestrand and Suhas Nandakumar. <!-- ACK 1 --> Dan
-      Burnett, Neil Stratford, Eric Rescorla, Anant Narayanan, Andrew Hutton,
+      provided by Peter Thatcher, Taylor Brandstetter, Harald Alvestrand and Suhas Nandakumar. <!-- ACK 1 --> Dan
+      Burnett, Neil Stratford, Anant Narayanan, Andrew Hutton,
       Richard Ejzak, <!-- ACK 2 --> <!-- ACK 3 --> <!-- ACK 4 --> Adam
       Bergkvist and Matthew Kaufman all provided valuable feedback on this proposal.
       <!-- ACK 5 -->
@@ -4496,43 +4498,6 @@ a=end-of-candidates
       </reference>
 
 
-      <reference anchor="I-D.ietf-mmusic-trickle-ice">
-        <front>
-          <title>Trickle ICE: Incremental Provisioning of Candidates for the
-          Interactive Connectivity Establishment (ICE) Protocol</title>
-
-          <author fullname="Emil Ivov" initials="E" surname="Ivov">
-            <organization></organization>
-          </author>
-
-          <author fullname="Eric Rescorla" initials="E" surname="Rescorla">
-            <organization></organization>
-          </author>
-
-          <author fullname="Justin Uberti" initials="J" surname="Uberti">
-            <organization></organization>
-          </author>
-
-          <date day="11" month="March" year="2013" />
-
-          <abstract>
-            <t>This document describes an extension to the Interactive
-            Connectivity Establishment (ICE) protocol that allows ICE agents
-            to send and receive candidates incrementally rather than
-            exchanging complete lists. With such incremental provisioning, ICE
-            agents can begin connectivity checks while they are still
-            gathering candidates and considerably shorten the time necessary
-            for ICE processing to complete. The above mechanism is also
-            referred to as "trickle ICE".</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-ietf-mmusic-trickle-ice-00" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-ivov-mmusic-trickle-ice-00.txt"
-                type="TXT" />
-      </reference>
 
       <reference anchor="I-D.ietf-rtcweb-fec">
         <front>
@@ -4567,7 +4532,77 @@ a=end-of-candidates
         <format type='TXT' octets='73546' target='http://www.rfc-editor.org/rfc/rfc6347.txt' />
       </reference>
 
+      <reference anchor="I-D.ietf-ice-trickle">
+        <front>
 
+          <title abbrev='Trickle ICE'>
+            Trickle ICE: Incremental Provisioning of Candidates for the
+            Interactive Connectivity Establishment (ICE) Protocol
+          </title>
+          <author initials='E.' surname='Ivov'
+                  fullname='Emil Ivov'>
+            <organization abbrev='Jitsi'>Jitsi</organization>
+            <address>
+              <postal>
+                <street></street>
+                <city>Strasbourg</city>
+                <code>67000</code>
+                <country>France</country>
+              </postal>
+              <phone>+33 6 72 81 15 55</phone>
+              <email>emcho@jitsi.org</email>
+            </address>
+          </author>
+          <author fullname="Eric Rescorla" initials="E.K." surname="Rescorla">
+            <organization>RTFM, Inc.</organization>
+            <address>
+              <postal>
+                <street>2064 Edgewood Drive</street>
+                <city>Palo Alto</city>
+                <region>CA</region>
+                <code>94303</code>
+                <country>USA</country>
+              </postal>
+              <phone>+1 650 678 2350</phone>
+              <email>ekr@rtfm.com</email>
+            </address>
+          </author>
+          <author fullname="Justin Uberti" initials="J." surname="Uberti">
+            <organization>Google</organization>
+            <address>
+              <postal>
+                <street>747 6th St S</street>
+                <city>Kirkland</city>
+                <region>WA</region>
+                <code>98033</code>
+                <country>USA</country>
+              </postal>
+              <phone>+1 857 288 8888</phone>
+              <email>justin@uberti.name</email>
+            </address>
+          </author>
+          <author initials="P." surname="Saint-Andre" fullname="Peter Saint-Andre">
+            <organization>&amp;yet</organization>
+            <address>
+              <email>peter@andyet.com</email>
+              <uri>https://andyet.com/</uri>
+            </address>
+          </author>
+          <date />
+          <abstract>
+            <t>
+              This document describes an extension to the Interactive
+              Connectivity Establishment (ICE) protocol that allows ICE agents
+              to send and receive candidates incrementally rather than
+              exchanging complete lists. With such incremental provisioning,
+              ICE agents can begin connectivity checks while they are still
+              gathering candidates and considerably shorten the time necessary
+              for ICE processing to complete. This mechanism is called "trickle 
+              ICE".
+            </t>
+          </abstract>
+        </front>
+      </reference>
       <reference anchor="RFC6236">
 
         <front>
@@ -4591,7 +4626,6 @@ a=end-of-candidates
         <seriesInfo name="RFC" value="6236"/>
         <format type="TXT" octets="49356" target="http://www.rfc-editor.org/rfc/rfc6236.txt"/>
       </reference>
-
     </references>
 
     <references title="Informative References">
@@ -5261,3 +5295,4 @@ a=end-of-candidates
     </section>
   </back>
 </rfc>
+
