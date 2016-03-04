@@ -2882,7 +2882,9 @@ Internet-Draft                    JSEP                        March 2016
       as specified in [I-D.ietf-mmusic-sctp-sdp], Section 5.2, and the
       value stored.
 
-   o  TODO: max message size
+   o  If present, a single "a=max-message-size" attribute MUST be parsed
+      as specified in [I-D.ietf-mmusic-sctp-sdp], Section 6, and the
+      value stored.  Otherwise, use the specified default.
 
 5.6.3.  Semantics Verification
 
@@ -2904,8 +2906,6 @@ Internet-Draft                    JSEP                        March 2016
          the selected role of the current DTLS connection, if one
          exists.[TODO: may need revision, i.e., use of actpass
 
-      *  DTLS fingerprint values, where at least one fingerprint MUST be
-         present.
 
 
 
@@ -2913,6 +2913,9 @@ Uberti, et al.          Expires September 4, 2016              [Page 52]
 
 Internet-Draft                    JSEP                        March 2016
 
+
+      *  DTLS fingerprint values, where at least one fingerprint MUST be
+         present.
 
    o  Each m= section is also checked to ensure prohibited features are
       not used.  If this is a local description, the "ice-lite"
@@ -2958,9 +2961,6 @@ Internet-Draft                    JSEP                        March 2016
 
       *  If RTCP mux is indicated, prepare to demux RTP and RTCP from
          the RTP ICE component, as specified in [RFC5761],
-         Section 5.1.1.  If RTCP mux is not indicated, but was indicated
-         in a previous description, this MUST result in an error.
-
 
 
 
@@ -2969,6 +2969,9 @@ Uberti, et al.          Expires September 4, 2016              [Page 53]
 
 Internet-Draft                    JSEP                        March 2016
 
+
+         Section 5.1.1.  If RTCP mux is not indicated, but was indicated
+         in a previous description, this MUST result in an error.
 
       *  For each specified RTP header extension, establish a mapping
          between the extension ID and URI, as described in section 6 of
@@ -3016,15 +3019,15 @@ Internet-Draft                    JSEP                        March 2016
       simultaneously meet any limits on individual m= sections, as well
       as this overall session limit.
 
-   o  For any specified "RR" or "RS" bandwidth values, handle as
-      specified in [RFC3556], Section 2.
-
 
 
 Uberti, et al.          Expires September 4, 2016              [Page 54]
 
 Internet-Draft                    JSEP                        March 2016
 
+
+   o  For any specified "RR" or "RS" bandwidth values, handle as
+      specified in [RFC3556], Section 2.
 
    o  Any "AS" bandwidth value MUST be ignored, as the meaning of this
       construct at the session level is not well defined.
@@ -3071,9 +3074,6 @@ Internet-Draft                    JSEP                        March 2016
 
       *  For any specified "TIAS" bandwidth value, set this value as a
          constraint on the maximum RTP bitrate to be used when sending
-         media, as specified in [RFC3890].  If a "TIAS" value is not
-         present, but an "AS" value is specified, generate a "TIAS"
-         value using this formula:
 
 
 
@@ -3081,6 +3081,10 @@ Uberti, et al.          Expires September 4, 2016              [Page 55]
 
 Internet-Draft                    JSEP                        March 2016
 
+
+         media, as specified in [RFC3890].  If a "TIAS" value is not
+         present, but an "AS" value is specified, generate a "TIAS"
+         value using this formula:
 
          TIAS = AS * 0.95 - 50 * 40 * 8
 
@@ -3124,11 +3128,7 @@ Internet-Draft                    JSEP                        March 2016
    o  If the remote DTLS fingerprint has been changed, tear down the
       existing DTLS connection.
 
-   o  If no valid DTLS connection exists, prepare to start a DTLS
-      connection, using the specified roles and fingerprints, on any
-      underlying ICE components, once they are active.
 
-   o  If the media section proto value indicates use of RTP:
 
 
 
@@ -3137,6 +3137,12 @@ Uberti, et al.          Expires September 4, 2016              [Page 56]
 
 Internet-Draft                    JSEP                        March 2016
 
+
+   o  If no valid DTLS connection exists, prepare to start a DTLS
+      connection, using the specified roles and fingerprints, on any
+      underlying ICE components, once they are active.
+
+   o  If the media section proto value indicates use of RTP:
 
       *  If the media section has RTCP mux enabled, discard any RTCP
          component, and begin or continue muxing RTCP over the RTP
@@ -3180,12 +3186,6 @@ Internet-Draft                    JSEP                        March 2016
 
    o  Accept the changes and adjust its behavior to match the SDP.
 
-   o  Reject the changes and return an error via the error callback.
-
-   Changes MUST NOT be silently ignored.
-
-   The following elements of the session description MUST NOT be changed
-   between the createOffer and the setLocalDescription (or between the
 
 
 
@@ -3194,6 +3194,12 @@ Uberti, et al.          Expires September 4, 2016              [Page 57]
 Internet-Draft                    JSEP                        March 2016
 
 
+   o  Reject the changes and return an error via the error callback.
+
+   Changes MUST NOT be silently ignored.
+
+   The following elements of the session description MUST NOT be changed
+   between the createOffer and the setLocalDescription (or between the
    createAnswer and the setLocalDescription), since they reflect
    transport attributes that are solely under browser control, and the
    browser MUST NOT honor an attempt to change them:
@@ -3236,12 +3242,6 @@ Internet-Draft                    JSEP                        March 2016
    The application can also modify the SDP to reduce the capabilities in
    the offer it sends to the far side or the offer that it installs from
    the far side in any way the application sees fit, as long as it is a
-   valid SDP offer and specifies a subset of what was in the original
-   offer.  This is safe because the answer is not permitted to expand
-   capabilities and therefore will just respond to what is actually in
-   the offer.
-
-
 
 
 
@@ -3249,6 +3249,11 @@ Uberti, et al.          Expires September 4, 2016              [Page 58]
 
 Internet-Draft                    JSEP                        March 2016
 
+
+   valid SDP offer and specifies a subset of what was in the original
+   offer.  This is safe because the answer is not permitted to expand
+   capabilities and therefore will just respond to what is actually in
+   the offer.
 
    As always, the application is solely responsible for what it sends to
    the other party, and all incoming SDP will be processed by the
@@ -3283,11 +3288,6 @@ Internet-Draft                    JSEP                        March 2016
    the offer or answer, so the offers and answers are complete.  Trickle
    ICE is not used.  Both Alice and Bob are using the default policy of
    balanced.
-
-
-
-
-
 
 
 
