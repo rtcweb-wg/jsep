@@ -461,7 +461,11 @@ setRemote(ANSWER) |                                   |
 
           <t>Upon receipt of trickled candidates, the receiving application
           will supply them to its ICE Agent. This triggers the ICE Agent to
-          start using the new remote candidates for connectivity checks.</t>
+          start using the new remote candidates for connectivity checks.
+          If BUNDLE is in use, each candidate is only supplied once, and
+          is associated with the m= section which matches the sender's
+          BUNDLE-tag.
+          </t>
 
           <section title="ICE Candidate Format" anchor="sec.ice-candidate-format">
             <t>As with session descriptions, the syntax of the IceCandidate
@@ -1459,15 +1463,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           containing an audio MediaStreamTrack was added, it would follow
           the m=video section.</t>
 
-          <t>Each m= section, provided it is not being bundled into
-          another m= section, MUST generate a unique set of ICE credentials
-          and gather its own unique set of ICE candidates. Otherwise, it MUST
-          use the same ICE credentials and candidates as the m= section
-          into which it is being bundled. Note that this means
-          that for offers, any m= sections which are not bundle-only
-          MUST have unique ICE credentials and candidates, since it is
-          possible that the answerer will accept them without bundling
-          them.
+          <t>Each m= section, provided it is not marked as
+          bundle-only, MUST generate a unique set of ICE credentials and gather
+          its own unique set of ICE candidates. Bundle-only m= sections MUST NOT
+          have any ICE credentials and MUST NOT gather any candidates.
           </t>
 
           <t>For DTLS, all m= sections MUST use the certificate for the
@@ -1709,19 +1708,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>Each "a=mid" line MUST stay the same.</t>
 
-              <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
+              <t>If the m= section is not bundled into another m= section
+              (i.e., it is either not bundled or it is associated with the
+              sender's BUNDLE-tag) each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
               same, unless the ICE configuration has changed (either changes to
               the supported STUN/TURN servers, or the ICE candidate policy), or
               the "IceRestart" option (<xref target="sec.icerestart"/>
-              was specified.
+              was specified. If the m= section is bundled into another
+              m= section, it MUST NOT have any ICE credentials.
               </t>
 
-              <t>Within each m= section, for each candidate that has
+              <t>If the m= section is not bundled into another m= section,
+              for each candidate that has
               been gathered during the most recent gathering phase
               (see <xref target="sec.ice-gather-overview"></xref>),
-              an "a=candidate" line MUST be added, as specified in <xref
-              target="RFC5245"></xref>, Section 4.3., paragraph 3. If
-              candidate gathering for the section has completed, an
+              an "a=candidate" line MUST be added, as defined in <xref
+              target="RFC5245"></xref>, Section 4.3., paragraph 3.
+              If the m= section is bundled into another m= section, any
+              "a=candidate" lines MUST be omitted.
+              If candidate gathering for the section has completed, an
               "a=end-of-candidates" attribute MUST be added, as described in
               <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 9.3.
               </t>
@@ -2198,15 +2203,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               type have yet been gathered, dummy values MUST be used, as
               described in the initial answer section above.</t>
 
-              <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same.
+              <t>If the m= section is not bundled into another m= section
+              (i.e., it is either not bundled or it is associated with the
+              sender's BUNDLE-tag) each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
+              same, unless the ICE configuration has changed (either changes to
+              the supported STUN/TURN servers, or the ICE candidate policy), or
+              the "IceRestart" option (<xref target="sec.icerestart"/>
+              was specified. If the m= section is bundled into another
+              m= section, it MUST NOT have any ICE credentials.
               </t>
 
-              <t>Within each m= section, for each candidate that has
+              <t>If the m= section is not bundled into another m= section,
+              for each candidate that has
               been gathered during the most recent gathering phase
               (see <xref target="sec.ice-gather-overview"></xref>),
-              an "a=candidate" line MUST be added, as specified in <xref
-              target="RFC5245"></xref>, Section 4.3., paragraph 3. If
-              candidate gathering for the section has completed, an
+              an "a=candidate" line MUST be added, as defined in <xref
+              target="RFC5245"></xref>, Section 4.3., paragraph 3.
+              If the m= section is bundled into another m= section, any
+              "a=candidate" lines MUST be omitted.
+              If candidate gathering for the section has completed, an
               "a=end-of-candidates" attribute MUST be added, as described in
               <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 9.3.
               </t>
