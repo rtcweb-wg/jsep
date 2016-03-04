@@ -2639,25 +2639,32 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the media section proto value indicates use of RTP:
               <list style="symbols">
                 <t>[TODO: header extensions]</t>
+		
+		<t>If the m= section is being recycled ... dissociate
+		the currently associated RtpTransceiver by setting its
+		mid attribute to null.</t>
 
-                <t>If there is no RtpTransceiver associated with this m=
-                section (which should only happen when applying an offer),
-                either find one and associate it with this m= section or create
-                one according to the following steps:
+                <t>If the m= section is not associated with any
+                RtpTransceiver (possibly because it was dissociated in
+                the previous step), either find an RtpTransceiver or
+                create one according to the following steps:
                 <list style="symbols">
-                  <t>If the m= section is sendrecv or recvonly, and there are
-                  RtpTransceivers of the same type that were added to the
-                  PeerConnection by addTrack and are not associated with any m=
-                  section, find the first (according to canonical order
-                  described in <xref target="sec.initial-offers"/>) such
-                  RtpTransceiver and associate it with this m= section.</t>
+                  <t>If the m= section is sendrecv or recvonly, and
+                  there are RtpTransceivers of the same type that were
+                  added to the PeerConnection by addTrack and are not
+                  associated with any m= section and are not stopped,
+                  find the first (according to canonical order
+                  described in <xref target="sec.initial-offers"/>)
+                  such RtpTransceiver.</t>
 
-                  <t>If no RtpTransceiver was associated in the previous step,
-                  create one with an inactive RtpSender and active RtpReceiver
-                  and associate it with the m= section.</t>
+                  <t>If no RtpTransceiver was found in the previous
+                  step, create one with an inactive RtpSender and
+                  active RtpReceiver.</t>
 
-                  <t>Set the value of the RtpTransceiver's mid attribute to the
-                  MID of the m= section.</t>
+                  <t>Associate the found or created RtpTransceiver
+                  with the m= section by setting the value of the
+                  RtpTransceiver's mid attribute to the MID of the m=
+                  section.</t>
                 </list>
                 </t>
 		
