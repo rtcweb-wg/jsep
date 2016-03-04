@@ -583,8 +583,8 @@ Internet-Draft                    JSEP                        March 2016
    Candidate trickling is a technique through which a caller may
    incrementally provide candidates to the callee after the initial
    offer has been dispatched; the semantics of "Trickle ICE" are defined
-   in [I-D.ietf-mmusic-trickle-ice].  This process allows the callee to
-   begin acting upon the call and setting up the ICE (and perhaps DTLS)
+   in [I-D.ietf-ice-trickle].  This process allows the callee to begin
+   acting upon the call and setting up the ICE (and perhaps DTLS)
    connections immediately, without having to wait for the caller to
    gather all possible candidates.  This results in faster media setup
    in cases where gathering is not performed prior to initiating the
@@ -1693,7 +1693,7 @@ Internet-Draft                    JSEP                        March 2016
       0".
 
    o  An "a=ice-options" line with the "trickle" option MUST be added,
-      as specified in [I-D.ietf-mmusic-trickle-ice], Section 4.
+      as specified in [I-D.ietf-ice-trickle], Section 4.
 
    The next step is to generate m= sections, as specified in [RFC4566]
    Section 5.14, for each MediaStreamTrack that has been added to the
@@ -1739,7 +1739,7 @@ Internet-Draft                    JSEP                        March 2016
 
 
       gathered, the "dummy" port value of 9 (Discard) MUST be used, as
-      indicated in [I-D.ietf-mmusic-trickle-ice], Section 5.1.
+      indicated in [I-D.ietf-ice-trickle], Section 5.1.
 
    o  To properly indicate use of DTLS, the <proto> field MUST be set to
       "UDP/TLS/RTP/SAVPF", as specified in [RFC5764], Section 8, if the
@@ -1750,8 +1750,7 @@ Internet-Draft                    JSEP                        March 2016
    The m= line MUST be followed immediately by a "c=" line, as specified
    in [RFC4566], Section 5.7.  Again, as no candidates have yet been
    gathered, the "c=" line must contain the "dummy" value "IN IP4
-   0.0.0.0", as defined in [I-D.ietf-mmusic-trickle-ice], Section 5.1.
-   [[NOTE: This has not yet changed in the trickle ICE draft.]]
+   0.0.0.0", as defined in [I-D.ietf-ice-trickle], Section 5.1.
 
    Each m= section MUST include the following attribute lines:
 
@@ -1786,6 +1785,7 @@ Internet-Draft                    JSEP                        March 2016
 
    o  For each primary codec where RTP retransmission should be used, a
       corresponding "a=rtpmap" line indicating "rtx" with the clock rate
+      of the primary codec and an "a=fmtp" line that references the
 
 
 
@@ -1794,7 +1794,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 32]
 Internet-Draft                    JSEP                        March 2016
 
 
-      of the primary codec and an "a=fmtp" line that references the
       payload type of the primary codec, as specified in [RFC4588],
       Section 8.1.
 
@@ -1842,6 +1841,7 @@ Internet-Draft                    JSEP                        March 2016
       with the RTX SSRC, and an "a=ssrc-group" line, as specified in
       [RFC5576], section 4.2, with semantics set to "FID" and including
       the primary and RTX SSRCs.
+
 
 
 
@@ -1980,7 +1980,7 @@ Internet-Draft                    JSEP                        March 2016
       "a=candidate" line MUST be added, as specified in [RFC5245],
       Section 4.3., paragraph 3.  If candidate gathering for the section
       has completed, an "a=end-of-candidates" attribute MUST be added,
-      as described in [I-D.ietf-mmusic-trickle-ice], Section 9.3.
+      as described in [I-D.ietf-ice-trickle], Section 9.3.
 
    o  For MediaStreamTracks that are still present, the "a=msid",
       "a=ssrc", and "a=ssrc-group" lines MUST stay the same.
@@ -2212,8 +2212,8 @@ Internet-Draft                    JSEP                        March 2016
    session-level attributes.  The process here is identical to that
    indicated in the Initial Offers section above, except that the
    "a=ice-options" line, with the "trickle" option as specified in
-   [I-D.ietf-mmusic-trickle-ice], Section 4, is only included if such an
-   option was present in the offer.
+   [I-D.ietf-ice-trickle], Section 4, is only included if such an option
+   was present in the offer.
 
    The next step is to generate lip sync groups as defined in [RFC5888],
    Section 7.  For each MediaStream with more than one MediaStreamTrack,
@@ -2267,8 +2267,7 @@ Internet-Draft                    JSEP                        March 2016
    o  The port value would normally be set to the port of the default
       ICE candidate for this m= section, but given that no candidates
       have yet been gathered, the "dummy" port value of 9 (Discard) MUST
-      be used, as indicated in [I-D.ietf-mmusic-trickle-ice],
-      Section 5.1.
+      be used, as indicated in [I-D.ietf-ice-trickle], Section 5.1.
 
    o  The <proto> field MUST be set to exactly match the <proto> field
       for the corresponding m= line in the offer.
@@ -2276,7 +2275,7 @@ Internet-Draft                    JSEP                        March 2016
    The m= line MUST be followed immediately by a "c=" line, as specified
    in [RFC4566], Section 5.7.  Again, as no candidates have yet been
    gathered, the "c=" line must contain the "dummy" value "IN IP4
-   0.0.0.0", as defined in [I-D.ietf-mmusic-trickle-ice], Section 5.1.
+   0.0.0.0", as defined in [I-D.ietf-ice-trickle], Section 5.1.
 
    If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
    the same ICE credentials and candidates; all m= sections not being
@@ -2290,6 +2289,7 @@ Internet-Draft                    JSEP                        March 2016
    o  An "a=rtcp" line, as specified in [RFC3605], Section 2.1,
       containing the dummy value "9 IN IP4 0.0.0.0", because no
       candidates have yet been gathered.
+
 
 
 
@@ -2488,7 +2488,7 @@ Internet-Draft                    JSEP                        March 2016
       "a=candidate" line MUST be added, as specified in [RFC5245],
       Section 4.3., paragraph 3.  If candidate gathering for the section
       has completed, an "a=end-of-candidates" attribute MUST be added,
-      as described in [I-D.ietf-mmusic-trickle-ice], Section 9.3.
+      as described in [I-D.ietf-ice-trickle], Section 9.3.
 
    o  For MediaStreamTracks that are still present, the "a=msid",
       "a=ssrc", and "a=ssrc-group" lines MUST stay the same.
@@ -4148,6 +4148,12 @@ Internet-Draft                    JSEP                        March 2016
 
 11.1.  Normative References
 
+   [I-D.ietf-ice-trickle]
+              Ivov, E., Rescorla, E., Uberti, J., and P. Saint-Andre,
+              "Trickle ICE: Incremental Provisioning of Candidates for
+              the Interactive Connectivity Establishment (ICE)
+              Protocol".
+
    [I-D.ietf-mmusic-msid]
               Alvestrand, H., "Cross Session Stream Identification in
               the Session Description Protocol", draft-ietf-mmusic-
@@ -4169,12 +4175,6 @@ Internet-Draft                    JSEP                        March 2016
               Nandakumar, S., "A Framework for SDP Attributes when
               Multiplexing", draft-ietf-mmusic-sdp-mux-attributes-01
               (work in progress), February 2014.
-
-   [I-D.ietf-mmusic-trickle-ice]
-              Ivov, E., Rescorla, E., and J. Uberti, "Trickle ICE:
-              Incremental Provisioning of Candidates for the Interactive
-              Connectivity Establishment (ICE) Protocol", draft-ietf-
-              mmusic-trickle-ice-00 (work in progress), March 2013.
 
    [I-D.ietf-rtcweb-audio]
               Valin, J. and C. Bran, "WebRTC Audio Codec and Processing
