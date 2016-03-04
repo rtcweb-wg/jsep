@@ -416,16 +416,6 @@ setRemote(ANSWER) |                                   |
 	calls.</t>
 
 	<section title="RtpTransceivers" anchor="sec.rtptransceivers">
-	  <t>RtpTransceivers generally have a 1:1 mapping with m=
-	  sections, however there may be more RtpTransceivers tha m=
-	  sections when RtpTransceivers are created but not yet
-	  associated with a m= section, or if RtpTransceivers have
-	  been stopped and disassociated from m= sections. An
-	  RtpTransceiver is never associated with more than one m=
-	  section, and a m= section is always associated with exactly
-	  one RtpTransceiver once a session description is
-	  applied.</t>
-
 	  <t>RtpTransceivers allow the application to control the RTP
 	  media associated with one m= section.  Each RtpTransceiver
 	  has an RtpSender and an RtpReceiver, described below, which
@@ -433,16 +423,25 @@ setRemote(ANSWER) |                                   |
 	  RTP media.  The application may also modify the
 	  RtpTransceiver directly, for instance, by closing it.</t>
 	  
-	  <t>RtpTransceivers can be created either by the application
-	  explicitly calling methods to add them, or implicitly by
-	  calling setRemoteDescription with an offer that adds new m=
-	  sections.</t>
+	  <t>RtpTransceivers generally have a 1:1 mapping with m=
+	  sections, however there may be more RtpTransceivers tha m=
+	  sections when RtpTransceivers are created but not yet
+	  associated with a m= section, or if RtpTransceivers have
+	  been stopped and disassociated from m= sections. An
+	  RtpTransceiver is never associated with more than one m=
+	  section, and a m= section is always associated with exactly
+	  one RtpTransceiver, once a session description is
+	  applied.</t>
+
+	  <t>RtpTransceivers can be created explicitly by the
+	  application or implicitly by calling setRemoteDescription
+	  with an offer that adds new m= sections.</t>
 	</section>
 
 	<section title="RtpSenders" anchor="sec.rtpsenders">
 	  <t>RtpSenders allow the application to control how RTP media
 	  is sent.  In particular, the application can control whether
-	  an RtpSender is active or not, which controls the
+	  an RtpSender is active or not, which affects the
 	  directionality attribute of the associated m= section.</t>
 	</section>
 
@@ -450,7 +449,7 @@ setRemote(ANSWER) |                                   |
           <t>RtpReceivers allows the application to control how RTP
           media is received.  In particular, the application can
           control whether an RtpReceiver is active or not, which
-          controls the directionality attribute of the associated m=
+          affects the directionality attribute of the associated m=
           section.</t>
 	</section>
       </section>
@@ -957,7 +956,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           supplied in the most recent call to setRemoteDescription, which MUST
           have been called prior to calling createAnswer.
           Like createOffer, the returned blob contains
-          descriptions of the RtpTransceivers added to this
+          descriptions of the media added to this
           PeerConnection, the codec/RTP/RTCP options negotiated for this
           session, and any candidates that have been gathered by the ICE
           Agent. An options parameter may be supplied to provide additional
@@ -1091,15 +1090,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             some RtpTransceivers that were previously associated will
             no longer be associated with any m= section. In such
             cases, the value of the RtpTransceiver's mid attribute
-            MUST be set to null. It may also remove RtpTransceivers that
-            were created created by applying a remote offer that was
-            subsequently rolled back.  However, a RtpTransceiver MUST NOT
-            be removed if it the RtpTransceiver's RtpSender was activated
-            by the addTrack method. This is so that an application may
-            call addTrack, then setRemoteDescription with an offer,
-            then rollback that offer, then call createOffer and have
-            a m= section for the added track appear in the generated
-            offer.</t>
+            MUST be set to null. RtpTransceivers that were created by
+            applying a remote offer that was subsequently rolled back
+            MAY also be removed.  However, a RtpTransceiver MUST NOT
+            be removed if the RtpTransceiver's RtpSender was
+            activated by the addTrack method. This is so that an
+            application may call addTrack, then setRemoteDescription
+            with an offer, then rollback that offer, then call
+            createOffer and have a m= section for the added track
+            appear in the generated offer.</t>
 
             <t>A rollback is performed by supplying a session description of
             type "rollback" with empty contents to either setLocalDescription or
@@ -1493,7 +1492,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           RtpTransceiver that has been added to the PeerConnection via
           the addTrack or addTransceiver methods, excluding the
           stopped RtpTransceivers that are no longer associated with an
-          m= section (in other words, don't add back stopped
+          m= section (in other words, don't re-add stopped
           RtpTransceivers). m= sections are generated in the order that
           their associated RtpTransceivers were added to the
           PeerConnection.</t>
@@ -1551,7 +1550,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               no candidates have yet been gathered.</t>
 
               <t>A direction attribute for the associated
-              RtpTransceiver described by <xref
+              RtpTransceiver as described by <xref
               target="sec.offer-dirattr"></xref>.</t>
 
               <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as
@@ -2640,9 +2639,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <list style="symbols">
                 <t>[TODO: header extensions]</t>
 		
-		<t>If the m= section is being recycled ... dissociate
-		the currently associated RtpTransceiver by setting its
-		mid attribute to null.</t>
+		<t>If the m= section is being recycled (see <xref
+		target="sec.subsequent-offers"></xref>), dissociate the
+		currently associated RtpTransceiver by setting its mid
+		attribute to null.</t>
 
                 <t>If the m= section is not associated with any
                 RtpTransceiver (possibly because it was dissociated in
