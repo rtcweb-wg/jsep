@@ -666,7 +666,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.4.p.1">This section details the basic operations that must be present to implement JSEP functionality. The actual API exposed in the W3C API may have somewhat different syntax, but should map easily to these concepts.</p>
 <h2 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a> <a href="#sec.methods" id="sec.methods">Methods</a></h2>
 <h3 id="rfc.section.4.1.1"><a href="#rfc.section.4.1.1">4.1.1.</a> <a href="#sec.constructor" id="sec.constructor">Constructor</a></h3>
-<p id="rfc.section.4.1.1.p.1">The PeerConnection constructor allows the application to specify global parameters for the media session, such as the STUN/TURN servers and credentials to use when gathering candidates, as well as the initial ICE candidate policy and pool size, and also the BUNDLE policy to use.</p>
+<p id="rfc.section.4.1.1.p.1">The PeerConnection constructor allows the application to specify global parameters for the media session, such as the STUN/TURN servers and credentials to use when gathering candidates, as well as the initial ICE candidate policy and pool size, and also the bundle policy to use.</p>
 <p id="rfc.section.4.1.1.p.2">If an ICE candidate policy is specified, it functions as described in <a href="#sec.ice-candidate-policy">Section 3.4.3</a>, causing the browser to only surface the permitted candidates (including any internal browser filtering) to the application, and only use those candidates for connectivity checks. The set of available policies is as follows: </p>
 
 <dl>
@@ -681,7 +681,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p> </p>
 <p id="rfc.section.4.1.1.p.3">The default ICE candidate policy MUST be set to "all" as this is generally the desired policy, and also typically reduces use of application TURN server resources significantly.</p>
 <p id="rfc.section.4.1.1.p.4">If a size is specified for the ICE candidate pool, this indicates the number of ICE components to pre-gather candidates for. Because pre-gathering results in utilizing STUN/TURN server resources for potentially long periods of time, this must only occur upon application request, and therefore the default candidate pool size MUST be zero.  </p>
-<p id="rfc.section.4.1.1.p.5">The application can specify its preferred policy regarding use of BUNDLE, the multiplexing mechanism defined in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>.  Regardless of policy, the application will always try to negotiate BUNDLE onto a single transport, and will offer a single BUNDLE group across all media section; use of this single transport is contingent upon the answerer accepting BUNDLE.  However, by specifying a policy from the list below, the application can control exactly how aggressively it will try to BUNDLE media streams together, which affects how it will interoperate with a non-BUNDLE-aware endpoint.  When negotiating with a non-BUNDLE-aware endpoint, only the streams not marked as bundle-only streams will be established.  </p>
+<p id="rfc.section.4.1.1.p.5">The application can specify its preferred policy regarding use of bundle, the multiplexing mechanism defined in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>.  Regardless of policy, the application will always try to negotiate bundle onto a single transport, and will offer a single bundle group across all media section; use of this single transport is contingent upon the answerer accepting bundle.  However, by specifying a policy from the list below, the application can control exactly how aggressively it will try to bundle media streams together, which affects how it will interoperate with a non-bundle-aware endpoint.  When negotiating with a non-bundle-aware endpoint, only the streams not marked as bundle-only streams will be established.  </p>
 <p id="rfc.section.4.1.1.p.6">The set of available policies is as follows: </p>
 
 <dl>
@@ -690,7 +690,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <dt></dt>
   <dd style="margin-left: 8"/>
   <dt>max-compat:</dt>
-  <dd style="margin-left: 8">All media sections will contain transport parameters; none will be marked as bundle-only. This policy will allow all streams to be received by non-BUNDLE-aware endpoints, but require separate candidates to be gathered for each media stream.  </dd>
+  <dd style="margin-left: 8">All media sections will contain transport parameters; none will be marked as bundle-only. This policy will allow all streams to be received by non-bundle-aware endpoints, but require separate candidates to be gathered for each media stream.  </dd>
   <dt></dt>
   <dd style="margin-left: 8"/>
   <dt>max-bundle:</dt>
@@ -698,7 +698,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </dl>
 
 <p> </p>
-<p id="rfc.section.4.1.1.p.7">As it provides the best tradeoff between performance and compatibility with legacy endpoints, the default BUNDLE policy MUST be set to "balanced".  </p>
+<p id="rfc.section.4.1.1.p.7">As it provides the best tradeoff between performance and compatibility with legacy endpoints, the default bundle policy MUST be set to "balanced".  </p>
 <p id="rfc.section.4.1.1.p.8">The application can specify its preferred policy regarding use of RTP/RTCP multiplexing <a href="#RFC5761">[RFC5761]</a> using one of the following policies: </p>
 
 <dl>
@@ -787,7 +787,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>Any changes to the STUN/TURN servers to use affect the next gathering phase. If an ICE gathering phase has already started or completed, the 'needs-ice-restart' bit mentioned in <a href="#sec.ice-gather-overview">Section 3.4.1</a> will be set. This will cause the next call to createOffer to generate new ICE credentials, for the purpose of forcing an ICE restart and kicking off a new gathering phase, in which the new servers will be used. If the ICE candidate pool has a nonzero size, any existing candidates will be discarded, and new candidates will be gathered from the new servers.  </li>
   <li>Any change to the ICE candidate policy affects the next gathering phase. If an ICE gathering phase has already started or completed, the 'needs-ice-restart' bit will be set.  Either way, changes to the policy have no effect on the candidate pool, because pooled candidates are not surfaced to the application until a gathering phase occurs, and so any necessary filtering can still be done on any pooled candidates.  </li>
   <li>Any changes to the ICE candidate pool size take effect immediately; if increased, additional candidates are pre-gathered; if decreased, the now-superfluous candidates are discarded.  </li>
-  <li>The BUNDLE and RTCP-multiplexing policies MUST NOT be changed after the construction of the PeerConnection.  </li>
+  <li>The bundle and RTCP-multiplexing policies MUST NOT be changed after the construction of the PeerConnection.  </li>
 </ul>
 <p id="rfc.section.4.1.12.p.3">This call may result in a change to the state of the ICE Agent, and may result in a change to media state if it results in connectivity being established.</p>
 <h3 id="rfc.section.4.1.13"><a href="#rfc.section.4.1.13">4.1.13.</a> <a href="#sec.addicecandidate" id="sec.addicecandidate">addIceCandidate</a></h3>
@@ -910,11 +910,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>An "a=ssrc" line, as specified in <a href="#RFC5576">[RFC5576]</a>, Section 4.1, indicating the SSRC to be used for sending media, along with the mandatory "cname" source attribute, as specified in Section 6.1, indicating the CNAME for the source. The CNAME MUST be generated in accordance with Section 4.9 of <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>.</li>
   <li>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <a href="#RFC5576">[RFC5576]</a>, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</li>
   <li>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line with semantics set to "FEC-FR" and including the primary and FEC SSRCs, as specified in <a href="#RFC5956">[RFC5956]</a>, section 4.3. For simplicity, if both RTX and FEC are supported, the FEC SSRC MUST be the same as the RTX SSRC.</li>
-  <li>If the BUNDLE policy for this PeerConnection is set to "max-bundle", and this is not the first m= section, or the BUNDLE policy is set to "balanced", and this is not the first m= section for this media type, an "a=bundle-only" line.</li>
+  <li>If the bundle policy for this PeerConnection is set to "max-bundle", and this is not the first m= section, or the bundle policy is set to "balanced", and this is not the first m= section for this media type, an "a=bundle-only" line.</li>
 </ul>
 <p id="rfc.section.5.2.1.p.9">Lastly, if a data channel has been created, a m= section MUST be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field MUST be set to "UDP/DTLS/SCTP" if the default candidate uses UDP transport, or "TCP/DTLS/SCTP" if the default candidate uses TCP transport <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>. The "fmt" value MUST be set to "webrtc-datachannel" as specified in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.  </p>
 <p id="rfc.section.5.2.1.p.10">Within the data m= section, the "a=mid", "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", and "a=setup" lines MUST be included as mentioned above, along with an "a=fmtp:webrtc-datachannel" line and an "a=sctp-port" line referencing the SCTP port number as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.</p>
-<p id="rfc.section.5.2.1.p.11">Once all m= sections have been generated, a session-level "a=group" attribute MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. This attribute MUST have semantics "BUNDLE", and MUST include the mid identifiers of each m= section.  The effect of this is that the browser offers all m= sections as one BUNDLE group. However, whether the m= sections are bundle-only or not depends on the BUNDLE policy.  </p>
+<p id="rfc.section.5.2.1.p.11">Once all m= sections have been generated, a session-level "a=group" attribute MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. This attribute MUST have semantics "bundle", and MUST include the mid identifiers of each m= section.  The effect of this is that the browser offers all m= sections as one bundle group. However, whether the m= sections are bundle-only or not depends on the bundle policy.  </p>
 <p id="rfc.section.5.2.1.p.12">The next step is to generate session-level lip sync groups as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7.  For each MediaStream with more than one MediaStreamTrack, a group of type "LS" MUST be added that contains the mid values for each MediaStreamTrack in that MediaStream. </p>
 <p id="rfc.section.5.2.1.p.13">Attributes which SDP permits to either be at the session level or the media level SHOULD generally be at the media level even if they are identical. This promotes readability, especially if one of a set of initially identical attributes is subsequently changed.  </p>
 <p id="rfc.section.5.2.1.p.14">Attributes other than the ones specified above MAY be included, except for the following attributes which are specifically incompatible with the requirements of <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, and MUST NOT be included: </p>
@@ -924,7 +924,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>"a=key-mgmt"</li>
   <li>"a=ice-lite"</li>
 </ul>
-<p id="rfc.section.5.2.1.p.15">Note that when BUNDLE is used, any additional attributes that are added MUST follow the advice in <a href="#I-D.ietf-mmusic-sdp-mux-attributes">[I-D.ietf-mmusic-sdp-mux-attributes]</a> on how those attributes interact with BUNDLE.</p>
+<p id="rfc.section.5.2.1.p.15">Note that when bundle is used, any additional attributes that are added MUST follow the advice in <a href="#I-D.ietf-mmusic-sdp-mux-attributes">[I-D.ietf-mmusic-sdp-mux-attributes]</a> on how those attributes interact with bundle.</p>
 <p id="rfc.section.5.2.1.p.16">Note that these requirements are in some cases stricter than those of SDP. Implementations MUST be prepared to accept compliant SDP even if it would not conform to the requirements for generating SDP in this specification.</p>
 <h3 id="rfc.section.5.2.2"><a href="#rfc.section.5.2.2">5.2.2.</a> <a href="#sec.subsequent-offers" id="sec.subsequent-offers">Subsequent Offers</a></h3>
 <p id="rfc.section.5.2.2.p.1">When createOffer is called a second (or later) time, or is called after a local description has already been installed, the processing is somewhat different than for an initial offer.</p>
@@ -962,7 +962,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>The "a=rtcp-mux" line MUST only be added if present in the remote description.</li>
   <li>The "a=rtcp-rsize" line MUST only be added if present in the remote description.</li>
 </ul>
-<p id="rfc.section.5.2.2.p.6">The "a=group:BUNDLE" attribute MUST include the mid identifiers specified in the BUNDLE group in the most recent answer, minus any m= sections that have been marked as rejected, plus any newly added or re-enabled m= sections. In other words, the BUNDLE attribute must contain all m= sections that were previously bundled, as long as they are still alive, as well as any new m= sections.</p>
+<p id="rfc.section.5.2.2.p.6">The "a=group:BUNDLE" attribute MUST include the mid identifiers specified in the bundle group in the most recent answer, minus any m= sections that have been marked as rejected, plus any newly added or re-enabled m= sections. In other words, the bundle attribute must contain all m= sections that were previously bundled, as long as they are still alive, as well as any new m= sections.</p>
 <p id="rfc.section.5.2.2.p.7">The "LS" groups are generated in the same way as with initial offers.</p>
 <h3 id="rfc.section.5.2.3"><a href="#rfc.section.5.2.3">5.2.3.</a> <a href="#sec.options-handling1" id="sec.options-handling1">Options Handling</a></h3>
 <p id="rfc.section.5.2.3.p.1">The createOffer method takes as a parameter an RTCOfferOptions object. Special processing is performed when generating a SDP description if the following options are present.</p>
@@ -1000,7 +1000,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <p> </p>
 <p id="rfc.section.5.3.1.p.9">The m= line MUST be followed immediately by a "c=" line, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.7. Again, as no candidates have yet been gathered, the "c=" line must contain the "dummy" value "IN IP4 0.0.0.0", as defined in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 5.1.</p>
-<p id="rfc.section.5.3.1.p.10">If the offer supports BUNDLE, all m= sections to be BUNDLEd must use the same ICE credentials and candidates; all m= sections not being BUNDLEd must use unique ICE credentials and candidates. Each m= section MUST include the following: </p>
+<p id="rfc.section.5.3.1.p.10">If the offer supports bundle, all m= sections to be bundled must use the same ICE credentials and candidates; all m= sections not being bundled must use unique ICE credentials and candidates. Each m= section MUST include the following: </p>
 
 <ul>
   <li>If and only if present in the offer, an "a=mid" line, as specified in <a href="#RFC5888">[RFC5888]</a>, Section 9.1. The "mid" value MUST match that specified in the offer.</li>
@@ -1025,7 +1025,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 <p id="rfc.section.5.3.1.p.11">If a data channel m= section has been offered, a m= section MUST also be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; and "fmt" fields MUST be set to exactly match the fields in the offer.</p>
 <p id="rfc.section.5.3.1.p.12">Within the data m= section, the "a=mid", "a=ice-ufrag", "a=ice-pwd", "a=candidate", "a=fingerprint", and "a=setup" lines MUST be included as mentioned above, along with an "a=fmtp:webrtc-datachannel" line and an "a=sctp-port" line referencing the SCTP port number as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.  </p>
-<p id="rfc.section.5.3.1.p.13">If "a=group" attributes with semantics of "BUNDLE" are offered, corresponding session-level "a=group" attributes MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. These attributes MUST have semantics "BUNDLE", and MUST include the all mid identifiers from the offered BUNDLE groups that have not been rejected.  Note that regardless of the presence of "a=bundle-only" in the offer, no m= sections in the answer should have an "a=bundle-only" line.  </p>
+<p id="rfc.section.5.3.1.p.13">If "a=group" attributes with semantics of "BUNDLE" are offered, corresponding session-level "a=group" attributes MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. These attributes MUST have semantics "BUNDLE", and MUST include the all mid identifiers from the offered bundle groups that have not been rejected.  Note that regardless of the presence of "a=bundle-only" in the offer, no m= sections in the answer should have an "a=bundle-only" line.  </p>
 <p id="rfc.section.5.3.1.p.14">Attributes that are common between all m= sections MAY be moved to session-level, if explicitly defined to be valid at session-level.</p>
 <p id="rfc.section.5.3.1.p.15">The attributes prohibited in the creation of offers are also prohibited in the creation of answers.</p>
 <h3 id="rfc.section.5.3.2"><a href="#rfc.section.5.3.2">5.3.2.</a> <a href="#sec.subsequent-answers" id="sec.subsequent-answers">Subsequent Answers</a></h3>
@@ -1187,15 +1187,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul class="empty">
   <li>The "c=" line MUST be checked for syntax but its value is not used.  This supersedes the guidance in <a href="#RFC5245">[RFC5245]</a>, Section 6.1, to use "ice-mismatch" to indicate mismatches between "c=" and the candidate lines; because JSEP always uses ICE, "ice-mismatch" is not useful in this context.  </li>
-  <li>The "i=", "u=", "e=", "p=", "t=", "r=", "z=", "k=", lines are not used by this specification; they MUST be checked for syntax but their values MAY be ignored.</li>
+  <li>TODO</li>
 </ul>
 
 <p> </p>
 <p id="rfc.section.5.6.1.p.3">The remaining lines are processed as follows: </p>
 
 <ul class="empty">
-  <li>The "v=" line MUST have a version of 0.  </li>
-  <li>The "o=" line MUST be processed to check it is consistent with <a href="#RFC4566">[RFC4566]</a>, Section 5.2 </li>
   <li>The "b=" line, if present, MUST be parsed as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.8, and the bwtype and bandwidth values stored.</li>
 </ul>
 
@@ -1244,23 +1242,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>The "m=" fmt value MUST be parsed as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.14, and the individual values stored.</li>
   <li>Any "a=rtpmap" or "a=fmtp" lines MUST be parsed as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6, and their values stored.</li>
   <li>If present, a single "a=ptime" line MUST be parsed as described in <a href="#RFC4566">[RFC4566]</a>, Section 6, and its value stored.</li>
-  <li>If present, a single "a=maxptime" line MUST be parsed as described in <a href="#RFC4566">[RFC4566]</a>, Section 6, and its value stored.</li>
   <li>If present, a single direction attribute line (e.g. "a=sendrecv") MUST be parsed as described in <a href="#RFC4566">[RFC4566]</a>, Section 6, and its value stored.</li>
   <li>Any "a=ssrc" or "a=ssrc-group" attributes MUST be parsed as specified in <a href="#RFC5576">[RFC5576]</a>, Sections 4.1-4.2, and their values stored.</li>
   <li>Any "a=extmap" attributes MUST be parsed as specified in <a href="#RFC5285">[RFC5285]</a>, Section 5, and their values stored.</li>
   <li>Any "a=rtcp-fb" attributes MUST be parsed as specified in <a href="#RFC4585">[RFC4585]</a>, Section 4.2., and their values stored.</li>
   <li>If present, a single "a=rtcp-mux" line MUST be parsed as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.1, and its presence or absence flagged and stored.</li>
-  <li>If present, a single "a=rtcp-rsize" attribute MUST be parsed as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5, and its value stored. </li>
-  <li>If present, a single "a=rtcp" attribute MUST be parsed as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, but its value is ignored. </li>
-  <li>If present, a single "a=msid" attribute MUST be parsed as specified in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 3.2, and their values stored. </li>
-  <li>Any "a=candidate" attributes MUST be parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 4.3, and their values stored. </li>
-  <li>Any "a=remote-candidates" attributes MUST be parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 4.3, but their values are ignored.</li>
-  <li>If present, a single "a=end-of-candidates" attribute MUST be parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 4.3, and their values stored.</li>
-  <li>Any "a=imageattr" attributes MUST be parsed as specified in <a href="#RFC6236">[RFC6236]</a>, Section 3, and their values stored. </li>
+  <li>TODO: a=rtcp-rsize, a=rtcp, a=msid, a=candidate, a=end-of-candidates</li>
 </ul>
 
 <p> </p>
-<p id="rfc.section.5.6.2.p.6">Otherwise, if the "m=" proto value indicates use of SCTP, the following attribute lines MUST be processed: </p>
+<p id="rfc.section.5.6.2.p.6">Otherwise, if the "m=" proto value indicats use of SCTP, the following attribute lines MUST be processed: </p>
 
 <ul>
   <li>The "m=" fmt value MUST be parsed as specified in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.3, and the application protocol value stored.</li>
@@ -1335,7 +1326,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 
 <p> </p>
-<p id="rfc.section.5.9.p.3">If the answer contains valid BUNDLE groups, discard any ICE components for the m= sections that will be bundled onto the primary ICE components in each BUNDLE, and begin muxing these m= sections accordingly, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 8.2.</p>
+<p id="rfc.section.5.9.p.3">If the answer contains valid bundle groups, discard any ICE components for the m= sections that will be bundled onto the primary ICE components in each bundle, and begin muxing these m= sections accordingly, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 8.2.</p>
 <h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#sec.configurable-sdp-paramete" id="sec.configurable-sdp-paramete">Configurable SDP Parameters</a></h1>
 <p id="rfc.section.6.p.1">It is possible to change elements in the SDP returned from createOffer before passing it to setLocalDescription. When an implementation receives modified SDP it MUST either: </p>
 <p/>
@@ -1355,7 +1346,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>The generated ICE credentials (a=ice-ufrag and a=ice-pwd).</li>
   <li>The set of ICE candidates and their parameters (a=candidate).</li>
   <li>The DTLS fingerprint(s) (a=fingerprint).</li>
-  <li>The contents of BUNDLE groups, bundle-only parameters, or "a=rtcp-mux" parameters.</li>
+  <li>The contents of bundle groups, bundle-only parameters, or "a=rtcp-mux" parameters.</li>
 </ul>
 <p id="rfc.section.6.p.6">The following modifications, if done by the browser to a description between createOffer/createAnswer and the setLocalDescription, MUST be honored by the browser:</p>
 <p/>
@@ -1624,7 +1615,7 @@ BobUA-&gt;AliceUA:     audio+data sent from Bob to Alice
 AliceUA-&gt;BobUA:     audio+data sent from Alice to Bob
 
 //                  some time later Bob adds two video streams
-//                  note, no candidates exchanged, because of BUNDLE
+//                  note, no candidates exchanged, because of bundle
 BobJS-&gt;BobUA:       addStream with first video stream
 BobJS-&gt;BobUA:       addStream with second video stream
 BobJS-&gt;BobUA:       createOffer to get |offer-B2|
