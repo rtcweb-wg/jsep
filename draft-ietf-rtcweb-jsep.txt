@@ -99,11 +99,11 @@ Table of Contents
        4.1.10. pendingRemoteDescription  . . . . . . . . . . . . . .  25
        4.1.11. canTrickleIceCandidates . . . . . . . . . . . . . . .  25
        4.1.12. setConfiguration  . . . . . . . . . . . . . . . . . .  26
-       4.1.13. addIceCandidate . . . . . . . . . . . . . . . . . . .  27
+       4.1.13. addIceCandidate . . . . . . . . . . . . . . . . . . .  26
    5.  SDP Interaction Procedures  . . . . . . . . . . . . . . . . .  27
      5.1.  Requirements Overview . . . . . . . . . . . . . . . . . .  27
        5.1.1.  Implementation Requirements . . . . . . . . . . . . .  27
-       5.1.2.  Usage Requirements  . . . . . . . . . . . . . . . . .  29
+       5.1.2.  Usage Requirements  . . . . . . . . . . . . . . . . .  28
        5.1.3.  Profile Names and Interoperability  . . . . . . . . .  29
      5.2.  Constructing an Offer . . . . . . . . . . . . . . . . . .  30
 
@@ -125,7 +125,7 @@ Internet-Draft                    JSEP                        March 2016
        5.3.1.  Initial Answers . . . . . . . . . . . . . . . . . . .  40
        5.3.2.  Subsequent Answers  . . . . . . . . . . . . . . . . .  44
        5.3.3.  Options Handling  . . . . . . . . . . . . . . . . . .  45
-         5.3.3.1.  VoiceActivityDetection  . . . . . . . . . . . . .  46
+         5.3.3.1.  VoiceActivityDetection  . . . . . . . . . . . . .  45
      5.4.  Processing a Local Description  . . . . . . . . . . . . .  46
      5.5.  Processing a Remote Description . . . . . . . . . . . . .  46
      5.6.  Parsing a Session Description . . . . . . . . . . . . . .  47
@@ -1425,16 +1425,13 @@ Internet-Draft                    JSEP                        March 2016
       size, any existing candidates will be discarded, and new
       candidates will be gathered from the new servers.
 
-   o  Any changes to the ICE candidate policy also affect the next
-      gathering phase.  If the policy is being made more liberal (i.e.,
-      more permitted candidates), and an ICE gathering phase has already
-      started or completed, the 'needs-ice-restart' bit will be set.  If
-      the policy is being made more strict, no ICE restart is needed,
-      and the bit will not be set.  Either way, changes to the policy
-      have no effect on the candidate pool, because pooled candidates
-      are not surfaced to the application until a gathering phase
-      occurs, and so any necessary filtering can still be done on any
-      pooled candidates.
+   o  Any change to the ICE candidate policy affects the next gathering
+      phase.  If an ICE gathering phase has already started or
+      completed, the 'needs-ice-restart' bit will be set.  Either way,
+      changes to the policy have no effect on the candidate pool,
+      because pooled candidates are not surfaced to the application
+      until a gathering phase occurs, and so any necessary filtering can
+      still be done on any pooled candidates.
 
    o  Any changes to the ICE candidate pool size take effect
       immediately; if increased, additional candidates are pre-gathered;
@@ -1447,9 +1444,12 @@ Internet-Draft                    JSEP                        March 2016
    may result in a change to media state if it results in connectivity
    being established.
 
+4.1.13.  addIceCandidate
 
-
-
+   The addIceCandidate method provides a remote candidate to the ICE
+   Agent, which, if parsed successfully, will be added to the current
+   and/or pending remote description according to the rules defined for
+   Trickle ICE.  Connectivity checks will be sent to the new candidate.
 
 
 
@@ -1457,13 +1457,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 26]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-4.1.13.  addIceCandidate
-
-   The addIceCandidate method provides a remote candidate to the ICE
-   Agent, which, if parsed successfully, will be added to the current
-   and/or pending remote description according to the rules defined for
-   Trickle ICE.  Connectivity checks will be sent to the new candidate.
 
    This call will result in a change to the state of the ICE Agent, and
    may result in a change to media state if it results in connectivity
@@ -1507,18 +1500,19 @@ Internet-Draft                    JSEP                        March 2016
          ICE implementation MUST be a Full implementation, not a Lite
          implementation.
 
+   R-4   [RFC5763] MUST be implemented to signal DTLS certificate
+         fingerprints.
+
+   R-5   [RFC4568] MUST NOT be implemented to signal SDES SRTP keying
+         information.
+
+
 
 
 Uberti, et al.          Expires September 4, 2016              [Page 27]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-   R-4   [RFC5763] MUST be implemented to signal DTLS certificate
-         fingerprints.
-
-   R-5   [RFC4568] MUST NOT be implemented to signal SDES SRTP keying
-         information.
 
    R-6   The [RFC5888] grouping framework MUST be implemented for
          signaling grouping information, and MUST be used to identify m=
@@ -1561,6 +1555,12 @@ Internet-Draft                    JSEP                        March 2016
    As required by [RFC4566], Section 5.13, JSEP implementations MUST
    ignore unknown attribute (a=) lines.
 
+5.1.2.  Usage Requirements
+
+   All session descriptions handled by JSEP endpoints, both local and
+   remote, MUST indicate support for the following specifications.  If
+   any of these are absent, this omission MUST be treated as an error.
+
 
 
 
@@ -1569,12 +1569,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 28]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-5.1.2.  Usage Requirements
-
-   All session descriptions handled by JSEP endpoints, both local and
-   remote, MUST indicate support for the following specifications.  If
-   any of these are absent, this omission MUST be treated as an error.
 
    R-1  ICE, as specified in [RFC5245], MUST be used.  Note that the
         remote endpoint may use a Lite implementation; implementations
@@ -1618,6 +1612,12 @@ Internet-Draft                    JSEP                        March 2016
 
    o  The use of AVPF or AVP simply controls the timing rules used for
       RTCP feedback.  If AVPF is provided, or an "a=rtcp-fb" attribute
+      is present, assume AVPF timing, i.e. a default value of "trr-
+      int=0".  Otherwise, assume that AVPF is being used in an AVP
+      compatible mode and use AVP timing, i.e., "trr-int=4".
+
+
+
 
 
 
@@ -1625,10 +1625,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 29]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-      is present, assume AVPF timing, i.e. a default value of "trr-
-      int=0".  Otherwise, assume that AVPF is being used in an AVP
-      compatible mode and use AVP timing, i.e., "trr-int=4".
 
    o  For data m= sections, JSEP endpoints MUST support receiving the
       "UDP/ DTLS/SCTP", "TCP/DTLS/SCTP", or "DTLS/SCTP" (for backwards
@@ -1673,7 +1669,11 @@ Internet-Draft                    JSEP                        March 2016
       Section 5.3; to match the "o=" line, a single dash SHOULD be used
       as the session name, e.g. "s=-".  Note that this differs from the
       advice in [RFC4566] which proposes a single space, but as both
+      "o=" and "s=" are meaningless, having the same meaningless value
+      seems clearer.
 
+   o  Session Information ("i="), URI ("u="), Email Address ("e="),
+      Phone Number ("p="), Bandwidth ("b="), Repeat Times ("r="), and
 
 
 
@@ -1682,11 +1682,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 30]
 Internet-Draft                    JSEP                        March 2016
 
 
-      "o=" and "s=" are meaningless, having the same meaningless value
-      seems clearer.
-
-   o  Session Information ("i="), URI ("u="), Email Address ("e="),
-      Phone Number ("p="), Bandwidth ("b="), Repeat Times ("r="), and
       Time Zones ("z=") lines are not useful in this context and SHOULD
       NOT be included.
 
@@ -1728,7 +1723,12 @@ Internet-Draft                    JSEP                        March 2016
    MUST all have the same [RFC4572] fingerprint value, or this value
    MUST be a session-level attribute.
 
+   Each m= section should be generated as specified in [RFC4566],
+   Section 5.14.  For the m= line itself, the following rules MUST be
+   followed:
 
+   o  The port value is set to the port of the default ICE candidate for
+      this m= section, but given that no candidates have yet been
 
 
 
@@ -1738,12 +1738,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 31]
 Internet-Draft                    JSEP                        March 2016
 
 
-   Each m= section should be generated as specified in [RFC4566],
-   Section 5.14.  For the m= line itself, the following rules MUST be
-   followed:
-
-   o  The port value is set to the port of the default ICE candidate for
-      this m= section, but given that no candidates have yet been
       gathered, the "dummy" port value of 9 (Discard) MUST be used, as
       indicated in [I-D.ietf-mmusic-trickle-ice], Section 5.1.
 
@@ -1786,6 +1780,12 @@ Internet-Draft                    JSEP                        March 2016
       maximum supported frame sizes out of all codecs included above, as
       specified in [RFC4566], Section 6.
 
+   o  If this m= section is for video media, and there are known
+      limitations on the size of images which can be decoded, an
+      "a=imageattr" line, as specified in Section 3.5.
+
+   o  For each primary codec where RTP retransmission should be used, a
+      corresponding "a=rtpmap" line indicating "rtx" with the clock rate
 
 
 
@@ -1794,12 +1794,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 32]
 Internet-Draft                    JSEP                        March 2016
 
 
-   o  If this m= section is for video media, and there are known
-      limitations on the size of images which can be decoded, an
-      "a=imageattr" line, as specified in Section 3.5.
-
-   o  For each primary codec where RTP retransmission should be used, a
-      corresponding "a=rtpmap" line indicating "rtx" with the clock rate
       of the primary codec and an "a=fmtp" line that references the
       payload type of the primary codec, as specified in [RFC4588],
       Section 8.1.
@@ -1841,15 +1835,6 @@ Internet-Draft                    JSEP                        March 2016
    o  An "a=ssrc" line, as specified in [RFC5576], Section 4.1,
       indicating the SSRC to be used for sending media, along with the
       mandatory "cname" source attribute, as specified in Section 6.1,
-
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 33]
-
-Internet-Draft                    JSEP                        March 2016
-
-
       indicating the CNAME for the source.  The CNAME MUST be generated
       in accordance with Section 4.9 of [I-D.ietf-rtcweb-rtp-usage].
 
@@ -1857,6 +1842,13 @@ Internet-Draft                    JSEP                        March 2016
       with the RTX SSRC, and an "a=ssrc-group" line, as specified in
       [RFC5576], section 4.2, with semantics set to "FID" and including
       the primary and RTX SSRCs.
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 33]
+
+Internet-Draft                    JSEP                        March 2016
+
 
    o  If FEC is supported for this media type, another "a=ssrc" line
       with the FEC SSRC, and an "a=ssrc-group" line with semantics set
@@ -1897,15 +1889,6 @@ Internet-Draft                    JSEP                        March 2016
 
    Attributes which SDP permits to either be at the session level or the
    media level SHOULD generally be at the media level even if they are
-
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 34]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    identical.  This promotes readability, especially if one of a set of
    initially identical attributes is subsequently changed.
 
@@ -1915,6 +1898,13 @@ Internet-Draft                    JSEP                        March 2016
    and MUST NOT be included:
 
    o  "a=crypto"
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 34]
+
+Internet-Draft                    JSEP                        March 2016
+
 
    o  "a=key-mgmt"
 
@@ -1953,15 +1943,6 @@ Internet-Draft                    JSEP                        March 2016
 
    o  The "s=" and "t=" lines MUST stay the same.
 
-
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 35]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    o  Each "m=" and c=" line MUST be filled in with the port, protocol,
       and address of the default candidate for the m= section, as
       described in [RFC5245], Section 4.3.  If ICE checking has already
@@ -1973,6 +1954,14 @@ Internet-Draft                    JSEP                        March 2016
       filled in with the port and address of the appropriate default
       candidate, either the default RTP or RTCP candidate, depending on
       whether RTCP multiplexing is currently active or not.  Note that
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 35]
+
+Internet-Draft                    JSEP                        March 2016
+
+
       if RTCP multiplexing is being offered, but not yet active, the
       default RTCP candidate MUST be used, as indicated in [RFC5761],
       section 5.1.3.  In each case, if no candidates of the desired type
@@ -2011,13 +2000,6 @@ Internet-Draft                    JSEP                        March 2016
       necessary "a=msid", "a=ssrc", and "a=ssrc-group" lines to the
       recycled m= section, and removing the "a=recvonly" attribute.
 
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 36]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    If the initial offer was applied using setLocalDescription, and an
    answer from the remote side has been applied using
    setRemoteDescription, meaning the PeerConnection is in the "remote-
@@ -2026,6 +2008,15 @@ Internet-Draft                    JSEP                        March 2016
    the "local-offer" state above, along with these exceptions: [OPEN
    ISSUE: should this be permitted in the remote-pranswer state?
    https://github.com/rtcweb-wg/jsep/issues/143]
+
+
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 36]
+
+Internet-Draft                    JSEP                        March 2016
+
 
    o  If a m= section exists in the current local description, but does
       not have an associated local MediaStreamTrack (possibly because
@@ -2067,13 +2058,6 @@ Internet-Draft                    JSEP                        March 2016
    o  The "a=rtcp-rsize" line MUST only be added if present in the
       remote description.
 
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 37]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    The "a=group:BUNDLE" attribute MUST include the mid identifiers
    specified in the BUNDLE group in the most recent answer, minus any m=
    sections that have been marked as rejected, plus any newly added or
@@ -2082,6 +2066,13 @@ Internet-Draft                    JSEP                        March 2016
    are still alive, as well as any new m= sections.
 
    The "LS" groups are generated in the same way as with initial offers.
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 37]
+
+Internet-Draft                    JSEP                        March 2016
+
 
 5.2.3.  Options Handling
 
@@ -2123,13 +2114,6 @@ Internet-Draft                    JSEP                        March 2016
    the N-M video m= sections without associated MediaStreamTracks MUST
    be set to recvonly.
 
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 38]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    If N is set to a value less than M, the offer MUST mark the m=
    sections associated with the M-N most recently added (since the last
    setLocalDescription) MediaStreamTracks as sendonly.  This allows the
@@ -2137,6 +2121,14 @@ Internet-Draft                    JSEP                        March 2016
    all of its newly created streams.  For m= sections that have
    previously been negotiated, this setting has no effect.  [TODO: refer
    to RTCRtpSender in the future]
+
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 38]
+
+Internet-Draft                    JSEP                        March 2016
+
 
    For backwards compatibility with pre-standard versions of this
    specification, a value of "true" is interpreted as equivalent to N=1,
@@ -2178,14 +2170,6 @@ Internet-Draft                    JSEP                        March 2016
    using the Opus codec, the "usedtx=0" parameter would be specified in
    the offer.
 
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 39]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    Note that setting the "VoiceActivityDetection" parameter when
    generating an offer is a request to receive audio with silence
    suppression.  It has no impact on whether the local endpoint does
@@ -2194,6 +2178,13 @@ Internet-Draft                    JSEP                        March 2016
    The "VoiceActivityDetection" option does not have any impact on the
    setting of the "vad" value in the signaling of the client to mixer
    audio level header extension described in [RFC6464], Section 4.
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 39]
+
+Internet-Draft                    JSEP                        March 2016
+
 
 5.3.  Generating an Answer
 
@@ -2234,14 +2225,6 @@ Internet-Draft                    JSEP                        March 2016
    [[OPEN ISSUE: This is still under discussion.  See:
    https://github.com/rtcweb-wg/jsep/issues/162.]]
 
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 40]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    The next step is to generate m= sections for each m= section that is
    present in the remote offer, as specified in [RFC3264], Section 6.
    For the purposes of this discussion, any session-level attributes in
@@ -2251,6 +2234,14 @@ Internet-Draft                    JSEP                        March 2016
    The next step is to go through each offered m= section.  If there is
    a local MediaStreamTrack of the same type which has been added to the
    PeerConnection via addStream and not yet associated with a m=
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 40]
+
+Internet-Draft                    JSEP                        March 2016
+
+
    section, and the specific m= section is either sendrecv or recvonly,
    the MediaStreamTrack will be associated with the m= section at this
    time.  MediaStreamTracks are assigned to m= sections using the
@@ -2289,15 +2280,6 @@ Internet-Draft                    JSEP                        March 2016
 
    If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
    the same ICE credentials and candidates; all m= sections not being
-
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 41]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    BUNDLEd must use unique ICE credentials and candidates.  Each m=
    section MUST include the following:
 
@@ -2308,6 +2290,13 @@ Internet-Draft                    JSEP                        March 2016
    o  An "a=rtcp" line, as specified in [RFC3605], Section 2.1,
       containing the dummy value "9 IN IP4 0.0.0.0", because no
       candidates have yet been gathered.
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 41]
+
+Internet-Draft                    JSEP                        March 2016
+
 
    o  If a local MediaStreamTrack has been associated, an "a=msid" line,
       as specified in [I-D.ietf-mmusic-msid], Section 2.
@@ -2346,14 +2335,6 @@ Internet-Draft                    JSEP                        March 2016
       "a=fmtp" line that references the payload type of the primary
       codec, as specified in [RFC4588], Section 8.1.
 
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 42]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    o  For each supported FEC mechanism, "a=rtpmap" and "a=fmtp" lines,
       as specified in [RFC4566], Section 6.  The FEC mechanisms that
       MUST be supported are specified in [I-D.ietf-rtcweb-fec],
@@ -2365,6 +2346,14 @@ Internet-Draft                    JSEP                        March 2016
 
    o  An "a=fingerprint" line for each of the endpoint's certificates,
       as specified in [RFC4572], Section 5; the digest algorithm used
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 42]
+
+Internet-Draft                    JSEP                        March 2016
+
+
       for the fingerprint MUST match that used in the certificate
       signature.
 
@@ -2402,14 +2391,6 @@ Internet-Draft                    JSEP                        March 2016
       the source.  The CNAME MUST be generated in accordance with
       Section 4.9 of [I-D.ietf-rtcweb-rtp-usage].
 
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 43]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    o  If a local MediaStreamTrack has been associated, and RTX has been
       negotiated for this m= section, another "a=ssrc" line with the RTX
       SSRC, and an "a=ssrc-group" line, as specified in [RFC5576],
@@ -2420,6 +2401,15 @@ Internet-Draft                    JSEP                        March 2016
       negotiated for this m= section, another "a=ssrc" line with the FEC
       SSRC, and an "a=ssrc-group" line with semantics set to "FEC-FR"
       and including the primary and FEC SSRCs, as specified in
+
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 43]
+
+Internet-Draft                    JSEP                        March 2016
+
+
       [RFC5956], section 4.3.  For simplicity, if both RTX and FEC are
       supported, the FEC SSRC MUST be the same as the RTX SSRC.
 
@@ -2459,13 +2449,6 @@ Internet-Draft                    JSEP                        March 2016
    the steps for generating an initial answer should be followed,
    subject to the following restriction:
 
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 44]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    o  The fields of the "o=" line MUST stay the same except for the
       <session-version> field, which MUST increment if the session
       description changes in any way from the previously generated
@@ -2474,6 +2457,14 @@ Internet-Draft                    JSEP                        March 2016
    If any session description was previously supplied to
    setLocalDescription, an answer is generated by following the steps in
    the "have-remote-offer" state above, along with these exceptions:
+
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 44]
+
+Internet-Draft                    JSEP                        March 2016
+
 
    o  The "s=" and "t=" lines MUST stay the same.
 
@@ -2515,13 +2506,6 @@ Internet-Draft                    JSEP                        March 2016
 
    The following options are supported in RTCAnswerOptions.
 
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 45]
-
-Internet-Draft                    JSEP                        March 2016
-
-
 5.3.3.1.  VoiceActivityDetection
 
    Silence suppression in the answer is handled as described in
@@ -2530,6 +2514,14 @@ Internet-Draft                    JSEP                        March 2016
    VoiceActivityDetection parameter has no effect, and the answer should
    be generated as if VoiceActivityDetection was set to false.  This is
    done on a per-codec basis (e.g., if the offerer somehow offered
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 45]
+
+Internet-Draft                    JSEP                        March 2016
+
+
    support for CN but set "usedtx=0" for Opus, setting
    VoiceActivityDetection to true would result in an answer with CN
    codecs and "usedtx=0").
@@ -2569,15 +2561,6 @@ Internet-Draft                    JSEP                        March 2016
       *  If the type is "offer", the PeerConnection state MUST be either
          "stable" or "have-remote-offer".
 
-
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 46]
-
-Internet-Draft                    JSEP                        March 2016
-
-
       *  If the type is "pranswer" or "answer", the PeerConnection state
          MUST be either "have-local-offer" or "have-remote-pranswer".
 
@@ -2587,6 +2570,13 @@ Internet-Draft                    JSEP                        March 2016
    o  Next, the SessionDescription is parsed into a data structure, as
       described in the Section 5.6 section below.  If parsing fails for
       any reason, processing MUST stop and an error MUST be returned.
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 46]
+
+Internet-Draft                    JSEP                        March 2016
+
 
    o  Finally, the parsed SessionDescription is applied as described in
       the Section 5.8 section below.
@@ -2612,6 +2602,16 @@ Internet-Draft                    JSEP                        March 2016
    [RFC3264] semantics, and then either parse and store or discard the
    provided value, as described below.  A partial list of ABNF
    definitions for SDP attributes can found in:
+
+
+
+
+
+
+
+
+
+
 
 
 
