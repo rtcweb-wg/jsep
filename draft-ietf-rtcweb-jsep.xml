@@ -615,6 +615,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           track to at most 360p. In this case, the implemention would generate this
           attribute:</t>
           <t>a=imageattr:* recv [x=[16:640],y=[16:360],q=1.0]</t>
+          <t>This declaration indicates that the receiver is capable of decoding
+          any image resolution from 16x16 up to 640x360 pixels.</t>
         </section>
 
         <section title="Interpreting an imageattr Attribute">
@@ -628,7 +630,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             of a certain resolution, receives an "a=imageattr recv"
             attribute, it MUST first check to see if the original resolution
             meets the criteria specified in the attribute, and transmit it
-            untouched if so. If the original resolution is too large for the
+            untouched if so. Note that when considering a MediaStreamTrack that
+            is producing rotated video, the unrotated resolution MUST be used.
+            This is required regardless of whether the receiver supports
+            performing receive-side rotation (e.g., through CVO), as it
+            significantly simplifies the matching logic.</t>
+            <t>If the original resolution is too large for the
             attribute criteria, the sender SHOULD apply downscaling to the
             output of the MediaStreamTrack in order to satisfy the criteria.</t>
             <t>
@@ -1926,7 +1933,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           that the "a=ice-options" line, with the "trickle" option as specified in
           <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
           4, is only included if such an option was present in the offer.</t>
-          
+
 	  <t>The next step is to generate lip sync groups as defined
 	  in <xref target="RFC5888"/>, Section 7.  For each
 	  MediaStream with more than one MediaStreamTrack, a group
@@ -2225,7 +2232,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the VoiceActivityDetection parameter has no effect, and the answer
               should be generated as if VoiceActivityDetection was set to
               false. This is done on a per-codec basis (e.g., if the offerer somehow
-              offered support for CN but set "usedtx=0" for Opus, setting 
+              offered support for CN but set "usedtx=0" for Opus, setting
               VoiceActivityDetection to true would result in an answer with CN codecs
               and "usedtx=0").
             </t>
@@ -2312,7 +2319,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <texttable anchor="sdp_abnf" title="SDP ABNF References">
           <ttcol align='left'>Attribute</ttcol>
           <ttcol align='left'>Reference</ttcol>
-          
+
 	      <c> ptime  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> maxptime  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> rtpmap  </c><c> <xref target="RFC4566"/> Section 9  </c>
@@ -2323,7 +2330,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 	      <c> framerate  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> fmtp  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> quality  </c><c> <xref target="RFC4566"/> Section 9  </c>
-          
+
 		  <c> msid  </c><c> <xref target="I-D.ietf-mmusic-msid"/> Section 2  </c>
 
 	      <c> rtcp  </c><c> <xref target=" RFC3605"/> Section 2.1 </c>
@@ -2345,11 +2352,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <c> imageattr  </c><c>  <xref target="RFC6236"/> Section 3.1 </c>
 
           <c> extmap (encrypt option)  </c><c>  <xref target="RFC6904"/> Section 4 </c>
-          
+
         </texttable>
-        
+
         <t>  [TODO: ensure that every line is listed below.] </t>
-        
+
         <t>
         If the line is not well-formed, or cannot be parsed as described, the parser MUST stop
         with an error and reject the session description. This ensures that
@@ -2596,7 +2603,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <t>If the answer contains any "a=ice-options" attributes where "trickle"
           is listed as an attribute, update the PeerConnection
           canTrickle property to be true. Otherwise, set this property to false.</t>
-        
+
         <t>The following steps are performed at the media engine level to apply a remote
         description.</t>
 	<t>The following steps MUST be performed for attributes at the
@@ -2647,7 +2654,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   enable them on the associated payload types.</t>
                 <t>For each specified RTCP feedback mechanism that is supported by the local implementation,
                 enable them on the associated payload types.</t>
-		
+
                 <t>For any specified "TIAS" bandwidth value, set this
                 value as a constraint on the maximum RTP bitrate to be
                 used when sending media, as specified in <xref
@@ -2656,7 +2663,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 "TIAS" value using this formula:
 		<list style="format">
 		  <t>
-		    TIAS = AS * 0.95 - 50 * 40 * 8 
+		    TIAS = AS * 0.95 - 50 * 40 * 8
 		  </t>
 		</list>
 		The 50 is based on 50 packets per second, the 40 is based on an estimate of
@@ -2665,10 +2672,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 		"TIAS" should be used instead of "AS".</t>
 		<t>For any "RR" or "RS" bandwidth values, handle as specified in <xref
 		target="RFC3556"></xref>, Section 2.</t>
-		<t>Any specified "CT" bandwidth value MUST be 
-		ignored, as the meaning of this construct at the media level is not well 
+		<t>Any specified "CT" bandwidth value MUST be
+		ignored, as the meaning of this construct at the media level is not well
 		defined.</t>
-		
+
                 <t>[TODO: handling of CN, telephone-event, "red"]</t>
                 <t>If the media section if of type audio:
                   <list style="symbols">
@@ -2716,7 +2723,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   "sendonly", prepare to start transmitting media using the specified primary SSRC
                   and one of the selected payload types, once the underlying transport
                   layers have been established. Otherwise, stop transmitting RTP media,
-                  although RTCP should still be sent, as described in 
+                  although RTCP should still be sent, as described in
                   <xref target="RFC3264"/>, Section 5.1. </t>
               </list>
             </t>
@@ -3863,7 +3870,7 @@ a=end-of-candidates
 	<seriesInfo name="DOI" value="10.17487/RFC3890"/>
       </reference>
 
-      
+
      <!-- NORM 2a -->
 
       <reference anchor="I-D.ietf-rtcweb-audio">
@@ -4332,43 +4339,43 @@ a=end-of-candidates
         <front>
           <title abbrev="RFC Key Words">Key words for use in RFCs to Indicate
           Requirement Levels</title>
-          
+
           <author fullname="Scott Bradner" initials="S." surname="Bradner">
             <organization>Harvard University</organization>
-            
+
             <address>
               <postal>
                 <street>1350 Mass. Ave.</street>
-                
+
                 <street>Cambridge</street>
-                
+
                 <street>MA 02138</street>
               </postal>
-              
+
               <phone>- +1 617 495 3864</phone>
-              
+
               <email>sob@harvard.edu</email>
             </address>
           </author>
-          
+
           <date month="March" year="1997" />
-          
+
           <area>General</area>
-          
+
           <keyword>keyword</keyword>
         </front>
-        
+
         <seriesInfo name="BCP" value="14" />
-        
+
         <seriesInfo name="RFC" value="2119" />
-        
+
         <format octets="4723"
                 target="http://www.rfc-editor.org/rfc/rfc2119.txt" type="TXT" />
-        
+
         <format octets="17491"
                 target="http://xml.resource.org/public/rfc/html/rfc2119.html"
                 type="HTML" />
-        
+
         <format octets="5777"
                 target="http://xml.resource.org/public/rfc/xml/rfc2119.xml"
                 type="XML" />
@@ -4722,7 +4729,7 @@ a=end-of-candidates
         <seriesInfo name='RFC' value='6464'/>
         <seriesInfo name='DOI' value='10.17487/RFC6464'/>
       </reference>
-      
+
       <!-- INFORM 3 -->
 
       <!-- INFORM 4 -->
