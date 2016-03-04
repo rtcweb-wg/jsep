@@ -2385,20 +2385,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               because JSEP always uses ICE, "ice-mismatch" is not useful in this context.
               </t>
               <t>The "i=", "u=", "e=", "p=", "t=", "r=", "z=", "k=",
-	      lines are not used by this specification and MAY be ignored. </t>
+	      lines are not used by this specification; they MUST be checked
+              for syntax but their values MAY be ignored.</t>
             </list>
           </t>
           <t>The remaining lines are processed as follows:
             <list>
+	      <t> The "v=" line MUST have a version of 0.  </t>
+	      
+	      <t> The "o=" line MUST be processed to check it is consistent
+	      with <xref target="RFC5245"/>, Section
+	      5.2 </t>
+              
               <t>The "b=" line, if present, MUST be parsed as specified in
                 <xref target="RFC4566"/>, Section 5.8, and the bwtype and
               bandwidth values stored.</t>
-	      <t> The "v="  MUST have a version of 0.  </t>
-	      
-	      <t> The "o=" MUST be processed to check it is consistent
-	      with <xref target="RFC5245"/>, Section
-	      5.2 </t>
-	      
             </list>
           </t>
           <t>Specific processing MUST be applied for the following session-level
@@ -2503,19 +2504,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 		<t>If present, a single "a=rtcp-mux" line MUST be parsed as specified in
                 <xref target="RFC5761"/>, Section 5.1.1, and its presence or
                 absence flagged and stored.</t>
-		<t>Any  "a=rtcp-rsize" attributes MUST be parsed as specified in
-                <xref target="RFC5506"/>, Section 5, and their values stored. </t>
-		<t>Any  "a=rtcp" attributes MUST be parsed as specified in
-                <xref target="RFC3605"/>, Section 2.1, and their values stored. </t>
-		<t>Any  "a=msid" attributes MUST be parsed as specified in
+		<t>If present, a single "a=rtcp-rsize" attribute MUST be parsed as specified in
+                <xref target="RFC5506"/>, Section 5, and its value stored. </t>
+		<t>If present, a single "a=rtcp" attribute MUST be parsed as specified in
+                <xref target="RFC3605"/>, Section 2.1, but its value is ignored. </t>
+		<t>If present, a single "a=msid" attribute MUST be parsed as specified in
                 <xref target="I-D.ietf-mmusic-msid"/>, Section 3.2, and their values stored. </t>
-		<t>Any  "a=candidate" attributes MUST be parsed as specified in
+		<t>Any "a=candidate" attributes MUST be parsed as specified in
                 <xref target="RFC5245"/>, Section 4.3, and their values stored. </t>
-		<t>Any  "a=remote-candidates" attributes MUST be parsed as specified in
-                <xref target="RFC5245"/>, Section 4.3, and their values stored. </t>
-		<t>Any  "a=end-of-candidates" attributes MUST be parsed as specified in
+		<t>Any "a=remote-candidates" attributes MUST be parsed as specified in
+                <xref target="RFC5245"/>, Section 4.3, but their values are ignored.</t>
+		<t>If present, a single "a=end-of-candidates" attribute MUST be parsed as specified in
                 <xref target="RFC5245"/>, Section 4.3, and their values stored.</t>
-		<t>Any  "a=imageattr" attributes MUST be parsed as specified in
+		<t>Any "a=imageattr" attributes MUST be parsed as specified in
                 <xref target="RFC6236"/>, Section 3, and their values stored. </t>
             </list>
           </t>
