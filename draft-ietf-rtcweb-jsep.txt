@@ -132,12 +132,12 @@ Internet-Draft                    JSEP                        March 2016
        5.6.1.  Session-Level Parsing . . . . . . . . . . . . . . . .  48
        5.6.2.  Media Section Parsing . . . . . . . . . . . . . . . .  50
        5.6.3.  Semantics Verification  . . . . . . . . . . . . . . .  52
-     5.7.  Applying a Local Description  . . . . . . . . . . . . . .  52
+     5.7.  Applying a Local Description  . . . . . . . . . . . . . .  53
      5.8.  Applying a Remote Description . . . . . . . . . . . . . .  54
      5.9.  Applying an Answer  . . . . . . . . . . . . . . . . . . .  56
    6.  Configurable SDP Parameters . . . . . . . . . . . . . . . . .  57
-   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  58
-     7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  58
+   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  59
+     7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  59
      7.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  63
    8.  Security Considerations . . . . . . . . . . . . . . . . . . .  74
    9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  74
@@ -2699,9 +2699,17 @@ Internet-Draft                    JSEP                        March 2016
       candidate lines; because JSEP always uses ICE, "ice-mismatch" is
       not useful in this context.
 
-      TODO
+      The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are
+      not used by this specification; they MUST be checked for syntax
+      but their values are not used.
 
    The remaining lines are processed as follows:
+
+      The "v=" line MUST have a version of 0, as specified in [RFC4566],
+      Section 5.1.
+
+      The "o=" line MUST be parsed as specified in [RFC4566],
+      Section 5.2.
 
       The "b=" line, if present, MUST be parsed as specified in
       [RFC4566], Section 5.8, and the bwtype and bandwidth values
@@ -2731,20 +2739,18 @@ Internet-Draft                    JSEP                        March 2016
       Section 5, and the set of fingerprint and algorithm values is
       stored.
 
-   o  If present, a single "a=setup" line is parsed as specified in
-      [RFC4145], Section 4, and the setup value is stored.
-
-   o  Any "a=extmap" lines are parsed as specified in [RFC5285],
-      Section 5, and their values are stored.
-
-
-
 
 
 Uberti, et al.          Expires September 4, 2016              [Page 49]
 
 Internet-Draft                    JSEP                        March 2016
 
+
+   o  If present, a single "a=setup" line is parsed as specified in
+      [RFC4145], Section 4, and the setup value is stored.
+
+   o  Any "a=extmap" lines are parsed as specified in [RFC5285],
+      Section 5, and their values are stored.
 
    o  TODO: identity, rtcp-rsize, rtcp-mux, and any other attribs valid
       at session level.
@@ -2789,18 +2795,15 @@ Internet-Draft                    JSEP                        March 2016
       Section 5, and the set of fingerprint and algorithm values is
       stored.
 
-   o  If present, a single "a=setup" line is parsed as specified in
-      [RFC4145], Section 4, and the setup value is stored.
-
-
-
-
 
 
 Uberti, et al.          Expires September 4, 2016              [Page 50]
 
 Internet-Draft                    JSEP                        March 2016
 
+
+   o  If present, a single "a=setup" line is parsed as specified in
+      [RFC4145], Section 4, and the setup value is stored.
 
    If the "m=" proto value indicates use of RTP, as decribed in the
    Section 5.1.3 section above, the following attribute lines MUST be
@@ -2815,6 +2818,9 @@ Internet-Draft                    JSEP                        March 2016
    o  If present, a single "a=ptime" line MUST be parsed as described in
       [RFC4566], Section 6, and its value stored.
 
+   o  If present, a single "a=maxptime" line MUST be parsed as described
+      in [RFC4566], Section 6, and its value stored.
+
    o  If present, a single direction attribute line (e.g. "a=sendrecv")
       MUST be parsed as described in [RFC4566], Section 6, and its value
       stored.
@@ -2828,14 +2834,44 @@ Internet-Draft                    JSEP                        March 2016
    o  Any "a=rtcp-fb" attributes MUST be parsed as specified in
       [RFC4585], Section 4.2., and their values stored.
 
-   o  If present, a single "a=rtcp-mux" line MUST be parsed as specified
-      in [RFC5761], Section 5.1.1, and its presence or absence flagged
-      and stored.
+   o  If present, a single "a=rtcp-mux" attribute MUST be parsed as
+      specified in [RFC5761], Section 5.1.1, and its presence or absence
+      flagged and stored.
 
-   o  TODO: a=rtcp-rsize, a=rtcp, a=msid, a=candidate, a=end-of-
-      candidates
+   o  If present, a single "a=rtcp-rsize" attribute MUST be parsed as
+      specified in [RFC5506], Section 5, and its presence or absence
+      flagged and stored.
 
-   Otherwise, if the "m=" proto value indicats use of SCTP, the
+   o  If present, a single "a=rtcp" attribute MUST be parsed as
+      specified in [RFC3605], Section 2.1, but its value is ignored.
+
+   o  If present, a single "a=msid" attribute MUST be parsed as
+      specified in [I-D.ietf-mmusic-msid], Section 3.2, and its value
+      stored.
+
+
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 51]
+
+Internet-Draft                    JSEP                        March 2016
+
+
+   o  Any "a=candidate" attributes MUST be parsed as specified in
+      [RFC5245], Section 4.3, and their values stored.
+
+   o  Any "a=remote-candidates" attributes MUST be parsed as specified
+      in [RFC5245], Section 4.3, but their values are ignored.
+
+   o  If present, a single "a=end-of-candidates" attribute MUST be
+      parsed as specified in [I-D.ietf-ice-trickle], Section 8.2, and
+      its presence or absence flagged and stored.
+
+   o  Any "a=imageattr" attributes MUST be parsed as specified in
+      [RFC6236], Section 3, and their values stored.
+
+   Otherwise, if the "m=" proto value indicates use of SCTP, the
    following attribute lines MUST be processed:
 
    o  The "m=" fmt value MUST be parsed as specified in
@@ -2847,16 +2883,6 @@ Internet-Draft                    JSEP                        March 2016
       value stored.
 
    o  TODO: max message size
-
-
-
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 51]
-
-Internet-Draft                    JSEP                        March 2016
-
 
 5.6.3.  Semantics Verification
 
@@ -2880,6 +2906,13 @@ Internet-Draft                    JSEP                        March 2016
 
       *  DTLS fingerprint values, where at least one fingerprint MUST be
          present.
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 52]
+
+Internet-Draft                    JSEP                        March 2016
+
 
    o  Each m= section is also checked to ensure prohibited features are
       not used.  If this is a local description, the "ice-lite"
@@ -2907,13 +2940,6 @@ Internet-Draft                    JSEP                        March 2016
    Section 6; otherwise, processing MUST stop and an error MUST be
    returned.
 
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 52]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    Next, media sections are processed.  For each media section, the
    following steps MUST be performed; if any parameters are out of
    bounds, or cannot be applied, processing MUST stop and an error MUST
@@ -2934,6 +2960,15 @@ Internet-Draft                    JSEP                        March 2016
          the RTP ICE component, as specified in [RFC5761],
          Section 5.1.1.  If RTCP mux is not indicated, but was indicated
          in a previous description, this MUST result in an error.
+
+
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 53]
+
+Internet-Draft                    JSEP                        March 2016
+
 
       *  For each specified RTP header extension, establish a mapping
          between the extension ID and URI, as described in section 6 of
@@ -2961,15 +2996,6 @@ Internet-Draft                    JSEP                        March 2016
    Finally, if this description is of type "pranswer" or "answer",
    follow the processing defined in the Section 5.9 section below.
 
-
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 53]
-
-Internet-Draft                    JSEP                        March 2016
-
-
 5.8.  Applying a Remote Description
 
    If the answer contains any "a=ice-options" attributes where "trickle"
@@ -2992,6 +3018,13 @@ Internet-Draft                    JSEP                        March 2016
 
    o  For any specified "RR" or "RS" bandwidth values, handle as
       specified in [RFC3556], Section 2.
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 54]
+
+Internet-Draft                    JSEP                        March 2016
+
 
    o  Any "AS" bandwidth value MUST be ignored, as the meaning of this
       construct at the session level is not well defined.
@@ -3016,15 +3049,6 @@ Internet-Draft                    JSEP                        March 2016
    o  If the media section proto value indicates use of RTP:
 
       *  [TODO: header extensions]
-
-
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 54]
-
-Internet-Draft                    JSEP                        March 2016
-
 
       *  For each specified payload type that is also supported by the
          local implementation, establish a mapping between the payload
@@ -3051,6 +3075,13 @@ Internet-Draft                    JSEP                        March 2016
          present, but an "AS" value is specified, generate a "TIAS"
          value using this formula:
 
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 55]
+
+Internet-Draft                    JSEP                        March 2016
+
+
          TIAS = AS * 0.95 - 50 * 40 * 8
 
          The 50 is based on 50 packets per second, the 40 is based on an
@@ -3073,14 +3104,6 @@ Internet-Draft                    JSEP                        March 2016
             payload types to use the specified packet size.  If the
             specified size is not supported for a payload type, use the
             next closest value instead.
-
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 55]
-
-Internet-Draft                    JSEP                        March 2016
-
 
    Finally, if this description is of type "pranswer" or "answer",
    follow the processing defined in the Section 5.9 section below.
@@ -3107,6 +3130,14 @@ Internet-Draft                    JSEP                        March 2016
 
    o  If the media section proto value indicates use of RTP:
 
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 56]
+
+Internet-Draft                    JSEP                        March 2016
+
+
       *  If the media section has RTCP mux enabled, discard any RTCP
          component, and begin or continue muxing RTCP over the RTP
          component, as specified in [RFC5761], Section 5.1.3.
@@ -3130,14 +3161,6 @@ Internet-Draft                    JSEP                        March 2016
 
       *  If no SCTP association yet exists, prepare to initiate a SCTP
          association over the associated ICE component and DTLS
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 56]
-
-Internet-Draft                    JSEP                        March 2016
-
-
          connection, using the local SCTP port value from the local
          description, and the remote SCTP port value from the remote
          description, as described in [I-D.ietf-mmusic-sctp-sdp],
@@ -3163,6 +3186,14 @@ Internet-Draft                    JSEP                        March 2016
 
    The following elements of the session description MUST NOT be changed
    between the createOffer and the setLocalDescription (or between the
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 57]
+
+Internet-Draft                    JSEP                        March 2016
+
+
    createAnswer and the setLocalDescription), since they reflect
    transport attributes that are solely under browser control, and the
    browser MUST NOT honor an attempt to change them:
@@ -3186,14 +3217,6 @@ Internet-Draft                    JSEP                        March 2016
 
    The following parameters may be controlled by options passed into
    createOffer/createAnswer.  As an open issue, these changes may also
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 57]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    be be performed by manipulating the SDP returned from createOffer/
    createAnswer, as indicated above, as long as the capabilities of the
    endpoint are not exceeded (e.g. asking for a resolution greater than
@@ -3218,6 +3241,15 @@ Internet-Draft                    JSEP                        March 2016
    capabilities and therefore will just respond to what is actually in
    the offer.
 
+
+
+
+
+Uberti, et al.          Expires September 4, 2016              [Page 58]
+
+Internet-Draft                    JSEP                        March 2016
+
+
    As always, the application is solely responsible for what it sends to
    the other party, and all incoming SDP will be processed by the
    browser to the extent of its capabilities.  It is an error to assume
@@ -3241,15 +3273,6 @@ Internet-Draft                    JSEP                        March 2016
 
    This section shows a very simple example that sets up a minimal audio
    / video call between two browsers and does not use trickle ICE.  The
-
-
-
-
-Uberti, et al.          Expires September 4, 2016              [Page 58]
-
-Internet-Draft                    JSEP                        March 2016
-
-
    example in the following section provides a more realistic example of
    what would happen in a normal browser to browser connection.
 
@@ -3260,29 +3283,6 @@ Internet-Draft                    JSEP                        March 2016
    the offer or answer, so the offers and answers are complete.  Trickle
    ICE is not used.  Both Alice and Bob are using the default policy of
    balanced.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
