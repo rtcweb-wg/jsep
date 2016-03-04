@@ -1186,8 +1186,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           parameters are changed:</t>
          <t><list style="symbols">
             <t>Any changes to the STUN/TURN servers to use affect
-            the next gathering phase. With the exception of the initial state
-            where ICE gathering has not yet occurred, the 'needs-ice-restart'
+            the next gathering phase. If an ICE gathering phase has already
+            started or completed, the 'needs-ice-restart'
             bit mentioned in <xref target="sec.ice-gather-overview"/>
             will be set. This will cause the next call to createOffer to
             generate new ICE credentials, for the purpose of forcing an ICE
@@ -1198,7 +1198,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </t>
             <t>Any changes to the ICE candidate policy also affect the next
             gathering phase. If the policy is being made more liberal (i.e.,
-            more permitted candidates), the 'needs-ice-restart' bit will be set.
+            more permitted candidates), and an ICE gathering phase has already
+            started or completed, the 'needs-ice-restart' bit will be set.
             If the policy is being made more strict, no ICE restart is needed,
             and the bit will not be set. Either way, changes to the policy have
             no effect on the candidate pool, because pooled candidates are not
