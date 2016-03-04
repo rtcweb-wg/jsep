@@ -1072,9 +1072,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <p> </p>
 <h2 id="rfc.section.5.6"><a href="#rfc.section.5.6">5.6.</a> <a href="#sec.parsing-a-desc" id="sec.parsing-a-desc">Parsing a Session Description</a></h2>
-<p id="rfc.section.5.6.p.1">[The behavior described herein is a draft version, and needs more discussion to resolve various open issues.]</p>
-<p id="rfc.section.5.6.p.2">When a SessionDescription of any type is supplied to setLocal/RemoteDescription, the implementation must parse it and reject it if it is invalid. The exact details of this process are explained below.</p>
-<p id="rfc.section.5.6.p.3">The SDP contained in the session description object consists of a sequence of text lines, each containing a key-value expression, as described in <a href="#RFC4566">[RFC4566]</a>, Section 5.  The SDP is read, line-by-line, and converted to a data structure that contains the deserialized information. However, SDP allows many types of lines, not all of which are relevant to JSEP applications.  For each line, the implementation will first ensure it is syntactically correct according its defining ABNF, check that it conforms to <a href="#RFC4566">[RFC4566]</a> and <a href="#RFC3264">[RFC3264]</a> semantics, and then either parse and store or discard the provided value, as described below. A partial list of ABNF definitions for SDP attributes can found in:</p>
+<p id="rfc.section.5.6.p.1">When a SessionDescription of any type is supplied to setLocal/RemoteDescription, the implementation must parse it and reject it if it is invalid. The exact details of this process are explained below.</p>
+<p id="rfc.section.5.6.p.2">The SDP contained in the session description object consists of a sequence of text lines, each containing a key-value expression, as described in <a href="#RFC4566">[RFC4566]</a>, Section 5.  The SDP is read, line-by-line, and converted to a data structure that contains the deserialized information. However, SDP allows many types of lines, not all of which are relevant to JSEP applications.  For each line, the implementation will first ensure it is syntactically correct according its defining ABNF, check that it conforms to <a href="#RFC4566">[RFC4566]</a> and <a href="#RFC3264">[RFC3264]</a> semantics, and then either parse and store or discard the provided value, as described below. A partial list of ABNF definitions for SDP attributes can found in:</p>
 <div id="rfc.table.1"/>
 <div id="sdp_abnf"/>
 <table cellpadding="3" cellspacing="0" class="tt full center">
@@ -1176,8 +1175,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     </tr>
   </tbody>
 </table>
-<p id="rfc.section.5.6.p.4">[TODO: ensure that every line is listed below.] </p>
-<p id="rfc.section.5.6.p.5">If the line is not well-formed, or cannot be parsed as described, the parser MUST stop with an error and reject the session description. This ensures that implementations do not accidentally misinterpret ambiguous SDP.</p>
+<p id="rfc.section.5.6.p.3">[TODO: ensure that every line is listed below.] </p>
+<p id="rfc.section.5.6.p.4">If the line is not well-formed, or cannot be parsed as described, the parser MUST stop with an error and reject the session description. This ensures that implementations do not accidentally misinterpret ambiguous SDP.</p>
 <h3 id="rfc.section.5.6.1"><a href="#rfc.section.5.6.1">5.6.1.</a> <a href="#sec.session-level-parse" id="sec.session-level-parse">Session-Level Parsing</a></h3>
 <p id="rfc.section.5.6.1.p.1">First, the session-level lines are checked and parsed. These lines MUST occur in a specific order, and with a specific syntax, as defined in <a href="#RFC4566">[RFC4566]</a>, Section 5. Note that while the specific line types (e.g. "v=", "c=") MUST occur in the defined order, lines of the same type (typically "a=") can occur in any order, and their ordering is not meaningful.</p>
 <p id="rfc.section.5.6.1.p.2">For non-attribute (non-"a=") lines, their sequencing, syntax, and semantics, are checked, as mentioned above. The following lines are not meaningful in the JSEP context and MAY be discarded once they have been checked.  </p>
