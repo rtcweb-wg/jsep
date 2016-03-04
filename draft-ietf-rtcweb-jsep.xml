@@ -9,6 +9,7 @@
 <?rfc sortrefs="yes" ?>
 <?rfc colonspace="yes" ?>
 <?rfc rfcedstyle="no" ?>
+<?rfc docmapping="yes" ?>
 <?rfc tocdepth="4"?>
 
 <rfc category="std" docName="draft-ietf-rtcweb-jsep-latest" ipr="trust200902">
@@ -76,7 +77,7 @@
     </author>
 
 
-    <date day="29" month="January" year="2016" />
+    <date day="3" month="March" year="2016" />
 
     <area>RAI</area>
 
@@ -488,7 +489,7 @@ setRemote(ANSWER) |                                   |
           <t>Candidate trickling is a technique through which a caller may
           incrementally provide candidates to the callee after the initial
           offer has been dispatched; the semantics of "Trickle ICE" are
-          defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>. This
+          defined in <xref target="I-D.ietf-ice-trickle"></xref>. This
           process allows the callee to begin acting upon the call and setting
           up the ICE (and perhaps DTLS) connections immediately, without
           having to wait for the caller to gather all possible candidates.
@@ -662,6 +663,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           track to at most 360p. In this case, the implemention would generate this
           attribute:</t>
           <t>a=imageattr:* recv [x=[16:640],y=[16:360],q=1.0]</t>
+          <t>This declaration indicates that the receiver is capable of decoding
+          any image resolution from 16x16 up to 640x360 pixels.</t>
         </section>
 
         <section title="Interpreting an imageattr Attribute">
@@ -673,14 +676,32 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>This specification prescribes more specific behavior.
             When a sender of a given MediaStreamTrack, which is producing video
             of a certain resolution, receives an "a=imageattr recv"
-            attribute, it MUST first check to see if the original resolution
-            meets the criteria specified in the attribute, and transmit it
-            untouched if so. If the original resolution is too large for the
-            attribute criteria, the sender SHOULD apply downscaling to the
-            output of the MediaStreamTrack in order to satisfy the criteria.</t>
-            <t>
-            If the receiver requires a minimum resolution which is greater than the
-            native resolution of the video, upscaling is needed, but this may
+            attribute, it MUST check to see if the original resolution
+            meets the size criteria specified in the attribute, and adapt the
+            resolution accordingly by scaling (if appropriate).
+            Note that when considering a MediaStreamTrack that
+            is producing rotated video, the unrotated resolution MUST be used.
+            This is required regardless of whether the receiver supports
+            performing receive-side rotation (e.g., through CVO), as it
+            significantly simplifies the matching logic.</t>
+            <t>For an "a=imageattr recv" attribute, only size limits are
+            considered. Any other values, e.g. aspect ratio, MUST be ignored.
+            </t>
+            <t>When communicating with a non-JSEP endpoint, multiple relevant
+            "a=imageattr recv" attributes may be received. If this occurs,
+            attributes other than the one with the highest "q=" value MUST
+            be ignored.</t>
+            <t>If an "a=imageattr recv" attribute references a different
+            video codec than what has been selected for the MediaStreamTrack,
+            it MUST be ignored.</t>
+            <t>If the original resolution matches the size limits in the
+            attribute, the track MUST be transmitted untouched.</t>
+            <t>If the original resolution exceeds the size limits in the
+            attribute, the sender SHOULD apply downscaling to the
+            output of the MediaStreamTrack in order to satisfy the limits.
+            Downscaling MUST NOT change the track aspect ratio.</t>
+            <t>If the original resolution is less than the size limits in the
+            attribute, upscaling is needed, but this may
             not be appropriate in all cases. To address this concern, the
             application can set an upscaling policy for each sent track.
             For this case, if upscaling is permitted by policy, the sender
@@ -688,14 +709,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             Otherwise, the sender MUST NOT apply upscaling.
             The sender SHOULD NOT upscale in other cases, even if the policy
             permits it.
+            Upscaling MUST NOT change the track aspect ratio.
             </t>
-            <t>If there is no appropriate and permitted scaling mechanism that allows
-            the received criteria to be satisfied, the sender MUST NOT transmit
-            the track.
-           </t>
-           <t>In the special case of receiving a maximum resolution of [0, 0],
-           as described above, the sender MUST NOT transmit the track.
-           </t>
+            <t>If there is no appropriate and permitted scaling mechanism
+            that allows the received size limits to be satisfied,
+            the sender MUST NOT transmit the track.
+            </t>
+            <t>In the special case of receiving a maximum resolution of [0, 0],
+            as described above, the sender MUST NOT transmit the track.
+            </t>
         </section>
       </section>
 
@@ -796,7 +818,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The PeerConnection constructor allows the application to specify
           global parameters for the media session, such as the STUN/TURN servers
           and credentials to use when gathering candidates, as well as the
-          initial ICE candidate policy and pool size, and also the BUNDLE
+          initial ICE candidate policy and pool size, and also the bundle
           policy to use.</t>
 
           <t>If an ICE candidate policy is specified, it functions as
@@ -831,17 +853,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
 
           <t>The
-          application can specify its preferred policy regarding use of BUNDLE,
+          application can specify its preferred policy regarding use of bundle,
           the multiplexing mechanism defined in <xref
           target="I-D.ietf-mmusic-sdp-bundle-negotiation"></xref>.
-          Regardless of policy, the application will always try to negotiate BUNDLE
+          Regardless of policy, the application will always try to negotiate bundle
           onto a single transport,
-          and will offer a single BUNDLE group across all media section; use of
-          this single transport is contingent upon the answerer accepting BUNDLE.
+          and will offer a single bundle group across all media section; use of
+          this single transport is contingent upon the answerer accepting bundle.
           However, by specifying a policy from the list below, the application can
-          control exactly how aggressively it will try to BUNDLE media streams together,
-          which affects how it will interoperate with a non-BUNDLE-aware endpoint.
-          When negotiating with a non-BUNDLE-aware endpoint, only the streams not
+          control exactly how aggressively it will try to bundle media streams together,
+          which affects how it will interoperate with a non-bundle-aware endpoint.
+          When negotiating with a non-bundle-aware endpoint, only the streams not
           marked as bundle-only streams will be established.
           </t>
 
@@ -860,7 +882,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t></t>
               <t hangText="max-compat:"> All media sections will contain transport
               parameters; none will be marked as bundle-only. This policy will allow all streams
-              to be received by non-BUNDLE-aware endpoints, but require separate
+              to be received by non-bundle-aware endpoints, but require separate
               candidates to be gathered for each media stream.
               </t>
               <t></t>
@@ -874,7 +896,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
           <t>
             As it provides the best tradeoff between performance and
-            compatibility with legacy endpoints, the default BUNDLE policy
+            compatibility with legacy endpoints, the default bundle policy
             MUST be set to "balanced".
           </t>
 
@@ -1235,8 +1257,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           parameters are changed:</t>
          <t><list style="symbols">
             <t>Any changes to the STUN/TURN servers to use affect
-            the next gathering phase. With the exception of the initial state
-            where ICE gathering has not yet occurred, the 'needs-ice-restart'
+            the next gathering phase. If an ICE gathering phase has already
+            started or completed, the 'needs-ice-restart'
             bit mentioned in <xref target="sec.ice-gather-overview"/>
             will be set. This will cause the next call to createOffer to
             generate new ICE credentials, for the purpose of forcing an ICE
@@ -1245,11 +1267,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             any existing candidates will be discarded, and new candidates will
             be gathered from the new servers.
             </t>
-            <t>Any changes to the ICE candidate policy also affect the next
-            gathering phase. If the policy is being made more liberal (i.e.,
-            more permitted candidates), the 'needs-ice-restart' bit will be set.
-            If the policy is being made more strict, no ICE restart is needed,
-            and the bit will not be set. Either way, changes to the policy have
+            <t>Any change to the ICE candidate policy affects the next
+            gathering phase. If an ICE gathering phase has already
+            started or completed, the 'needs-ice-restart' bit will be set.
+            Either way, changes to the policy have
             no effect on the candidate pool, because pooled candidates are not
             surfaced to the application until a gathering phase occurs, and so
             any necessary filtering can still be done on any pooled candidates.
@@ -1258,7 +1279,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             immediately; if increased, additional candidates are pre-gathered;
             if decreased, the now-superfluous candidates are discarded.
             </t>
-            <t>The BUNDLE and RTCP-multiplexing policies MUST NOT be
+            <t>The bundle and RTCP-multiplexing policies MUST NOT be
             changed after the construction of the PeerConnection.
             </t>
 
@@ -1306,8 +1327,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 and MUST be implemented.</t>
 
                 <t><xref target="RFC5764"></xref> MUST be supported for signaling
-                the UDP/TLS/RTP/SAVPF <xref target="RFC5764"/> and TCP/DTLS/RTP/SAVPF
-                <xref target="I-D.nandakumar-mmusic-proto-iana-registration"/>
+                the UDP/TLS/RTP/SAVPF <xref target="RFC5764"/>,
+		TCP/DTLS/RTP/SAVPF
+                <xref
+		    target="I-D.nandakumar-mmusic-proto-iana-registration"/>,
+		"UDP/DTLS/SCTP" <xref
+		    target="I-D.ietf-mmusic-sctp-sdp"/>,
+            and "TCP/DTLS/SCTP" <xref
+		    target="I-D.ietf-mmusic-sctp-sdp"/>
                 RTP profiles.
                 </t>
 
@@ -1483,7 +1510,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</t>
 
               <t>An "a=ice-options" line with the "trickle" option MUST be
-              added, as specified in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+              added, as specified in <xref target="I-D.ietf-ice-trickle"></xref>,
               Section 4.</t>
             </list></t>
 
@@ -1519,7 +1546,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>The port value is set to the port of the default ICE candidate
             for this m= section, but given that no candidates have yet been
             gathered, the "dummy" port value of 9 (Discard) MUST be used, as
-            indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+            indicated in <xref target="I-D.ietf-ice-trickle"></xref>,
             Section 5.1.</t>
             <t>To properly indicate use of DTLS, the &lt;proto&gt; field MUST
             be set to "UDP/TLS/RTP/SAVPF", as specified in
@@ -1533,8 +1560,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The m= line MUST be followed immediately by a "c=" line, as specified
           in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
           have yet been gathered, the "c=" line must contain the "dummy" value
-          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
-          Section 5.1. [[NOTE: This has not yet changed in the trickle ICE draft.]]</t>
+          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-ice-trickle"></xref>,
+          Section 5.1.</t>
 
           <t>Each m= section MUST include the following attribute lines:
             <list style="symbols">
@@ -1617,8 +1644,27 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               SHOULD/MUST be supported is specified in <xref
               target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section 5.1.</t>
 
-              <t>If the BUNDLE policy for this PeerConnection is set to
-              "max-bundle", and this is not the first m= section, or the BUNDLE
+              <t>An "a=ssrc" line, as specified in <xref
+              target="RFC5576"></xref>, Section 4.1, indicating the SSRC to be
+              used for sending media, along with the mandatory "cname" source
+              attribute, as specified in Section 6.1, indicating the CNAME for
+              the source. The CNAME MUST be generated in accordance with
+             Section 4.9 of <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
+
+              <t>If RTX is supported for this media type, another "a=ssrc"
+              line with the RTX SSRC, and an "a=ssrc-group" line, as specified
+              in <xref target="RFC5576"></xref>, section 4.2, with semantics
+              set to "FID" and including the primary and RTX SSRCs.</t>
+
+              <t>If FEC is supported for this media type, another "a=ssrc"
+              line with the FEC SSRC, and an "a=ssrc-group" line with semantics
+              set to "FEC-FR" and including the primary and FEC SSRCs, as
+              specified in <xref target="RFC5956"></xref>, section 4.3. For
+              simplicity, if both RTX and FEC are supported, the FEC SSRC
+              MUST be the same as the RTX SSRC.</t>
+
+              <t>If the bundle policy for this PeerConnection is set to
+              "max-bundle", and this is not the first m= section, or the bundle
               policy is set to "balanced", and this is not the first m= section
               for this media type, an "a=bundle-only" line.</t>
 
@@ -1670,10 +1716,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Once all m= sections have been generated, a session-level
           "a=group" attribute MUST be added as specified in <xref
           target="RFC5888"></xref>. This attribute MUST have semantics
-          "BUNDLE", and MUST include the mid identifiers of each m= section.
+          "bundle", and MUST include the mid identifiers of each m= section.
           The effect of this is that the browser offers all m= sections as one
-          BUNDLE group. However, whether the m= sections are bundle-only
-          or not depends on the BUNDLE policy.
+          bundle group. However, whether the m= sections are bundle-only
+          or not depends on the bundle policy.
           </t>
 
           <t>The next step is to generate session-level lip sync
@@ -1701,10 +1747,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>"a=ice-lite"</t>
             </list></t>
 
-          <t>Note that when BUNDLE is used, any additional attributes that are
+          <t>Note that when bundle is used, any additional attributes that are
           added MUST follow the advice in <xref
           target="I-D.ietf-mmusic-sdp-mux-attributes"></xref> on how
-          those attributes interact with BUNDLE.</t>
+          those attributes interact with bundle.</t>
 
           <t>Note that these requirements are in some cases stricter than those
           of SDP. Implementations MUST be prepared to accept compliant SDP
@@ -1769,7 +1815,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC5245"></xref>, Section 4.3., paragraph 3. If
               candidate gathering for the section has completed, an
               "a=end-of-candidates" attribute MUST be added, as described in
-              <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 9.3.
+              <xref target="I-D.ietf-ice-trickle"></xref>, Section 9.3.
               </t>
 
               <t>For RtpTransceivers with an RtpSender that is still
@@ -1817,9 +1863,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </list></t>
 
             <t>The "a=group:BUNDLE" attribute MUST include the mid identifiers
-            specified in the BUNDLE group in the most recent answer, minus any
+            specified in the bundle group in the most recent answer, minus any
             m= sections that have been marked as rejected, plus any newly added
-            or re-enabled m= sections. In other words, the BUNDLE attribute must
+            or re-enabled m= sections. In other words, the bundle attribute must
             contain all m= sections that were previously bundled, as long as
             they are still alive, as well as any new m= sections.</t>
 
@@ -1924,18 +1970,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           session-level attributes. The process here is identical to that
           indicated in the Initial Offers section above, except
           that the "a=ice-options" line, with the "trickle" option as specified in
-          <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section
+          <xref target="I-D.ietf-ice-trickle"></xref>, Section
           4, is only included if such an option was present in the offer.</t>
 
-          <t>The next step is to generate lip sync groups as defined
-          in <xref target="RFC5888"/>, Section 7.  For each
-          MediaStream with more than one associated RtpTransceiver, a group
-          of type "LS" MUST be added that contains the mid values for
-          each RtpTransceiver added with that MediaStream. In some cases
-          this may result in adding a mid to a given LS group that
-          was not in that LS group in the associated offer. Although
-          this is not allowed by <xref target="RFC5888"/>, it is
-          allowed when implementing this specification.
+	  <t>The next step is to generate lip sync groups as defined
+	  in <xref target="RFC5888"/>, Section 7.  For each
+	  MediaStream with more than one associated RtpTransceiver, a group
+	  of type "LS" MUST be added that contains the mid values for
+	  each RtpTransceiver added with that MediaStream. In some cases
+	  this may result in adding a mid to a given LS group that
+	  was not in that LS group in the associated offer. Although
+	  this is not allowed by <xref target="RFC5888"/>, it is
+	  allowed when implementing this specification.
+
           [[OPEN ISSUE: This is still under discussion. See:
           https://github.com/rtcweb-wg/jsep/issues/162.]]</t>
 
@@ -1968,7 +2015,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The port value would normally be set to the port of the default ICE candidate
           for this m= section, but given that no candidates have yet been gathered,
           the "dummy" port value of 9 (Discard) MUST be used, as
-          indicated in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          indicated in <xref target="I-D.ietf-ice-trickle"></xref>,
           Section 5.1.</t>
           <t>The &lt;proto&gt; field MUST be set to exactly match the &lt;proto&gt;
           field for the corresponding m= line in the offer.</t>
@@ -1978,13 +2025,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The m= line MUST be followed immediately by a "c=" line, as specified
           in <xref target="RFC4566"></xref>, Section 5.7. Again, as no candidates
           have yet been gathered, the "c=" line must contain the "dummy" value
-          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-mmusic-trickle-ice"></xref>,
+          "IN IP4 0.0.0.0", as defined in <xref target="I-D.ietf-ice-trickle"></xref>,
           Section 5.1.</t>
 
           <t>
-          If the offer supports BUNDLE, all m= sections to be BUNDLEd must use
+          If the offer supports bundle, all m= sections to be bundled must use
           the same ICE credentials and candidates; all m= sections not being
-          BUNDLEd must use unique ICE credentials and candidates. Each
+          bundled must use unique ICE credentials and candidates. Each
           m= section MUST include the following:
             <list style="symbols">
               <t>If and only if present in the offer, an "a=mid" line, as specified in
@@ -2007,9 +2054,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               specified in <xref
               target="I-D.ietf-rtcweb-audio"></xref> (see Section 3) and <xref
               target="I-D.ietf-rtcweb-video"></xref> (see Section 5).
-              Note that for simplicity, the
-              answerer MAY use different payload types for codecs than the
-              offerer, as it is not prohibited by Section 6.1.</t>
+              </t>
 
               <t>If this m= section is for media with configurable frame sizes,
               e.g. audio, an "a=maxptime" line, indicating the smallest of the
@@ -2122,7 +2167,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           corresponding session-level "a=group" attributes MUST be added as
           specified in <xref target="RFC5888"></xref>. These attributes MUST
           have semantics "BUNDLE", and MUST include the all mid identifiers from
-          the offered BUNDLE groups that have not been rejected.
+          the offered bundle groups that have not been rejected.
           Note that regardless of the presence of "a=bundle-only" in the offer,
           no m= sections in the answer should have an "a=bundle-only" line.
           </t>
@@ -2180,7 +2225,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               target="RFC5245"></xref>, Section 4.3., paragraph 3. If
               candidate gathering for the section has completed, an
               "a=end-of-candidates" attribute MUST be added, as described in
-              <xref target="I-D.ietf-mmusic-trickle-ice"></xref>, Section 9.3.
+              <xref target="I-D.ietf-ice-trickle"></xref>, Section 9.3.
               </t>
 
               <t>For RtpTransceivers that are still present, the "a=msid",
@@ -2208,7 +2253,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the VoiceActivityDetection parameter has no effect, and the answer
               should be generated as if VoiceActivityDetection was set to
               false. This is done on a per-codec basis (e.g., if the offerer somehow
-              offered support for CN but set "usedtx=0" for Opus, setting 
+              offered support for CN but set "usedtx=0" for Opus, setting
               VoiceActivityDetection to true would result in an answer with CN codecs
               and "usedtx=0").
             </t>
@@ -2301,8 +2346,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
 
       <section title="Parsing a Session Description" anchor="sec.parsing-a-desc">
-        <t>[The behavior described herein is a draft version, and needs
-            more discussion to resolve various open issues.]</t>
         <t>When a SessionDescription of any type is supplied to
         setLocal/RemoteDescription, the implementation must parse it and
         reject it if it is invalid. The exact details of this
@@ -2323,7 +2366,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <texttable anchor="sdp_abnf" title="SDP ABNF References">
           <ttcol align='left'>Attribute</ttcol>
           <ttcol align='left'>Reference</ttcol>
-          
+
 	      <c> ptime  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> maxptime  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> rtpmap  </c><c> <xref target="RFC4566"/> Section 9  </c>
@@ -2334,7 +2377,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 	      <c> framerate  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> fmtp  </c><c> <xref target="RFC4566"/> Section 9  </c>
 	      <c> quality  </c><c> <xref target="RFC4566"/> Section 9  </c>
-          
+
 		  <c> msid  </c><c> <xref target="I-D.ietf-mmusic-msid"/> Section 2  </c>
 
 	      <c> rtcp  </c><c> <xref target=" RFC3605"/> Section 2.1 </c>
@@ -2356,11 +2399,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <c> imageattr  </c><c>  <xref target="RFC6236"/> Section 3.1 </c>
 
           <c> extmap (encrypt option)  </c><c>  <xref target="RFC6904"/> Section 4 </c>
-          
+
         </texttable>
-        
+
         <t>  [TODO: ensure that every line is listed below.] </t>
-        
+
         <t>
         If the line is not well-formed, or cannot be parsed as described, the parser MUST stop
         with an error and reject the session description. This ensures that
@@ -2619,9 +2662,27 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <t>If the answer contains any "a=ice-options" attributes where "trickle"
           is listed as an attribute, update the PeerConnection
           canTrickle property to be true. Otherwise, set this property to false.</t>
-        
+
         <t>The following steps are performed at the media engine level to apply a remote
         description.</t>
+	<t>The following steps MUST be performed for attributes at the
+	session level; if any parameters are out of
+        bounds, or cannot be applied, processing MUST stop and an error MUST be
+        returned.
+        <list style="symbols">
+	  <t>For any specified "CT" bandwidth value, set
+	  this as the limit for the maximum total bitrate for all m= sections,
+	  as specified in Section 5.8 of <xref
+	  target="RFC4566"></xref>. The implementation can decide how to
+	  allocate the available bandwidth between m= sections to
+	  simultaneously meet any limits on individual m= sections,
+	  as well as this overall session limit.</t>
+	  <t>For any specified "RR" or "RS" bandwidth values, handle as specified in <xref
+	  target="RFC3556"></xref>, Section 2.</t>
+	  <t>Any "AS" bandwidth value MUST be ignored, as the meaning of this
+	  construct at the session level is not well defined. </t>
+	</list>
+	</t>
         <t>For each media section,
         the following steps MUST be performed; if any parameters are out of
         bounds, or cannot be applied, processing MUST stop and an error MUST be
@@ -2681,11 +2742,29 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <t>For each specified fmtp parameter that is supported by the local implementation,
                   enable them on the associated payload types.</t>
                 <t>For each specified RTCP feedback mechanism that is supported by the local implementation,
-                  enable them on the associated payload types.</t>
-                <t>For any specified "TIAS" bandwidth value, set this value
-                  as the maximum RTP bitrate to be used when sending media. If
-                  a "TIAS" value is not present, but an "AS" value is, generate
-                  a TIAS a value using this formula: [TODO: convert AS to TIAS].</t>
+                enable them on the associated payload types.</t>
+
+                <t>For any specified "TIAS" bandwidth value, set this
+                value as a constraint on the maximum RTP bitrate to be
+                used when sending media, as specified in <xref
+                target="RFC3890"></xref>. If a "TIAS" value is not
+                present, but an "AS" value is specified, generate a
+                "TIAS" value using this formula:
+		<list style="format">
+		  <t>
+		    TIAS = AS * 0.95 - 50 * 40 * 8
+		  </t>
+		</list>
+		The 50 is based on 50 packets per second, the 40 is based on an estimate of
+		total header size, and the 0.95 is to allocate 5% to RTCP. If more
+		accurate control of bandwidth is needed,
+		"TIAS" should be used instead of "AS".</t>
+		<t>For any "RR" or "RS" bandwidth values, handle as specified in <xref
+		target="RFC3556"></xref>, Section 2.</t>
+		<t>Any specified "CT" bandwidth value MUST be
+		ignored, as the meaning of this construct at the media level is not well
+		defined.</t>
+
                 <t>[TODO: handling of CN, telephone-event, "red"]</t>
                 <t>If the media section if of type audio:
                   <list style="symbols">
@@ -2733,7 +2812,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   "sendonly", prepare to start transmitting media using the specified primary SSRC
                   and one of the selected payload types, once the underlying transport
                   layers have been established. Otherwise, stop transmitting RTP media,
-                  although RTCP should still be sent, as described in 
+                  although RTCP should still be sent, as described in
                   <xref target="RFC3264"/>, Section 5.1. </t>
               </list>
             </t>
@@ -2748,9 +2827,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </t>
           </list>
         </t>
-        <t>If the answer contains valid BUNDLE groups, discard any ICE components
+        <t>If the answer contains valid bundle groups, discard any ICE components
            for the m= sections that will be bundled onto the primary ICE components
-           in each BUNDLE, and begin muxing these m= sections accordingly,
+           in each bundle, and begin muxing these m= sections accordingly,
            as described in <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />, Section 8.2.</t>
       </section>
     </section>
@@ -2788,7 +2867,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The DTLS fingerprint(s) (a=fingerprint).</t>
 
-          <t>The contents of BUNDLE groups, bundle-only parameters, or
+          <t>The contents of bundle groups, bundle-only parameters, or
           "a=rtcp-mux" parameters.</t>
         </list></t>
 
@@ -2873,7 +2952,7 @@ AliceUA->AliceJS:   multiple onicecandidate events with candidates
 
 //                  wait for ICE gathering to complete
 AliceUA->AliceJS:   onicecandidate event with null candidate
-AliceJS->AliceUA:   get |offer-A1| from value of pendingLocalDescription
+AliceJS->AliceUA:   get |offer-A1| from pendingLocalDescription
 
 //                  |offer-A1| is sent over signaling protocol to Bob
 AliceJS->WebServer: signaling with |offer-A1|
@@ -2892,7 +2971,7 @@ BobUA->BobJS:       multiple onicecandidate events with candidates
 
 //                  wait for ICE gathering to complete
 BobUA->BobJS:       onicecandidate event with null candidate
-BobJS->BobUA:       get |answer-A1| from value of currentLocalDescription
+BobJS->BobUA:       get |answer-A1| from currentLocalDescription
 
 //                  |answer-A1| is sent over signaling protocol to Alice
 BobJS->WebServer:   signaling with |answer-A1|
@@ -3136,9 +3215,9 @@ BobUA->AliceUA:     audio+data sent from Bob to Alice
 AliceUA->BobUA:     audio+data sent from Alice to Bob
 
 //                  some time later Bob adds two video streams
-//                  note, no candidates exchanged, because of BUNDLE
-BobJS->BobUA:       addTrack with first video track
-BobJS->BobUA:       addTrack with second video track
+//                  note, no candidates exchanged, because of bundle
+BobJS->BobUA:       addTrack with first video stream
+BobJS->BobUA:       addTrack with second video stream
 BobJS->BobUA:       createOffer to get |offer-B2|
 BobJS->BobUA:       setLocalDescription with |offer-B2|
 
@@ -3620,8 +3699,8 @@ a=end-of-candidates
 
     <section title="Acknowledgements" anchor="sec.acknowledgements">
       <t>Significant text incorporated in the draft as well and review was
-      provided by Harald Alvestrand and Suhas Nandakumar. <!-- ACK 1 --> Dan
-      Burnett, Neil Stratford, Eric Rescorla, Anant Narayanan, Andrew Hutton,
+      provided by Peter Thatcher, Taylor Brandstetter, Harald Alvestrand and Suhas Nandakumar. <!-- ACK 1 --> Dan
+      Burnett, Neil Stratford, Anant Narayanan, Andrew Hutton,
       Richard Ejzak, <!-- ACK 2 --> <!-- ACK 3 --> <!-- ACK 4 --> Adam
       Bergkvist and Matthew Kaufman all provided valuable feedback on this proposal.
       <!-- ACK 5 -->
@@ -3767,37 +3846,6 @@ a=end-of-candidates
                 target="http://www.rfc-editor.org/rfc/rfc4585.txt" type="TXT" />
       </reference>
 
-      <reference anchor="RFC5124">
-        <front>
-          <title>Extended Secure RTP Profile for Real-time Transport Control
-          Protocol (RTCP)-Based Feedback (RTP/SAVPF)</title>
-
-          <author fullname="J. Ott" initials="J." surname="Ott">
-            <organization></organization>
-          </author>
-
-          <author fullname="E. Carrara" initials="E." surname="Carrara">
-            <organization></organization>
-          </author>
-
-          <date month="February" year="2008" />
-
-          <abstract>
-            <t>An RTP profile (SAVP) for secure real-time communications and
-            another profile (AVPF) to provide timely feedback from the
-            receivers to a sender are defined in RFC 3711 and RFC 4585,
-            respectively. This memo specifies the combination of both profiles
-            to enable secure RTP communications with feedback.
-            [STANDARDS-TRACK]</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="RFC" value="5124" />
-
-        <format octets="37856"
-                target="http://www.rfc-editor.org/rfc/rfc5124.txt" type="TXT" />
-      </reference>
-
       <reference anchor="RFC3261">
         <front>
           <title>SIP: Session Initiation Protocol</title>
@@ -3866,6 +3914,22 @@ a=end-of-candidates
         <format type='TXT'
         target='http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-video-00.txt' />
       </reference>
+
+
+      <reference anchor="RFC3890" target="http://www.rfc-editor.org/info/rfc3890">
+	<front>
+	  <title>
+	    A Transport Independent Bandwidth Modifier for the Session Description Protocol (SDP)
+	  </title>
+	  <author initials="M." surname="Westerlund" fullname="M. Westerlund">
+	    <organization/>
+	  </author>
+	  <date year="2004" month="September"/>
+	</front>
+	<seriesInfo name="RFC" value="3890"/>
+	<seriesInfo name="DOI" value="10.17487/RFC3890"/>
+      </reference>
+
 
      <!-- NORM 2a -->
 
@@ -4254,24 +4318,6 @@ a=end-of-candidates
 
       <!-- NORM 15 -->
 
-      <reference anchor='RFC7022'>
-        <front>
-          <title>Guidelines for Choosing RTP Control Protocol (RTCP) Canonical Names (CNAMEs)</title>
-          <author initials='A.' surname='Begen' fullname='A. Begen'>
-          <organization /></author>
-          <author initials='C.' surname='Perkins' fullname='C. Perkins'>
-          <organization /></author>
-          <author initials='D.' surname='Wing' fullname='D. Wing'>
-          <organization /></author>
-          <author initials='E.' surname='Rescorla' fullname='E. Rescorla'>
-          <organization /></author>
-          <date year='2013' month='September' />
-        </front>
-
-        <seriesInfo name='RFC' value='7022' />
-        <format type='TXT' octets='21717' target='http://www.rfc-editor.org/rfc/rfc7022.txt' />
-      </reference>
-
       <!-- NORM 16 -->
 
       <reference anchor='I-D.ietf-rtcweb-security'>
@@ -4335,43 +4381,43 @@ a=end-of-candidates
         <front>
           <title abbrev="RFC Key Words">Key words for use in RFCs to Indicate
           Requirement Levels</title>
-          
+
           <author fullname="Scott Bradner" initials="S." surname="Bradner">
             <organization>Harvard University</organization>
-            
+
             <address>
               <postal>
                 <street>1350 Mass. Ave.</street>
-                
+
                 <street>Cambridge</street>
-                
+
                 <street>MA 02138</street>
               </postal>
-              
+
               <phone>- +1 617 495 3864</phone>
-              
+
               <email>sob@harvard.edu</email>
             </address>
           </author>
-          
+
           <date month="March" year="1997" />
-          
+
           <area>General</area>
-          
+
           <keyword>keyword</keyword>
         </front>
-        
+
         <seriesInfo name="BCP" value="14" />
-        
+
         <seriesInfo name="RFC" value="2119" />
-        
+
         <format octets="4723"
                 target="http://www.rfc-editor.org/rfc/rfc2119.txt" type="TXT" />
-        
+
         <format octets="17491"
                 target="http://xml.resource.org/public/rfc/html/rfc2119.html"
                 type="HTML" />
-        
+
         <format octets="5777"
                 target="http://xml.resource.org/public/rfc/xml/rfc2119.xml"
                 type="XML" />
@@ -4425,41 +4471,6 @@ a=end-of-candidates
                 target="http://www.rfc-editor.org/rfc/rfc4566.txt" type="TXT" />
       </reference>
 
-      <reference anchor="I-D.ietf-rtcweb-data-protocol">
-        <front>
-          <title>WebRTC Data Channel Protocol</title>
-
-          <author fullname="Randell Jesup" initials="R" surname="Jesup">
-            <organization></organization>
-          </author>
-
-          <author fullname="Salvatore Loreto" initials="S" surname="Loreto">
-            <organization></organization>
-          </author>
-
-          <author fullname="Michael Tuexen" initials="M" surname="Tuexen">
-            <organization></organization>
-          </author>
-
-          <date day="26" month="February" year="2013" />
-
-          <abstract>
-            <t>The Web Real-Time Communication (WebRTC) working group is
-            charged to provide protocols to support for direct interactive
-            rich communication using audio, video, and data between two peers'
-            web- browsers. This document specifies an actual (minor) protocol
-            for how the JS-layer DataChannel objects provide the data channels
-            between the peers.</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-ietf-rtcweb-data-protocol-04" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-data-protocol-04.txt"
-                type="TXT" />
-      </reference>
-
       <reference anchor="RFC3605">
         <front>
           <title>
@@ -4480,43 +4491,6 @@ a=end-of-candidates
       </reference>
 
 
-      <reference anchor="I-D.ietf-mmusic-trickle-ice">
-        <front>
-          <title>Trickle ICE: Incremental Provisioning of Candidates for the
-          Interactive Connectivity Establishment (ICE) Protocol</title>
-
-          <author fullname="Emil Ivov" initials="E" surname="Ivov">
-            <organization></organization>
-          </author>
-
-          <author fullname="Eric Rescorla" initials="E" surname="Rescorla">
-            <organization></organization>
-          </author>
-
-          <author fullname="Justin Uberti" initials="J" surname="Uberti">
-            <organization></organization>
-          </author>
-
-          <date day="11" month="March" year="2013" />
-
-          <abstract>
-            <t>This document describes an extension to the Interactive
-            Connectivity Establishment (ICE) protocol that allows ICE agents
-            to send and receive candidates incrementally rather than
-            exchanging complete lists. With such incremental provisioning, ICE
-            agents can begin connectivity checks while they are still
-            gathering candidates and considerably shorten the time necessary
-            for ICE processing to complete. The above mechanism is also
-            referred to as "trickle ICE".</t>
-          </abstract>
-        </front>
-
-        <seriesInfo name="Internet-Draft"
-                    value="draft-ietf-mmusic-trickle-ice-00" />
-
-        <format target="http://www.ietf.org/internet-drafts/draft-ivov-mmusic-trickle-ice-00.txt"
-                type="TXT" />
-      </reference>
 
       <reference anchor="I-D.ietf-rtcweb-fec">
         <front>
@@ -4551,7 +4525,77 @@ a=end-of-candidates
         <format type='TXT' octets='73546' target='http://www.rfc-editor.org/rfc/rfc6347.txt' />
       </reference>
 
+      <reference anchor="I-D.ietf-ice-trickle">
+        <front>
 
+          <title abbrev='Trickle ICE'>
+            Trickle ICE: Incremental Provisioning of Candidates for the
+            Interactive Connectivity Establishment (ICE) Protocol
+          </title>
+          <author initials='E.' surname='Ivov'
+                  fullname='Emil Ivov'>
+            <organization abbrev='Jitsi'>Jitsi</organization>
+            <address>
+              <postal>
+                <street></street>
+                <city>Strasbourg</city>
+                <code>67000</code>
+                <country>France</country>
+              </postal>
+              <phone>+33 6 72 81 15 55</phone>
+              <email>emcho@jitsi.org</email>
+            </address>
+          </author>
+          <author fullname="Eric Rescorla" initials="E.K." surname="Rescorla">
+            <organization>RTFM, Inc.</organization>
+            <address>
+              <postal>
+                <street>2064 Edgewood Drive</street>
+                <city>Palo Alto</city>
+                <region>CA</region>
+                <code>94303</code>
+                <country>USA</country>
+              </postal>
+              <phone>+1 650 678 2350</phone>
+              <email>ekr@rtfm.com</email>
+            </address>
+          </author>
+          <author fullname="Justin Uberti" initials="J." surname="Uberti">
+            <organization>Google</organization>
+            <address>
+              <postal>
+                <street>747 6th St S</street>
+                <city>Kirkland</city>
+                <region>WA</region>
+                <code>98033</code>
+                <country>USA</country>
+              </postal>
+              <phone>+1 857 288 8888</phone>
+              <email>justin@uberti.name</email>
+            </address>
+          </author>
+          <author initials="P." surname="Saint-Andre" fullname="Peter Saint-Andre">
+            <organization>&amp;yet</organization>
+            <address>
+              <email>peter@andyet.com</email>
+              <uri>https://andyet.com/</uri>
+            </address>
+          </author>
+          <date />
+          <abstract>
+            <t>
+              This document describes an extension to the Interactive
+              Connectivity Establishment (ICE) protocol that allows ICE agents
+              to send and receive candidates incrementally rather than
+              exchanging complete lists. With such incremental provisioning,
+              ICE agents can begin connectivity checks while they are still
+              gathering candidates and considerably shorten the time necessary
+              for ICE processing to complete. This mechanism is called "trickle
+              ICE".
+            </t>
+          </abstract>
+        </front>
+      </reference>
       <reference anchor="RFC6236">
 
         <front>
@@ -4575,7 +4619,6 @@ a=end-of-candidates
         <seriesInfo name="RFC" value="6236"/>
         <format type="TXT" octets="49356" target="http://www.rfc-editor.org/rfc/rfc6236.txt"/>
       </reference>
-
     </references>
 
     <references title="Informative References">
@@ -4725,7 +4768,7 @@ a=end-of-candidates
         <seriesInfo name='RFC' value='6464'/>
         <seriesInfo name='DOI' value='10.17487/RFC6464'/>
       </reference>
-      
+
       <!-- INFORM 3 -->
 
       <!-- INFORM 4 -->
@@ -5245,3 +5288,4 @@ a=end-of-candidates
     </section>
   </back>
 </rfc>
+
