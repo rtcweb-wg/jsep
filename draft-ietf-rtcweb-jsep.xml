@@ -1550,17 +1550,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because
               no candidates have yet been gathered.</t>
 
-              <t>A direction attribute as specified in
-              <xref target="RFC3264"></xref>, Section 6.1, according to the
-              associated RtpTransceiver's disposition.
-              If the RtpTransceiver's RtpReceiver and RtpSender are both active,
-              the directionality MUST be set as sendrecv.
-              If the RtpTransceiver's RtpReceiver is active, but the RtpSender is inactive,
-              the directionality MUST be set as recvonly.
-              If the RtpTransceiver's RtpSender is active but the RtpReceiver is inactive,
-              the directionality MUST be set as sendonly.
-              If RtpTransceiver's RtpReceiver and RtpSender are both inactive,
-              the directionality MUST be set as inactive.</t>
+              <t>A direction attribute for the associated
+              RtpTransceiver described by <xref
+              target="sec.offer-dirattr"></xref>.</t>
 
               <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as
               specified in <xref target="RFC4566"></xref>, Section 6.
@@ -1884,6 +1876,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             target="RFC6464"></xref>, Section 4. </t>
           </section>
         </section>
+
+	<section title="Direction Attribute in Offers" anchor="sec.offer-dirattr">
+	  <t>
+	    <xref target="RFC3264"></xref> direction attributes
+	    (defined in Section 6.1) in offers are chosen according to
+	    the states of the RtpSender and RtpReceiver of a given
+	    RtpTransceiver as follows:
+	  </t>
+
+	  <texttable>
+	    <ttcol align='center'>RtpSender</ttcol>
+	    <ttcol align='center'>RtpReceiver</ttcol>
+	    <ttcol align='center'>offer direction</ttcol>
+	    <c>active</c><c>active</c><c>sendrecv</c>
+	    <c>active</c><c>inactive</c><c>sendonly</c>
+	    <c>inactive</c><c>active</c><c>recvonly</c>
+	    <c>inactive</c><c>inactive</c><c>inactive</c>
+	  </texttable>
+	</section>
       </section>
 
       <section title="Generating an Answer" anchor="sec.generating-an-answer">
@@ -1982,28 +1993,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because
               no candidates have yet been gathered.</t>
 
-              <t>Depending on the directionality of the offer, and the
-              disposition of the associated RtpTransceiver, a directionality
-              attribute as specified in <xref target="RFC3264"></xref>,
-              Section 6.1.
-              If the offer was sendrecv and both of the RtpTransceiver's
-              RtpReceiver and RtpSender are active,
-              the directionality MUST be set as sendrecv.
-              If the offer was sendrecv and only the RtpTransceiver's RtpSender
-              is active, the directionality MUST be set as sendonly.
-              If the offer was sendrecv and only the RtpTransceiver's
-              RtpReceiver is active, the directionality MUST be set as recvonly.
-              If the offer was sendonly and the RtpTransceiver's RtpReceiver is
-              active, the directionality MUST be set as recvonly.
-              If the offer was sendonly and the RtpTransceiver's RtpReceiver is
-              inactive, the directionality MUST be set as inactive.
-              If the offer was recvonly and the RtpTransceiver's RtpSender is
-              active, the directionality MUST be set as sendonly.
-              If the offer was recvonly and the RtpTransceiver's RtpSender is
-              inactive, the directionality MUST be set as inactive.
-              If the offer was inactive or both of the RtpTransceiver's
-              RtpReceiver and RtpSender are inactive,
-              the directionality MUST be set as inactive.</t>
+              <t>A direction attribute for the associated
+              RtpTransceiver described by <xref
+              target="sec.answer-dirattr"></xref>.</t>
 
               <t>For each supported codec that is present in the offer,
               "a=rtpmap" and "a=fmtp" lines, as specified in <xref
@@ -2220,6 +2212,34 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </t>
           </section>
         </section>
+
+	<section title="Direction Attribute in Answers" anchor="sec.answer-dirattr">
+	  <t>
+	    <xref target="RFC3264"></xref> direction attributes
+	    (defined in Section 6.1) in answers are chosen according
+	    to the states of the RtpSender and RtpReceiver of a given
+	    RtpTransceiver and the corresponding direction in the
+	    offer as follows:
+	  </t>
+	  <texttable>
+	    <ttcol align='center'>offer direction</ttcol>
+	    <ttcol align='center'>RtpSender</ttcol>
+	    <ttcol align='center'>RtpReceiver</ttcol>
+	    <ttcol align='center'>answer direction</ttcol>
+	    <c>sendrecv</c><c>active</c><c>active</c><c>sendrecv</c>
+	    <c>sendrecv</c><c>active</c><c>inactive</c><c>sendonly</c>
+	    <c>sendrecv</c><c>inactive</c><c>active</c><c>recvonly</c>
+	    <c>sendrecv</c><c>inactive</c><c>inactive</c><c>inactive</c>
+
+	    <c>sendonly</c><c>*</c><c>active</c><c>recvonly</c>
+	    <c>sendonly</c><c>*</c><c>inactive</c><c>inactive</c>
+
+	    <c>recvonly</c><c>active</c><c>*</c><c>sendonly</c>
+	    <c>recvonly</c><c>inactive</c><c>*</c><c>inactive</c>
+
+	    <c>inactive</c><c>*</c><c>*</c><c>inactive</c>
+	  </texttable>
+	</section>
       </section>
 
       <section title="Processing a Local Description" anchor="sec.processing-a-local-desc">
