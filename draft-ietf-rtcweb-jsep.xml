@@ -435,7 +435,10 @@ setRemote(ANSWER) |                                   |
           complete.</t>
           <t>Note that gathering phases only gather the candidates needed by
           new/recycled/restarting m= lines; other m= lines continue to use their
-          existing candidates.</t>
+          existing candidates. Also, when bundling is active, candidates are
+          only gathered (and exchanged) for the m= lines referenced in BUNDLE-tags,
+          as described in <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation"/>.
+          </t>
         </section>
 
         <section title="ICE Candidate Trickling" anchor="sec.ice-candidate-trickling">
@@ -462,13 +465,6 @@ setRemote(ANSWER) |                                   |
           <t>Upon receipt of trickled candidates, the receiving application
           will supply them to its ICE Agent. This triggers the ICE Agent to
           start using the new remote candidates for connectivity checks.
-          </t>
-
-          <t>
-            When BUNDLE is in use, candidates (both in-SDP and trickle)
-            are only exchanged for and
-            associated with the m= section referenced by the sender's BUNDLE-tag,
-            as described in <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation"/>
           </t>
 
           <section title="ICE Candidate Format" anchor="sec.ice-candidate-format">
@@ -1726,14 +1722,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>Each "a=mid" line MUST stay the same.</t>
 
-              <t>If the m= section is not bundled into another m= section
-              (i.e., it is either not bundled or it possesses the
-              sender's BUNDLE-tag) each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
+              <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
               same, unless the ICE configuration has changed (either changes to
               the supported STUN/TURN servers, or the ICE candidate policy), or
               the "IceRestart" option (<xref target="sec.icerestart"/>
               was specified. If the m= section is bundled into another
-              m= section, it MUST NOT have any ICE credentials.
+              m= section, it still MUST NOT contain any ICE credentials.
               </t>
 
               <t>If the m= section is not bundled into another m= section,
@@ -2219,14 +2213,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               type have yet been gathered, dummy values MUST be used, as
               described in the initial answer section above.</t>
 
-              <t>If the m= section is not bundled into another m= section
-              (i.e., it is either not bundled or it possesses the
-              sender's BUNDLE-tag) each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
-              same, unless the ICE configuration has changed (either changes to
-              the supported STUN/TURN servers, or the ICE candidate policy), or
-              the "IceRestart" option (<xref target="sec.icerestart"/>
-              was specified. If the m= section is bundled into another
-              m= section, it MUST NOT contain any ICE credentials.
+              <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same,
+              unless the m= section is restarting, in which case new ICE
+              credentials must be created as specified in
+              <xref target="RFC5245"></xref>, Section 9.2.1.1.
+              If the m= section is bundled into another m= section,
+              it still MUST NOT contain any ICE credentials.
               </t>
 
               <t>If the m= section is not bundled into another m= section,
