@@ -1607,7 +1607,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 	      </t>
 
 	      <t>If the RtpTransceiver's RtpSender is active and more than one
-	      "a=rid" line has been generated, one "a=simulcast" line, with
+	      "a=rid" line has been generated, an "a=simulcast" line, with
 	      direction "send", as defined in <xref
 	      target="I-D.ietf-mmusic-sdp-simulcast"></xref>, Section 6.2.  The
 	      list of RIDs MUST include all of the RID identifiers used in the
@@ -1741,8 +1741,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 	      <t>For RtpTransceivers that are still present, the
 	      "a=rid" lines MUST stay the same.</t>
 
-	      <t>For RtpTransceivers that are still present, the
-	      "a=simulcast" line MUST stay the same.</t>
+	      <t>For RtpTransceivers that are still present, the "a=simulcast"
+	      lines MUST follow the rules for subsequent offers defined in <xref
+	      target="I-D.ietf-mmusic-sdp-simulcast"></xref>.</t>
 
               <t>If any MediaStreamTracks have been removed, either through
               the removeStream method or by removing them from an added
@@ -2491,9 +2492,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>If present, a single "a=rtcp-mux" line MUST be parsed as specified in
                 <xref target="RFC5761"/>, Section 5.1.1, and its presence or
                 absence flagged and stored.</t>
-              <t>If present, any "a=rid" lines MUST be parsed as specified in
+              <t>If present, the "a=rid" lines MUST be parsed as specified in
 	      <xref target="I-D.ietf-mmusic-rid"></xref>, Section 10, and their values stored.</t>
-              <t>If present, any "a=simulcast" lines MUST be parsed as specified
+              <t>If present, the "a=simulcast" lines MUST be parsed as specified
               in <xref target="I-D.ietf-mmusic-sdp-simulcast"></xref>, and their
               values stored.</t>
               <t>TODO: a=rtcp-rsize, a=rtcp, a=msid, a=candidate, a=end-of-candidates</t>
@@ -2531,8 +2532,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                       connection, if one exists.[TODO: may need revision, i.e., use of actpass</t>
                     <t>DTLS fingerprint values, where at least one fingerprint
                       MUST be present.</t>
-		    <t>All RID reference in an "a=simulcast" line must
-		    exist as "a=rid" lines.</t>
                   </list>
                 </t>
                 <t>Each m= section is also checked to ensure prohibited features
@@ -2698,14 +2697,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   and one of the selected payload types, once the underlying transport
                   layers have been established. Otherwise, stop transmitting RTP media,
                   although RTCP should still be sent, as described in 
-                  <xref target="RFC3264"/>, Section 5.1. If RID values are specified, include the RID header
-		  extension in the RTP streams, as indicated in <xref
-		  target="I-D.ietf-mmusic-rid"></xref>, Section 4).  If simulcast is negotiated,
-		  send the number of Source RTP Streams as specified in
-		  <xref target="I-D.ietf-mmusic-sdp-simulcast"></xref>, Section 6.2.2.
-		  The "send" portion of any "a=simulcast" line from a
-		  remote description MUST be ignored, since receiving
-		  of simulcast is not supported.
+                  <xref target="RFC3264"/>, Section 5.1. </t>
+		<t>If RID values are specified, include the RID header
+		extension in the RTP streams, as indicated in <xref
+		target="I-D.ietf-mmusic-rid"></xref>, Section 4)
+		</t>
+		<t>If simulcast is specified, send simulcast as specified in
+		<xref target="I-D.ietf-mmusic-sdp-simulcast"></xref>, Section 6.2.2.
+		Otherwise, don't send simulcast.
 		</t>
               </list>
             </t>
