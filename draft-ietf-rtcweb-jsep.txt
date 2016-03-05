@@ -129,13 +129,13 @@ Internet-Draft                    JSEP                        March 2016
      5.4.  Processing a Local Description  . . . . . . . . . . . . .  46
      5.5.  Processing a Remote Description . . . . . . . . . . . . .  47
      5.6.  Parsing a Session Description . . . . . . . . . . . . . .  47
-       5.6.1.  Session-Level Parsing . . . . . . . . . . . . . . . .  49
+       5.6.1.  Session-Level Parsing . . . . . . . . . . . . . . . .  48
        5.6.2.  Media Section Parsing . . . . . . . . . . . . . . . .  50
        5.6.3.  Semantics Verification  . . . . . . . . . . . . . . .  52
      5.7.  Applying a Local Description  . . . . . . . . . . . . . .  53
      5.8.  Applying a Remote Description . . . . . . . . . . . . . .  54
      5.9.  Applying an Answer  . . . . . . . . . . . . . . . . . . .  56
-   6.  Configurable SDP Parameters . . . . . . . . . . . . . . . . .  58
+   6.  Configurable SDP Parameters . . . . . . . . . . . . . . . . .  57
    7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  59
      7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  59
      7.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  63
@@ -576,7 +576,10 @@ Internet-Draft                    JSEP                        March 2016
 
    Note that gathering phases only gather the candidates needed by
    new/recycled/restarting m= lines; other m= lines continue to use
-   their existing candidates.
+   their existing candidates.  Also, when bundling is active, candidates
+   are only gathered (and exchanged) for the m= lines referenced in
+   BUNDLE-tags, as described in
+   [I-D.ietf-mmusic-sdp-bundle-negotiation].
 
 3.4.2.  ICE Candidate Trickling
 
@@ -603,10 +606,7 @@ Internet-Draft                    JSEP                        March 2016
    supply them to its ICE Agent.  This triggers the ICE Agent to start
    using the new remote candidates for connectivity checks.
 
-   When BUNDLE is in use, candidates (both in-SDP and trickle) are only
-   exchanged for and associated with the m= section referenced by the
-   sender's BUNDLE-tag, as described in
-   [I-D.ietf-mmusic-sdp-bundle-negotiation]
+
 
 
 
@@ -1989,14 +1989,12 @@ Internet-Draft                    JSEP                        March 2016
 
    o  Each "a=mid" line MUST stay the same.
 
-   o  If the m= section is not bundled into another m= section (i.e., it
-      is either not bundled or it possesses the sender's BUNDLE-tag)
-      each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless
+   o  Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless
       the ICE configuration has changed (either changes to the supported
       STUN/TURN servers, or the ICE candidate policy), or the
       "IceRestart" option (Section 5.2.3.3 was specified.  If the m=
-      section is bundled into another m= section, it MUST NOT have any
-      ICE credentials.
+      section is bundled into another m= section, it still MUST NOT
+      contain any ICE credentials.
 
    o  If the m= section is not bundled into another m= section, for each
       candidate that has been gathered during the most recent gathering
@@ -2010,6 +2008,8 @@ Internet-Draft                    JSEP                        March 2016
 
    o  For MediaStreamTracks that are still present, the "a=msid",
       "a=ssrc", and "a=ssrc-group" lines MUST stay the same.
+
+
 
 
 
@@ -2504,16 +2504,16 @@ Internet-Draft                    JSEP                        March 2016
       values MUST be used, as described in the initial answer section
       above.
 
-   o  If the m= section is not bundled into another m= section (i.e., it
-      is either not bundled or it possesses the sender's BUNDLE-tag)
-      each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless
-      the ICE configuration has changed (either changes to the supported
-      STUN/TURN servers, or the ICE candidate policy), or the
-      "IceRestart" option (Section 5.2.3.3 was specified.  If the m=
-      section is bundled into another m= section, it MUST NOT contain
-      any ICE credentials.
+   o  Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless
+      the m= section is restarting, in which case new ICE credentials
+      must be created as specified in [RFC5245], Section 9.2.1.1.  If
+      the m= section is bundled into another m= section, it still MUST
+      NOT contain any ICE credentials.
 
-
+   o  If the m= section is not bundled into another m= section, for each
+      candidate that has been gathered during the most recent gathering
+      phase (see Section 3.4.1), an "a=candidate" line MUST be added, as
+      defined in [RFC5245], Section 4.3., paragraph 3.  If candidate
 
 
 
@@ -2522,10 +2522,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 45]
 Internet-Draft                    JSEP                        March 2016
 
 
-   o  If the m= section is not bundled into another m= section, for each
-      candidate that has been gathered during the most recent gathering
-      phase (see Section 3.4.1), an "a=candidate" line MUST be added, as
-      defined in [RFC5245], Section 4.3., paragraph 3.  If candidate
       gathering for the section has completed, an "a=end-of-candidates"
       attribute MUST be added, as described in [I-D.ietf-ice-trickle],
       Section 9.3.  If the m= section is bundled into another m=
@@ -2571,15 +2567,16 @@ Internet-Draft                    JSEP                        March 2016
       *  If the type is "offer", the PeerConnection state MUST be either
          "stable" or "have-local-offer".
 
+      *  If the type is "pranswer" or "answer", the PeerConnection state
+         MUST be either "have-remote-offer" or "have-local-pranswer".
+
+
 
 
 Uberti, et al.          Expires September 4, 2016              [Page 46]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-      *  If the type is "pranswer" or "answer", the PeerConnection state
-         MUST be either "have-remote-offer" or "have-local-pranswer".
 
    o  If the type is not correct for the current state, processing MUST
       stop and an error MUST be returned.
@@ -2626,6 +2623,9 @@ Internet-Draft                    JSEP                        March 2016
    sequence of text lines, each containing a key-value expression, as
    described in [RFC4566], Section 5.  The SDP is read, line-by-line,
    and converted to a data structure that contains the deserialized
+   information.  However, SDP allows many types of lines, not all of
+   which are relevant to JSEP applications.  For each line, the
+   implementation will first ensure it is syntactically correct
 
 
 
@@ -2634,9 +2634,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 47]
 Internet-Draft                    JSEP                        March 2016
 
 
-   information.  However, SDP allows many types of lines, not all of
-   which are relevant to JSEP applications.  For each line, the
-   implementation will first ensure it is syntactically correct
    according its defining ABNF, check that it conforms to [RFC4566] and
    [RFC3264] semantics, and then either parse and store or discard the
    provided value, as described below.  A partial list of ABNF
@@ -2678,9 +2675,12 @@ Internet-Draft                    JSEP                        March 2016
    This ensures that implementations do not accidentally misinterpret
    ambiguous SDP.
 
+5.6.1.  Session-Level Parsing
 
-
-
+   First, the session-level lines are checked and parsed.  These lines
+   MUST occur in a specific order, and with a specific syntax, as
+   defined in [RFC4566], Section 5.  Note that while the specific line
+   types (e.g. "v=", "c=") MUST occur in the defined order, lines of the
 
 
 
@@ -2690,12 +2690,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 48]
 Internet-Draft                    JSEP                        March 2016
 
 
-5.6.1.  Session-Level Parsing
-
-   First, the session-level lines are checked and parsed.  These lines
-   MUST occur in a specific order, and with a specific syntax, as
-   defined in [RFC4566], Section 5.  Note that while the specific line
-   types (e.g. "v=", "c=") MUST occur in the defined order, lines of the
    same type (typically "a=") can occur in any order, and their ordering
    is not meaningful.
 
@@ -2739,15 +2733,18 @@ Internet-Draft                    JSEP                        March 2016
    o  If present, a single "a=ice-ufrag" line is parsed as specified in
       [RFC5245], Section 15.4, and the ufrag value is stored.
 
+   o  If present, a single "a=ice-pwd" line is parsed as specified in
+      [RFC5245], Section 15.4, and the password value is stored.
+
+
+
+
 
 
 Uberti, et al.          Expires September 4, 2016              [Page 49]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-   o  If present, a single "a=ice-pwd" line is parsed as specified in
-      [RFC5245], Section 15.4, and the password value is stored.
 
    o  If present, a single "a=ice-options" line is parsed as specified
       in [RFC5245], Section 15.5, and the set of specified options is
@@ -2795,15 +2792,15 @@ Internet-Draft                    JSEP                        March 2016
    o  If present, a single "a=ice-ufrag" line is parsed as specified in
       [RFC5245], Section 15.4, and the ufrag value is stored.
 
+   o  If present, a single "a=ice-pwd" line is parsed as specified in
+      [RFC5245], Section 15.4, and the password value is stored.
+
 
 
 Uberti, et al.          Expires September 4, 2016              [Page 50]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-   o  If present, a single "a=ice-pwd" line is parsed as specified in
-      [RFC5245], Section 15.4, and the password value is stored.
 
    o  If present, a single "a=ice-options" line is parsed as specified
       in [RFC5245], Section 15.5, and the set of specified options is
@@ -2849,6 +2846,9 @@ Internet-Draft                    JSEP                        March 2016
       specified in [RFC5761], Section 5.1.1, and its presence or absence
       flagged and stored.
 
+   o  If present, a single "a=rtcp-rsize" attribute MUST be parsed as
+      specified in [RFC5506], Section 5, and its presence or absence
+      flagged and stored.
 
 
 
@@ -2857,10 +2857,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 51]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-   o  If present, a single "a=rtcp-rsize" attribute MUST be parsed as
-      specified in [RFC5506], Section 5, and its presence or absence
-      flagged and stored.
 
    o  If present, a single "a=rtcp" attribute MUST be parsed as
       specified in [RFC3605], Section 2.1, but its value is ignored.
@@ -2906,6 +2902,10 @@ Internet-Draft                    JSEP                        March 2016
 
    o  For each m= section, valid values for each of the mandatory-to-use
       features enumerated in Section 5.1.2 MUST be present.  These
+      values MAY either be present at the media level, or inherited from
+      the session level.
+
+
 
 
 
@@ -2913,9 +2913,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 52]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-      values MAY either be present at the media level, or inherited from
-      the session level.
 
       *  ICE ufrag and password values, which MUST comply with the size
          limits specified in [RFC5245], Section 15.4.
@@ -2963,6 +2960,9 @@ Internet-Draft                    JSEP                        March 2016
       as defined in [RFC5245], Section 4.1.1, unless it has been marked
       as bundle-only.
 
+   o  Or, if the ICE ufrag and password values have changed, trigger the
+      ICE Agent to start an ICE restart and begin gathering new
+
 
 
 Uberti, et al.          Expires September 4, 2016              [Page 53]
@@ -2970,8 +2970,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 53]
 Internet-Draft                    JSEP                        March 2016
 
 
-   o  Or, if the ICE ufrag and password values have changed, trigger the
-      ICE Agent to start an ICE restart and begin gathering new
       candidates for the media section, as defined in [RFC5245],
       Section 9.1.1.1, unless it has been marked as bundle-only.
 
@@ -3017,7 +3015,9 @@ Internet-Draft                    JSEP                        March 2016
    The following steps are performed at the media engine level to apply
    a remote description.
 
-
+   The following steps MUST be performed for attributes at the session
+   level; if any parameters are out of bounds, or cannot be applied,
+   processing MUST stop and an error MUST be returned.
 
 
 
@@ -3025,10 +3025,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 54]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-   The following steps MUST be performed for attributes at the session
-   level; if any parameters are out of bounds, or cannot be applied,
-   processing MUST stop and an error MUST be returned.
 
    o  For any specified "CT" bandwidth value, set this as the limit for
       the maximum total bitrate for all m= sections, as specified in
@@ -3075,16 +3071,16 @@ Internet-Draft                    JSEP                        March 2016
          type, as described in [RFC4588].  If any referenced primary
          payload types are not present, this MUST result in an error.
 
+      *  For each specified fmtp parameter that is supported by the
+         local implementation, enable them on the associated payload
+         types.
+
 
 
 Uberti, et al.          Expires September 4, 2016              [Page 55]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-      *  For each specified fmtp parameter that is supported by the
-         local implementation, enable them on the associated payload
-         types.
 
       *  For each specified RTCP feedback mechanism that is supported by
          the local implementation, enable them on the associated payload
@@ -3130,6 +3126,10 @@ Internet-Draft                    JSEP                        March 2016
 
    For each media section, the following steps MUST be performed:
 
+   o  If the media section has been rejected (i.e. port is set to zero
+      in the answer), stop any reception or transmission of media for
+      this section, and discard any associated ICE components, as
+      described in Section 9.2.1.3 of [RFC5245].
 
 
 
@@ -3137,11 +3137,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 56]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-   o  If the media section has been rejected (i.e. port is set to zero
-      in the answer), stop any reception or transmission of media for
-      this section, and discard any associated ICE components, as
-      described in Section 9.2.1.3 of [RFC5245].
 
    o  If the remote DTLS fingerprint has been changed, tear down the
       existing DTLS connection.
@@ -3186,6 +3181,11 @@ Internet-Draft                    JSEP                        March 2016
    accordingly, as described in
    [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 8.2.
 
+6.  Configurable SDP Parameters
+
+   It is possible to change elements in the SDP returned from
+   createOffer before passing it to setLocalDescription.  When an
+   implementation receives modified SDP it MUST either:
 
 
 
@@ -3193,12 +3193,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 57]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-6.  Configurable SDP Parameters
-
-   It is possible to change elements in the SDP returned from
-   createOffer before passing it to setLocalDescription.  When an
-   implementation receives modified SDP it MUST either:
 
    o  Accept the changes and adjust its behavior to match the SDP.
 
@@ -3242,6 +3236,12 @@ Internet-Draft                    JSEP                        March 2016
    Implementations MAY choose to either honor or reject any elements not
    listed in the above two categories, but must do so explicitly as
    described at the beginning of this section.  Note that future
+   standards may add new SDP elements to the list of elements which must
+   be accepted or rejected, but due to version skew, applications must
+   be prepared for implementations to accept changes which must be
+   rejected and vice versa.
+
+
 
 
 
@@ -3249,11 +3249,6 @@ Uberti, et al.          Expires September 4, 2016              [Page 58]
 
 Internet-Draft                    JSEP                        March 2016
 
-
-   standards may add new SDP elements to the list of elements which must
-   be accepted or rejected, but due to version skew, applications must
-   be prepared for implementations to accept changes which must be
-   rejected and vice versa.
 
    The application can also modify the SDP to reduce the capabilities in
    the offer it sends to the far side or the offer that it installs from
@@ -3296,6 +3291,11 @@ Internet-Draft                    JSEP                        March 2016
    the offer or answer, so the offers and answers are complete.  Trickle
    ICE is not used.  Both Alice and Bob are using the default policy of
    balanced.
+
+
+
+
+
 
 
 
