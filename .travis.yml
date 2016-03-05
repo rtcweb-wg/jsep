@@ -1,24 +1,17 @@
 language: python
-python:
-  - "2.7"
-
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y python-lxml python-pip
+sudo: false
+addons:
+  apt:
+    packages:
+     - python-pip
 
 install:
-  # here we don't use the travis virtualenv because that
-  # causes us to install lxml again below, doubling the build time
-  # when it compiles the native modules from source
-  - deactivate
-  - sudo pip install xml2rfc
+ - gem install kramdown-rfc2629
+ - pip install xml2rfc
 
-# command to run tests, e.g. python setup.py test
-script: make
+script: make ghpages
 
 env:
  global:
- - GH_REF: github.com/rtcweb-wg/jsep.git
  - secure: "Dyu6BRI5Gyidgnshtz4qNvDtXfGLhsoOH9KIyGpk+3RgDYpE2t0uL2D1oWAr7oNbgzHuBpEkd4HaSigs0Yu5UgmQXvhwjBO/ChrleX9g4lVx7qjkOGEz94o6B/FI/ygqmQ819V4CyldZkSYyAJSaL0/OanwuKZ6CejKpCyJYJeo="
 
