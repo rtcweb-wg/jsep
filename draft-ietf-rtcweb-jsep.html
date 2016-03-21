@@ -318,15 +318,15 @@ li, p {
 <link href="#rfc.section.5.2.1" rel="Chapter" title="5.2.1 Initial Offers"/>
 <link href="#rfc.section.5.2.2" rel="Chapter" title="5.2.2 Subsequent Offers"/>
 <link href="#rfc.section.5.2.3" rel="Chapter" title="5.2.3 Options Handling"/>
-<link href="#rfc.section.5.2.3.1" rel="Chapter" title="5.2.3.1 IceRestart"/>
-<link href="#rfc.section.5.2.3.2" rel="Chapter" title="5.2.3.2 VoiceActivityDetection"/>
-<link href="#rfc.section.5.2.4" rel="Chapter" title="5.2.4 Direction Attribute in Offers"/>
+<link href="#rfc.section.5.2.3.1" rel="Chapter" title="5.2.3.1 OfferToReceiveAudio"/>
+<link href="#rfc.section.5.2.3.2" rel="Chapter" title="5.2.3.2 OfferToReceiveVideo"/>
+<link href="#rfc.section.5.2.3.3" rel="Chapter" title="5.2.3.3 IceRestart"/>
+<link href="#rfc.section.5.2.3.4" rel="Chapter" title="5.2.3.4 VoiceActivityDetection"/>
 <link href="#rfc.section.5.3" rel="Chapter" title="5.3 Generating an Answer"/>
 <link href="#rfc.section.5.3.1" rel="Chapter" title="5.3.1 Initial Answers"/>
 <link href="#rfc.section.5.3.2" rel="Chapter" title="5.3.2 Subsequent Answers"/>
 <link href="#rfc.section.5.3.3" rel="Chapter" title="5.3.3 Options Handling"/>
 <link href="#rfc.section.5.3.3.1" rel="Chapter" title="5.3.3.1 VoiceActivityDetection"/>
-<link href="#rfc.section.5.3.4" rel="Chapter" title="5.3.4 Direction Attribute in Answers"/>
 <link href="#rfc.section.5.4" rel="Chapter" title="5.4 Processing a Local Description"/>
 <link href="#rfc.section.5.5" rel="Chapter" title="5.5 Processing a Remote Description"/>
 <link href="#rfc.section.5.6" rel="Chapter" title="5.6 Parsing a Session Description"/>
@@ -474,16 +474,16 @@ li, p {
 <ul><li>5.2.1.   <a href="#rfc.section.5.2.1">Initial Offers</a></li>
 <li>5.2.2.   <a href="#rfc.section.5.2.2">Subsequent Offers</a></li>
 <li>5.2.3.   <a href="#rfc.section.5.2.3">Options Handling</a></li>
-<ul><li>5.2.3.1.   <a href="#rfc.section.5.2.3.1">IceRestart</a></li>
-<li>5.2.3.2.   <a href="#rfc.section.5.2.3.2">VoiceActivityDetection</a></li>
-</ul><li>5.2.4.   <a href="#rfc.section.5.2.4">Direction Attribute in Offers</a></li>
-</ul><li>5.3.   <a href="#rfc.section.5.3">Generating an Answer</a></li>
+<ul><li>5.2.3.1.   <a href="#rfc.section.5.2.3.1">OfferToReceiveAudio</a></li>
+<li>5.2.3.2.   <a href="#rfc.section.5.2.3.2">OfferToReceiveVideo</a></li>
+<li>5.2.3.3.   <a href="#rfc.section.5.2.3.3">IceRestart</a></li>
+<li>5.2.3.4.   <a href="#rfc.section.5.2.3.4">VoiceActivityDetection</a></li>
+</ul></ul><li>5.3.   <a href="#rfc.section.5.3">Generating an Answer</a></li>
 <ul><li>5.3.1.   <a href="#rfc.section.5.3.1">Initial Answers</a></li>
 <li>5.3.2.   <a href="#rfc.section.5.3.2">Subsequent Answers</a></li>
 <li>5.3.3.   <a href="#rfc.section.5.3.3">Options Handling</a></li>
 <ul><li>5.3.3.1.   <a href="#rfc.section.5.3.3.1">VoiceActivityDetection</a></li>
-</ul><li>5.3.4.   <a href="#rfc.section.5.3.4">Direction Attribute in Answers</a></li>
-</ul><li>5.4.   <a href="#rfc.section.5.4">Processing a Local Description</a></li>
+</ul></ul><li>5.4.   <a href="#rfc.section.5.4">Processing a Local Description</a></li>
 <li>5.5.   <a href="#rfc.section.5.5">Processing a Remote Description</a></li>
 <li>5.6.   <a href="#rfc.section.5.6">Parsing a Session Description</a></li>
 <ul><li>5.6.1.   <a href="#rfc.section.5.6.1">Session-Level Parsing</a></li>
@@ -754,7 +754,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h4 id="rfc.section.4.1.4.2"><a href="#rfc.section.4.1.4.2">4.1.4.2.</a> <a href="#sec.rollback" id="sec.rollback">Rollback</a></h4>
 <p id="rfc.section.4.1.4.2.p.1">In certain situations it may be desirable to "undo" a change made to setLocalDescription or setRemoteDescription. Consider a case where a call is ongoing, and one side wants to change some of the session parameters; that side generates an updated offer and then calls setLocalDescription. However, the remote side, either before or after setRemoteDescription, decides it does not want to accept the new parameters, and sends a reject message back to the offerer. Now, the offerer, and possibly the answerer as well, need to return to a stable state and the previous local/remote description. To support this, we introduce the concept of "rollback".</p>
 <p id="rfc.section.4.1.4.2.p.2">A rollback discards any proposed changes to the session, returning the state machine to the stable state, and setting the pending local and/or remote description back to null.  Any resources or candidates that were allocated by the abandoned local description are discarded; any media that is received will be processed according to the previous local and remote descriptions. Rollback can only be used to cancel proposed changes; there is no support for rolling back from a stable state to a previous stable state. Note that this implies that once the answerer has performed setLocalDescription with his answer, this cannot be rolled back.  </p>
-<p id="rfc.section.4.1.4.2.p.3">A rollback will disassociate any RtpTransceivers that were associated with m= sections by the application of the rolled-back session description (see <a href="#sec.applying-a-remote-desc">Section 5.8</a> and <a href="#sec.applying-a-local-desc">Section 5.7</a>). This means that some RtpTransceivers that were previously associated will no longer be associated with any m= section; in such cases, the value of the RtpTransceiver's mid attribute MUST be set to null. RtpTransceivers that were created by applying a remote offer that was subsequently rolled back MUST be removed.  However, a RtpTransceiver MUST NOT be removed if the RtpTransceiver's RtpSender was activated by the addTrack method. This is so that an application may call addTrack, then call setRemoteDescription with an offer, then roll back that offer, then call createOffer and have a m= section for the added track appear in the generated offer.</p>
+<p id="rfc.section.4.1.4.2.p.3">A rollback will disassociate any RtpTransceivers that were associated with m= sections by the application of the rolled-back session description (see <a href="#sec.applying-a-remote-desc">Section 5.8</a> and <a href="#sec.applying-a-local-desc">Section 5.7</a>). This means that some RtpTransceivers that were previously associated will no longer be associated with any m= section; in such cases, the value of the RtpTransceiver's mid attribute MUST be set to null. RtpTransceivers that were created by applying a remote offer that was subsequently rolled back MUST be removed.  However, a RtpTransceiver MUST NOT be removed if the RtpTransceiver's RtpSender was activated by the addTrack method. This is so that an application may call addTrack, then call setRemoteDescription with an offer, then rollback that offer, then call createOffer and have a m= section for the added track appear in the generated offer.</p>
 <p id="rfc.section.4.1.4.2.p.4">A rollback is performed by supplying a session description of type "rollback" with empty contents to either setLocalDescription or setRemoteDescription, depending on which was most recently used (i.e. if the new offer was supplied to setLocalDescription, the rollback should be done using setLocalDescription as well).  </p>
 <h3 id="rfc.section.4.1.5"><a href="#rfc.section.4.1.5">4.1.5.</a> <a href="#sec.setlocaldescription" id="sec.setlocaldescription">setLocalDescription</a></h3>
 <p id="rfc.section.4.1.5.p.1">The setLocalDescription method instructs the PeerConnection to apply the supplied session description as its local configuration. The type field indicates whether the description should be processed as an offer, provisional answer, or final answer; offers and answers are checked differently, using the various rules that exist for each SDP line.</p>
@@ -889,7 +889,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>A "t=" line MUST be added, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.9; both &lt;start-time&gt; and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</li>
   <li>An "a=ice-options" line with the "trickle" option MUST be added, as specified in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 4.</li>
 </ul>
-<p id="rfc.section.5.2.1.p.3">The next step is to generate m= sections, as specified in <a href="#RFC4566">[RFC4566]</a> Section 5.14.  An m= section is generated for each RtpTransceiver that has been added to the PeerConnection via the addTrack, addTransceiver, and setRemoteDescription methods.  This is done in the order that their associated RtpTransceivers were added to the PeerConnection and excludes RtpTranscievers that are stopped and not associated with an m= section (either due to an m= section being recycled or an RtpTransceiver having been stopped before being associated with an m= section) .</p>
+<p id="rfc.section.5.2.1.p.3">The next step is to generate m= sections, as specified in <a href="#RFC4566">[RFC4566]</a> Section 5.14, for each MediaStreamTrack that has been added to the PeerConnection via the addStream method. (Note that this method takes a MediaStream, which can contain multiple MediaStreamTracks, and therefore multiple m= sections can be generated even if addStream is only called once.) m=sections MUST be sorted first by the order in which the MediaStreams were added to the PeerConnection, and then by the alphabetical ordering of the media type for the MediaStreamTrack.  For example, if a MediaStream containing both an audio and a video MediaStreamTrack is added to a PeerConnection, the resultant m=audio section will precede the m=video section. If a second MediaStream containing an audio MediaStreamTrack was added, it would follow the m=video section.</p>
 <p id="rfc.section.5.2.1.p.4">Each m= section, provided it is not marked as bundle-only, MUST generate a unique set of ICE credentials and gather its own unique set of ICE candidates. Bundle-only m= sections MUST NOT contain any ICE credentials and MUST NOT gather any candidates.  </p>
 <p id="rfc.section.5.2.1.p.5">For DTLS, all m= sections MUST use the certificate for the identity that has been specified for the PeerConnection; as a result, they MUST all have the same <a href="#RFC4572">[RFC4572]</a> fingerprint value, or this value MUST be a session-level attribute.</p>
 <p id="rfc.section.5.2.1.p.6">Each m= section should be generated as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.14. For the m= line itself, the following rules MUST be followed:</p>
@@ -906,7 +906,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
   <li>An "a=mid" line, as specified in <a href="#RFC5888">[RFC5888]</a>, Section 4. When generating mid values, it is RECOMMENDED that the values be 3 bytes or less, to allow them to efficiently fit into the RTP header extension defined in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 11.</li>
   <li>An "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because no candidates have yet been gathered.</li>
-  <li>A direction attribute for the associated RtpTransceiver as described by <a href="#sec.offer-dirattr">Section 5.2.4</a>.</li>
+  <li>An "a=msid" line, as specified in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 2.</li>
+  <li>An "a=sendrecv" line, as specified in <a href="#RFC3264">[RFC3264]</a>, Section 5.1.</li>
   <li>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6.  The audio and video codecs that MUST be supported are specified in <a href="#I-D.ietf-rtcweb-audio">[I-D.ietf-rtcweb-audio]</a> (see Section 3) and <a href="#I-D.ietf-rtcweb-video">[I-D.ietf-rtcweb-video]</a> (see Section 5).</li>
   <li>If this m= section is for media with configurable frame sizes, e.g. audio, an "a=maxptime" line, indicating the smallest of the maximum supported frame sizes out of all codecs included above, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6.</li>
   <li>If this m= section is for video media, and there are known limitations on the size of images which can be decoded, an "a=imageattr" line, as specified in <a href="#sec.imageattr">Section 3.6</a>.  </li>
@@ -923,16 +924,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <a href="#RFC5576">[RFC5576]</a>, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</li>
   <li>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line with semantics set to "FEC-FR" and including the primary and FEC SSRCs, as specified in <a href="#RFC5956">[RFC5956]</a>, section 4.3. For simplicity, if both RTX and FEC are supported, the FEC SSRC MUST be the same as the RTX SSRC.</li>
   <li>If the bundle policy for this PeerConnection is set to "max-bundle", and this is not the first m= section, or the bundle policy is set to "balanced", and this is not the first m= section for this media type, an "a=bundle-only" line.</li>
-  <li>If the RtpSender of the RtpTransceiver associated with this m=section is active: <ul><li>An "a=msid" line, as specified in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 2.</li><li>An "a=ssrc" line, as specified in <a href="#RFC5576">[RFC5576]</a>, Section 4.1, indicating the SSRC to be used for sending media, along with the mandatory "cname" source attribute, as specified in Section 6.1, indicating the CNAME for the source. The CNAME MUST be generated in accordance with Section 4.9 of <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>.</li><li>If RTX is supported for this media type, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <a href="#RFC5576">[RFC5576]</a>, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</li><li>If FEC is supported for this media type, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line with semantics set to "FEC-FR" and including the primary and FEC SSRCs, as specified in <a href="#RFC5956">[RFC5956]</a>, section 4.3. For simplicity, if both RTX and FEC are supported, the FEC SSRC MUST be the same as the RTX SSRC.</li></ul><p> </p></li>
-  <li>If the RtpTransceiver's RtpSender is active, and the application has specified RID values or has specified more than one encoding in the RtpSenders's parameters, an "a=rid" line for each encoding specified.  The "a=rid" line is specified in <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a>, and its direction MUST be "send".  If the application has chosen a RID value, it MUST be used as the rid-identifier; otherwise a RID value MUST be generated by the implementation.  When generating RID values, it is RECOMMENDED that the values be 3 bytes or less, to allow them to efficiently fit into the RTP header extension defined in <a href="#I-D.ietf-avtext-rid">[I-D.ietf-avtext-rid]</a>, Section 11.  If no encodings have been specified, or only one encoding is specified but without a RID value, then no "a=rid" lines are generated.</li>
+  <li>If the RtpTransceiver's RtpSender is active, an "a=rid" line for each encoding specified by the application in the RtpSenders's parameters.  If no encodings have been specified, then a single "a=rid" line is generated.  The "a=rid" line is specified in <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a>, and its direction MUST be "send".  If the application has chosen a RID value, it MUST be used as the rid-identifier; otherwise a RID value MUST be generated by the implementation.  When generating RID values, it is RECOMMENDED that the values be 3 bytes or less, to allow them to efficiently fit into the RTP header extension defined in <a href="#I-D.ietf-avtext-rid">[I-D.ietf-avtext-rid]</a>, Section 11.</li>
   <li>If the RtpTransceiver's RtpSender is active and more than one "a=rid" line has been generated, an "a=simulcast" line, with direction "send", as defined in <a href="#I-D.ietf-mmusic-sdp-simulcast">[I-D.ietf-mmusic-sdp-simulcast]</a>, Section 6.2.  The list of RIDs MUST include all of the RID identifiers used in the "a=rid" lines for this m= section.  </li>
 </ul>
-
-<p> </p>
 <p id="rfc.section.5.2.1.p.9">Lastly, if a data channel has been created, a m= section MUST be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field MUST be set to "UDP/DTLS/SCTP" if the default candidate uses UDP transport, or "TCP/DTLS/SCTP" if the default candidate uses TCP transport <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>. The "fmt" value MUST be set to "webrtc-datachannel" as specified in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.  </p>
 <p id="rfc.section.5.2.1.p.10">Within the data m= section, the "a=mid", "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", and "a=setup" lines MUST be included as mentioned above, along with an "a=fmtp:webrtc-datachannel" line and an "a=sctp-port" line referencing the SCTP port number as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.</p>
 <p id="rfc.section.5.2.1.p.11">Once all m= sections have been generated, a session-level "a=group" attribute MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. This attribute MUST have semantics "bundle", and MUST include the mid identifiers of each m= section.  The effect of this is that the browser offers all m= sections as one bundle group. However, whether the m= sections are bundle-only or not depends on the bundle policy.  </p>
-<p id="rfc.section.5.2.1.p.12">The next step is to generate session-level lip sync groups as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7. For each MediaStream referenced by more than one RtpTransceiver (by passing those MediaStreams as arguments to the addTrack and addTransceiver methods), a group of type "LS" MUST be added that contains the mid values for each RtpTransceiver.</p>
+<p id="rfc.section.5.2.1.p.12">The next step is to generate session-level lip sync groups as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7.  For each MediaStream with more than one MediaStreamTrack, a group of type "LS" MUST be added that contains the mid values for each MediaStreamTrack in that MediaStream. </p>
 <p id="rfc.section.5.2.1.p.13">Attributes which SDP permits to either be at the session level or the media level SHOULD generally be at the media level even if they are identical. This promotes readability, especially if one of a set of initially identical attributes is subsequently changed.  </p>
 <p id="rfc.section.5.2.1.p.14">Attributes other than the ones specified above MAY be included, except for the following attributes which are specifically incompatible with the requirements of <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, and MUST NOT be included: </p>
 
@@ -956,23 +954,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
   <li>The "s=" and "t=" lines MUST stay the same.</li>
-  <li>If any RtpTransceiver has been added, and there exists an m= section with a zero port in the current local description or the current remote description, that m= section MUST be recycled by generating an m= section for the added RtpTransceiver as if the m= section were being added to the session description, placed at the same index as the m= section with a zero port.</li>
-  <li>If an RtpTransceiver is stopped and is not associated with an m= section, an m= section MUST NOT be generated for it.  This prevents adding back RtpTransceivers whose m= sections were recycled and used for a new RtpTransceiver in a previous offer/ answer exchange, as described above.</li>
-  <li>If an RtpTransceiver has been stopped and is associated with an m= section, and the m= section is not being recycled as described above, an m= section MUST be generated for it with the port set to zero and the "a=msid", "a=ssrc", and "a=ssrc-group" lines removed.</li>
-  <li>For RtpTransceivers that are not stopped, the "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST stay the same if they are present in the current description.</li>
   <li>Each "m=" and c=" line MUST be filled in with the port, protocol, and address of the default candidate for the m= section, as described in <a href="#RFC5245">[RFC5245]</a>, Section 4.3. If ICE checking has already completed for one or more candidate pairs and a candidate pair is in active use, then that pair MUST be used, even if ICE has not yet completed. Note that this differs from the guidance in <a href="#RFC5245">[RFC5245]</a>, Section 9.1.2.2, which only refers to offers created when ICE has completed. Each "a=rtcp" attribute line MUST also be filled in with the port and address of the appropriate default candidate, either the default RTP or RTCP candidate, depending on whether RTCP multiplexing is currently active or not. Note that if RTCP multiplexing is being offered, but not yet active, the default RTCP candidate MUST be used, as indicated in <a href="#RFC5761">[RFC5761]</a>, section 5.1.3. In each case, if no candidates of the desired type have yet been gathered, dummy values MUST be used, as described above.</li>
   <li>Each "a=mid" line MUST stay the same.</li>
-  <li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the ICE configuration has changed (either changes to the supported STUN/TURN servers, or the ICE candidate policy), or the "IceRestart" option (<a href="#sec.icerestart">Section 5.2.3.1</a> was specified. If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.  </li>
+  <li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the ICE configuration has changed (either changes to the supported STUN/TURN servers, or the ICE candidate policy), or the "IceRestart" option (<a href="#sec.icerestart">Section 5.2.3.3</a> was specified. If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.  </li>
   <li>If the m= section is not bundled into another m= section, for each candidate that has been gathered during the most recent gathering phase (see <a href="#sec.ice-gather-overview">Section 3.5.1</a>), an "a=candidate" line MUST be added, as defined in <a href="#RFC5245">[RFC5245]</a>, Section 4.3., paragraph 3.  If candidate gathering for the section has completed, an "a=end-of-candidates" attribute MUST be added, as described in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 9.3.  If the m= section is bundled into another m= section, both "a=candidate" and "a=end-of-candidates" MUST be omitted.  </li>
-  <li>For RtpTransceivers that are still present, the "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</li>
+  <li>For MediaStreamTracks that are still present, the "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</li>
   <li>For RtpTransceivers that are still present, the "a=rid" lines MUST stay the same.</li>
   <li>For RtpTransceivers that are still present, any "a=simulcast" line MUST stay the same.</li>
-  <li>If any RtpTransceiver has been stopped, the port MUST be set to zero and the "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST be removed.</li>
-  <li>If any RtpTransceiver has been added, and there exists a m= section with a zero port in the current local description or the current remote description, that m= section MUST be recycled by generating a m= section for the added RtpTransceiver as if the m= section were being added to session description, except that instead of adding it, the generated m= section replaces the m= section with a zero port.  </li>
+  <li>If any MediaStreamTracks have been removed, either through the removeStream method or by removing them from an added MediaStream, their m= sections MUST be marked as recvonly by changing the value of the <a href="#RFC3264">[RFC3264]</a> directional attribute to "a=recvonly". The "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST be removed from the associated m= sections.</li>
+  <li>If any MediaStreamTracks have been added, and there exist m= sections of the appropriate media type with no associated MediaStreamTracks (i.e. as described in the preceding paragraph), those m= sections MUST be recycled by adding the new MediaStreamTrack to the m= section. This is done by adding the necessary "a=msid", "a=ssrc", and "a=ssrc-group" lines to the recycled m= section, and removing the "a=recvonly" attribute.  </li>
 </ul>
+<p id="rfc.section.5.2.2.p.4">If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "remote-pranswer" or "stable" states, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "local-offer" state above, along with these exceptions: </p>
 
-<p> </p>
-<p id="rfc.section.5.2.2.p.4">If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "remote-pranswer" or "stable" states, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "local-offer" state above.</p>
+<ul>
+  <li>If a m= section exists in the current local description, but does not have an associated local MediaStreamTrack (possibly because said MediaStreamTrack was removed since the last exchange), a m= section MUST still be generated in the new offer, as indicated in <a href="#RFC3264">[RFC3264]</a>, Section 8. The disposition of this section will depend on the state of the remote MediaStreamTrack associated with this m= section. If one exists, and it is still in the "live" state, the new m= section MUST be marked as "a=recvonly", with no "a=msid" or related attributes present. If no remote MediaStreamTrack exists, or it is in the "ended" state, the m= section MUST be marked as rejected, by setting the port to zero, as indicated in <a href="#RFC3264">[RFC3264]</a>, Section 8.2.</li>
+  <li>If any MediaStreamTracks have been added, and there exist recvonly m= sections of the appropriate media type with no associated MediaStreamTracks, or rejected m= sections of any media type, those m= sections MUST be recycled, and a local MediaStreamTrack associated with these recycled m= sections until all such existing m= sections have been used. This includes any recvonly or rejected m= sections created by the preceding paragraph.</li>
+</ul>
 <p id="rfc.section.5.2.2.p.5">In addition, for each non-recycled, non-rejected m= section in the new offer, the following adjustments are made based on the contents of the corresponding m= section in the current remote description: </p>
 
 <ul>
@@ -982,62 +979,35 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>The "a=rtcp-mux" line MUST only be added if present in the remote description.</li>
   <li>The "a=rtcp-rsize" line MUST only be added if present in the remote description.</li>
 </ul>
-
-<p> </p>
 <p id="rfc.section.5.2.2.p.6">The "a=group:BUNDLE" attribute MUST include the mid identifiers specified in the bundle group in the most recent answer, minus any m= sections that have been marked as rejected, plus any newly added or re-enabled m= sections. In other words, the bundle attribute must contain all m= sections that were previously bundled, as long as they are still alive, as well as any new m= sections.</p>
 <p id="rfc.section.5.2.2.p.7">The "LS" groups are generated in the same way as with initial offers.</p>
 <h3 id="rfc.section.5.2.3"><a href="#rfc.section.5.2.3">5.2.3.</a> <a href="#sec.options-handling1" id="sec.options-handling1">Options Handling</a></h3>
 <p id="rfc.section.5.2.3.p.1">The createOffer method takes as a parameter an RTCOfferOptions object. Special processing is performed when generating a SDP description if the following options are present.</p>
-<h4 id="rfc.section.5.2.3.1"><a href="#rfc.section.5.2.3.1">5.2.3.1.</a> <a href="#sec.icerestart" id="sec.icerestart">IceRestart</a></h4>
-<p id="rfc.section.5.2.3.1.p.1">If the "IceRestart" option is specified, with a value of "true", the offer MUST indicate an ICE restart by generating new ICE ufrag and pwd attributes, as specified in <a href="#RFC5245">[RFC5245]</a>, Section 9.1.1.1. If this option is specified on an initial offer, it has no effect (since a new ICE ufrag and pwd are already generated). Similarly, if the ICE configuration has changed, this option has no effect, since new ufrag and pwd attributes will be generated automatically. This option is primarily useful for reestablishing connectivity in cases where failures are detected by the application.  </p>
-<h4 id="rfc.section.5.2.3.2"><a href="#rfc.section.5.2.3.2">5.2.3.2.</a> <a href="#sec.voiceactivitydetection1" id="sec.voiceactivitydetection1">VoiceActivityDetection</a></h4>
-<p id="rfc.section.5.2.3.2.p.1">If the "VoiceActivityDetection" option is specified, with a value of "true", the offer MUST indicate support for silence suppression in the audio it receives by including comfort noise ("CN") codecs for each offered audio codec, as specified in <a href="#RFC3389">[RFC3389]</a>, Section 5.1, except for codecs that have their own internal silence suppression support. For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is desired. For example, when using the Opus codec, the "usedtx=1" parameter would be specified in the offer.  This option allows the endpoint to significantly reduce the amount of audio bandwidth it receives, at the cost of some fidelity, depending on the quality of the remote VAD algorithm.</p>
-<p id="rfc.section.5.2.3.2.p.2">If the "VoiceActivityDetection" option is specified, with a value of "false", the browser MUST NOT emit "CN" codecs.  For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is not desired. For example, when using the Opus codec, the "usedtx=0" parameter would be specified in the offer.</p>
-<p id="rfc.section.5.2.3.2.p.3">Note that setting the "VoiceActivityDetection" parameter when generating an offer is a request to receive audio with silence suppression. It has no impact on whether the local endpoint does silence suppression for the audio it sends.</p>
-<p id="rfc.section.5.2.3.2.p.4">The "VoiceActivityDetection" option does not have any impact on the setting of the "vad" value in the signaling of the client to mixer audio level header extension described in <a href="#RFC6464">[RFC6464]</a>, Section 4. </p>
-<h3 id="rfc.section.5.2.4"><a href="#rfc.section.5.2.4">5.2.4.</a> <a href="#sec.offer-dirattr" id="sec.offer-dirattr">Direction Attribute in Offers</a></h3>
-<p><a href="#RFC3264">[RFC3264]</a> direction attributes (defined in Section 6.1) in offers are chosen according to the states of the RtpSender and RtpReceiver of a given RtpTransceiver, as follows: </p>
-<table cellpadding="3" cellspacing="0" class="tt full center">
-  <thead>
-    <tr>
-      <th class="center">RtpSender</th>
-      <th class="center">RtpReceiver</th>
-      <th class="center">offer direction</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="center">active</td>
-      <td class="center">active</td>
-      <td class="center">sendrecv</td>
-    </tr>
-    <tr>
-      <td class="center">active</td>
-      <td class="center">inactive</td>
-      <td class="center">sendonly</td>
-    </tr>
-    <tr>
-      <td class="center">inactive</td>
-      <td class="center">active</td>
-      <td class="center">recvonly</td>
-    </tr>
-    <tr>
-      <td class="center">inactive</td>
-      <td class="center">inactive</td>
-      <td class="center">inactive</td>
-    </tr>
-  </tbody>
-</table>
+<h4 id="rfc.section.5.2.3.1"><a href="#rfc.section.5.2.3.1">5.2.3.1.</a> <a href="#sec.offertoreceiveaudio" id="sec.offertoreceiveaudio">OfferToReceiveAudio</a></h4>
+<p id="rfc.section.5.2.3.1.p.1">If the "OfferToReceiveAudio" option is specified, with an integer value of N, and M audio MediaStreamTracks have been added to the PeerConnection, the offer MUST include N non-rejected m= sections with media type "audio", even if N is greater than M.  This allows the offerer to receive audio, including multiple independent streams, even when not sending it; accordingly, the directional attribute on the N-M audio m= sections without associated MediaStreamTracks MUST be set to recvonly.</p>
+<p id="rfc.section.5.2.3.1.p.2">If N is set to a value less than M, the offer MUST mark the m= sections associated with the M-N most recently added (since the last setLocalDescription) MediaStreamTracks as sendonly.  This allows the offerer to indicate that it does not want to receive audio on some or all of its newly created streams.  For m= sections that have previously been negotiated, this setting has no effect. [TODO: refer to RTCRtpSender in the future] </p>
+<p id="rfc.section.5.2.3.1.p.3">For backwards compatibility with pre-standard versions of this specification, a value of "true" is interpreted as equivalent to N=1, and "false" as N=0.  </p>
+<h4 id="rfc.section.5.2.3.2"><a href="#rfc.section.5.2.3.2">5.2.3.2.</a> <a href="#sec.offertoreceivevideo" id="sec.offertoreceivevideo">OfferToReceiveVideo</a></h4>
+<p id="rfc.section.5.2.3.2.p.1">If the "OfferToReceiveVideo" option is specified, with an integer value of N, and M video MediaStreamTracks have been added to the PeerConnection, the offer MUST include N non-rejected m= sections with media type "video", even if N is greater than M.  This allows the offerer to receive video, including multiple independent streams, even when not sending it; accordingly, the directional attribute on the N-M video m= sections without associated MediaStreamTracks MUST be set to recvonly.</p>
+<p id="rfc.section.5.2.3.2.p.2">If N is set to a value less than M, the offer MUST mark the m= sections associated with the M-N most recently added (since the last setLocalDescription) MediaStreamTracks as sendonly.  This allows the offerer to indicate that it does not want to receive video on some or all of its newly created streams.  For m= sections that have previously been negotiated, this setting has no effect. [TODO: refer to RTCRtpSender in the future] </p>
+<p id="rfc.section.5.2.3.2.p.3">For backwards compatibility with pre-standard versions of this specification, a value of "true" is interpreted as equivalent to N=1, and "false" as N=0.  </p>
+<h4 id="rfc.section.5.2.3.3"><a href="#rfc.section.5.2.3.3">5.2.3.3.</a> <a href="#sec.icerestart" id="sec.icerestart">IceRestart</a></h4>
+<p id="rfc.section.5.2.3.3.p.1">If the "IceRestart" option is specified, with a value of "true", the offer MUST indicate an ICE restart by generating new ICE ufrag and pwd attributes, as specified in <a href="#RFC5245">[RFC5245]</a>, Section 9.1.1.1. If this option is specified on an initial offer, it has no effect (since a new ICE ufrag and pwd are already generated). Similarly, if the ICE configuration has changed, this option has no effect, since new ufrag and pwd attributes will be generated automatically. This option is primarily useful for reestablishing connectivity in cases where failures are detected by the application.  </p>
+<h4 id="rfc.section.5.2.3.4"><a href="#rfc.section.5.2.3.4">5.2.3.4.</a> <a href="#sec.voiceactivitydetection1" id="sec.voiceactivitydetection1">VoiceActivityDetection</a></h4>
+<p id="rfc.section.5.2.3.4.p.1">If the "VoiceActivityDetection" option is specified, with a value of "true", the offer MUST indicate support for silence suppression in the audio it receives by including comfort noise ("CN") codecs for each offered audio codec, as specified in <a href="#RFC3389">[RFC3389]</a>, Section 5.1, except for codecs that have their own internal silence suppression support. For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is desired. For example, when using the Opus codec, the "usedtx=1" parameter would be specified in the offer.  This option allows the endpoint to significantly reduce the amount of audio bandwidth it receives, at the cost of some fidelity, depending on the quality of the remote VAD algorithm.</p>
+<p id="rfc.section.5.2.3.4.p.2">If the "VoiceActivityDetection" option is specified, with a value of "false", the browser MUST NOT emit "CN" codecs.  For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is not desired. For example, when using the Opus codec, the "usedtx=0" parameter would be specified in the offer.</p>
+<p id="rfc.section.5.2.3.4.p.3">Note that setting the "VoiceActivityDetection" parameter when generating an offer is a request to receive audio with silence suppression. It has no impact on whether the local endpoint does silence suppression for the audio it sends.</p>
+<p id="rfc.section.5.2.3.4.p.4">The "VoiceActivityDetection" option does not have any impact on the setting of the "vad" value in the signaling of the client to mixer audio level header extension described in <a href="#RFC6464">[RFC6464]</a>, Section 4. </p>
 <h2 id="rfc.section.5.3"><a href="#rfc.section.5.3">5.3.</a> <a href="#sec.generating-an-answer" id="sec.generating-an-answer">Generating an Answer</a></h2>
 <p id="rfc.section.5.3.p.1">When createAnswer is called, a new SDP description must be created that is compatible with the supplied remote description as well as the requirements specified in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>. The exact details of this process are explained below.</p>
 <h3 id="rfc.section.5.3.1"><a href="#rfc.section.5.3.1">5.3.1.</a> <a href="#sec.initial-answers" id="sec.initial-answers">Initial Answers</a></h3>
 <p id="rfc.section.5.3.1.p.1">When createAnswer is called for the first time after a remote description has been provided, the result is known as the initial answer. If no remote description has been installed, an answer cannot be generated, and an error MUST be returned.</p>
 <p id="rfc.section.5.3.1.p.2">Note that the remote description SDP may not have been created by a JSEP endpoint and may not conform to all the requirements listed in <a href="#sec-create-offer">Section 5.2</a>. For many cases, this is not a problem. However, if any mandatory SDP attributes are missing, or functionality listed as mandatory-to-use above is not present, this MUST be treated as an error, and MUST cause the affected m= sections to be marked as rejected.</p>
 <p id="rfc.section.5.3.1.p.3">The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the Initial Offers section above, except that the "a=ice-options" line, with the "trickle" option as specified in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 4, is only included if such an option was present in the offer.</p>
-<p id="rfc.section.5.3.1.p.4">The next step is to generate lip sync groups as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7.  For each MediaStream with more than one referenced RtpTransceiver, a group of type "LS" MUST be added that contains the mid values for each RtpTransceiver added with that MediaStream. In some cases this may result in adding a mid to a given LS group that was not in that LS group in the associated offer. Although this is not allowed by <a href="#RFC5888">[RFC5888]</a>, it is allowed when implementing this specification.  [[OPEN ISSUE: This is still under discussion. See: https://github.com/rtcweb-wg/jsep/issues/162.]]</p>
+<p id="rfc.section.5.3.1.p.4">The next step is to generate lip sync groups as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7.  For each MediaStream with more than one MediaStreamTrack, a group of type "LS" MUST be added that contains the mid values for each MediaStreamTrack in that MediaStream. In some cases this may result in adding a mid to a given LS group that was not in that LS group in the associated offer. Although this is not allowed by <a href="#RFC5888">[RFC5888]</a>, it is allowed when implementing this specification.  [[OPEN ISSUE: This is still under discussion. See: https://github.com/rtcweb-wg/jsep/issues/162.]] </p>
 <p id="rfc.section.5.3.1.p.5">The next step is to generate m= sections for each m= section that is present in the remote offer, as specified in <a href="#RFC3264">[RFC3264]</a>, Section 6. For the purposes of this discussion, any session-level attributes in the offer that are also valid as media-level attributes SHALL be considered to be present in each m= section.</p>
-<p id="rfc.section.5.3.1.p.6">The next step is to go through each offered m= section.  Each offered m= section will have an associated RtpTransceiver, as described in <a href="#sec.applying-a-remote-desc">Section 5.8</a>.  If there are more RtpTransceivers than there are m= sections, the unmatched RtpTransceivers will need to be associated in a subsequent offer.</p>
-<p id="rfc.section.5.3.1.p.7">For each offered m= section, if the associated RtpTransceiver has been stopped, the corresponding m= section in the answer MUST be marked as rejected by setting the port in the m= line to zero, as indicated in <a href="#RFC3264">[RFC3264]</a>, Section 6., and further processing for this m= section can be skipped.</p>
+<p id="rfc.section.5.3.1.p.6">The next step is to go through each offered m= section.  If there is a local MediaStreamTrack of the same type which has been added to the PeerConnection via addStream and not yet associated with a m= section, and the specific m= section is either sendrecv or recvonly, the MediaStreamTrack will be associated with the m= section at this time. MediaStreamTracks are assigned to m= sections using the canonical order described in <a href="#sec.initial-offers">Section 5.2.1</a>. If there are more m= sections of a certain type than MediaStreamTracks, some m= sections will not have an associated MediaStreamTrack. If there are more MediaStreamTracks of a certain type than compatible m= sections, only the first N MediaStreamTracks will be able to be associated in the constructed answer. The remainder will need to be associated in a subsequent offer.</p>
+<p id="rfc.section.5.3.1.p.7">For each offered m= section, if the associated remote MediaStreamTrack has been stopped, and is therefore in state "ended", and no local MediaStreamTrack has been associated, the corresponding m= section in the answer MUST be marked as rejected by setting the port in the m= line to zero, as indicated in <a href="#RFC3264">[RFC3264]</a>, Section 6., and further processing for this m= section can be skipped.</p>
 <p id="rfc.section.5.3.1.p.8">Provided that is not the case, each m= section in the answer should then be generated as specified in <a href="#RFC3264">[RFC3264]</a>, Section 6.1. For the m= line itself, the following rules must be followed:</p>
 
 <ul>
@@ -1052,7 +1022,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
   <li>If and only if present in the offer, an "a=mid" line, as specified in <a href="#RFC5888">[RFC5888]</a>, Section 9.1. The "mid" value MUST match that specified in the offer.</li>
   <li>An "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because no candidates have yet been gathered.</li>
-  <li>A direction attribute for the associated RtpTransceiver described by <a href="#sec.answer-dirattr">Section 5.3.4</a>.</li>
+  <li>If a local MediaStreamTrack has been associated, an "a=msid" line, as specified in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 2.</li>
+  <li>Depending on the directionality of the offer, the disposition of any associated remote MediaStreamTrack, and the presence of an associated local MediaStreamTrack, the appropriate directionality attribute, as specified in <a href="#RFC3264">[RFC3264]</a>, Section 6.1. If the offer was sendrecv, and the remote MediaStreamTrack is still "live", and there is a local MediaStreamTrack that has been associated, the directionality MUST be set as sendrecv. If the offer was sendonly, and the remote MediaStreamTrack is still "live", the directionality MUST be set as recvonly. If the offer was recvonly, and a local MediaStreamTrack has been associated, the directionality MUST be set as sendonly. If the offer was inactive, the directionality MUST be set as inactive.</li>
   <li>For each supported codec that is present in the offer, "a=rtpmap" and "a=fmtp" lines, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6, and <a href="#RFC3264">[RFC3264]</a>, Section 6.1.  The audio and video codecs that MUST be supported are specified in <a href="#I-D.ietf-rtcweb-audio">[I-D.ietf-rtcweb-audio]</a> (see Section 3) and <a href="#I-D.ietf-rtcweb-video">[I-D.ietf-rtcweb-video]</a> (see Section 5).  </li>
   <li>If this m= section is for media with configurable frame sizes, e.g. audio, an "a=maxptime" line, indicating the smallest of the maximum supported frame sizes out of all codecs included above, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6.</li>
   <li>If this m= section is for video media, and there are known limitations on the size of images which can be decoded, an "a=imageattr" line, as specified in <a href="#sec.imageattr">Section 3.6</a>.  </li>
@@ -1065,7 +1036,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If present in the offer, an "a=rtcp-rsize" line, as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5.</li>
   <li>For each supported RTP header extension that is present in the offer, an "a=extmap" line, as specified in <a href="#RFC5285">[RFC5285]</a>, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in <a href="#RFC6904">[RFC6904]</a>, Section 4.</li>
   <li>For each supported RTCP feedback mechanism that is present in the offer, an "a=rtcp-fb" mechanism, as specified in <a href="#RFC4585">[RFC4585]</a>, Section 4.2. The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, Section 5.1.</li>
-  <li>If the RtpSender of the RtpTransceiver associated with this m=section is active: <ul><li>An "a=msid" line, as specified in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 2.</li><li>An "a=ssrc" line, as specified in <a href="#RFC5576">[RFC5576]</a>, Section 4.1, indicating the SSRC to be used for sending media, along with the mandatory "cname" source attribute, as specified in Section 6.1, indicating the CNAME for the source. The CNAME MUST be generated in accordance with Section 4.9 of <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>.</li><li>If RTX has been negotiated for this m= section, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <a href="#RFC5576">[RFC5576]</a>, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</li><li>If FEC has been negotiated for this m= section, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line with semantics set to "FEC-FR" and including the primary and FEC SSRCs, as specified in <a href="#RFC5956">[RFC5956]</a>, section 4.3. For simplicity, if both RTX and FEC are supported, the FEC SSRC MUST be the same as the RTX SSRC.</li></ul><p> </p></li>
+  <li>If a local MediaStreamTrack has been associated, an "a=ssrc" line, as specified in <a href="#RFC5576">[RFC5576]</a>, Section 4.1, indicating the SSRC to be used for sending media, along with the mandatory "cname" source attribute, as specified in Section 6.1, indicating the CNAME for the source.  The CNAME MUST be generated in accordance with Section 4.9 of <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>.</li>
+  <li>If a local MediaStreamTrack has been associated, and RTX has been negotiated for this m= section, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <a href="#RFC5576">[RFC5576]</a>, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</li>
+  <li>If a local MediaStreamTrack has been associated, and FEC has been negotiated for this m= section, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line with semantics set to "FEC-FR" and including the primary and FEC SSRCs, as specified in <a href="#RFC5956">[RFC5956]</a>, section 4.3. For simplicity, if both RTX and FEC are supported, the FEC SSRC MUST be the same as the RTX SSRC.</li>
 </ul>
 <p id="rfc.section.5.3.1.p.11">If a data channel m= section has been offered, a m= section MUST also be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; and "fmt" fields MUST be set to exactly match the fields in the offer.</p>
 <p id="rfc.section.5.3.1.p.12">Within the data m= section, the "a=mid", "a=ice-ufrag", "a=ice-pwd", "a=candidate", "a=fingerprint", and "a=setup" lines MUST be included as mentioned above, along with an "a=fmtp:webrtc-datachannel" line and an "a=sctp-port" line referencing the SCTP port number as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.  </p>
@@ -1088,83 +1061,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>Each "m=" and c=" line MUST be filled in with the port and address of the default candidate for the m= section, as described in <a href="#RFC5245">[RFC5245]</a>, Section 4.3. Note, however, that the m= line protocol need not match the default candidate, because this protocol value must instead match what was supplied in the offer, as described above. Each "a=rtcp" attribute line MUST also be filled in with the port and address of the appropriate default candidate, either the default RTP or RTCP candidate, depending on whether RTCP multiplexing is enabled in the answer. In each case, if no candidates of the desired type have yet been gathered, dummy values MUST be used, as described in the initial answer section above.</li>
   <li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the m= section is restarting, in which case new ICE credentials must be created as specified in <a href="#RFC5245">[RFC5245]</a>, Section 9.2.1.1.  If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.  </li>
   <li>If the m= section is not bundled into another m= section, for each candidate that has been gathered during the most recent gathering phase (see <a href="#sec.ice-gather-overview">Section 3.5.1</a>), an "a=candidate" line MUST be added, as defined in <a href="#RFC5245">[RFC5245]</a>, Section 4.3., paragraph 3.  If candidate gathering for the section has completed, an "a=end-of-candidates" attribute MUST be added, as described in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 9.3.  If the m= section is bundled into another m= section, both "a=candidate" and "a=end-of-candidates" MUST be omitted.  </li>
-  <li>For RtpTransceivers that are not stopped, the "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</li>
+  <li>For MediaStreamTracks that are still present, the "a=msid", "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</li>
 </ul>
 
 <p> </p>
 <h3 id="rfc.section.5.3.3"><a href="#rfc.section.5.3.3">5.3.3.</a> <a href="#sec.options-handling2" id="sec.options-handling2">Options Handling</a></h3>
-<p id="rfc.section.5.3.3.p.1">The createAnswer method takes as a parameter an RTCAnswerOptions object. The set of parameters for RTCAnswerOptions is different than those supported in RTCOfferOptions; the IceRestart option is unnecessary, as ICE credentials will automatically be changed for all m= lines where the offerer chose to perform ICE restart.</p>
+<p id="rfc.section.5.3.3.p.1">The createAnswer method takes as a parameter an RTCAnswerOptions object. The set of parameters for RTCAnswerOptions is different than those supported in RTCOfferOptions; the OfferToReceiveAudio, OfferToReceiveVideo, and IceRestart options mentioned in <a href="#sec.options-handling1">Section 5.2.3</a> are meaningless in the context of generating an answer, as there is no need to generate extra m= lines in an answer, and ICE credentials will automatically be changed for all m= lines where the offerer chose to perform ICE restart.</p>
 <p id="rfc.section.5.3.3.p.2">The following options are supported in RTCAnswerOptions.</p>
 <h4 id="rfc.section.5.3.3.1"><a href="#rfc.section.5.3.3.1">5.3.3.1.</a> <a href="#sec.voiceactivitydetection2" id="sec.voiceactivitydetection2">VoiceActivityDetection</a></h4>
-<p id="rfc.section.5.3.3.1.p.1">Silence suppression in the answer is handled as described in <a href="#sec.voiceactivitydetection1">Section 5.2.3.2</a>, with one exception: if support for silence suppression was not indicated in the offer, the VoiceActivityDetection parameter has no effect, and the answer should be generated as if VoiceActivityDetection was set to false. This is done on a per-codec basis (e.g., if the offerer somehow offered support for CN but set "usedtx=0" for Opus, setting VoiceActivityDetection to true would result in an answer with CN codecs and "usedtx=0").  </p>
-<h3 id="rfc.section.5.3.4"><a href="#rfc.section.5.3.4">5.3.4.</a> <a href="#sec.answer-dirattr" id="sec.answer-dirattr">Direction Attribute in Answers</a></h3>
-<p><a href="#RFC3264">[RFC3264]</a> direction attributes (defined in Section 6.1) in answers are chosen according to the direction attribute in the remote offer and the states of the RtpSender and RtpReceiver of the corresponding RtpTransceiver, as follows: </p>
-<table cellpadding="3" cellspacing="0" class="tt full center">
-  <thead>
-    <tr>
-      <th class="center">offer direction</th>
-      <th class="center">RtpSender</th>
-      <th class="center">RtpReceiver</th>
-      <th class="center">answer direction</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="center">sendrecv</td>
-      <td class="center">active</td>
-      <td class="center">active</td>
-      <td class="center">sendrecv</td>
-    </tr>
-    <tr>
-      <td class="center">sendrecv</td>
-      <td class="center">active</td>
-      <td class="center">inactive</td>
-      <td class="center">sendonly</td>
-    </tr>
-    <tr>
-      <td class="center">sendrecv</td>
-      <td class="center">inactive</td>
-      <td class="center">active</td>
-      <td class="center">recvonly</td>
-    </tr>
-    <tr>
-      <td class="center">sendrecv</td>
-      <td class="center">inactive</td>
-      <td class="center">inactive</td>
-      <td class="center">inactive</td>
-    </tr>
-    <tr>
-      <td class="center">sendonly</td>
-      <td class="center">*</td>
-      <td class="center">active</td>
-      <td class="center">recvonly</td>
-    </tr>
-    <tr>
-      <td class="center">sendonly</td>
-      <td class="center">*</td>
-      <td class="center">inactive</td>
-      <td class="center">inactive</td>
-    </tr>
-    <tr>
-      <td class="center">recvonly</td>
-      <td class="center">active</td>
-      <td class="center">*</td>
-      <td class="center">sendonly</td>
-    </tr>
-    <tr>
-      <td class="center">recvonly</td>
-      <td class="center">inactive</td>
-      <td class="center">*</td>
-      <td class="center">inactive</td>
-    </tr>
-    <tr>
-      <td class="center">inactive</td>
-      <td class="center">*</td>
-      <td class="center">*</td>
-      <td class="center">inactive</td>
-    </tr>
-  </tbody>
-</table>
+<p id="rfc.section.5.3.3.1.p.1">Silence suppression in the answer is handled as described in <a href="#sec.voiceactivitydetection1">Section 5.2.3.4</a>, with one exception: if support for silence suppression was not indicated in the offer, the VoiceActivityDetection parameter has no effect, and the answer should be generated as if VoiceActivityDetection was set to false. This is done on a per-codec basis (e.g., if the offerer somehow offered support for CN but set "usedtx=0" for Opus, setting VoiceActivityDetection to true would result in an answer with CN codecs and "usedtx=0").  </p>
 <h2 id="rfc.section.5.4"><a href="#rfc.section.5.4">5.4.</a> <a href="#sec.processing-a-local-desc" id="sec.processing-a-local-desc">Processing a Local Description</a></h2>
 <p id="rfc.section.5.4.p.1">When a SessionDescription is supplied to setLocalDescription, the following steps MUST be performed: </p>
 
@@ -2352,7 +2257,17 @@ a=rtcp-fb:100 nack pli
 </table>
 <h1 id="rfc.appendix.A"><a href="#rfc.appendix.A">Appendix A.</a> <a href="#sec.change-log" id="sec.change-log">Change log</a></h1>
 <p id="rfc.section.A.p.1">Note: This section will be removed by RFC Editor before publication. </p>
-<p id="rfc.section.A.p.2">Changes in draft-13:</p>
+<p id="rfc.section.A.p.2">Changes in draft-14:</p>
+<p/>
+
+<ul>
+  <li>Added discussion of RtpTransceivers + RtpSenders + RtpReceivers, and how they interact with createOffer/createAnswer.</li>
+  <li>Removed obsolete OfferToReceiveX options.</li>
+  <li>Explained how addIceCandidate can be used for end-of-candidates.</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.A.p.4">Changes in draft-13:</p>
 <p/>
 
 <ul>
@@ -2376,7 +2291,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.4">Changes in draft-12:</p>
+<p id="rfc.section.A.p.6">Changes in draft-12:</p>
 <p/>
 
 <ul>
@@ -2390,7 +2305,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.6">Changes in draft-11:</p>
+<p id="rfc.section.A.p.8">Changes in draft-11:</p>
 <p/>
 
 <ul>
@@ -2400,7 +2315,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.8">Changes in draft-10:</p>
+<p id="rfc.section.A.p.10">Changes in draft-10:</p>
 <p/>
 
 <ul>
@@ -2408,7 +2323,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.10">Changes in draft-09:</p>
+<p id="rfc.section.A.p.12">Changes in draft-09:</p>
 <p/>
 
 <ul>
@@ -2422,7 +2337,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.12">Changes in draft-08: </p>
+<p id="rfc.section.A.p.14">Changes in draft-08: </p>
 
 <ul>
   <li>Added new example section and removed old examples in appendix. </li>
@@ -2438,7 +2353,7 @@ a=rtcp-fb:100 nack pli
   <li>Some reference updates.</li>
   <li>Editorial clarification.</li>
 </ul>
-<p id="rfc.section.A.p.13">Changes in draft-07: </p>
+<p id="rfc.section.A.p.15">Changes in draft-07: </p>
 
 <ul>
   <li>Expanded discussion of VAD and Opus DTX.</li>
@@ -2454,7 +2369,7 @@ a=rtcp-fb:100 nack pli
   <li>Cleaned up references.</li>
   <li>Editorial cleanup</li>
 </ul>
-<p id="rfc.section.A.p.14">Changes in draft-06: </p>
+<p id="rfc.section.A.p.16">Changes in draft-06: </p>
 
 <ul>
   <li>Reworked handling of m= line recycling.</li>
@@ -2463,25 +2378,25 @@ a=rtcp-fb:100 nack pli
   <li>Added text describing the ICE Candidate Pool and its behavior.</li>
   <li>Allowed OfferToReceiveX to create multiple recvonly m= sections.  </li>
 </ul>
-<p id="rfc.section.A.p.15">Changes in draft-05: </p>
+<p id="rfc.section.A.p.17">Changes in draft-05: </p>
 
 <ul>
   <li>Fixed several issues identified in the createOffer/Answer sections during document review.</li>
   <li>Updated references.</li>
 </ul>
-<p id="rfc.section.A.p.16">Changes in draft-04: </p>
+<p id="rfc.section.A.p.18">Changes in draft-04: </p>
 
 <ul>
   <li>Filled in sections on createOffer and createAnswer.</li>
   <li>Added SDP examples.</li>
   <li>Fixed references.</li>
 </ul>
-<p id="rfc.section.A.p.17">Changes in draft-03: </p>
+<p id="rfc.section.A.p.19">Changes in draft-03: </p>
 
 <ul>
   <li>Added text describing relationship to W3C specification</li>
 </ul>
-<p id="rfc.section.A.p.18">Changes in draft-02: </p>
+<p id="rfc.section.A.p.20">Changes in draft-02: </p>
 
 <ul>
   <li>Converted from nroff</li>
@@ -2490,7 +2405,7 @@ a=rtcp-fb:100 nack pli
   <li>Align SDP handling with W3C draft</li>
   <li>Clarified section on forking.</li>
 </ul>
-<p id="rfc.section.A.p.19">Changes in draft-01: </p>
+<p id="rfc.section.A.p.21">Changes in draft-01: </p>
 
 <ul>
   <li>Added diagrams for architecture and state machine.</li>
@@ -2501,7 +2416,7 @@ a=rtcp-fb:100 nack pli
   <li>Updated suggested API and examples to match latest thinking.</li>
   <li>Suggested API and examples have been moved to an appendix.</li>
 </ul>
-<p id="rfc.section.A.p.20">Changes in draft -00: </p>
+<p id="rfc.section.A.p.22">Changes in draft -00: </p>
 
 <ul>
   <li>Migrated from draft-uberti-rtcweb-jsep-02.</li>
