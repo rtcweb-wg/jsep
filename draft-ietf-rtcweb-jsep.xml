@@ -1521,18 +1521,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The next step is to generate m= sections, as specified in
           <xref target="RFC4566"/> Section 5.14, for each
-          MediaStreamTrack that has been added to the PeerConnection via the
-          addStream method. (Note that this method takes a MediaStream, which
-          can contain multiple MediaStreamTracks, and therefore multiple m=
-          sections can be generated even if addStream is only called once.)
-          m=sections MUST be sorted first by the order in which the
-          MediaStreams were added to the PeerConnection, and
-          then by the alphabetical ordering of the media type for the MediaStreamTrack.
-          For example, if a MediaStream containing both an audio and a video
-          MediaStreamTrack is added to a PeerConnection, the resultant m=audio
-          section will precede the m=video section. If a second MediaStream
-          containing an audio MediaStreamTrack was added, it would follow
-          the m=video section.</t>
+          RtpTransceiver that has been added to the PeerConnection via
+          the addTrack or addTransceiver methods, excluding stopped
+          RtpTransceivers. m= sections are generated in the order that
+          their associated RtpTransceivers were added to the
+          PeerConnection.</t>
 
           <t>Each m= section, provided it is not marked as
           bundle-only, MUST generate a unique set of ICE credentials and gather
@@ -1581,11 +1574,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because
               no candidates have yet been gathered.</t>
 
-              <t>An "a=msid" line, as specified in <xref
-              target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
-
-              <t>An "a=sendrecv" line, as specified in <xref
-              target="RFC3264"></xref>, Section 5.1.</t>
+              <t>A direction attribute for the associated
+              RtpTransceiver as described by <xref
+              target="sec.offer-dirattr"></xref>.</t>
 
               <t>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as
               specified in <xref target="RFC4566"></xref>, Section 6.
@@ -1675,15 +1666,49 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               policy is set to "balanced", and this is not the first m= section
               for this media type, an "a=bundle-only" line.</t>
 
-              <t>If the RtpTransceiver's RtpSender is active, an "a=rid" line for each
-              encoding specified by the application in the RtpSenders's parameters.
-              If no encodings have been specified, then a single "a=rid" line is generated.
-              The "a=rid" line is specified in <xref target="I-D.ietf-mmusic-rid"></xref>, and its direction MUST be "send".  If the application has chosen a RID
+              <t>If the RtpTransceiver's RtpSender is active:
+                <list style="symbols">
+                  <t>An "a=msid" line, as specified in <xref target=
+                  "I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
+
+                  <t>An "a=ssrc" line, as specified in <xref target=
+                  "RFC5576"></xref>, Section 4.1, indicating the SSRC to
+                  be used for sending media, along with the mandatory
+                  "cname" source attribute, as specified in Section 6.1,
+                  indicating the CNAME for the source. The CNAME MUST be
+                  generated in accordance with Section 4.9 of
+                  <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
+
+                  <t>If RTX is supported for this media type, another
+                  "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group"
+                  line, as specified in <xref target="RFC5576"></xref>,
+                  section 4.2, with semantics set to "FID" and including
+                  the primary and RTX SSRCs.</t>
+
+                  <t>If FEC is supported for this media type, another
+                  "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group"
+                  line with semantics set to "FEC-FR" and including the
+                  primary and FEC SSRCs, as specified in <xref target=
+                  "RFC5956"></xref>, section 4.3. For simplicity, if both
+                  RTX and FEC are supported, the FEC SSRC MUST be the
+                  same as the RTX SSRC.</t>
+                </list>
+              </t>
+
+              <t>If the RtpTransceiver's RtpSender is active, and the
+              application has specified RID values or has specified more
+              than one encoding in the RtpSenders's parameters,
+              an "a=rid" line for each encoding specified.
+              The "a=rid" line is specified in <xref target="I-D.ietf-mmusic-rid"></xref>,
+              and its direction MUST be "send".  If the application has chosen a RID
               value, it MUST be used as the rid-identifier; otherwise a RID value MUST
               be generated by the implementation.  When generating RID values, it is
               RECOMMENDED that the values be 3 bytes or less, to allow them to
               efficiently fit into the RTP header extension defined in <xref
-              target="I-D.ietf-avtext-rid"></xref>, Section 11.</t>
+              target="I-D.ietf-avtext-rid"></xref>, Section 11.
+              If no encodings have been specified or one encoding is specified
+              but without a RID value, then no "a=rid" lines are
+              generated.</t>
 
               <t>If the RtpTransceiver's RtpSender is active and more than one
               "a=rid" line has been generated, an "a=simulcast" line, with
@@ -1692,7 +1717,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               list of RIDs MUST include all of the RID identifiers used in the
               "a=rid" lines for this m= section.
               </t>
-          </list></t>
+            </list>
+          </t>
 
           <t>Lastly, if a data channel has been created, a m= section MUST be
           generated for data. The &lt;media&gt; field MUST be set to
@@ -1718,11 +1744,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           or not depends on the bundle policy.
           </t>
 
-          <t>The next step is to generate session-level lip sync groups as
-          defined in <xref target="RFC5888"/>, Section 7.  For each MediaStream
-          with more than one MediaStreamTrack, a group of type "LS" MUST be
-          added that contains the mid values for each MediaStreamTrack in that
-          MediaStream. </t>
+          <t>The next step is to generate session-level lip sync
+          groups as defined in <xref target="RFC5888"/>, Section
+          7. For each MediaStream referenced by more than one
+          RtpTransceiver, a group of type "LS" MUST be added that
+          contains the mid values for each RtpTransceiver.</t>
 
           <t>Attributes which SDP permits to either be at the session
           level or the media level SHOULD generally be at the media
@@ -1777,6 +1803,31 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           with these exceptions: <list style="symbols">
               <t>The "s=" and "t=" lines MUST stay the same.</t>
 
+              <t>If any RtpTransceiver has been added, and there
+              exists an m= section with a zero port in the current
+              local description or the current remote description,
+              that m= section MUST be recycled by generating an m=
+              section for the added RtpTransceiver as if the m=
+              section were being added to session description, placed at
+              the same index as the m= section with a zero port.</t>
+
+              <t>If an RtpTransceiver is stopped and is not associated
+              with an m= section, an m= section MUST NOT be generated for it.
+              This prevents adding back RtpTransceivers whose m= sections were
+              recycled and used for a new RtpTransceiver in a previous offer/
+              answer exchange, as described above.</t>
+
+              <t>If an RtpTransceiver has been stopped and is associated
+              with an m= section, and the m= section is not being recycled
+              as described above, an m= section MUST be generated for it
+              with the port set to zero and the "a=msid", "a=ssrc", and
+              "a=ssrc-group" lines removed.</t>
+
+              <t>For RtpTransceivers that are not stopped, the "a=msid",
+              "a=ssrc", and "a=ssrc-group" lines MUST stay the same if
+              they are present in the current description.</t>
+
+
               <t>Each "m=" and c=" line MUST be filled in with the port, protocol,
               and address of the default candidate for the m= section, as described
               in <xref target="RFC5245"></xref>, Section 4.3. If ICE checking
@@ -1818,8 +1869,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               "a=candidate" and "a=end-of-candidates" MUST be omitted.
               </t>
 
-              <t>For MediaStreamTracks that are still present, the "a=msid",
-              "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</t>
+              <t>For RtpTransceivers with an RtpSender that is still
+              active, the "a=msid", "a=ssrc", and "a=ssrc-group" lines
+              MUST stay the same.</t>
 
               <t>For RtpTransceivers that are still present, the
               "a=rid" lines MUST stay the same.</t>
@@ -1827,23 +1879,26 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>For RtpTransceivers that are still present, any
               "a=simulcast" line MUST stay the same.</t>
 
-              <t>If any MediaStreamTracks have been removed, either through
-              the removeStream method or by removing them from an added
-              MediaStream, their m= sections MUST be marked as recvonly by
-              changing the value of the <xref target="RFC3264"></xref>
-              directional attribute to "a=recvonly". The "a=msid", "a=ssrc",
-              and "a=ssrc-group" lines MUST be removed from the associated m=
-              sections.</t>
+              <t>The directional attribute MAY change, depending on
+              the active state of the RtpSender or RtpReceiver, and
+              MUST have the value specified for initial offers in
+              <xref target="sec.initial-offers"></xref>.</t>
 
-              <t>If any MediaStreamTracks have been added, and there exist
-              m= sections of the appropriate media type with no associated
-              MediaStreamTracks (i.e. as described in the preceding paragraph),
-              those m= sections MUST be recycled by adding the new
-              MediaStreamTrack to the m= section. This is done by adding the
-              necessary "a=msid", "a=ssrc", and "a=ssrc-group" lines to the
-              recycled m= section, and removing the "a=recvonly" attribute.
-              </t>
-            </list></t>
+              <t>If any RtpTransceiver has been stopped, the port
+              MUST be set to zero and the "a=msid", "a=ssrc", and
+              "a=ssrc-group" lines MUST be removed.</t>
+
+              <t>If any RtpTransceiver has been added, and there
+              exists a m= section with a zero port in the current
+              local description or the current remote description,
+              that m= section MUST be recycled by generating a m=
+              section for the added RtpTransceiver as if the m=
+              section were being added to session description, except
+              that instead of adding it, the generated m= section
+              replaces the m= section with a zero port.
+          </t>
+            </list>
+      </t>
 
           <t>If the initial offer was applied using setLocalDescription, and
           an answer from the remote side has been applied using
@@ -1903,7 +1958,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             contain all m= sections that were previously bundled, as long as
             they are still alive, as well as any new m= sections.</t>
 
-            <t>The "LS" groups are generated in the same way as with initial offers.</t>
+        <t>The "LS" groups are generated in the same way as with initial offers.</t>
 
         </section>
 
@@ -1911,54 +1966,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The createOffer method takes as a parameter an RTCOfferOptions
           object. Special processing is performed when generating a SDP
           description if the following options are present.</t>
-
-          <section title="OfferToReceiveAudio" anchor="sec.offertoreceiveaudio">
-            <t>If the "OfferToReceiveAudio" option is specified, with an integer
-            value of N, and M audio MediaStreamTracks have been added to the
-            PeerConnection, the offer MUST include N non-rejected m= sections
-            with media type "audio", even if N is greater than M.
-            This allows the offerer to receive audio, including multiple independent
-            streams, even when not sending it; accordingly, the directional
-            attribute on the N-M audio m= sections without associated
-            MediaStreamTracks MUST be set to recvonly.</t>
-            <t>If N is set to a value less than M, the offer MUST mark the
-            m= sections associated with the M-N most recently added
-            (since the last setLocalDescription) MediaStreamTracks as sendonly.
-            This allows the offerer to indicate that it does not want to receive
-            audio on some or all of its newly created streams.
-            For m= sections that have previously
-            been negotiated, this setting has no effect. [TODO: refer to
-            RTCRtpSender in the future]
-            </t>
-            <t>For backwards compatibility with pre-standard
-            versions of this specification, a value of "true"
-            is interpreted as equivalent to N=1, and "false" as N=0.
-            </t>
-          </section>
-
-          <section title="OfferToReceiveVideo" anchor="sec.offertoreceivevideo">
-            <t>If the "OfferToReceiveVideo" option is specified, with an integer
-            value of N, and M video MediaStreamTracks have been added to the
-            PeerConnection, the offer MUST include N non-rejected m= sections
-            with media type "video", even if N is greater than M.
-            This allows the offerer to receive video, including multiple independent
-            streams, even when not sending it; accordingly, the directional
-            attribute on the N-M video m= sections without associated
-            MediaStreamTracks MUST be set to recvonly.</t>
-            <t>If N is set to a value less than M, the offer MUST mark the
-            m= sections associated with the M-N most recently added
-            (since the last setLocalDescription) MediaStreamTracks as sendonly.
-            This allows the offerer to indicate that it does not want to receive
-            video on some or all of its newly created streams.
-            For m= sections that have previously
-            been negotiated, this setting has no effect. [TODO: refer to
-            RTCRtpSender in the future]
-            </t>
-            <t>For backwards compatibility with pre-standard
-            versions of this specification, a value of "true"
-            is interpreted as equivalent to N=1, and "false" as N=0.
-            </t>
-          </section>
 
           <section title="IceRestart" anchor="sec.icerestart">
             <t>If the "IceRestart" option is specified, with a value of
@@ -2006,6 +2013,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             target="RFC6464"></xref>, Section 4. </t>
           </section>
         </section>
+
+        <section title="Direction Attribute in Offers" anchor="sec.offer-dirattr">
+          <t>
+            <xref target="RFC3264"></xref> direction attributes
+            (defined in Section 6.1) in offers are chosen according to
+            the states of the RtpSender and RtpReceiver of a given
+            RtpTransceiver, as follows:
+          </t>
+
+          <texttable>
+            <ttcol align='center'>RtpSender</ttcol>
+            <ttcol align='center'>RtpReceiver</ttcol>
+            <ttcol align='center'>offer direction</ttcol>
+            <c>active</c><c>active</c><c>sendrecv</c>
+            <c>active</c><c>inactive</c><c>sendonly</c>
+            <c>inactive</c><c>active</c><c>recvonly</c>
+            <c>inactive</c><c>inactive</c><c>inactive</c>
+          </texttable>
+        </section>
       </section>
 
       <section title="Generating an Answer" anchor="sec.generating-an-answer">
@@ -2036,18 +2062,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <xref target="I-D.ietf-ice-trickle"></xref>, Section
           4, is only included if such an option was present in the offer.</t>
 
-          <t>The next step is to generate lip sync groups as defined
-          in <xref target="RFC5888"/>, Section 7.  For each
-          MediaStream with more than one MediaStreamTrack, a group
-          of type "LS" MUST be added that contains the mid values for
-          each MediaStreamTrack in that MediaStream. In some cases
-          this may result in adding a mid to a given LS group that
-          was not in that LS group in the associated offer. Although
-          this is not allowed by <xref target="RFC5888"/>, it is
-          allowed when implementing this specification.
-              [[OPEN ISSUE: This is still under discussion. See:
-              https://github.com/rtcweb-wg/jsep/issues/162.]]
-              </t>
+      <t>The next step is to generate lip sync groups as defined
+      in <xref target="RFC5888"/>, Section 7.  For each
+      MediaStream with more than one referenced RtpTransceiver, a group
+      of type "LS" MUST be added that contains the mid values for
+      each RtpTransceiver added with that MediaStream. In some cases
+      this may result in adding a mid to a given LS group that
+      was not in that LS group in the associated offer. Although
+      this is not allowed by <xref target="RFC5888"/>, it is
+      allowed when implementing this specification.
+
+          [[OPEN ISSUE: This is still under discussion. See:
+          https://github.com/rtcweb-wg/jsep/issues/162.]]</t>
 
           <t>The next step is to generate m= sections for each m= section that
           is present in the remote offer, as specified in <xref
@@ -2057,23 +2083,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           each m= section.</t>
 
           <t>The next step is to go through each offered m= section.
-          If there is a local MediaStreamTrack of the same type which has been
-          added to the PeerConnection via addStream and not yet associated
-          with a m= section, and the specific m= section is either sendrecv or
-          recvonly, the MediaStreamTrack will be associated with the m=
-          section at this time. MediaStreamTracks are assigned to m=
-          sections using the canonical order described in
-          <xref target="sec.initial-offers"/>. If there are more m= sections of a certain
-          type than MediaStreamTracks, some m= sections will not have an
-          associated MediaStreamTrack. If there are more MediaStreamTracks of
-          a certain type than compatible m= sections, only the first N
-          MediaStreamTracks will be able to be associated in the constructed
-          answer. The remainder will need to be associated in a subsequent
+          Each offered m= section will have an associated
+          RtpTransceiver, as described in <xref
+          target="sec.applying-a-remote-desc"/>.  If there are more
+          RtpTransceivers than there are m= sections, the unmatched
+          RtpTransceivers will need to be associated in a subsequent
           offer.</t>
 
-          <t>For each offered m= section, if the associated remote
-          MediaStreamTrack has been stopped, and is therefore in state "ended",
-          and no local MediaStreamTrack has been associated, the corresponding
+          <t>For each offered m= section, if the associated
+          RtpTransceiver has been stopped, the corresponding
           m= section in the answer MUST be marked as rejected by setting the
           port in the m= line to zero, as indicated in
           <xref target="RFC3264"></xref>, Section 6., and further processing for
@@ -2113,23 +2131,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because
               no candidates have yet been gathered.</t>
 
-              <t>If a local MediaStreamTrack has been associated, an "a=msid"
-              line, as specified in <xref
-              target="I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
-
-              <t>Depending on the directionality of the offer, the disposition
-              of any associated remote MediaStreamTrack, and the presence of an
-              associated local MediaStreamTrack, the appropriate directionality
-              attribute, as specified in <xref target="RFC3264"></xref>,
-              Section 6.1. If the offer was sendrecv, and the remote
-              MediaStreamTrack is still "live", and there is a local
-              MediaStreamTrack that has been associated, the directionality MUST be
-              set as sendrecv. If the offer was sendonly, and the remote
-              MediaStreamTrack is still "live", the directionality MUST be set
-              as recvonly. If the offer was recvonly, and a local
-              MediaStreamTrack has been associated, the directionality MUST be
-              set as sendonly. If the offer was inactive, the directionality
-              MUST be set as inactive.</t>
+              <t>A direction attribute for the associated
+              RtpTransceiver described by <xref
+              target="sec.answer-dirattr"></xref>.</t>
 
               <t>For each supported codec that is present in the offer,
               "a=rtpmap" and "a=fmtp" lines, as specified in <xref
@@ -2205,28 +2209,34 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               mechanisms that SHOULD/MUST be supported is specified in <xref
               target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section 5.1.</t>
 
-              <t>If a local MediaStreamTrack has been associated, an "a=ssrc"
-              line, as specified in <xref target="RFC5576"></xref>, Section
-              4.1, indicating the SSRC to be used for sending media, along with
-              the mandatory "cname" source attribute, as specified in Section
-              6.1, indicating the CNAME for the source.
-              The CNAME MUST be generated in accordance with
-              Section 4.9 of <xref
-              target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
+              <t>If the RtpTransceiver's RtpSender is active:
+                <list style="symbols">
+                  <t>An "a=msid" line, as specified in <xref target=
+                  "I-D.ietf-mmusic-msid"></xref>, Section 2.</t>
 
-              <t>If a local MediaStreamTrack has been associated, and RTX has
-              been negotiated for this m= section, another "a=ssrc" line with
-              the RTX SSRC, and an "a=ssrc-group" line, as specified in <xref
-              target="RFC5576"></xref>, section 4.2, with semantics set to
-              "FID" and including the primary and RTX SSRCs.</t>
+                  <t>An "a=ssrc" line, as specified in <xref target=
+                  "RFC5576"></xref>, Section 4.1, indicating the SSRC to
+                  be used for sending media, along with the mandatory
+                  "cname" source attribute, as specified in Section 6.1,
+                  indicating the CNAME for the source. The CNAME MUST be
+                  generated in accordance with Section 4.9 of <xref
+                  target="I-D.ietf-rtcweb-rtp-usage"></xref>.</t>
 
-              <t>If a local MediaStreamTrack has been associated, and FEC has
-              been negotiated for this m= section, another "a=ssrc" line with
-              the FEC SSRC, and an "a=ssrc-group" line with semantics set to
-              "FEC-FR" and including the primary and FEC SSRCs, as specified in
-              <xref target="RFC5956"></xref>, section 4.3. For
-              simplicity, if both RTX and FEC are supported, the FEC SSRC
-              MUST be the same as the RTX SSRC.</t>
+                  <t>If RTX has been negotiated for this m= section,
+                  another "a=ssrc" line with the RTX SSRC, and an
+                  "a=ssrc-group" line, as specified in <xref target=
+                  "RFC5576"></xref>, section 4.2, with semantics set to
+                  "FID" and including the primary and RTX SSRCs.</t>
+
+                  <t>If FEC has been negotiated for this m= section,
+                  another "a=ssrc" line with the FEC SSRC, and an
+                  "a=ssrc-group" line with semantics set to "FEC-FR" and
+                  including the primary and FEC SSRCs, as specified in
+                  <xref target="RFC5956"></xref>, section 4.3. For
+                  simplicity, if both RTX and FEC are supported, the FEC SSRC
+                  MUST be the same as the RTX SSRC.</t>
+                </list>
+              </t>
             </list></t>
 
           <t>If a data channel m= section has been offered, a m= section MUST
@@ -2315,8 +2325,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               "a=candidate" and "a=end-of-candidates" MUST be omitted.
               </t>
 
-              <t>For MediaStreamTracks that are still present, the "a=msid",
-              "a=ssrc", and "a=ssrc-group" lines MUST stay the same.</t>
+              <t>For RtpTransceivers that are not stopped, the "a=msid",
+              "a=ssrc", and "a=ssrc-group" lines MUST stay the same if
+              they are present in the remote description.</t>
             </list>
           </t>
         </section>
@@ -2324,11 +2335,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Options Handling" anchor="sec.options-handling2">
           <t>The createAnswer method takes as a parameter an RTCAnswerOptions
           object. The set of parameters for RTCAnswerOptions is different than
-          those supported in RTCOfferOptions;
-          the OfferToReceiveAudio, OfferToReceiveVideo, and IceRestart
-          options mentioned in <xref target="sec.options-handling1"></xref> are
-          meaningless in the context of generating an answer, as there is no need
-          to generate extra m= lines in an answer, and ICE credentials
+          those supported in RTCOfferOptions; the IceRestart
+          option is unnecessary, as ICE credentials
           will automatically be changed for all m= lines where the offerer chose
           to perform ICE restart.</t>
           <t>The following options are supported in RTCAnswerOptions.</t>
@@ -2345,6 +2353,34 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               and "usedtx=0").
             </t>
           </section>
+        </section>
+
+        <section title="Direction Attribute in Answers" anchor="sec.answer-dirattr">
+          <t>
+            <xref target="RFC3264"></xref> direction attributes
+            (defined in Section 6.1) in answers are chosen according to the
+            direction attribute in the remote offer and the states
+            of the RtpSender and RtpReceiver of the corresponding
+            RtpTransceiver, as follows:
+          </t>
+          <texttable>
+            <ttcol align='center'>offer direction</ttcol>
+            <ttcol align='center'>RtpSender</ttcol>
+            <ttcol align='center'>RtpReceiver</ttcol>
+            <ttcol align='center'>answer direction</ttcol>
+            <c>sendrecv</c><c>active</c><c>active</c><c>sendrecv</c>
+            <c>sendrecv</c><c>active</c><c>inactive</c><c>sendonly</c>
+            <c>sendrecv</c><c>inactive</c><c>active</c><c>recvonly</c>
+            <c>sendrecv</c><c>inactive</c><c>inactive</c><c>inactive</c>
+
+            <c>sendonly</c><c>*</c><c>active</c><c>recvonly</c>
+            <c>sendonly</c><c>*</c><c>inactive</c><c>inactive</c>
+
+            <c>recvonly</c><c>active</c><c>*</c><c>sendonly</c>
+            <c>recvonly</c><c>inactive</c><c>*</c><c>inactive</c>
+
+            <c>inactive</c><c>*</c><c>*</c><c>inactive</c>
+          </texttable>
         </section>
       </section>
 
