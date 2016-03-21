@@ -1780,12 +1780,12 @@ Internet-Draft                    JSEP                        March 2016
       as specified in [I-D.ietf-ice-trickle], Section 4.
 
    The next step is to generate m= sections, as specified in [RFC4566]
-   Section 5.14, for each RtpTransceiver that has been added to the
-   PeerConnection via the addTrack or addTransceiver methods, excluding
-   stopped RtpTransceivers that are not associated with an m= section
-   (either due to an m= section being recycled or an RtpTransceiver
-   having been stopped before being associated with an m= section), m=
-
+   Section 5.14.  An m= section is generated for each RtpTransceiver
+   that has been added to the PeerConnection via the addTrack,
+   addTransceiver, and setRemoteDescription methods.  This is done in
+   the order that their associated RtpTransceivers were added to the
+   PeerConnection and excludes RtpTranscievers that are stopped and not
+   associated with an m= section (either due to an m= section being
 
 
 
@@ -1794,8 +1794,8 @@ Uberti, et al.         Expires September 10, 2016              [Page 32]
 Internet-Draft                    JSEP                        March 2016
 
 
-   sections are generated in the order that their associated
-   RtpTransceivers were added to the PeerConnection.
+   recycled or an RtpTransceiver having been stopped before being
+   associated with an m= section) .
 
    Each m= section, provided it is not marked as bundle-only, MUST
    generate a unique set of ICE credentials and gather its own unique
@@ -2589,8 +2589,7 @@ Internet-Draft                    JSEP                        March 2016
       omitted.
 
    o  For RtpTransceivers that are not stopped, the "a=msid", "a=ssrc",
-      and "a=ssrc-group" lines MUST stay the same if they are present in
-      the remote description.
+      and "a=ssrc-group" lines MUST stay the same.
 
 5.3.3.  Options Handling
 
@@ -2620,6 +2619,7 @@ Internet-Draft                    JSEP                        March 2016
    are chosen according to the direction attribute in the remote offer
    and the states of the RtpSender and RtpReceiver of the corresponding
    RtpTransceiver, as follows:
+
 
 
 
