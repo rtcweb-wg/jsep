@@ -1,4 +1,4 @@
-PUSH_GHPAGES_BRANCHES = false
+PUSH_GHPAGES_BRANCHES=false
 
 include lib/main.mk
 
@@ -9,3 +9,4 @@ ifneq (,$(shell git submodule status lib 2>/dev/null))
 else
 	git clone --depth 10 -b master https://github.com/ekr/i-d-template.git lib
 endif
+
