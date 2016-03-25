@@ -355,7 +355,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2016-3-9" />
+  <meta name="dct.issued" scheme="ISO8601" content="2016-3-25" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -379,7 +379,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: September 10, 2016</td>
+  <td class="left">Expires: September 26, 2016</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -392,7 +392,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">March 9, 2016</td>
+  <td class="right">March 25, 2016</td>
 </tr>
 
     	
@@ -412,7 +412,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on September 10, 2016.</p>
+<p>This Internet-Draft will expire on September 26, 2016.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -636,7 +636,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </pre>
 <p id="rfc.section.3.5.2.1.p.3">The IceCandidate object also contains fields to indicate which m= line it should be associated with. The m= line can be identified in one of two ways; either by a m= line index, or a MID.  The m= line index is a zero-based index, with index N referring to the N+1th m= line in the SDP sent by the entity which sent the IceCandidate.  The MID uses the "media stream identification" attribute, as defined in <a href="#RFC5888">[RFC5888]</a>, Section 4, to identify the m= line.  JSEP implementations creating an ICE Candidate object MUST populate both of these fields. Implementations receiving an ICE Candidate object MUST use the MID if present, or the m= line index, if not (as it could have come from a non-JSEP endpoint).</p>
 <h3 id="rfc.section.3.5.3"><a href="#rfc.section.3.5.3">3.5.3.</a> <a href="#sec.ice-candidate-policy" id="sec.ice-candidate-policy">ICE Candidate Policy</a></h3>
-<p id="rfc.section.3.5.3.p.1">Typically, when gathering ICE candidates, the browser will gather all possible forms of initial candidates - host, server reflexive, and relay. However, in certain cases, applications may want to have more specific control over the gathering process, due to privacy or related concerns. For example, one may want to suppress the use of host candidates, to avoid exposing information about the local network, or go as far as only using relay candidates, to leak as little location information as possible (note that these choices come with corresponding operational costs). To accomplish this, the browser MUST allow the application to restrict which ICE candidates are used in a session. Note that this filtering is applied on top of any restrictions the browser chooses to enforce regarding which IP addresses are permitted for the application, as discussed in <a href="#I-D.shieh-rtcweb-ip-handling">[I-D.shieh-rtcweb-ip-handling]</a>.  </p>
+<p id="rfc.section.3.5.3.p.1">Typically, when gathering ICE candidates, the browser will gather all possible forms of initial candidates - host, server reflexive, and relay. However, in certain cases, applications may want to have more specific control over the gathering process, due to privacy or related concerns. For example, one may want to suppress the use of host candidates, to avoid exposing information about the local network, or go as far as only using relay candidates, to leak as little location information as possible (note that these choices come with corresponding operational costs). To accomplish this, the browser MUST allow the application to restrict which ICE candidates are used in a session. Note that this filtering is applied on top of any restrictions the browser chooses to enforce regarding which IP addresses are permitted for the application, as discussed in <a href="#I-D.ietf-rtcweb-ip-handling">[I-D.ietf-rtcweb-ip-handling]</a>.  </p>
 <p id="rfc.section.3.5.3.p.2">There may also be cases where the application wants to change which types of candidates are used while the session is active. A prime example is where a callee may initially want to use only relay candidates, to avoid leaking location information to an arbitrary caller, but then change to use all candidates (for lower operational cost) once the user has indicated they want to take the call. For this scenario, the browser MUST allow the candidate policy to be changed in mid-session, subject to the aforementioned interactions with local policy.</p>
 <p id="rfc.section.3.5.3.p.3">To administer the ICE candidate policy, the browser will determine the current setting at the start of each gathering phase.  Then, during the gathering phase, the browser MUST NOT expose candidates disallowed by the current policy to the application, use them as the source of connectivity checks, or indirectly expose them via other fields, such as the raddr/rport attributes for other ICE candidates.  Later, if a different policy is specified by the application, the application can apply it by kicking off a new gathering phase via an ICE restart.  </p>
 <h3 id="rfc.section.3.5.4"><a href="#rfc.section.3.5.4">3.5.4.</a> <a href="#sec.ice-candidate-pool" id="sec.ice-candidate-pool">ICE Candidate Pool</a></h3>
@@ -651,7 +651,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.3.6.1.p.3">Otherwise, an "a=imageattr" attribute is created with "recv" direction, and the resulting resolution space formed by intersecting the decoder limits and constraints is used to specify its minimum and maximum x= and y= values. If the intersection is the null set, i.e., there are no resolutions that are permitted by both the decoder and the mandatory constraints, this SHOULD be represented by x=0 and y=0 values.</p>
 <p id="rfc.section.3.6.1.p.4">The rules here express a single set of preferences, and therefore, the "a=imageattr" q= value is not important. It SHOULD be set to 1.0.</p>
 <p id="rfc.section.3.6.1.p.5">The "a=imageattr" field is payload type specific.  When all video codecs supported have the same capabilities, use of a single attribute, with the wildcard payload type (*), is RECOMMENDED.  However, when the supported video codecs have differing capabilities, specific "a=imageattr" attributes MUST be inserted for each payload type.  </p>
-<p id="rfc.section.3.6.1.p.6">As an example, consider a system with a HD-capable, multiformat video decoder, where the application has constrained the received track to at most 360p. In this case, the implemention would generate this attribute:</p>
+<p id="rfc.section.3.6.1.p.6">As an example, consider a system with a HD-capable, multiformat video decoder, where the application has constrained the received track to at most 360p. In this case, the implementation would generate this attribute:</p>
 <p id="rfc.section.3.6.1.p.7">a=imageattr:* recv [x=[16:640],y=[16:360],q=1.0]</p>
 <p id="rfc.section.3.6.1.p.8">This declaration indicates that the receiver is capable of decoding any image resolution from 16x16 up to 640x360 pixels.</p>
 <h3 id="rfc.section.3.6.2"><a href="#rfc.section.3.6.2">3.6.2.</a> Interpreting an imageattr Attribute</h3>
@@ -812,7 +812,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.1.p.1">JSEP implementations must comply with the specifications listed below that govern the creation and processing of offers and answers.  </p>
 <p id="rfc.section.5.1.p.2">The first set of specifications is the "mandatory-to-implement" set.  All implementations must support these behaviors, but may not use all of them if the remote side, which may not be a JSEP endpoint, does not support them.</p>
 <p id="rfc.section.5.1.p.3">The second set of specifications is the "mandatory-to-use" set.  The local JSEP endpoint and any remote endpoint must indicate support for these specifications in their session descriptions.</p>
-<h3 id="rfc.section.5.1.1"><a href="#rfc.section.5.1.1">5.1.1.</a> <a href="#sec.implementation-requiremen" id="sec.implementation-requiremen">Implementation Requirements</a></h3>
+<h3 id="rfc.section.5.1.1"><a href="#rfc.section.5.1.1">5.1.1.</a> <a href="#sec.implementation-requirements" id="sec.implementation-requirements">Implementation Requirements</a></h3>
 <p id="rfc.section.5.1.1.p.1">This list of mandatory-to-implement specifications is derived from the requirements outlined in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>.  </p>
 
 <dl>
@@ -1323,7 +1323,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC4572">[RFC4572]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
   <li>If present, a single "a=setup" line is parsed as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and the setup value is stored.</li>
   <li>Any "a=extmap" lines are parsed as specified in <a href="#RFC5285">[RFC5285]</a>, Section 5, and their values are stored.</li>
-  <li>TODO: identity, rtcp-rsize, rtcp-mux, and any other attribs valid at session level.</li>
+  <li>TODO: identity, rtcp-rsize, rtcp-mux, and any other attributes valid at session level.</li>
 </ul>
 
 <p> </p>
@@ -1350,7 +1350,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 
 <p> </p>
-<p id="rfc.section.5.6.2.p.5">If the "m=" proto value indicates use of RTP, as decribed in the <a href="#sec.profile-names">Section 5.1.3</a> section above, the following attribute lines MUST be processed: </p>
+<p id="rfc.section.5.6.2.p.5">If the "m=" proto value indicates use of RTP, as described in the <a href="#sec.profile-names">Section 5.1.3</a> section above, the following attribute lines MUST be processed: </p>
 
 <ul>
   <li>The "m=" fmt value MUST be parsed as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.14, and the individual values stored.</li>
@@ -1409,7 +1409,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
   <li>If this media section is new, begin gathering candidates for it, as defined in <a href="#RFC5245">[RFC5245]</a>, Section 4.1.1, unless it has been marked as bundle-only.</li>
   <li>Or, if the ICE ufrag and password values have changed, trigger the ICE Agent to start an ICE restart and begin gathering new candidates for the media section, as defined in <a href="#RFC5245">[RFC5245]</a>, Section 9.1.1.1, unless it has been marked as bundle-only.</li>
-  <li>If the media section proto value indicates use of RTP: <ul><li>If there is no RtpTransceiver associated with this m= section (which should only happen when applying an offer), find one and associate it with this m= section according to the following steps: <ul><li>Find the RtpTransceiver that corresponds to the m= section with the same MID in the created offer.</li><li>Set the value of the RtpTransceiver's mid attribute to the MID of the m= section.</li></ul><p> </p></li><li>If RTCP mux is indicated, prepare to demux RTP and RTCP from the RTP ICE component, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.1.  If RTCP mux is not indicated, but was indicated in a previous description, this MUST result in an error.</li><li>For each specified RTP header extension, establish a mapping between the extension ID and URI, as described in section 6 of <a href="#RFC5285">[RFC5285]</a>.  If any indicated RTP header extension is unknown, this MUST result in an error. </li><li>If the MID header extension is supported, prepare to demux RTP data intended for this media section based on the MID header extension, as described in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 3.2. </li><li>For each specified payload type, establish a mapping between the payload type ID and the actual media format, as descibed in <a href="#RFC3264">[RFC3264]</a>.  If any indicated payload type is unknown, this MUST result in an error.</li><li>For each specified "rtx" media format, establish a mapping between the RTX payload type and its associated primary payload type, as described in <a href="#RFC4588">[RFC4588]</a>, Sections 8.6 and 8.7. If any referenced primary payload types are not present, this MUST result in an error.</li><li>If the directional attribute is of type "sendrecv" or "recvonly", enable receipt and decoding of media.  </li></ul><p> </p></li>
+  <li>If the media section proto value indicates use of RTP: <ul><li>If there is no RtpTransceiver associated with this m= section (which should only happen when applying an offer), find one and associate it with this m= section according to the following steps: <ul><li>Find the RtpTransceiver that corresponds to the m= section with the same MID in the created offer.</li><li>Set the value of the RtpTransceiver's mid attribute to the MID of the m= section.</li></ul><p> </p></li><li>If RTCP mux is indicated, prepare to demux RTP and RTCP from the RTP ICE component, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.1.  If RTCP mux is not indicated, but was indicated in a previous description, this MUST result in an error.</li><li>For each specified RTP header extension, establish a mapping between the extension ID and URI, as described in section 6 of <a href="#RFC5285">[RFC5285]</a>.  If any indicated RTP header extension is unknown, this MUST result in an error. </li><li>If the MID header extension is supported, prepare to demux RTP data intended for this media section based on the MID header extension, as described in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 3.2. </li><li>For each specified payload type, establish a mapping between the payload type ID and the actual media format, as described in <a href="#RFC3264">[RFC3264]</a>.  If any indicated payload type is unknown, this MUST result in an error.</li><li>For each specified "rtx" media format, establish a mapping between the RTX payload type and its associated primary payload type, as described in <a href="#RFC4588">[RFC4588]</a>, Sections 8.6 and 8.7. If any referenced primary payload types are not present, this MUST result in an error.</li><li>If the directional attribute is of type "sendrecv" or "recvonly", enable receipt and decoding of media.  </li></ul><p> </p></li>
 </ul>
 
 <p> </p>
@@ -2266,15 +2266,15 @@ a=rtcp-fb:100 nack pli
     </tr>
     <tr>
       <td class="reference">
-        <b id="I-D.nandakumar-rtcweb-sdp">[I-D.nandakumar-rtcweb-sdp]</b>
+        <b id="I-D.ietf-rtcweb-ip-handling">[I-D.ietf-rtcweb-ip-handling]</b>
       </td>
-      <td class="top"><a>Nandakumar, S.</a> and <a>C. Jennings</a>, "<a href="http://tools.ietf.org/html/draft-nandakumar-rtcweb-sdp-02">SDP for the WebRTC</a>", Internet-Draft draft-nandakumar-rtcweb-sdp-02, July 2013.</td>
+      <td class="top"><a>Uberti, J.</a> and <a>G. Shieh</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-ip-handling-01">WebRTC IP Address Handling Recommendations</a>", Internet-Draft draft-ietf-rtcweb-ip-handling-01, March 2016.</td>
     </tr>
     <tr>
       <td class="reference">
-        <b id="I-D.shieh-rtcweb-ip-handling">[I-D.shieh-rtcweb-ip-handling]</b>
+        <b id="I-D.nandakumar-rtcweb-sdp">[I-D.nandakumar-rtcweb-sdp]</b>
       </td>
-      <td class="top"><a>Shieh, G.</a> and <a>J. Uberti</a>, "<a href="http://tools.ietf.org/html/draft-shieh-rtcweb-ip-handling-00">WebRTC IP Address Handling Recommendations</a>", Internet-Draft draft-shieh-rtcweb-ip-handling-00, October 2015.</td>
+      <td class="top"><a>Nandakumar, S.</a> and <a>C. Jennings</a>, "<a href="http://tools.ietf.org/html/draft-nandakumar-rtcweb-sdp-02">SDP for the WebRTC</a>", Internet-Draft draft-nandakumar-rtcweb-sdp-02, July 2013.</td>
     </tr>
     <tr>
       <td class="reference">
@@ -2352,7 +2352,15 @@ a=rtcp-fb:100 nack pli
 </table>
 <h1 id="rfc.appendix.A"><a href="#rfc.appendix.A">Appendix A.</a> <a href="#sec.change-log" id="sec.change-log">Change log</a></h1>
 <p id="rfc.section.A.p.1">Note: This section will be removed by RFC Editor before publication. </p>
-<p id="rfc.section.A.p.2">Changes in draft-14:</p>
+<p id="rfc.section.A.p.2">Changes in draft-15:</p>
+<p/>
+
+<ul>
+  <li>TODO</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.A.p.4">Changes in draft-14:</p>
 <p/>
 
 <ul>
@@ -2362,13 +2370,13 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.4">Changes in draft-13:</p>
+<p id="rfc.section.A.p.6">Changes in draft-13:</p>
 <p/>
 
 <ul>
   <li>Clarified which SDP lines can be ignored.</li>
   <li>Clarified how to handle various received attributes.</li>
-  <li>Revised how atttributes should be generated for bundled m= lines.</li>
+  <li>Revised how attributes should be generated for bundled m= lines.</li>
   <li>Remove unused references.</li>
   <li>Remove text advocating use of unilateral PTs.</li>
   <li>Trigger an ICE restart even if the ICE candidate policy is being made more strict.</li>
@@ -2386,7 +2394,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.6">Changes in draft-12:</p>
+<p id="rfc.section.A.p.8">Changes in draft-12:</p>
 <p/>
 
 <ul>
@@ -2400,7 +2408,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.8">Changes in draft-11:</p>
+<p id="rfc.section.A.p.10">Changes in draft-11:</p>
 <p/>
 
 <ul>
@@ -2410,7 +2418,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.10">Changes in draft-10:</p>
+<p id="rfc.section.A.p.12">Changes in draft-10:</p>
 <p/>
 
 <ul>
@@ -2418,7 +2426,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.12">Changes in draft-09:</p>
+<p id="rfc.section.A.p.14">Changes in draft-09:</p>
 <p/>
 
 <ul>
@@ -2432,7 +2440,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.14">Changes in draft-08: </p>
+<p id="rfc.section.A.p.16">Changes in draft-08: </p>
 
 <ul>
   <li>Added new example section and removed old examples in appendix. </li>
@@ -2448,7 +2456,7 @@ a=rtcp-fb:100 nack pli
   <li>Some reference updates.</li>
   <li>Editorial clarification.</li>
 </ul>
-<p id="rfc.section.A.p.15">Changes in draft-07: </p>
+<p id="rfc.section.A.p.17">Changes in draft-07: </p>
 
 <ul>
   <li>Expanded discussion of VAD and Opus DTX.</li>
@@ -2464,7 +2472,7 @@ a=rtcp-fb:100 nack pli
   <li>Cleaned up references.</li>
   <li>Editorial cleanup</li>
 </ul>
-<p id="rfc.section.A.p.16">Changes in draft-06: </p>
+<p id="rfc.section.A.p.18">Changes in draft-06: </p>
 
 <ul>
   <li>Reworked handling of m= line recycling.</li>
@@ -2473,25 +2481,25 @@ a=rtcp-fb:100 nack pli
   <li>Added text describing the ICE Candidate Pool and its behavior.</li>
   <li>Allowed OfferToReceiveX to create multiple recvonly m= sections.  </li>
 </ul>
-<p id="rfc.section.A.p.17">Changes in draft-05: </p>
+<p id="rfc.section.A.p.19">Changes in draft-05: </p>
 
 <ul>
   <li>Fixed several issues identified in the createOffer/Answer sections during document review.</li>
   <li>Updated references.</li>
 </ul>
-<p id="rfc.section.A.p.18">Changes in draft-04: </p>
+<p id="rfc.section.A.p.20">Changes in draft-04: </p>
 
 <ul>
   <li>Filled in sections on createOffer and createAnswer.</li>
   <li>Added SDP examples.</li>
   <li>Fixed references.</li>
 </ul>
-<p id="rfc.section.A.p.19">Changes in draft-03: </p>
+<p id="rfc.section.A.p.21">Changes in draft-03: </p>
 
 <ul>
   <li>Added text describing relationship to W3C specification</li>
 </ul>
-<p id="rfc.section.A.p.20">Changes in draft-02: </p>
+<p id="rfc.section.A.p.22">Changes in draft-02: </p>
 
 <ul>
   <li>Converted from nroff</li>
@@ -2500,7 +2508,7 @@ a=rtcp-fb:100 nack pli
   <li>Align SDP handling with W3C draft</li>
   <li>Clarified section on forking.</li>
 </ul>
-<p id="rfc.section.A.p.21">Changes in draft-01: </p>
+<p id="rfc.section.A.p.23">Changes in draft-01: </p>
 
 <ul>
   <li>Added diagrams for architecture and state machine.</li>
@@ -2511,7 +2519,7 @@ a=rtcp-fb:100 nack pli
   <li>Updated suggested API and examples to match latest thinking.</li>
   <li>Suggested API and examples have been moved to an appendix.</li>
 </ul>
-<p id="rfc.section.A.p.22">Changes in draft -00: </p>
+<p id="rfc.section.A.p.24">Changes in draft -00: </p>
 
 <ul>
   <li>Migrated from draft-uberti-rtcweb-jsep-02.</li>
