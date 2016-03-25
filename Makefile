@@ -1,4 +1,4 @@
-PUSH_GHPAGES_BRANCHES = false
+PUSH_GHPAGES_BRANCHES=false
 
 include lib/main.mk
 
