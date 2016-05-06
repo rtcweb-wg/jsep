@@ -2623,9 +2623,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
                     <t>The next step is to generate session-level lip
                     sync groups as defined in <xref target="RFC5888"/>,
-                    Section 7. For each group of type "LS" present in the offer, determine which of the RtpTransceivers referenced
-                    by the supplied mid values reference a common MediaStream.
-                    If at least two such RtpTransceivers exist, a group of type "LS" with the mids of these RtpTransceivers MUST be added. Otherwise, the offered group MUST be ignored.
+                    Section 7. For each group of type "LS" present in the offer,
+                    determine which of the local RtpTransceivers identified by
+                    the group's mid values reference a common local MediaStream
+                    (as specified in the addTrack and
+                    addTransceiver methods). If at least two such
+                    RtpTransceivers exist, a group of type "LS" with the mid
+                    values of these RtpTransceivers MUST be added. Otherwise,
+                    this indicates a difference of opinion between the offerer
+                    and answerer regarding lip sync status, and as such,
+                    the offered group MUST be ignored.
                     </t>
 
                     <t>The next step is to generate m= sections for each
