@@ -1102,7 +1102,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         bundle-only. This policy aims to minimize
                         candidate gathering and maximize multiplexing,
                         at the cost of less compatibility with legacy
-                        endpoints.</t>
+                        endpoints. When acting as answerer, the
+                        implementation will reject any m= section that
+                        is not in a bundle group.</t>
 
                     </list></t>
 
@@ -1126,9 +1128,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         <t hangText="require:">The browser will only
                         gather RTP candidates. This halves the number
                         of candidates that the offerer needs to gather.
-                        When acting as answerer, the browser will
-                        reject any m= section that does not provide an
-                        "a=rtcp-mux" attribute.</t>
+                        When acting as answerer, the implementation
+                        will reject any m= section that does not
+                        contain an "a=rtcp-mux" attribute.</t>
 
                     </list></t>
 
@@ -2667,21 +2669,26 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     sections, the unmatched RtpTransceivers will need
                     to be associated in a subsequent offer.</t>
 
-                    <t>For each offered m= section, if the associated
-                    RtpTransceiver has been stopped, the corresponding
+                    <t>For each offered m= section, if any of the
+                    following conditions are true, the corresponding
                     m= section in the answer MUST be marked as rejected
                     by setting the port in the m= line to zero, as
                     indicated in <xref target="RFC3264"></xref>, Section
                     6., and further processing for this m= section can
-                    be skipped.</t>
+                    be skipped:
+                    <list style="symbols">
+                      <t>The associated RtpTransceiver has been stopped.
+                      </t>
 
-                    <t>For each offered m= section, if no supported codec
-                    is present in the offer, the corresponding
-                    m= section in the answer MUST be marked as rejected
-                    by setting the port in the m= line to zero, as
-                    indicated in <xref target="RFC3264"></xref>, Section
-                    6., and further processing for this m= section can
-                    be skipped.</t>
+                      <t>No supported codec is present in the offer.</t>
+
+                      <t>The bundle policy is "max-bundle" and the m=
+                      section is not in a bundle group.</t>
+
+                      <t>The RTP/RTCP multiplexing policy is "require"
+                      and the m= section doesn't contain an
+                      "a=rtcp-mux" attribute.</t>
+                    </list></t>
 
                     <t>Otherwise, each m= section in
                     the answer should then be generated as specified in
