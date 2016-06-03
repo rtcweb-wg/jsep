@@ -1083,7 +1083,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         streams. This policy balances desire to
                         multiplex with the need to ensure basic audio
                         and video can still be negotiated in legacy
-                        cases.</t>
+                        cases. When acting as answerer, if there is
+                        no bundle group in the offer, the
+                        implementation will reject all but the first
+                        m= section of each type.</t>
 
                         <t></t>
 
@@ -1102,9 +1105,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         bundle-only. This policy aims to minimize
                         candidate gathering and maximize multiplexing,
                         at the cost of less compatibility with legacy
-                        endpoints. When acting as answerer, the
-                        implementation will reject any m= section that
-                        is not in a bundle group.</t>
+                        endpoints. When acting as answerer, if there
+                        if no bundle group in the offer, the
+                        implementation will reject all but the first
+                        m= section.</t>
 
                     </list></t>
 
@@ -2682,8 +2686,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
                       <t>No supported codec is present in the offer.</t>
 
-                      <t>The bundle policy is "max-bundle" and the m=
-                      section is not in a bundle group.</t>
+                      <t>The bundle policy is "max-bundle", the m=
+                      section is not in a bundle group, and this is not
+                      the first m= section.</t>
+
+                      <t>The bundle policy is "balanced", the m=
+                      section is not in a bundle group, and this is not
+                      the first m= section for this media type.</t>
 
                       <t>The RTP/RTCP multiplexing policy is "require"
                       and the m= section doesn't contain an
