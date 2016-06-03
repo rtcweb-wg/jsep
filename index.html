@@ -715,7 +715,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <dl>
   <dt>balanced:</dt>
-  <dd style="margin-left: 8">The first media section of each type (audio, video, or application) will contain transport parameters, which will allow an answerer to unbundle that section. The second and any subsequent media section of each type will be marked bundle-only. The result is that if there are N distinct media types, then candidates will be gathered for for N media streams. This policy balances desire to multiplex with the need to ensure basic audio and video can still be negotiated in legacy cases.</dd>
+  <dd style="margin-left: 8">The first media section of each type (audio, video, or application) will contain transport parameters, which will allow an answerer to unbundle that section. The second and any subsequent media section of each type will be marked bundle-only. The result is that if there are N distinct media types, then candidates will be gathered for for N media streams. This policy balances desire to multiplex with the need to ensure basic audio and video can still be negotiated in legacy cases. When acting as answerer, if there is no bundle group in the offer, the implementation will reject all but the first m= section of each type.</dd>
   <dt></dt>
   <dd style="margin-left: 8"/>
   <dt>max-compat:</dt>
@@ -723,7 +723,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <dt></dt>
   <dd style="margin-left: 8"/>
   <dt>max-bundle:</dt>
-  <dd style="margin-left: 8">Only the first media section will contain transport parameters; all streams other than the first will be marked as bundle-only. This policy aims to minimize candidate gathering and maximize multiplexing, at the cost of less compatibility with legacy endpoints. When acting as answerer, the implementation will reject any m= section that is not in a bundle group.</dd>
+  <dd style="margin-left: 8">Only the first media section will contain transport parameters; all streams other than the first will be marked as bundle-only. This policy aims to minimize candidate gathering and maximize multiplexing, at the cost of less compatibility with legacy endpoints. When acting as answerer, if there if no bundle group in the offer, the implementation will reject all but the first m= section.</dd>
 </dl>
 <p id="rfc.section.4.1.1.p.7">As it provides the best tradeoff between performance and compatibility with legacy endpoints, the default bundle policy MUST be set to "balanced".</p>
 <p id="rfc.section.4.1.1.p.8">The application can specify its preferred policy regarding use of RTP/RTCP multiplexing <a href="#RFC5761">[RFC5761]</a> using one of the following policies: </p>
@@ -1044,7 +1044,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
   <li>The associated RtpTransceiver has been stopped.  </li>
   <li>No supported codec is present in the offer.</li>
-  <li>The bundle policy is "max-bundle" and the m= section is not in a bundle group.</li>
+  <li>The bundle policy is "max-bundle", the m= section is not in a bundle group, and this is not the first m= section.</li>
+  <li>The bundle policy is "balanced", the m= section is not in a bundle group, and this is not the first m= section for this media type.</li>
   <li>The RTP/RTCP multiplexing policy is "require" and the m= section doesn't contain an "a=rtcp-mux" attribute.</li>
 </ul>
 <p id="rfc.section.5.3.1.p.8">Otherwise, each m= section in the answer should then be generated as specified in <a href="#RFC3264">[RFC3264]</a>, Section 6.1. For the m= line itself, the following rules must be followed: </p>
