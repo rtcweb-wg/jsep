@@ -897,7 +897,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 will also include SDP markings to indicate their support, and JSEP
                 endpoints will use these markings to determine whether simulcast
                 is permitted for a given RTPSender. If simulcast support is not
-                negotiated, the RTPSender will only be permitted to use a single
+                negotiated, the RTPSender will only use the first configured
                 encoding.</t>
 
                 <t>Note that the exact simulcast parameters are up to the sending
@@ -926,13 +926,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 target="I-D.ietf-mmusic-sdp-simulcast"/> and <xref
                 target="I-D.ietf-mmusic-rid" /> are used. Specifically, when
                 multiple encodings have been configured for a RTPSender,
-                the m= section for the RTPSender will include the "a=simulcast"
+                the m= section for the RTPSender will include an "a=simulcast"
                 attribute, as defined in <xref target="I-D.ietf-mmusic-sdp-simulcast"/>,
-                Section 6.2.2, along with an "a=rid" attribute for each desired
-                encoding, as specfied in <xref
-                target="I-D.ietf-mmusic-rid" />, Section 4. This use of RID
+                Section 6.2, with a "send" simulcast stream description
+                that lists each desired encoding, and no "recv" simulcast stream
+                description. The m= section will also include an "a=rid"
+                attribute for each encoding, as specfied in <xref
+                target="I-D.ietf-mmusic-rid" />, Section 4; the use of RID
                 identifiers allows the individual encodings to be disambiguated
-                even though they are all part of the same m= section. [[expansion needed]]</t>
+                even though they are all part of the same m= section.</t>
             </section>
             <section title="Interactions With Forking"
             anchor="sec.interactions-with-forking">
