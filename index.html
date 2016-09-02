@@ -324,13 +324,11 @@ li, p {
 <link href="#rfc.section.5.2.3" rel="Chapter" title="5.2.3 Options Handling"/>
 <link href="#rfc.section.5.2.3.1" rel="Chapter" title="5.2.3.1 IceRestart"/>
 <link href="#rfc.section.5.2.3.2" rel="Chapter" title="5.2.3.2 VoiceActivityDetection"/>
-<link href="#rfc.section.5.2.4" rel="Chapter" title="5.2.4 Direction Attribute in Offers"/>
 <link href="#rfc.section.5.3" rel="Chapter" title="5.3 Generating an Answer"/>
 <link href="#rfc.section.5.3.1" rel="Chapter" title="5.3.1 Initial Answers"/>
 <link href="#rfc.section.5.3.2" rel="Chapter" title="5.3.2 Subsequent Answers"/>
 <link href="#rfc.section.5.3.3" rel="Chapter" title="5.3.3 Options Handling"/>
 <link href="#rfc.section.5.3.3.1" rel="Chapter" title="5.3.3.1 VoiceActivityDetection"/>
-<link href="#rfc.section.5.3.4" rel="Chapter" title="5.3.4 Direction Attribute in Answers"/>
 <link href="#rfc.section.5.4" rel="Chapter" title="5.4 Processing a Local Description"/>
 <link href="#rfc.section.5.5" rel="Chapter" title="5.5 Processing a Remote Description"/>
 <link href="#rfc.section.5.6" rel="Chapter" title="5.6 Parsing a Session Description"/>
@@ -484,14 +482,12 @@ li, p {
 <li>5.2.3.   <a href="#rfc.section.5.2.3">Options Handling</a></li>
 <ul><li>5.2.3.1.   <a href="#rfc.section.5.2.3.1">IceRestart</a></li>
 <li>5.2.3.2.   <a href="#rfc.section.5.2.3.2">VoiceActivityDetection</a></li>
-</ul><li>5.2.4.   <a href="#rfc.section.5.2.4">Direction Attribute in Offers</a></li>
-</ul><li>5.3.   <a href="#rfc.section.5.3">Generating an Answer</a></li>
+</ul></ul><li>5.3.   <a href="#rfc.section.5.3">Generating an Answer</a></li>
 <ul><li>5.3.1.   <a href="#rfc.section.5.3.1">Initial Answers</a></li>
 <li>5.3.2.   <a href="#rfc.section.5.3.2">Subsequent Answers</a></li>
 <li>5.3.3.   <a href="#rfc.section.5.3.3">Options Handling</a></li>
 <ul><li>5.3.3.1.   <a href="#rfc.section.5.3.3.1">VoiceActivityDetection</a></li>
-</ul><li>5.3.4.   <a href="#rfc.section.5.3.4">Direction Attribute in Answers</a></li>
-</ul><li>5.4.   <a href="#rfc.section.5.4">Processing a Local Description</a></li>
+</ul></ul><li>5.4.   <a href="#rfc.section.5.4">Processing a Local Description</a></li>
 <li>5.5.   <a href="#rfc.section.5.5">Processing a Remote Description</a></li>
 <li>5.6.   <a href="#rfc.section.5.6">Parsing a Session Description</a></li>
 <ul><li>5.6.1.   <a href="#rfc.section.5.6.1">Session-Level Parsing</a></li>
@@ -924,7 +920,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
   <li>An "a=mid" line, as specified in <a href="#RFC5888">[RFC5888]</a>, Section 4. When generating mid values, it is RECOMMENDED that the values be 3 bytes or less, to allow them to efficiently fit into the RTP header extension defined in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 11.</li>
   <li>An "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because no candidates have yet been gathered.</li>
-  <li>A direction attribute for the associated RtpTransceiver as described by <a href="#sec.offer-dirattr">Section 5.2.4</a>.</li>
+  <li>A direction attribute which is the same as that of the associated transceiver.</li>
   <li>For each supported codec, "a=rtpmap" and "a=fmtp" lines, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6. The audio and video codecs that MUST be supported are specified in <a href="#I-D.ietf-rtcweb-audio">[I-D.ietf-rtcweb-audio]</a>(see Section 3) and <a href="#I-D.ietf-rtcweb-video">[I-D.ietf-rtcweb-video]</a>(see Section 5).</li>
   <li>If this m= section is for media with configurable frame sizes, e.g. audio, an "a=maxptime" line, indicating the smallest of the maximum supported frame sizes out of all codecs included above, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6.</li>
   <li>If this m= section is for video media, and there are known limitations on the size of images which can be decoded, an "a=imageattr" line, as specified in <a href="#sec.imageattr">Section 3.6</a>.</li>
@@ -1005,39 +1001,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.2.3.2.p.2">If the "VoiceActivityDetection" option is specified, with a value of "false", the browser MUST NOT emit "CN" codecs. For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is not desired.  For example, when using the Opus codec, the "usedtx=0" parameter would be specified in the offer.</p>
 <p id="rfc.section.5.2.3.2.p.3">Note that setting the "VoiceActivityDetection" parameter when generating an offer is a request to receive audio with silence suppression. It has no impact on whether the local endpoint does silence suppression for the audio it sends.</p>
 <p id="rfc.section.5.2.3.2.p.4">The "VoiceActivityDetection" option does not have any impact on the setting of the "vad" value in the signaling of the client to mixer audio level header extension described in <a href="#RFC6464">[RFC6464]</a>, Section 4.</p>
-<h3 id="rfc.section.5.2.4"><a href="#rfc.section.5.2.4">5.2.4.</a> <a href="#sec.offer-dirattr" id="sec.offer-dirattr">Direction Attribute in Offers</a></h3>
-<p><a href="#RFC3264">[RFC3264]</a> direction attributes (defined in Section 6.1) in offers are chosen according to the states of the RtpSender and RtpReceiver of a given RtpTransceiver, as follows:</p>
-<table cellpadding="3" cellspacing="0" class="tt full center">
-  <thead>
-    <tr>
-      <th class="center">RtpSender</th>
-      <th class="center">RtpReceiver</th>
-      <th class="center">offer direction</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="center">active</td>
-      <td class="center">active</td>
-      <td class="center">sendrecv</td>
-    </tr>
-    <tr>
-      <td class="center">active</td>
-      <td class="center">inactive</td>
-      <td class="center">sendonly</td>
-    </tr>
-    <tr>
-      <td class="center">inactive</td>
-      <td class="center">active</td>
-      <td class="center">recvonly</td>
-    </tr>
-    <tr>
-      <td class="center">inactive</td>
-      <td class="center">inactive</td>
-      <td class="center">inactive</td>
-    </tr>
-  </tbody>
-</table>
 <h2 id="rfc.section.5.3"><a href="#rfc.section.5.3">5.3.</a> <a href="#sec.generating-an-answer" id="sec.generating-an-answer">Generating an Answer</a></h2>
 <p id="rfc.section.5.3.p.1">When createAnswer is called, a new SDP description must be created that is compatible with the supplied remote description as well as the requirements specified in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>. The exact details of this process are explained below.</p>
 <h3 id="rfc.section.5.3.1"><a href="#rfc.section.5.3.1">5.3.1.</a> <a href="#sec.initial-answers" id="sec.initial-answers">Initial Answers</a></h3>
@@ -1068,7 +1031,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
   <li>If and only if present in the offer, an "a=mid" line, as specified in <a href="#RFC5888">[RFC5888]</a>, Section 9.1.  The "mid" value MUST match that specified in the offer.</li>
   <li>An "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because no candidates have yet been gathered.</li>
-  <li>A direction attribute for the associated RtpTransceiver described by <a href="#sec.answer-dirattr">Section 5.3.4</a>.</li>
+  <li>A direction attribute which is the same as that of the associated transceiver.</li>
   <li>For each supported codec that is present in the offer, "a=rtpmap" and "a=fmtp" lines, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6, and <a href="#RFC3264">[RFC3264]</a>, Section 6.1.  The audio and video codecs that MUST be supported are specified in <a href="#I-D.ietf-rtcweb-audio">[I-D.ietf-rtcweb-audio]</a>(see Section 3) and <a href="#I-D.ietf-rtcweb-video">[I-D.ietf-rtcweb-video]</a>(see Section 5).</li>
   <li>If this m= section is for media with configurable frame sizes, e.g. audio, an "a=maxptime" line, indicating the smallest of the maximum supported frame sizes out of all codecs included above, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6.</li>
   <li>If this m= section is for video media, and there are known limitations on the size of images which can be decoded, an "a=imageattr" line, as specified in <a href="#sec.imageattr">Section 3.6</a>.</li>
@@ -1109,74 +1072,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.3.3.p.2">The following options are supported in RTCAnswerOptions.</p>
 <h4 id="rfc.section.5.3.3.1"><a href="#rfc.section.5.3.3.1">5.3.3.1.</a> <a href="#sec.voiceactivitydetection2" id="sec.voiceactivitydetection2">VoiceActivityDetection</a></h4>
 <p id="rfc.section.5.3.3.1.p.1">Silence suppression in the answer is handled as described in <a href="#sec.voiceactivitydetection1">Section 5.2.3.2</a>, with one exception: if support for silence suppression was not indicated in the offer, the VoiceActivityDetection parameter has no effect, and the answer should be generated as if VoiceActivityDetection was set to false.  This is done on a per-codec basis (e.g., if the offerer somehow offered support for CN but set "usedtx=0" for Opus, setting VoiceActivityDetection to true would result in an answer with CN codecs and "usedtx=0").</p>
-<h3 id="rfc.section.5.3.4"><a href="#rfc.section.5.3.4">5.3.4.</a> <a href="#sec.answer-dirattr" id="sec.answer-dirattr">Direction Attribute in Answers</a></h3>
-<p><a href="#RFC3264">[RFC3264]</a> direction attributes (defined in Section 6.1) in answers are chosen according to the direction attribute in the remote offer and the states of the RtpSender and RtpReceiver of the corresponding RtpTransceiver, as follows:</p>
-<table cellpadding="3" cellspacing="0" class="tt full center">
-  <thead>
-    <tr>
-      <th class="center">offer direction</th>
-      <th class="center">RtpSender</th>
-      <th class="center">RtpReceiver</th>
-      <th class="center">answer direction</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="center">sendrecv</td>
-      <td class="center">active</td>
-      <td class="center">active</td>
-      <td class="center">sendrecv</td>
-    </tr>
-    <tr>
-      <td class="center">sendrecv</td>
-      <td class="center">active</td>
-      <td class="center">inactive</td>
-      <td class="center">sendonly</td>
-    </tr>
-    <tr>
-      <td class="center">sendrecv</td>
-      <td class="center">inactive</td>
-      <td class="center">active</td>
-      <td class="center">recvonly</td>
-    </tr>
-    <tr>
-      <td class="center">sendrecv</td>
-      <td class="center">inactive</td>
-      <td class="center">inactive</td>
-      <td class="center">inactive</td>
-    </tr>
-    <tr>
-      <td class="center">sendonly</td>
-      <td class="center">*</td>
-      <td class="center">active</td>
-      <td class="center">recvonly</td>
-    </tr>
-    <tr>
-      <td class="center">sendonly</td>
-      <td class="center">*</td>
-      <td class="center">inactive</td>
-      <td class="center">inactive</td>
-    </tr>
-    <tr>
-      <td class="center">recvonly</td>
-      <td class="center">active</td>
-      <td class="center">*</td>
-      <td class="center">sendonly</td>
-    </tr>
-    <tr>
-      <td class="center">recvonly</td>
-      <td class="center">inactive</td>
-      <td class="center">*</td>
-      <td class="center">inactive</td>
-    </tr>
-    <tr>
-      <td class="center">inactive</td>
-      <td class="center">*</td>
-      <td class="center">*</td>
-      <td class="center">inactive</td>
-    </tr>
-  </tbody>
-</table>
 <h2 id="rfc.section.5.4"><a href="#rfc.section.5.4">5.4.</a> <a href="#sec.processing-a-local-desc" id="sec.processing-a-local-desc">Processing a Local Description</a></h2>
 <p id="rfc.section.5.4.p.1">When a SessionDescription is supplied to setLocalDescription, the following steps MUST be performed: </p>
 
