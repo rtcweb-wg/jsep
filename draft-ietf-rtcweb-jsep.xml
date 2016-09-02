@@ -3963,76 +3963,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Configurable SDP Parameters"
         anchor="sec.configurable-sdp-paramete">
 
-            <t>It is possible to change elements in the SDP returned
-            from createOffer before passing it to setLocalDescription.
-            When an implementation receives modified SDP it MUST
-            either:</t>
+            <t> The SDP returned from createOffer MUST NOT be changed
+            before passing it to setLocalDescription. </t>
 
-            <t>
-                <list style="symbols">
-
-                    <t>Accept the changes and adjust its behavior to
-                    match the SDP.</t>
-
-                    <t>Reject the changes and return an error via the
-                    error callback.</t>
-
-                </list>
-            </t>
-
-            <t>Changes MUST NOT be silently ignored.</t>
-
-            <t>The following elements of the session description MUST
-            NOT be changed between the createOffer and the
-            setLocalDescription (or between the createAnswer and the
-            setLocalDescription), since they reflect transport
-            attributes that are solely under browser control, and the
-            browser MUST NOT honor an attempt to change them:</t>
-
-            <t>
-                <list style="symbols">
-
-                    <t>The number, type and port number of m=
-                    lines.</t>
-
-                    <t>The generated MID attributes (a=mid).</t>
-
-                    <t>The generated ICE credentials (a=ice-ufrag and
-                    a=ice-pwd).</t>
-
-                    <t>The set of ICE candidates and their parameters
-                    (a=candidate).</t>
-
-                    <t>The DTLS fingerprint(s) (a=fingerprint).</t>
-
-                    <t>The contents of bundle groups, bundle-only
-                    parameters, or "a=rtcp-mux" parameters.</t>
-
-                </list>
-            </t>
-
-            <t>The following modifications, if done by the browser to a
-            description between createOffer/createAnswer and the
-            setLocalDescription, MUST be honored by the browser:</t>
-
-            <t>
-                <list style="symbols">
-
-                  <t>Remove or reorder codecs (m=)</t>
-                  
-                </list>
-            </t>
-
-            <t>Implementations MAY choose to either honor or reject any
-            elements not listed in the above two categories, but must
-            do so explicitly as described at the beginning of this
-            section. Note that future standards may add new SDP
-            elements to the list of elements which must be accepted or
-            rejected, but due to version skew, applications must be
-            prepared for implementations to accept changes which must
-            be rejected and vice versa.</t>
-
-            <t>The application can also modify the SDP to reduce the
+            <t>The application can modify the SDP to reduce the
             capabilities in the offer it sends to the far side or the
             offer that it installs from the far side in any way the
             application sees fit, as long as it is a valid SDP offer
