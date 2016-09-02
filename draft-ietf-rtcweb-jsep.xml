@@ -454,6 +454,27 @@ setRemote(ANSWER) |                                   |
                 application will not need to read or change them.</t>
 
             </section>
+            <section title="Session Description Versions"
+                     anchor="sec.session-description-vers">
+              <t>
+                The SessionDescription contains a "session-version"
+                field which is required by <xref target="RFC4566"/> to increase with
+                any change to the session description, including the addition of ICE
+                candidates. This has two somewhat unobvious implications. First,
+                successive calls to createOffer(), createAnswer(), and
+                getLocalDescription() may return SessionDescriptions which have
+                different "session-version" fields--even if the calling application
+                has made no other changes--for instance because additional candidates
+                have been gathered, thus requiring the "session-version" field to
+                increment, or because the browser has chosen to always increment
+                regardless of any other changes (this is explicitly permitted by <xref
+                target="RFC4566"/>.  Another important case is rollback. For instance,
+                if there were two calls to createOffer() returning offers with
+                versions 12 and 13 respectively, followed by a call to
+                setLocalDescription() rolling back to the offer with version 12, the
+                next call to getLocalDescription() would produce an offer with version
+                14 or greater.</t>
+            </section>
             <section title="Session Description Control"
             anchor="sec.session-description-ctrl">
 
@@ -2430,7 +2451,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         same except for the &lt;session-version&gt;
                         field, which MUST increment if the session
                         description changes in any way, including the
-                        addition of ICE candidates.</t>
+                        addition of ICE candidates, as described in
+                        <xref target="sec.session-description-vers"/></t>
                     </list></t>
 
                     <t>If the initial offer was applied using
