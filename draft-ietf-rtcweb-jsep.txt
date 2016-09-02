@@ -2976,9 +2976,6 @@ Internet-Draft                    JSEP                    September 2016
    o  Any "a=extmap" lines are parsed as specified in [RFC5285],
       Section 5, and their values are stored.
 
-   o  TODO: identity, rtcp-rsize, rtcp-mux, and any other attributes
-      valid at session level.
-
    Once all the session-level lines have been parsed, processing
    continues with the lines in media sections.
 
@@ -3019,15 +3016,15 @@ Internet-Draft                    JSEP                    September 2016
       Section 5, and the set of fingerprint and algorithm values is
       stored.
 
+   o  If present, a single "a=setup" line is parsed as specified in
+      [RFC4145], Section 4, and the setup value is stored.
+
 
 
 Uberti, et al.            Expires March 6, 2017                [Page 54]
 
 Internet-Draft                    JSEP                    September 2016
 
-
-   o  If present, a single "a=setup" line is parsed as specified in
-      [RFC4145], Section 4, and the setup value is stored.
 
    If the "m=" proto value indicates use of RTP, as described in the
    Section 5.1.3 section above, the following attribute lines MUST be
@@ -3062,6 +3059,10 @@ Internet-Draft                    JSEP                    September 2016
       specified in [RFC5761], Section 5.1.1, and its presence or absence
       flagged and stored.
 
+   o  If present, a single "a=rtcp-mux-only" attribute MUST be parsed as
+      specified in [I-D.ietf-mmusic-mux-exclusive], Section 3, and its
+      presence or absence flagged and stored.
+
    o  If present, a single "a=rtcp-rsize" attribute MUST be parsed as
       specified in [RFC5506], Section 5, and its presence or absence
       flagged and stored.
@@ -3073,7 +3074,6 @@ Internet-Draft                    JSEP                    September 2016
    o  If present, a single "a=msid" attribute MUST be parsed as
       specified in [I-D.ietf-mmusic-msid], Section 3.2, and its value
       stored.
-
 
 
 
@@ -4398,6 +4398,11 @@ Internet-Draft                    JSEP                    September 2016
               the Session Description Protocol", draft-ietf-mmusic-
               msid-01 (work in progress), August 2013.
 
+   [I-D.ietf-mmusic-mux-exclusive]
+              Holmberg, C., "Indicating Exclusive Support of RTP/RTCP
+              Multiplexing using SDP", draft-ietf-mmusic-mux-
+              exclusive-08 (work in progress), June 2016.
+
    [I-D.ietf-mmusic-rid]
               Thatcher, P., Zanaty, M., Nandakumar, S., Burman, B.,
               Roach, A., and B. Campen, "RTP Payload Format
@@ -4410,11 +4415,6 @@ Internet-Draft                    JSEP                    September 2016
               Description Protocol (SDP)", draft-ietf-mmusic-sctp-sdp-04
               (work in progress), June 2013.
 
-   [I-D.ietf-mmusic-sdp-bundle-negotiation]
-              Holmberg, C., Alvestrand, H., and C. Jennings,
-              "Multiplexing Negotiation Using Session Description
-              Protocol (SDP) Port Numbers", draft-ietf-mmusic-sdp-
-              bundle-negotiation-04 (work in progress), June 2013.
 
 
 
@@ -4425,6 +4425,12 @@ Uberti, et al.            Expires March 6, 2017                [Page 79]
 
 Internet-Draft                    JSEP                    September 2016
 
+
+   [I-D.ietf-mmusic-sdp-bundle-negotiation]
+              Holmberg, C., Alvestrand, H., and C. Jennings,
+              "Multiplexing Negotiation Using Session Description
+              Protocol (SDP) Port Numbers", draft-ietf-mmusic-sdp-
+              bundle-negotiation-04 (work in progress), June 2013.
 
    [I-D.ietf-mmusic-sdp-mux-attributes]
               Nandakumar, S., "A Framework for SDP Attributes when
@@ -4465,13 +4471,7 @@ Internet-Draft                    JSEP                    September 2016
               Requirements", draft-ietf-rtcweb-video-00 (work in
               progress), July 2014.
 
-   [I-D.nandakumar-mmusic-proto-iana-registration]
-              Nandakumar, S., "IANA registration of SDP 'proto'
-              attribute for transporting RTP Media over TCP under
-              various RTP profiles.", September 2014.
 
-   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119, March 1997.
 
 
 
@@ -4481,6 +4481,14 @@ Uberti, et al.            Expires March 6, 2017                [Page 80]
 
 Internet-Draft                    JSEP                    September 2016
 
+
+   [I-D.nandakumar-mmusic-proto-iana-registration]
+              Nandakumar, S., "IANA registration of SDP 'proto'
+              attribute for transporting RTP Media over TCP under
+              various RTP profiles.", September 2014.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
 
    [RFC3261]  Rosenberg, J., Schulzrinne, H., Camarillo, G., Johnston,
               A., Peterson, J., Sparks, R., Handley, M., and E.
@@ -4520,6 +4528,16 @@ Internet-Draft                    JSEP                    September 2016
               Protocol (RTCP)-Based Feedback (RTP/AVPF)", RFC 4585, July
               2006.
 
+
+
+
+
+
+Uberti, et al.            Expires March 6, 2017                [Page 81]
+
+Internet-Draft                    JSEP                    September 2016
+
+
    [RFC5245]  Rosenberg, J., "Interactive Connectivity Establishment
               (ICE): A Protocol for Network Address Translator (NAT)
               Traversal for Offer/Answer Protocols", RFC 5245, April
@@ -4530,13 +4548,6 @@ Internet-Draft                    JSEP                    September 2016
 
    [RFC5761]  Perkins, C. and M. Westerlund, "Multiplexing RTP Data and
               Control Packets on a Single Port", RFC 5761, April 2010.
-
-
-
-Uberti, et al.            Expires March 6, 2017                [Page 81]
-
-Internet-Draft                    JSEP                    September 2016
-
 
    [RFC5888]  Camarillo, G. and H. Schulzrinne, "The Session Description
               Protocol (SDP) Grouping Framework", RFC 5888, June 2010.
@@ -4575,6 +4586,14 @@ Internet-Draft                    JSEP                    September 2016
               Tone Generation in the Session Initiation Protocol (SIP)",
               RFC 3960, December 2004.
 
+
+
+
+Uberti, et al.            Expires March 6, 2017                [Page 82]
+
+Internet-Draft                    JSEP                    September 2016
+
+
    [RFC4568]  Andreasen, F., Baugher, M., and D. Wing, "Session
               Description Protocol (SDP) Security Descriptions for Media
               Streams", RFC 4568, July 2006.
@@ -4586,13 +4605,6 @@ Internet-Draft                    JSEP                    September 2016
    [RFC5506]  Johansson, I. and M. Westerlund, "Support for Reduced-Size
               Real-Time Transport Control Protocol (RTCP): Opportunities
               and Consequences", RFC 5506, April 2009.
-
-
-
-Uberti, et al.            Expires March 6, 2017                [Page 82]
-
-Internet-Draft                    JSEP                    September 2016
-
 
    [RFC5576]  Lennox, J., Ott, J., and T. Schierl, "Source-Specific
               Media Attributes in the Session Description Protocol
@@ -4630,6 +4642,14 @@ Appendix A.  Change log
 
    Changes in draft-15:
 
+
+
+
+Uberti, et al.            Expires March 6, 2017                [Page 83]
+
+Internet-Draft                    JSEP                    September 2016
+
+
    o  Clarify text around codecs offered in subsequent transactions to
       refer to what's been negotiated.
 
@@ -4642,13 +4662,6 @@ Appendix A.  Change log
    o  Enforce max-bundle on offer processing.
 
    o  Fix TIAS formula to handle bits vs. kilobits.
-
-
-
-Uberti, et al.            Expires March 6, 2017                [Page 83]
-
-Internet-Draft                    JSEP                    September 2016
-
 
    o  Describe addTrack algorithm.
 
@@ -4686,6 +4699,13 @@ Internet-Draft                    JSEP                    September 2016
 
    o  Clarify a=imageattr handling.
 
+
+
+Uberti, et al.            Expires March 6, 2017                [Page 84]
+
+Internet-Draft                    JSEP                    September 2016
+
+
    o  Add more detail on VoiceActivityDetection handling.
 
    o  Reference draft-shieh-rtcweb-ip-handling.
@@ -4697,14 +4717,6 @@ Internet-Draft                    JSEP                    September 2016
    o  Remove MSID semantics.
 
    o  ice-options are now at session level.
-
-
-
-
-Uberti, et al.            Expires March 6, 2017                [Page 84]
-
-Internet-Draft                    JSEP                    September 2016
-
 
    o  Default RTCP mux policy is now 'require'.
 
@@ -4743,6 +4755,13 @@ Internet-Draft                    JSEP                    September 2016
 
    o  Changed TCP/TLS to UDP/DTLS in RTP profile names.
 
+
+
+Uberti, et al.            Expires March 6, 2017                [Page 85]
+
+Internet-Draft                    JSEP                    September 2016
+
+
    o  Separate out bundle and mux policy.
 
    o  Added specific references to FEC mechanisms.
@@ -4754,13 +4773,6 @@ Internet-Draft                    JSEP                    September 2016
    o  Added text defining set{Local,Remote}Description behavior.
 
    Changes in draft-08:
-
-
-
-Uberti, et al.            Expires March 6, 2017                [Page 85]
-
-Internet-Draft                    JSEP                    September 2016
-
 
    o  Added new example section and removed old examples in appendix.
 
@@ -4798,6 +4810,14 @@ Internet-Draft                    JSEP                    September 2016
    o  Rewrote the section on modifying SDP to require implementations to
       clearly indicate whether any given modification is allowed.
 
+
+
+
+Uberti, et al.            Expires March 6, 2017                [Page 86]
+
+Internet-Draft                    JSEP                    September 2016
+
+
    o  Clarified impact of IceRestart on CreateOffer in local-offer
       state.
 
@@ -4809,14 +4829,6 @@ Internet-Draft                    JSEP                    September 2016
    o  Removed default ICE candidate pool size and clarify how it works.
 
    o  Defined a canonical order for assignment of MSTs to m= lines.
-
-
-
-
-Uberti, et al.            Expires March 6, 2017                [Page 86]
-
-Internet-Draft                    JSEP                    September 2016
-
 
    o  Removed discussion of rehydration.
 
@@ -4855,6 +4867,13 @@ Internet-Draft                    JSEP                    September 2016
 
    Changes in draft-03:
 
+
+
+Uberti, et al.            Expires March 6, 2017                [Page 87]
+
+Internet-Draft                    JSEP                    September 2016
+
+
    o  Added text describing relationship to W3C specification
 
    Changes in draft-02:
@@ -4865,14 +4884,6 @@ Internet-Draft                    JSEP                    September 2016
       group
 
    o  Removed stuff that has moved to W3C specification
-
-
-
-
-Uberti, et al.            Expires March 6, 2017                [Page 87]
-
-Internet-Draft                    JSEP                    September 2016
-
 
    o  Align SDP handling with W3C draft
 
@@ -4909,17 +4920,6 @@ Authors' Addresses
    Email: justin@uberti.name
 
 
-   Cullen Jennings
-   Cisco
-   170 West Tasman Drive
-   San Jose, CA  95134
-   USA
-
-   Email: fluffy@iii.ca
-
-
-
-
 
 
 
@@ -4930,6 +4930,15 @@ Uberti, et al.            Expires March 6, 2017                [Page 88]
 Internet-Draft                    JSEP                    September 2016
 
 
+   Cullen Jennings
+   Cisco
+   170 West Tasman Drive
+   San Jose, CA  95134
+   USA
+
+   Email: fluffy@iii.ca
+
+
    Eric Rescorla (editor)
    Mozilla
    331 Evelyn Ave
@@ -4937,15 +4946,6 @@ Internet-Draft                    JSEP                    September 2016
    USA
 
    Email: ekr@rtfm.com
-
-
-
-
-
-
-
-
-
 
 
 
