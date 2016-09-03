@@ -1676,7 +1676,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     pending remote description according to the rules
                     defined for Trickle ICE.
                     If the MID, m-line index, or candidate string provided in the ICE candidate is
-                    invalid, an error is generated. 
+                    invalid, an error is generated.
                     Connectivity checks will
                     be sent to the new candidate.</t>
 
@@ -2340,37 +2340,35 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     still in the "stable" state, the steps for
                     generating an initial offer should be followed,
                     subject to the following restriction:
+
                     <list style="symbols">
 
-                        <t>The fields of the "o=" line MUST stay the
-                        same except for the &lt;session-version&gt;
-                        field, which MUST be set to the value of an
-                        counter which is incremented on each call to
-                        the createOffer method if that may result in
-                        a different offer from the current local
-                        description.  Implementations MAY opt to
-                        increment the counter which sets the
-                        &lt;session-version&gt; on every call to
-                        createOffer.  </t>
-
-			<t> Note that if the Javascript gets SDP from
-			the reading the currentLocalDescription, that
-			SDP may have SDP that has the same
-			&lt;session-version&gt; as SDP received from
-			createOffer but the SDP is may not the same
-			due to ICE candidates being added. Providing
-			the remote side two SDP blobs that were
-			differnt but had the same
-			&lt;session-version&gt; may cause it to ignore
-			one of them. Tthe Javascript should make sure
-			only one of them is proivded to the remote
-			side or ensure createOffer call is used to
-			create the SDP such that all
-			&lt;session-version&gt; of the SDP that the
-			remote side will see have a unique
-			&lt;session-version&gt;.</t>
+                    <t>The fields of the "o=" line MUST stay the
+                    same except for the &lt;session-version&gt;
+                    field, which MUST increment on each call to
+                    createOffer if the offer might differ
+                    from the output of the previous call to createOffer;
+                    implementations MAY opt to increment
+                    &lt;session-version&gt; on every call.
+                    The value of the generated
+                    &lt;session-version&gt; is independent of the
+                    &lt;session-version&gt; of the current local description;
+                    in particular, in the case where the current version is N,
+                    an offer is created with version N+1, and then that offer
+                    is rolled back so that the current version is again N,
+                    the next generated offer will still have version N+2.</t>
 
                     </list></t>
+
+                    <t>Note that if the application creates an offer
+                    by reading currentLocalDescription instead of calling
+                    createOffer, the returned SDP may be different than when
+                    setLocalDescription was originally called, due to the
+                    addition of gathered ICE candidates, but the
+                    &lt;session-version&gt; will not have changed.
+                    There are no known scenarios in which this causes problems,
+                    but if this is a concern, the solution is simply to use
+                    createOffer to ensure a unique &lt;session-version&gt;.</t>
 
                     <t>If the initial offer was applied using
                     setLocalDescription, but an answer from the remote
@@ -5891,19 +5889,19 @@ a=rtcp-fb:100 nack pli
               <list style="symbols">
                 <t>Clarify text around codecs offered in subsequent transactions
                 to refer to what's been negotiated.</t>
-                
+
                 <t>Rewrite LS handling text to indicate edge cases and that we're
                 living with them.</t>
-                
+
                 <t>Require that answerer reject m= lines when there are no codecs
                 in common.</t>
-                
+
                 <t>Enforce max-bundle on offer processing.</t>
-                
+
                 <t>Fix TIAS formula to handle bits vs. kilobits.</t>
-                
+
                 <t>Describe addTrack algorithm.</t>
-                
+
                 <t>Clean up references.</t>
               </list>
             </t>
