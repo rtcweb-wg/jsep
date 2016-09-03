@@ -4076,6 +4076,65 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             process, as a remote offer or answer, unmodified SDP coming
             from any other implementation of this specification.</t>
         </section>
+        <section title="Processing RTP packets"
+                 anchor="sec.rtp.demux">
+          <t>When an RTP packet is received by a transport (typically a
+          DtlsTransport), that packet MUST be routed to the correct
+          RtpReceiver. For each transport, the following steps MUST be
+          followed to prepare to route packets:</t>
+
+          <t>
+            <list>
+              <t>Construct a table mapping MID to RtpReceiver. For each
+              RtpReceiver configured to recei ve from this transport,
+              let the key be the RtpReceiver's MID, and the value be the
+              RtpReceiver.</t>
+              
+              <t>Construct a table mapping SSRC to RtpReceiver. For each
+              RtpReceiver configured to receive from this transport, and
+              for each SSRC that RtpReceiver is configured to receive,
+              let the key be the SSRC and the value be the RtpReceiver.</t>
+
+              <t>Construct a table mapping Payload Type to RtpReceiver. For
+              each RtpReceiver configured to receive from this
+              transport, and for each Payload Type that RtpReceiver is
+              configured to receive, let the key be the Payload Type and
+              the value be the RtpReceiver.</t>
+            </list>
+          </t>
+
+          <t>For each RTP packet
+          received, the following steps MUST be followed to route
+          the packet:</t>
+
+          <t>
+            <list>
+              <t>
+                If the packet has a MID and that MID is not in the table mapping MID to RtpReceiver, drop the packet and stop.
+              </t>
+              <t>
+                If the packet has a MID and that MID is in the table
+                mapping MID to RtpReceiver, update the SSRC mapping
+                table to include an entry mapping the packet's SSRC to
+                the RtpReceiver.
+              </t>
+              <t>
+                If the packet's SSRC is in the SSRC mapping table,
+                route the packet to the mapped RtpReceiver and stop.
+              </t>
+              <t>
+                If the packet's Payload Type is in the Payload Type
+                table, update the the SSRC mapping table to include an
+                entry mapping the packet's SSRC to the
+                RtpReceiver. Deliver the packet to the RtpReceiver and
+                stop.
+              </t>
+              <t>
+                Drop the packet.
+              </t>
+            </list>
+          </t>
+        </section>
         <section title="Examples" anchor="sec.examples">
 
             <t>Note that this example section shows several SDP
