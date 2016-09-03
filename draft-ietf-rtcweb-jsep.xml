@@ -1677,7 +1677,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     pending remote description according to the rules
                     defined for Trickle ICE.
                     If the MID, m-line index, or candidate string provided in the ICE candidate is
-                    invalid, an error is generated. 
+                    invalid, an error is generated.
                     Connectivity checks will
                     be sent to the new candidate.</t>
 
@@ -3097,6 +3097,33 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
                 </section>
             </section>
+            <section title="Modifying an Offer or Answer"
+                anchor="sec.modifying-sdp">
+                <t>The SDP returned from createOffer or createAnswer MUST
+                NOT be changed before passing it to
+                setLocalDescription. If precise control over the SDP
+                is needed, the aformentioned createOffer/createAnswer options
+                or RTPSender APIs MUST be used.</t>
+
+                <t>Note that the application MAY modify the SDP to reduce the
+                capabilities in the offer it sends to the far side
+                (post-setLocalDescription) or the
+                offer that it installs from the far side (pre-setRemoteDescription),
+                as long as it retmains a
+                valid SDP offer and specifies a subset of what was in the
+                original offer. This is safe because the answer is not
+                permitted to expand capabilities, and therefore will just
+                respond to what is present in the offer.</t>
+
+                <t>As always, the application is solely responsible for
+                what it sends to the other party, and all incoming SDP will
+                be processed by the browser to the extent of its
+                capabilities. It is an error to assume that all SDP is
+                well-formed; however, one should be able to assume that any
+                implementation of this specification will be able to
+                process, as a remote offer or answer, unmodified SDP coming
+                from any other implementation of this specification.</t>
+            </section>
             <section title="Processing a Local Description"
             anchor="sec.processing-a-local-desc">
 
@@ -3961,30 +3988,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             </section>
         </section>
-        <section title="Modifying SDP"
-        anchor="sec.configurable-sdp-paramete">
-
-            <t> The SDP returned from createOffer or createAnswer MUST
-            NOT be changed before passing it to
-            setLocalDescription. </t>
-
-            <t>The application can modify the SDP to reduce the
-            capabilities in the offer it sends to the far side or the
-            offer that it installs from the far side in any way the
-            application sees fit, as long as it is a valid SDP offer
-            and specifies a subset of what was in the original offer.
-            This is safe because the answer is not permitted to expand
-            capabilities and therefore will just respond to what is
-            actually in the offer.</t>
-
-            <t>As always, the application is solely responsible for
-            what it sends to the other party, and all incoming SDP will
-            be processed by the browser to the extent of its
-            capabilities. It is an error to assume that all SDP is
-            well-formed; however, one should be able to assume that any
-            implementation of this specification will be able to
-            process, as a remote offer or answer, unmodified SDP coming
-            from any other implementation of this specification.</t>
+        <section title="Demux placeholder">
+          <t>RTP demux algo goes here</t>
         </section>
         <section title="Examples" anchor="sec.examples">
 
@@ -5787,19 +5792,19 @@ a=rtcp-fb:100 nack pli
               <list style="symbols">
                 <t>Clarify text around codecs offered in subsequent transactions
                 to refer to what's been negotiated.</t>
-                
+
                 <t>Rewrite LS handling text to indicate edge cases and that we're
                 living with them.</t>
-                
+
                 <t>Require that answerer reject m= lines when there are no codecs
                 in common.</t>
-                
+
                 <t>Enforce max-bundle on offer processing.</t>
-                
+
                 <t>Fix TIAS formula to handle bits vs. kilobits.</t>
-                
+
                 <t>Describe addTrack algorithm.</t>
-                
+
                 <t>Clean up references.</t>
               </list>
             </t>
