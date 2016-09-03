@@ -2424,14 +2424,35 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     still in the "stable" state, the steps for
                     generating an initial offer should be followed,
                     subject to the following restriction:
+
                     <list style="symbols">
 
-                        <t>The fields of the "o=" line MUST stay the
-                        same except for the &lt;session-version&gt;
-                        field, which MUST increment if the session
-                        description changes in any way, including the
-                        addition of ICE candidates.</t>
+                    <t>The fields of the "o=" line MUST stay the
+                    same except for the &lt;session-version&gt;
+                    field, which MUST increment by one on each call to
+                    createOffer if the offer might differ
+                    from the output of the previous call to createOffer;
+                    implementations MAY opt to increment
+                    &lt;session-version&gt; on every call.
+                    The value of the generated
+                    &lt;session-version&gt; is independent of the
+                    &lt;session-version&gt; of the current local description;
+                    in particular, in the case where the current version is N,
+                    an offer is created with version N+1, and then that offer
+                    is rolled back so that the current version is again N,
+                    the next generated offer will still have version N+2.</t>
+
                     </list></t>
+
+                    <t>Note that if the application creates an offer
+                    by reading currentLocalDescription instead of calling
+                    createOffer, the returned SDP may be different than when
+                    setLocalDescription was originally called, due to the
+                    addition of gathered ICE candidates, but the
+                    &lt;session-version&gt; will not have changed.
+                    There are no known scenarios in which this causes problems,
+                    but if this is a concern, the solution is simply to use
+                    createOffer to ensure a unique &lt;session-version&gt;.</t>
 
                     <t>If the initial offer was applied using
                     setLocalDescription, but an answer from the remote
