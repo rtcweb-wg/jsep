@@ -3217,10 +3217,12 @@ Internet-Draft                    JSEP                    September 2016
       as defined in [RFC5245], Section 4.1.1, unless it has been marked
       as bundle-only.
 
-   o  Or, if the ICE ufrag and password values have changed, trigger the
-      ICE Agent to start an ICE restart and begin gathering new
-      candidates for the media section, as defined in [RFC5245],
-      Section 9.1.1.1, unless it has been marked as bundle-only.
+   o  Or, if the ICE ufrag and password values have changed, and it has
+      not been marked as bundle-only, trigger the ICE Agent to start an
+      ICE restart, and begin gathering new candidates for the media
+      section as described in [RFC5245], Section 9.1.1.1.  If this
+      description is an answer, also start checks on that media section
+      as defined in [RFC5245], Section 9.3.1.1.
 
    o  If the media section proto value indicates use of RTP:
 
@@ -3240,8 +3242,6 @@ Internet-Draft                    JSEP                    September 2016
          Section 5.1.1.  If RTCP mux is not indicated, but was indicated
          in a previous description, this MUST result in an error.
 
-      *  For each specified RTP header extension, establish a mapping
-         between the extension ID and URI, as described in section 6 of
 
 
 
@@ -3250,6 +3250,8 @@ Uberti, et al.           Expires March 13, 2017                [Page 58]
 Internet-Draft                    JSEP                    September 2016
 
 
+      *  For each specified RTP header extension, establish a mapping
+         between the extension ID and URI, as described in section 6 of
          [RFC5285].  If any indicated RTP header extension is unknown,
          this MUST result in an error.
 
@@ -3299,8 +3301,6 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-
-
 Uberti, et al.           Expires March 13, 2017                [Page 59]
 
 Internet-Draft                    JSEP                    September 2016
@@ -3313,10 +3313,15 @@ Internet-Draft                    JSEP                    September 2016
    parameters are out of bounds, or cannot be applied, processing MUST
    stop and an error MUST be returned.
 
-   o  If the description is of type "offer", and the ICE ufrag or
-      password changed from the previous remote description, as
-      described in Section 9.1.1.1 of [RFC5245], mark that an ICE
-      restart is needed.
+   o  If the ICE ufrag or password changed from the previous remote
+      description, then an ICE restart is needed, as described in
+      Section 9.1.1.1 of [RFC5245] If the description is of type
+      "offer", mark that an ICE restart is needed.  If the description
+      is of type "answer" and the current local description is also an
+      ICE restart, then signal the ICE agent to begin checks as
+      described in Section 9.3.1.1 of [RFC5245].  An answer MUST change
+      the ufrag and password in an answer if and only if ICE is
+      restarting, as described in Section 9.2.1.1 of [RFC5245].
 
    o  Configure the ICE components associated with this media section to
       use the supplied ICE remote ufrag and password for their
@@ -3350,17 +3355,15 @@ Internet-Draft                    JSEP                    September 2016
             the canonical order described in Section 5.2.1) such
             RtpTransceiver.
 
-         +  If no RtpTransceiver was found in the previous step, create
-            one with an inactive RtpSender and active RtpReceiver.
-
-
-
 
 
 Uberti, et al.           Expires March 13, 2017                [Page 60]
 
 Internet-Draft                    JSEP                    September 2016
 
+
+         +  If no RtpTransceiver was found in the previous step, create
+            one with an inactive RtpSender and active RtpReceiver.
 
          +  Associate the found or created RtpTransceiver with the m=
             section by setting the value of the RtpTransceiver's mid
@@ -3408,15 +3411,14 @@ Internet-Draft                    JSEP                    September 2016
 
       *  [TODO: handling of CN, telephone-event, "red"]
 
-      *  If the media section is of type audio:
-
-
 
 
 Uberti, et al.           Expires March 13, 2017                [Page 61]
 
 Internet-Draft                    JSEP                    September 2016
 
+
+      *  If the media section is of type audio:
 
          +  For any specified "ptime" value, configure the available
             payload types to use the specified packet size.  If the
@@ -3464,8 +3466,6 @@ Internet-Draft                    JSEP                    September 2016
          using the specified primary SSRC and one of the selected
          payload types, once the underlying transport layers have been
          established.  If RID values are specified, include the RID
-         header extension in the RTP streams, as indicated in
-         [I-D.ietf-mmusic-rid], Section 4).  If simulcast is negotiated,
 
 
 
@@ -3474,6 +3474,8 @@ Uberti, et al.           Expires March 13, 2017                [Page 62]
 Internet-Draft                    JSEP                    September 2016
 
 
+         header extension in the RTP streams, as indicated in
+         [I-D.ietf-mmusic-rid], Section 4).  If simulcast is negotiated,
          send the number of Source RTP Streams as specified in
          [I-D.ietf-mmusic-sdp-simulcast], Section 6.2.2.  If the
          directional attribute is of type "recvonly" or "inactive", stop
@@ -3520,8 +3522,6 @@ Internet-Draft                    JSEP                    September 2016
    The flow shows Alice's browser initiating the session to Bob's
    browser.  The messages from Alice's JS to Bob's JS are assumed to
    flow over some signaling protocol via a web server.  The JS on both
-   Alice's side and Bob's side waits for all candidates before sending
-   the offer or answer, so the offers and answers are complete.  Trickle
 
 
 
@@ -3530,6 +3530,8 @@ Uberti, et al.           Expires March 13, 2017                [Page 63]
 Internet-Draft                    JSEP                    September 2016
 
 
+   Alice's side and Bob's side waits for all candidates before sending
+   the offer or answer, so the offers and answers are complete.  Trickle
    ICE is not used.  Both Alice and Bob are using the default policy of
    balanced.
 
@@ -3577,13 +3579,14 @@ BobUA->AliceUA:     media sent from Bob to Alice
 AliceUA->BobUA:     media sent from Alice to Bob
 
 
-   The SDP for |offer-A1| looks like:
-
 
 
 Uberti, et al.           Expires March 13, 2017                [Page 64]
 
 Internet-Draft                    JSEP                    September 2016
+
+
+   The SDP for |offer-A1| looks like:
 
 
    v=0
@@ -3631,9 +3634,6 @@ Internet-Draft                    JSEP                    September 2016
    a=sendrecv
    a=rtpmap:100 VP8/90000
    a=rtpmap:101 rtx/90000
-   a=fmtp:101 apt=100
-   a=ice-ufrag:BGKkWnG5GmiUpdIV
-   a=ice-pwd:mqyWsAjvtKwTGnvhPztQ9mIf
 
 
 
@@ -3642,6 +3642,9 @@ Uberti, et al.           Expires March 13, 2017                [Page 65]
 Internet-Draft                    JSEP                    September 2016
 
 
+   a=fmtp:101 apt=100
+   a=ice-ufrag:BGKkWnG5GmiUpdIV
+   a=ice-pwd:mqyWsAjvtKwTGnvhPztQ9mIf
    a=fingerprint:sha-256
                  19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04
                 :BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
@@ -3687,9 +3690,6 @@ Internet-Draft                    JSEP                    September 2016
    a=ice-pwd:cOTZKZNVlO9RSGsEGM63JXT2
    a=fingerprint:sha-256 6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35
                :DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
-   a=setup:active
-   a=rtcp-mux
-   a=rtcp-rsize
 
 
 
@@ -3698,6 +3698,9 @@ Uberti, et al.           Expires March 13, 2017                [Page 66]
 Internet-Draft                    JSEP                    September 2016
 
 
+   a=setup:active
+   a=rtcp-mux
+   a=rtcp-rsize
    a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
    a=ssrc:3429951804 cname:Q/NWs1ao1HmN4Xa5
    a=candidate:2299743422 1 udp 2113937151 192.0.2.2 20000
@@ -3743,9 +3746,6 @@ Internet-Draft                    JSEP                    September 2016
   AliceJS->AliceUA:   create new PeerConnection
   AliceJS->AliceUA:   addTrack with an audio track
   AliceJS->AliceUA:   createDataChannel to get data channel
-  AliceJS->AliceUA:   createOffer to get |offer-B1|
-  AliceJS->AliceUA:   setLocalDescription with |offer-B1|
-
 
 
 
@@ -3753,6 +3753,9 @@ Uberti, et al.           Expires March 13, 2017                [Page 67]
 
 Internet-Draft                    JSEP                    September 2016
 
+
+  AliceJS->AliceUA:   createOffer to get |offer-B1|
+  AliceJS->AliceUA:   setLocalDescription with |offer-B1|
 
   //                  |offer-B1| is sent over signaling protocol to Bob
   AliceJS->WebServer: signaling with |offer-B1|
@@ -3799,9 +3802,6 @@ Internet-Draft                    JSEP                    September 2016
 
   //                  data channel opens
   BobUA->BobJS:       ondatachannel event
-  AliceUA->AliceJS:   ondatachannel event
-  BobUA->BobJS:       onopen
-  AliceUA->AliceJS:   onopen
 
 
 
@@ -3809,6 +3809,10 @@ Uberti, et al.           Expires March 13, 2017                [Page 68]
 
 Internet-Draft                    JSEP                    September 2016
 
+
+  AliceUA->AliceJS:   ondatachannel event
+  BobUA->BobJS:       onopen
+  AliceUA->AliceJS:   onopen
 
   //                  media is flowing between browsers
   BobUA->AliceUA:     audio+data sent from Bob to Alice
@@ -3841,10 +3845,6 @@ Internet-Draft                    JSEP                    September 2016
 
 
    The SDP for |offer-B1| looks like:
-
-
-
-
 
 
 
