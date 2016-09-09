@@ -1350,7 +1350,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     reflect the current state of the system. Because
                     this method may need to inspect the system state to
                     determine the currently available resources, it may
-                    need to be implemented as an async operation.</t>
+                    need to be implemented as an async operation.
+		    </t>
 
                     <t>Calling this method may do things such as
                     generate new ICE credentials, but does not trigger
@@ -3119,6 +3120,38 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     </section>
                 </section>
             </section>
+            <section title="Modifying an Offer or Answer"
+                anchor="sec.modifying-sdp">
+                <t>The SDP returned from createOffer or createAnswer MUST
+                NOT be changed before passing it to
+                setLocalDescription. If precise control over the SDP
+                is needed, the aformentioned createOffer/createAnswer options
+                or RTPSender APIs MUST be used.</t>
+
+                <t>Note that the application MAY modify the SDP to reduce the
+                capabilities in the offer it sends to the far side
+                (post-setLocalDescription) or the
+                offer that it installs from the far side (pre-setRemoteDescription),
+                as long as it remains a
+                valid SDP offer and specifies a subset of what was in the
+                original offer. This is safe because the answer is not
+                permitted to expand capabilities, and therefore will just
+                respond to what is present in the offer.</t>
+
+                <t>The application SHOULD NOT modify the SDP in the answer it
+                transmits, as the answer contains the negotiated capabilities,
+                and this can cause the two sides to have different
+                ideas about what exactly was negotiated.</t>
+
+                <t>As always, the application is solely responsible for
+                what it sends to the other party, and all incoming SDP will
+                be processed by the browser to the extent of its
+                capabilities. It is an error to assume that all SDP is
+                well-formed; however, one should be able to assume that any
+                implementation of this specification will be able to
+                process, as a remote offer or answer, unmodified SDP coming
+                from any other implementation of this specification.</t>
+            </section>
             <section title="Processing a Local Description"
             anchor="sec.processing-a-local-desc">
 
@@ -3631,9 +3664,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 level to apply a local description.</t>
 
                 <t>First, the parsed parameters are checked to ensure
-                that any modifications performed fall within those
-                explicitly permitted by <xref
-                target="sec.configurable-sdp-paramete" />; otherwise,
+                that they have not been altered after their generation in
+                createOffer/createAnswer, as discussed in
+                <xref target="sec.modifying-sdp" />; otherwise,
                 processing MUST stop and an error MUST be returned.</t>
 
                 <t>Next, media sections are processed. For each media
@@ -3879,7 +3912,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         <t>[TODO: handling of CN, telephone-event,
                         "red"]</t>
 
-                        <t>If the media section if of type audio:
+                        <t>If the media section is of type audio:
                         <list style="symbols">
 
                             <t>For any specified "ptime" value,
@@ -3991,111 +4024,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             </section>
         </section>
-        <section title="Configurable SDP Parameters"
-        anchor="sec.configurable-sdp-paramete">
-
-            <t>It is possible to change elements in the SDP returned
-            from createOffer before passing it to setLocalDescription.
-            When an implementation receives modified SDP it MUST
-            either:</t>
-
-            <t>
-                <list style="symbols">
-
-                    <t>Accept the changes and adjust its behavior to
-                    match the SDP.</t>
-
-                    <t>Reject the changes and return an error via the
-                    error callback.</t>
-
-                </list>
-            </t>
-
-            <t>Changes MUST NOT be silently ignored.</t>
-
-            <t>The following elements of the session description MUST
-            NOT be changed between the createOffer and the
-            setLocalDescription (or between the createAnswer and the
-            setLocalDescription), since they reflect transport
-            attributes that are solely under browser control, and the
-            browser MUST NOT honor an attempt to change them:</t>
-
-            <t>
-                <list style="symbols">
-
-                    <t>The number, type and port number of m=
-                    lines.</t>
-
-                    <t>The generated MID attributes (a=mid).</t>
-
-                    <t>The generated ICE credentials (a=ice-ufrag and
-                    a=ice-pwd).</t>
-
-                    <t>The set of ICE candidates and their parameters
-                    (a=candidate).</t>
-
-                    <t>The DTLS fingerprint(s) (a=fingerprint).</t>
-
-                    <t>The contents of bundle groups, bundle-only
-                    parameters, or "a=rtcp-mux" parameters.</t>
-
-                </list>
-            </t>
-
-            <t>The following modifications, if done by the browser to a
-            description between createOffer/createAnswer and the
-            setLocalDescription, MUST be honored by the browser:</t>
-
-            <t>
-                <list style="symbols">
-
-                    <t>Remove or reorder codecs (m=)</t>
-                </list>
-            </t>
-
-            <t>The following parameters may be controlled by options
-            passed into createOffer/createAnswer. As an open issue,
-            these changes may also be be performed by manipulating the
-            SDP returned from createOffer/createAnswer, as indicated
-            above, as long as the capabilities of the endpoint are not
-            exceeded (e.g. asking for a resolution greater than what
-            the endpoint can encode):</t>
-
-            <t>
-                <list style="symbols">
-
-                    <t>[[OPEN ISSUE: This is a placeholder for other
-                    modifications, which we may continue adding as use
-                    cases appear.]]</t>
-                </list>
-            </t>
-
-            <t>Implementations MAY choose to either honor or reject any
-            elements not listed in the above two categories, but must
-            do so explicitly as described at the beginning of this
-            section. Note that future standards may add new SDP
-            elements to the list of elements which must be accepted or
-            rejected, but due to version skew, applications must be
-            prepared for implementations to accept changes which must
-            be rejected and vice versa.</t>
-
-            <t>The application can also modify the SDP to reduce the
-            capabilities in the offer it sends to the far side or the
-            offer that it installs from the far side in any way the
-            application sees fit, as long as it is a valid SDP offer
-            and specifies a subset of what was in the original offer.
-            This is safe because the answer is not permitted to expand
-            capabilities and therefore will just respond to what is
-            actually in the offer.</t>
-
-            <t>As always, the application is solely responsible for
-            what it sends to the other party, and all incoming SDP will
-            be processed by the browser to the extent of its
-            capabilities. It is an error to assume that all SDP is
-            well-formed; however, one should be able to assume that any
-            implementation of this specification will be able to
-            process, as a remote offer or answer, unmodified SDP coming
-            from any other implementation of this specification.</t>
+        <section title="Demux placeholder">
+          <t>RTP demux algo goes here</t>
         </section>
         <section title="Examples" anchor="sec.examples">
 
@@ -4809,11 +4739,9 @@ a=rtcp-fb:100 nack pli
             relevant when we consider the SDP which is passed to
             setLocalDescription().  While correct API usage requires
             that the application pass in SDP which was derived from
-            createOffer() or createAnswer() (perhaps suitably modified
-            as described in <xref target="sec.configurable-sdp-paramete"
-            />, there is no guarantee that applications do so. The
-            browser MUST be prepared for the JS to pass in bogus data
-            instead.</t>
+            createOffer() or createAnswer(), there is no guarantee that
+            applications do so. The browser MUST be prepared for the JS to pass
+            in bogus data instead.</t>
 
             <t>Conversely, the application programmer MUST recognize
             that the JS does not have complete control of browser
