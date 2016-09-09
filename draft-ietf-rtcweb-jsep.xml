@@ -2132,7 +2132,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     5.1.</t>
 
                     <t>Each m= section MUST include the following
-                    attribute lines:
+                    attribute lines (which are of attribute types
+                    other than IDENTICAL and TRANSPORT as defined
+                    in <xref target="I-D.ietf-mmusic-sdp-mux-attributes"/>):
                     <list style="symbols">
 
                         <t>An "a=mid" line, as specified in <xref
@@ -2191,28 +2193,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         in <xref target="I-D.ietf-rtcweb-fec"></xref>,
                         Section 6, and specific usage for each media
                         type is outlined in Sections 4 and 5.</t>
-
-                        <t>"a=ice-ufrag" and "a=ice-pwd" lines, as
-                        specified in <xref target="RFC5245"></xref>,
-                        Section 15.4.</t>
-
-                        <t>An "a=fingerprint" line for each of the
-                        endpoint's certificates, as specified in <xref
-                        target="RFC4572"></xref>, Section 5; the digest
-                        algorithm used for the fingerprint MUST match
-                        that used in the certificate signature.</t>
-
-                        <t>An "a=setup" line, as specified in <xref
-                        target="RFC4145"></xref>, Section 4, and
-                        clarified for use in DTLS-SRTP scenarios in
-                        <xref target="RFC5763"></xref>, Section 5. The
-                        role value in the offer MUST be "actpass".</t>
-
-                        <t>An "a=rtcp-mux" line, as specified in <xref
-                        target="RFC5761"></xref>, Section 5.1.1.</t>
-
-                        <t>An "a=rtcp-rsize" line, as specified in <xref
-                        target="RFC5506"></xref>, Section 5.</t>
 
                         <t>For each supported RTP header extension, an
                         "a=extmap" line, as specified in <xref
@@ -2336,6 +2316,37 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         "a=rid" lines for this m= section.</t>
                     </list></t>
 
+                    <t>Each m= section which does not contain the "a=bundle-only"
+                    attribute MUST include the following
+                    attribute lines (which are of attribute types
+                    IDENTICAL and TRANSPORT as defined
+                    in <xref target="I-D.ietf-mmusic-sdp-mux-attributes"/>):
+                    <list style="symbols">
+                        <t>"a=ice-ufrag" and "a=ice-pwd" lines, as
+                        specified in <xref target="RFC5245"></xref>,
+                        Section 15.4.</t>
+
+                        <t>An "a=fingerprint" line for each of the
+                        endpoint's certificates, as specified in <xref
+                        target="RFC4572"></xref>, Section 5; the digest
+                        algorithm used for the fingerprint MUST match
+                        that used in the certificate signature.</t>
+
+                        <t>An "a=setup" line, as specified in <xref
+                        target="RFC4145"></xref>, Section 4, and
+                        clarified for use in DTLS-SRTP scenarios in
+                        <xref target="RFC5763"></xref>, Section 5. The
+                        role value in the offer MUST be "actpass".</t>
+
+                        <t>An "a=rtcp-mux" line, as specified in <xref
+                        target="RFC5761"></xref>, Section 5.1.1.</t>
+
+                        <t>An "a=rtcp-rsize" line, as specified in <xref
+                        target="RFC5506"></xref>, Section 5.</t>
+
+                        <t>[TODO: rtcp-fb?]</t>
+                    </list>
+                    </t>                      
                     <t>Lastly, if a data channel has been created, a m=
                     section MUST be generated for data. The
                     &lt;media&gt; field MUST be set to "application" and
