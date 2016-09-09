@@ -3681,11 +3681,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     been marked as bundle-only.</t>
 
                     <t>Or, if the ICE ufrag and password values have
-                    changed, trigger the ICE Agent to start an ICE
-                    restart and begin gathering new candidates for the
-                    media section, as defined in <xref target="RFC5245"
-                    />, Section 9.1.1.1, unless it has been marked as
-                    bundle-only.</t>
+                    changed, and it has not been marked as bundle-only,
+                    trigger the ICE Agent to start an ICE restart, and
+                    begin gathering new candidates for the
+                    media section as described in <xref target="RFC5245"
+                    />, Section 9.1.1.1. If this description is an
+                    answer, also start checks on that media section
+                    as defined in <xref target="RFC5245"
+                    />, Section 9.3.1.1.
+                    </t>
 
                     <t>If the media section proto value indicates use of
                     RTP:
@@ -3795,11 +3799,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 MUST be returned.
                 <list style="symbols">
 
-                    <t>If the description is of type "offer", and the
-                    ICE ufrag or password changed from the previous
-                    remote description, as described in Section 9.1.1.1
-                    of <xref target="RFC5245" />, mark that an ICE
-                    restart is needed.</t>
+                    <t>If the ICE ufrag or password changed from the previous
+                    remote description, then an ICE restart is needed,
+                    as described in Section 9.1.1.1
+                    of <xref target="RFC5245" />
+                    If the description is of type "offer", mark that an ICE
+                    restart is needed. If the description is of type
+                    "answer" and the current local description is also
+                    an ICE restart, then signal the ICE agent to begin
+                    checks as described in Section 9.3.1.1 of <xref target="RFC5245" />.
+                    An answer MUST change the ufrag and password in an answer
+                    if and only if ICE is restarting, as described in
+                    Section 9.2.1.1 of <xref target="RFC5245" />.
+                    </t>
 
                     <t>Configure the ICE components associated with
                     this media section to use the supplied ICE remote
