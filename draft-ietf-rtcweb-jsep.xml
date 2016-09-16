@@ -1764,14 +1764,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     successfully, will be added to the current and/or
                     pending remote description according to the rules
                     defined for Trickle ICE.
-                    The ufrag is used to determine which
-                    remote description the candidate corresponds to.
-                    If the ufrag does not match either remote description
-                    an error is generated.
                     If the MID, m-line index, or candidate string provided in the ICE candidate is
                     invalid, an error is generated.
+                    If present, ufrag is used to determine which
+                    generation of remote description the candidate corresponds to;
+                    this resolves ambiguities when trickle ICE is in progress
+                    during an ICE restart. If the ufrag is present and
+                    does not match either remote description an error is generated.
+                    If ufrag is absent, the candidate MUST be assumed to correspond to
+                    the most recently applied remote description.
                     Connectivity checks will
-                    be sent to the new candidate.</t>
+                    be sent to the new candidate.
+                    </t>
 
                     <t>This method can also be used to provide an
                     end-of-candidates indication (as defined in <xref
