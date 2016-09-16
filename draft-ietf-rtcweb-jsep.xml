@@ -3684,7 +3684,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         establish a mapping between the extension ID and
                         URI, as described in section 6 of <xref
                         target="RFC5285" />. If any indicated RTP header
-                        extension is unknown, this MUST result in an
+                        extension is not supported, this MUST result in an
                         error.</t>
 
                         <t>If the MID header extension is supported,
@@ -3694,11 +3694,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         target="I-D.ietf-mmusic-msid" />, Section
                         3.2.</t>
 
-                        <t>For each specified payload type, establish a
-                        mapping between the payload type ID and the
+                        <t>For each specified media format, establish a
+                        mapping between the payload type and the
                         actual media format, as described in <xref
-                        target="RFC3264" />. If any indicated payload
-                        type is unknown, this MUST result in an
+                        target="RFC3264" />, Section 6.1.
+                        If any indicated media format
+                        is not supported, this MUST result in an
                         error.</t>
 
                         <t>For each specified "rtx" media format,
@@ -3822,16 +3823,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                             section.</t>
                         </list></t>
 
-                        <t>For each specified payload type that is also
+                        <t>For each specified media format that is also
                         supported by the local implementation, establish
-                        a mapping between the specified payload type ID and the
-                        actual media format, as described in
+                        a mapping between the specified payload type and
+                        the media format, as described in
                         <xref target="RFC3264" />, Section 6.1.
                         Specifically, this means that the
-                        implementation determines the payload type ID to
+                        implementation records the payload type to
                         be used in outgoing RTP packets when sending each
-                        specified payload type. If any indicated payload
-                        type is unknown, it MUST be ignored.</t>
+                        specified media format, as well as the relative
+                        preference for each format that is indicated in their
+                        ordering. If any indicated media format
+                        is not supported by the local implementation,
+                        it MUST be ignored.</t>
 
                         <t>For each specified "rtx" media format,
                         establish a mapping between the RTX payload type
@@ -3842,23 +3846,23 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
                         <t>For each specified fmtp parameter that is
                         supported by the local implementation, enable
-                        them on the associated payload types.</t>
+                        them on the associated media formats.</t>
 
                         <t>For each specified RTP header extension that is also
                         supported by the local implementation, establish a
                         mapping between the extension ID and
                         URI, as described in <xref
                         target="RFC5285" />, Section 5. Specifically, this means
-                        that the implementation determines the extension ID to
+                        that the implementation records the extension ID to
                         be used in outgoing RTP packets when sending each
-                        specified header extension, and enables that extension
-                        for the outgoing streams associated with this m= section.
+                        specified header extension.
                         If any indicated RTP header
-                        extension is unknown, it MUST be ignored.</t>
+                        extension is not supported by the local implementation,
+                        it MUST be ignored.</t>
 
                         <t>For each specified RTCP feedback mechanism
                         that is supported by the local implementation,
-                        enable them on the associated payload types.</t>
+                        enable them on the associated media formats.</t>
 
                         <t>For any specified "TIAS" bandwidth value, set
                         this value as a constraint on the maximum RTP
@@ -3896,10 +3900,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         <list style="symbols">
 
                             <t>For any specified "ptime" value,
-                            configure the available payload types to
+                            configure the available media formats to
                             use the specified packet size. If the
                             specified size is not supported for a
-                            payload type, use the next closest value
+                            media format, use the next closest value
                             instead.</t>
 
                         </list></t>
@@ -3943,10 +3947,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     <t>If the media section proto value indicates use
                     of RTP:
                     <list style="symbols">
-                        <t>If the media section references any payload types,
+                        <t>If the media section references any media formats,
                         RTP header extensions, or RTCP feedback mechanisms that
-                        are not known to the local implementation, this
-                        indicates a negotiation malfunction and MUST
+                        were not present in the corresponding media section in
+                        the offer, this indicates a negotiation problem and MUST
                         result in an error.</t>
 
                         <t>If the media section has RTCP mux enabled,
@@ -3963,19 +3967,33 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         this media section to use reduced-size RTCP, as
                         specified in <xref target="RFC5506" />.</t>
 
+                        <t>[TODO: enable appropriate rtcp-fb mechanisms]</t>
+
                         <t>If the directional attribute in the answer is
                         of type "sendrecv" or "sendonly", prepare to
-                        start transmitting media using the specified
-                        primary SSRC and one of the selected payload
-                        types, once the underlying transport layers have
-                        been established. If RID values are specified,
-                        include the RID header extension in the RTP
+                        start transmitting media using the most preferred
+                        media format from the remote description that is also
+                        present in the answer, as described in
+                        <xref target="RFC3264" />, Sections 6.1 and 7,
+                        once the underlying transport layers have
+                        been established.
+                        [TODO: add discusssion of RED/FEC/RTX/CN]
+                        The payload type mapping from the remote description is
+                        used to determine payload types for the
+                        outgoing RTP streams.
+                        Any RTP header extensions that were negotiated should
+                        be included in the outgoing RTP streams, using the
+                        extension mapping from the remote description;
+                        if the RID header extension has been negotiated, and
+                        RID values are specified,
+                        include the RID header extension in the outgoing RTP
                         streams, as indicated in <xref
                         target="I-D.ietf-mmusic-rid"></xref>, Section
                         4). If simulcast is negotiated, send the number
                         of Source RTP Streams as specified in
                         <xref target="I-D.ietf-mmusic-sdp-simulcast">
-                        </xref>, Section 6.2.2. If the directional
+                        </xref>, Section 6.2.2.</t>
+                        <t>If the directional
                         attribute is of type "recvonly" or "inactive",
                         stop transmitting RTP media, although RTCP
                         should still be sent, as described in
