@@ -3788,8 +3788,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     RTP:
                     <list style="symbols">
 
-                        <t>[TODO: header extensions]</t>
-
                         <t>If the m= section is being recycled (see
                         <xref target="sec.subsequent-offers"></xref>),
                         dissociate the currently associated
@@ -3826,22 +3824,37 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
                         <t>For each specified payload type that is also
                         supported by the local implementation, establish
-                        a mapping between the payload type ID and the
-                        actual media format. [TODO - Justin to add more
-                        to explain mapping.] If any indicated payload
-                        type is unknown, it MUST be ignored.  [TODO:
-                        should fail on answers]</t>
+                        a mapping between the specified payload type ID and the
+                        actual media format, as described in
+                        <xref target="RFC3264" />, Section 6.1.
+                        Specifically, this means that the
+                        implementation determines the payload type ID to
+                        be used in outgoing RTP packets when sending each
+                        specified payload type. If any indicated payload
+                        type is unknown, it MUST be ignored.</t>
 
                         <t>For each specified "rtx" media format,
                         establish a mapping between the RTX payload type
                         and its associated primary payload type, as
-                        described in <xref target="RFC4588" />. If any
-                        referenced primary payload types are not
+                        described in <xref target="RFC4588" />, Section 4.
+                        If any referenced primary payload types are not
                         present, this MUST result in an error.</t>
 
                         <t>For each specified fmtp parameter that is
                         supported by the local implementation, enable
                         them on the associated payload types.</t>
+
+                        <t>For each specified RTP header extension that is also
+                        supported by the local implementation, establish a
+                        mapping between the extension ID and
+                        URI, as described in <xref
+                        target="RFC5285" />, Section 5. Specifically, this means
+                        that the implementation determines the extension ID to
+                        be used in outgoing RTP packets when sending each
+                        specified header extension, and enables that extension
+                        for the outgoing streams associated with this m= section.
+                        If any indicated RTP header
+                        extension is unknown, it MUST be ignored.</t>
 
                         <t>For each specified RTCP feedback mechanism
                         that is supported by the local implementation,
@@ -3879,7 +3892,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         <t>[TODO: handling of CN, telephone-event,
                         "red"]</t>
 
-                        <t>If the media section if of type audio:
+                        <t>If the media section is of type audio:
                         <list style="symbols">
 
                             <t>For any specified "ptime" value,
@@ -3930,6 +3943,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     <t>If the media section proto value indicates use
                     of RTP:
                     <list style="symbols">
+                        <t>If the media section references any payload types,
+                        RTP header extensions, or RTCP feedback mechanisms that
+                        are not known to the local implementation, this
+                        indicates a negotiation malfunction and MUST
+                        result in an error.</t>
 
                         <t>If the media section has RTCP mux enabled,
                         discard any RTCP component, and begin or
