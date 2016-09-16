@@ -1933,10 +1933,10 @@ Internet-Draft                    JSEP                    September 2016
    set of ICE candidates.  Bundle-only m= sections MUST NOT contain any
    ICE credentials and MUST NOT gather any candidates.
 
-   For DTLS, all m= sections MUST use the certificate for the identity
-   that has been specified for the PeerConnection; as a result, they
-   MUST all have the same [RFC4572] fingerprint value, or this value
-   MUST be a session-level attribute.
+   For DTLS, all m= sections MUST use all the certificate(s) that have
+   been specified for the PeerConnection; as a result, they MUST all
+   have the same [I-D.ietf-mmusic-4572-update] fingerprint value(s), or
+   these value(s) MUST be session-level attributes.
 
    Each m= section should be generated as specified in [RFC4566],
    Section 5.14.  For the m= line itself, the following rules MUST be
@@ -2021,10 +2021,8 @@ Internet-Draft                    JSEP                    September 2016
    o  "a=ice-ufrag" and "a=ice-pwd" lines, as specified in [RFC5245],
       Section 15.4.
 
-   o  An "a=fingerprint" line for each of the endpoint's certificates,
-      as specified in [RFC4572], Section 5; the digest algorithm used
-      for the fingerprint MUST match that used in the certificate
-      signature.
+   o  One or more "a=fingerprint" line(s) for each of the endpoint's
+      certificates, as specified in [I-D.ietf-mmusic-4572-update].
 
    o  An "a=setup" line, as specified in [RFC4145], Section 4, and
       clarified for use in DTLS-SRTP scenarios in [RFC5763], Section 5.
@@ -2066,6 +2064,8 @@ Internet-Draft                    JSEP                    September 2016
       to "FEC-FR" and including the primary and FEC SSRCs, as specified
       in [RFC5956], section 4.3.  For simplicity, if both RTX and FEC
       are supported, the FEC SSRC MUST be the same as the RTX SSRC.
+
+
 
 
 
@@ -2593,10 +2593,8 @@ Internet-Draft                    JSEP                    September 2016
    o  "a=ice-ufrag" and "a=ice-pwd" lines, as specified in [RFC5245],
       Section 15.4.
 
-   o  An "a=fingerprint" line for each of the endpoint's certificates,
-      as specified in [RFC4572], Section 5; the digest algorithm used
-      for the fingerprint MUST match that used in the certificate
-      signature.
+   o  One or more "a=fingerprint" line(s) for each of the endpoint's
+      certificates, as specified in [I-D.ietf-mmusic-4572-update].
 
    o  An "a=setup" line, as specified in [RFC4145], Section 4, and
       clarified for use in DTLS-SRTP scenarios in [RFC5763], Section 5.
@@ -2625,6 +2623,8 @@ Internet-Draft                    JSEP                    September 2016
    o  For each supported RTCP feedback mechanism that is present in the
       offer, an "a=rtcp-fb" mechanism, as specified in [RFC4585],
       Section 4.2.  The list of RTCP feedback mechanisms that SHOULD/
+      MUST be supported is specified in [I-D.ietf-rtcweb-rtp-usage],
+      Section 5.1.
 
 
 
@@ -2633,9 +2633,6 @@ Uberti, et al.           Expires March 20, 2017                [Page 47]
 
 Internet-Draft                    JSEP                    September 2016
 
-
-      MUST be supported is specified in [I-D.ietf-rtcweb-rtp-usage],
-      Section 5.1.
 
    o  If the RtpSender of the RtpTransceiver associated with this
       m=section is active:
@@ -2681,6 +2678,9 @@ Internet-Draft                    JSEP                    September 2016
    the presence of "a=bundle-only" in the offer, no m= sections in the
    answer should have an "a=bundle-only" line.
 
+   Attributes that are common between all m= sections MAY be moved to
+   session-level, if explicitly defined to be valid at session-level.
+
 
 
 
@@ -2689,9 +2689,6 @@ Uberti, et al.           Expires March 20, 2017                [Page 48]
 
 Internet-Draft                    JSEP                    September 2016
 
-
-   Attributes that are common between all m= sections MAY be moved to
-   session-level, if explicitly defined to be valid at session-level.
 
    The attributes prohibited in the creation of offers are also
    prohibited in the creation of answers.
@@ -2737,7 +2734,10 @@ Internet-Draft                    JSEP                    September 2016
       the m= section is bundled into another m= section, it still MUST
       NOT contain any ICE credentials.
 
-
+   o  If the m= section is not bundled into another m= section, for each
+      candidate that has been gathered during the most recent gathering
+      phase (see Section 3.5.1), an "a=candidate" line MUST be added, as
+      defined in [RFC5245], Section 4.3., paragraph 3.  If candidate
 
 
 
@@ -2746,10 +2746,6 @@ Uberti, et al.           Expires March 20, 2017                [Page 49]
 Internet-Draft                    JSEP                    September 2016
 
 
-   o  If the m= section is not bundled into another m= section, for each
-      candidate that has been gathered during the most recent gathering
-      phase (see Section 3.5.1), an "a=candidate" line MUST be added, as
-      defined in [RFC5245], Section 4.3., paragraph 3.  If candidate
       gathering for the section has completed, an "a=end-of-candidates"
       attribute MUST be added, as described in [I-D.ietf-ice-trickle],
       Section 9.3.  If the m= section is bundled into another m=
@@ -2793,7 +2789,11 @@ Internet-Draft                    JSEP                    September 2016
    setLocalDescription) or the offer that it installs from the far side
    (pre-setRemoteDescription), as long as it remains a valid SDP offer
    and specifies a subset of what was in the original offer.  This is
+   safe because the answer is not permitted to expand capabilities, and
+   therefore will just respond to what is present in the offer.
 
+   The application SHOULD NOT modify the SDP in the answer it transmits,
+   as the answer contains the negotiated capabilities, and this can
 
 
 
@@ -2802,11 +2802,6 @@ Uberti, et al.           Expires March 20, 2017                [Page 50]
 Internet-Draft                    JSEP                    September 2016
 
 
-   safe because the answer is not permitted to expand capabilities, and
-   therefore will just respond to what is present in the offer.
-
-   The application SHOULD NOT modify the SDP in the answer it transmits,
-   as the answer contains the negotiated capabilities, and this can
    cause the two sides to have different ideas about what exactly was
    negotiated.
 
@@ -2850,6 +2845,11 @@ Internet-Draft                    JSEP                    September 2016
    o  First, the type of the SessionDescription is checked against the
       current state of the PeerConnection:
 
+      *  If the type is "offer", the PeerConnection state MUST be either
+         "stable" or "have-remote-offer".
+
+      *  If the type is "pranswer" or "answer", the PeerConnection state
+         MUST be either "have-local-offer" or "have-remote-pranswer".
 
 
 
@@ -2857,12 +2857,6 @@ Uberti, et al.           Expires March 20, 2017                [Page 51]
 
 Internet-Draft                    JSEP                    September 2016
 
-
-      *  If the type is "offer", the PeerConnection state MUST be either
-         "stable" or "have-remote-offer".
-
-      *  If the type is "pranswer" or "answer", the PeerConnection state
-         MUST be either "have-local-offer" or "have-remote-pranswer".
 
    o  If the type is not correct for the current state, processing MUST
       stop and an error MUST be returned.
@@ -2892,6 +2886,12 @@ Internet-Draft                    JSEP                    September 2016
    [RFC3264] semantics, and then either parse and store or discard the
    provided value, as described below.  A partial list of ABNF
    definitions for SDP attributes can found in:
+
+
+
+
+
+
 
 
 
@@ -4393,6 +4393,10 @@ Internet-Draft                    JSEP                    September 2016
               the Interactive Connectivity Establishment (ICE)
               Protocol".
 
+   [I-D.ietf-mmusic-4572-update]
+              Holmberg, C., "Updates to RFC 4572", draft-ietf-mmusic-
+              4572-update-05 (work in progress), June 2016.
+
    [I-D.ietf-mmusic-msid]
               Alvestrand, H., "Cross Session Stream Identification in
               the Session Description Protocol", draft-ietf-mmusic-
@@ -4414,10 +4418,6 @@ Internet-Draft                    JSEP                    September 2016
               Protocol (SCTP)-Based Media Transport in the Session
               Description Protocol (SDP)", draft-ietf-mmusic-sctp-sdp-04
               (work in progress), June 2013.
-
-
-
-
 
 
 
