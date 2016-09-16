@@ -4078,28 +4078,41 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
         <section title="Processing RTP packets"
                  anchor="sec.rtp.demux">
-          <t>When an RTP packet is received by a transport (typically a
-          DtlsTransport), that packet MUST be routed to the correct
-          RtpReceiver. For each transport, the following steps MUST be
-          followed to prepare to route packets:</t>
+          <t>Note: The following algorithm does not yet have WG
+          consensus but is included here as something concrete for the
+          working group to discuss."</t>
+          <t>When an RTP packet is received by a transport, that
+          packet needs to be routed to the correct RtpReceiver. For
+          each transport, the following steps MUST be followed to
+          prepare to route packets:</t>
 
           <t>
             <list>
-              <t>Construct a table mapping MID to RtpReceiver. For each
-              RtpReceiver configured to recei ve from this transport,
-              let the key be the RtpReceiver's MID, and the value be the
-              RtpReceiver.</t>
-              
-              <t>Construct a table mapping SSRC to RtpReceiver. For each
-              RtpReceiver configured to receive from this transport, and
-              for each SSRC that RtpReceiver is configured to receive,
-              let the key be the SSRC and the value be the RtpReceiver.</t>
-
-              <t>Construct a table mapping Payload Type to RtpReceiver. For
+              <t>Construct a table mapping MID to RtpReceiver. For
               each RtpReceiver configured to receive from this
-              transport, and for each Payload Type that RtpReceiver is
-              configured to receive, let the key be the Payload Type and
-              the value be the RtpReceiver.</t>
+              transport, let the key be the RtpReceiver's MID, and the
+              value be the RtpReceiver.  The MID of a given
+              RtpReceiver is found in the a=mid line of the m= section
+              corresponding to that RtpReceiver in remote local and
+              remote descriptions.</t>
+              
+              <t>Construct a table mapping SSRC to RtpReceiver. For
+              each RtpReceiver configured to receive from this
+              transport, and for each SSRC that RtpReceiver is
+              configured to receive, let the key be the SSRC and the
+              value be the RtpReceiver.  The SSRCs of a given
+              RtpReceiver are found in the a=ssrc lines of the m=
+              section corresponding to that RtpReceiver in the remote
+              description.</t>
+
+              <t>Construct a table mapping Payload Type to
+              RtpReceiver. For each RtpReceiver configured to receive
+              from this transport, and for each Payload Type that
+              RtpReceiver is configured to receive, let the key be the
+              Payload Type and the value be the RtpReceiver.  The
+              Payload Types of a given RtpReceiver are found in the
+              a=fmtp lines of the m= section corresponding to that
+              RtpReceiver in the local description.</t>
             </list>
           </t>
 
@@ -4133,6 +4146,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 Drop the packet.
               </t>
             </list>
+          </t>
+          <t>
+            After packets are routed to the RtpReceiver, further
+            processing of the RTP packets is done at the RtpReceiver
+            level.  This includes using the RID to determine which RTP
+            streams depend on or repair other RTP streams.
           </t>
         </section>
         <section title="Examples" anchor="sec.examples">
