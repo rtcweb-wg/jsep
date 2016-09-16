@@ -144,16 +144,16 @@ Internet-Draft                    JSEP                    September 2016
      5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  63
    6.  Demux placeholder . . . . . . . . . . . . . . . . . . . . . .  64
    7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  64
-     7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  64
-     7.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  68
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  78
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  78
-   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  79
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  79
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  79
-     11.2.  Informative References . . . . . . . . . . . . . . . . .  82
-   Appendix A.  Change log . . . . . . . . . . . . . . . . . . . . .  83
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  88
+     7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  65
+     7.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  69
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  79
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  79
+   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  80
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  80
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  80
+     11.2.  Informative References . . . . . . . . . . . . . . . . .  83
+   Appendix A.  Change log . . . . . . . . . . . . . . . . . . . . .  84
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  89
 
 1.  Introduction
 
@@ -3277,17 +3277,17 @@ Internet-Draft                    JSEP                    September 2016
 
       *  For each specified RTP header extension, establish a mapping
          between the extension ID and URI, as described in section 6 of
-         [RFC5285].  If any indicated RTP header extension is unknown,
-         this MUST result in an error.
+         [RFC5285].  If any indicated RTP header extension is not
+         supported, this MUST result in an error.
 
       *  If the MID header extension is supported, prepare to demux RTP
          data intended for this media section based on the MID header
          extension, as described in [I-D.ietf-mmusic-msid], Section 3.2.
 
-      *  For each specified payload type, establish a mapping between
-         the payload type ID and the actual media format, as described
-         in [RFC3264].  If any indicated payload type is unknown, this
-         MUST result in an error.
+      *  For each specified media format, establish a mapping between
+         the payload type and the actual media format, as described in
+         [RFC3264], Section 6.1.  If any indicated media format is not
+         supported, this MUST result in an error.
 
       *  For each specified "rtx" media format, establish a mapping
          between the RTX payload type and its associated primary payload
@@ -3372,8 +3372,6 @@ Internet-Draft                    JSEP                    September 2016
 
    o  If the media section proto value indicates use of RTP:
 
-      *  [TODO: header extensions]
-
       *  If the m= section is being recycled (see Section 5.2.2),
          dissociate the currently associated RtpTransceiver by setting
          its mid attribute to null.
@@ -3401,14 +3399,16 @@ Internet-Draft                    JSEP                    September 2016
             RtpTransceiver mid attribute, following the guidance for
             "a=mid" mentioned in Section 5.2.1.
 
-      *  For each specified payload type that is also supported by the
-         local implementation, establish a mapping between the payload
-         type ID and the actual media format.  [TODO - Justin to add
-         more to explain mapping.]  If any indicated payload type is
-         unknown, it MUST be ignored.  [TODO: should fail on answers]
+      *  For each specified media format that is also supported by the
+         local implementation, establish a mapping between the specified
+         payload type and the media format, as described in [RFC3264],
+         Section 6.1.  Specifically, this means that the implementation
+         records the payload type to be used in outgoing RTP packets
+         when sending each specified media format, as well as the
+         relative preference for each format that is indicated in their
+         ordering.  If any indicated media format is not supported by
+         the local implementation, it MUST be ignored.
 
-      *  For each specified "rtx" media format, establish a mapping
-         between the RTX payload type and its associated primary payload
 
 
 
@@ -3418,16 +3418,28 @@ Uberti, et al.           Expires March 20, 2017                [Page 61]
 Internet-Draft                    JSEP                    September 2016
 
 
-         type, as described in [RFC4588].  If any referenced primary
-         payload types are not present, this MUST result in an error.
+      *  For each specified "rtx" media format, establish a mapping
+         between the RTX payload type and its associated primary payload
+         type, as described in [RFC4588], Section 4.  If any referenced
+         primary payload types are not present, this MUST result in an
+         error.
 
       *  For each specified fmtp parameter that is supported by the
-         local implementation, enable them on the associated payload
-         types.
+         local implementation, enable them on the associated media
+         formats.
+
+      *  For each specified RTP header extension that is also supported
+         by the local implementation, establish a mapping between the
+         extension ID and URI, as described in [RFC5285], Section 5.
+         Specifically, this means that the implementation records the
+         extension ID to be used in outgoing RTP packets when sending
+         each specified header extension.  If any indicated RTP header
+         extension is not supported by the local implementation, it MUST
+         be ignored.
 
       *  For each specified RTCP feedback mechanism that is supported by
-         the local implementation, enable them on the associated payload
-         types.
+         the local implementation, enable them on the associated media
+         formats.
 
       *  For any specified "TIAS" bandwidth value, set this value as a
          constraint on the maximum RTP bitrate to be used when sending
@@ -3454,18 +3466,6 @@ Internet-Draft                    JSEP                    September 2016
 
       *  If the media section is of type audio:
 
-         +  For any specified "ptime" value, configure the available
-            payload types to use the specified packet size.  If the
-            specified size is not supported for a payload type, use the
-            next closest value instead.
-
-   Finally, if this description is of type "pranswer" or "answer",
-   follow the processing defined in the Section 5.10 section below.
-
-
-
-
-
 
 
 
@@ -3473,6 +3473,14 @@ Uberti, et al.           Expires March 20, 2017                [Page 62]
 
 Internet-Draft                    JSEP                    September 2016
 
+
+         +  For any specified "ptime" value, configure the available
+            media formats to use the specified packet size.  If the
+            specified size is not supported for a media format, use the
+            next closest value instead.
+
+   Finally, if this description is of type "pranswer" or "answer",
+   follow the processing defined in the Section 5.10 section below.
 
 5.10.  Applying an Answer
 
@@ -3496,6 +3504,11 @@ Internet-Draft                    JSEP                    September 2016
 
    o  If the media section proto value indicates use of RTP:
 
+      *  If the media section references any media formats, RTP header
+         extensions, or RTCP feedback mechanisms that were not present
+         in the corresponding media section in the offer, this indicates
+         a negotiation problem and MUST result in an error.
+
       *  If the media section has RTCP mux enabled, discard any RTCP
          component, and begin or continue muxing RTCP over the RTP
          component, as specified in [RFC5761], Section 5.1.3.
@@ -3507,20 +3520,7 @@ Internet-Draft                    JSEP                    September 2016
          the RTCP transmission for this media section to use reduced-
          size RTCP, as specified in [RFC5506].
 
-      *  If the directional attribute in the answer is of type
-         "sendrecv" or "sendonly", prepare to start transmitting media
-         using the specified primary SSRC and one of the selected
-         payload types, once the underlying transport layers have been
-         established.  If RID values are specified, include the RID
-         header extension in the RTP streams, as indicated in
-         [I-D.ietf-mmusic-rid], Section 4).  If simulcast is negotiated,
-         send the number of Source RTP Streams as specified in
-         [I-D.ietf-mmusic-sdp-simulcast], Section 6.2.2.  If the
-         directional attribute is of type "recvonly" or "inactive", stop
-         transmitting RTP media, although RTCP should still be sent, as
-         described in [RFC3264], Section 5.1.
-
-   o  If the media section proto value indicates use of SCTP:
+      *  [TODO: enable appropriate rtcp-fb mechanisms]
 
 
 
@@ -3529,6 +3529,29 @@ Uberti, et al.           Expires March 20, 2017                [Page 63]
 
 Internet-Draft                    JSEP                    September 2016
 
+
+      *  If the directional attribute in the answer is of type
+         "sendrecv" or "sendonly", prepare to start transmitting media
+         using the most preferred media format from the remote
+         description that is also present in the answer, as described in
+         [RFC3264], Sections 6.1 and 7, once the underlying transport
+         layers have been established.  [TODO: add discusssion of
+         RED/FEC/RTX/CN] The payload type mapping from the remote
+         description is used to determine payload types for the outgoing
+         RTP streams.  Any RTP header extensions that were negotiated
+         should be included in the outgoing RTP streams, using the
+         extension mapping from the remote description; if the RID
+         header extension has been negotiated, and RID values are
+         specified, include the RID header extension in the outgoing RTP
+         streams, as indicated in [I-D.ietf-mmusic-rid], Section 4).  If
+         simulcast is negotiated, send the number of Source RTP Streams
+         as specified in [I-D.ietf-mmusic-sdp-simulcast], Section 6.2.2.
+
+      *  If the directional attribute is of type "recvonly" or
+         "inactive", stop transmitting RTP media, although RTCP should
+         still be sent, as described in [RFC3264], Section 5.1.
+
+   o  If the media section proto value indicates use of SCTP:
 
       *  If no SCTP association yet exists, prepare to initiate a SCTP
          association over the associated ICE component and DTLS
@@ -3554,6 +3577,14 @@ Internet-Draft                    JSEP                    September 2016
    multiple lines, where leading whitespace indicates that a line is a
    continuation of the previous line.  In addition, some blank lines
    have been added to improve readability but are not valid in SDP.
+
+
+
+
+Uberti, et al.           Expires March 20, 2017                [Page 64]
+
+Internet-Draft                    JSEP                    September 2016
+
 
    More examples of SDP for WebRTC call flows can be found in
    [I-D.nandakumar-rtcweb-sdp].
@@ -3581,7 +3612,32 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 64]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Uberti, et al.           Expires March 20, 2017                [Page 65]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3637,7 +3693,7 @@ AliceUA->BobUA:     media sent from Alice to Bob
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 65]
+Uberti, et al.           Expires March 20, 2017                [Page 66]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3693,7 +3749,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 66]
+Uberti, et al.           Expires March 20, 2017                [Page 67]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3749,7 +3805,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 67]
+Uberti, et al.           Expires March 20, 2017                [Page 68]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3805,7 +3861,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 68]
+Uberti, et al.           Expires March 20, 2017                [Page 69]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3861,7 +3917,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 69]
+Uberti, et al.           Expires March 20, 2017                [Page 70]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3917,7 +3973,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 70]
+Uberti, et al.           Expires March 20, 2017                [Page 71]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3973,7 +4029,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 71]
+Uberti, et al.           Expires March 20, 2017                [Page 72]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4029,7 +4085,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 72]
+Uberti, et al.           Expires March 20, 2017                [Page 73]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4085,7 +4141,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 73]
+Uberti, et al.           Expires March 20, 2017                [Page 74]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4141,7 +4197,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 74]
+Uberti, et al.           Expires March 20, 2017                [Page 75]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4197,7 +4253,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 75]
+Uberti, et al.           Expires March 20, 2017                [Page 76]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4253,7 +4309,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 76]
+Uberti, et al.           Expires March 20, 2017                [Page 77]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4309,7 +4365,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 77]
+Uberti, et al.           Expires March 20, 2017                [Page 78]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4365,7 +4421,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 78]
+Uberti, et al.           Expires March 20, 2017                [Page 79]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4421,7 +4477,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 79]
+Uberti, et al.           Expires March 20, 2017                [Page 80]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4477,7 +4533,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 80]
+Uberti, et al.           Expires March 20, 2017                [Page 81]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4533,7 +4589,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 81]
+Uberti, et al.           Expires March 20, 2017                [Page 82]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4589,7 +4645,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 82]
+Uberti, et al.           Expires March 20, 2017                [Page 83]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4645,7 +4701,7 @@ Appendix A.  Change log
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 83]
+Uberti, et al.           Expires March 20, 2017                [Page 84]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4701,7 +4757,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 84]
+Uberti, et al.           Expires March 20, 2017                [Page 85]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4757,7 +4813,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 85]
+Uberti, et al.           Expires March 20, 2017                [Page 86]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4813,7 +4869,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 86]
+Uberti, et al.           Expires March 20, 2017                [Page 87]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4869,7 +4925,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 87]
+Uberti, et al.           Expires March 20, 2017                [Page 88]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4925,7 +4981,7 @@ Authors' Addresses
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 88]
+Uberti, et al.           Expires March 20, 2017                [Page 89]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4981,4 +5037,4 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 20, 2017                [Page 89]
+Uberti, et al.           Expires March 20, 2017                [Page 90]
