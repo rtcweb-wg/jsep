@@ -4121,6 +4121,89 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Demux placeholder">
           <t>RTP demux algo goes here</t>
         </section>
+        <section title="Processing RTP packets"
+                 anchor="sec.rtp.demux">
+          <t>Note: The following algorithm does not yet have WG
+          consensus but is included here as something concrete for the
+          working group to discuss.</t>
+          <t>When an RTP packet is received by a transport and passes
+          SRTP authentication, that packet needs to be routed to the
+          correct RtpReceiver. For each transport, the following steps
+          MUST be followed to prepare to route packets:</t>
+
+          <t>
+            <list>
+              <t>Construct a table mapping MID to RtpReceiver for each
+              RtpReceiver configured to receive from this
+              transport.</t>
+              
+              <t>Construct a table mapping SSRC to RtpReceiver for
+              each RtpReceiver configured to receive from this
+              transport and for each SSRC that RtpReceiver is
+              configured to receive.  Some of the SSRCs may be
+              presesnt in the m= section corresponding to that
+              RtpReceiver in the remote description.</t>
+
+              <t>Construct a table mapping payload type to RtpReceiver
+              for each RtpReceiver configured to receive from this
+              transport and for each payload type that RtpReceiver is
+              configured to receive.  The payload types of a given
+              RtpReceiver are found in the m= section corresponding to
+              that RtpReceiver in the local description.  If any
+              payload type could map to more than one RtpReceiver, map
+              to the RtpReceiver whose m= section appears earliest in
+              the local description.</t>
+            </list>
+          </t>
+
+          <t>For each RTP packet
+          received, the following steps MUST be followed to route
+          the packet:</t>
+
+          <t>
+            <list>
+              <t>
+                If the packet has a MID and that MID is not in the
+                table mapping MID to RtpReceiver, drop the packet and
+                stop.
+              </t>
+              <t>
+                If the packet has a MID and that MID is in the table
+                mapping MID to RtpReceiver, update the SSRC mapping
+                table to include an entry mapping the packet's SSRC to
+                the RtpReceiver.
+              </t>
+              <t>
+                If the packet's SSRC is in the SSRC mapping table,
+                route the packet to the mapped RtpReceiver and stop.
+              </t>
+              <t>
+                If the packet's payload type is in the payload type
+                table, update the the SSRC mapping table to include an
+                entry mapping the packet's SSRC to the
+                RtpReceiver. Deliver the packet to the RtpReceiver and
+                stop.
+              </t>
+              <t>
+                Otherwise, drop the packet.
+              </t>
+            </list>
+          </t>
+          <t>
+            After packets are routed to the RtpReceiver, further
+            processing of the RTP packets is done at the RtpReceiver
+            level.  This includes using <xref
+            target="I-D.ietf-mmusic-rid" /> to determine which RTP
+            streams depend on or repair other RTP streams.
+          </t>
+
+          <t>
+            As RtpTransceivers (and, thus, RtpReceivers) are added,
+            removed, stopped, or reconfigured, the tables above must
+            also be updated.  
+          </t>
+
+        </section>
         <section title="Examples" anchor="sec.examples">
 
             <t>Note that this example section shows several SDP
