@@ -1772,11 +1772,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     the rules defined for Trickle ICE.
                     The pair of MID and ufrag is used to
                     determine the m= section and ICE candidate generation to which the
-                    indication belongs. If the MID is not present, the m= line index is used
+                    candidate belongs. If the MID is not present, the m= line index is used
                     to look up the locally generated MID (see <xref
                     target="sec.applying-a-remote-desc"/>), which is used in place of
-                    the MID. If these values or the candidate string are
-                    invalid, an error is generated. The purpose of
+                    a supplied MID. If these values or the candidate string are
+                    invalid, an error is generated.
+                  </t>
+                  <t>
+                    The purpose of
                     the ufrag is to resolve ambiguities when trickle ICE is in progress
                     during an ICE restart.  If the ufrag is absent, the candidate MUST be
                     assumed to belong to the most recently applied remote description.
@@ -1789,10 +1792,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     as defined in <xref target="I-D.ietf-ice-trickle" />).
                     The MID and ufrag are used as described above to determine
                     the m= section and ICE generation for which candidate
-                    gathering is complete. If both the MID and m= line index
-                    or the ufrag are not present, then gathering MUST be
-                    assumed to be complete for the most recently applied
-                    remote description.</t>
+                    gathering is complete. If the ufrag is not present, then
+                    the end-of-candidates indication MUST be assumed to
+                    apply to the relevant m= section in the
+                    most recently applied remote description.
+                    If neither the MID or m= index, then the indication MUST
+                    be assumed to apply to all m= sections in the most
+                    recently applied remote description.
+                  </t>
 
                     <t>This call will result in a change to the state
                     of the ICE Agent, and may result in a change to
