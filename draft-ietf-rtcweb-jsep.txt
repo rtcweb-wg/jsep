@@ -143,24 +143,24 @@ Internet-Draft                    JSEP                    September 2016
      5.9.  Applying a Remote Description . . . . . . . . . . . . . .  60
      5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  63
    6.  Demux placeholder . . . . . . . . . . . . . . . . . . . . . .  64
-   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  64
-     7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  65
-     7.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  69
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  79
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  79
-   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  80
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  80
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  80
-     11.2.  Informative References . . . . . . . . . . . . . . . . .  83
-   Appendix A.  Change log . . . . . . . . . . . . . . . . . . . . .  84
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  89
+   7.  Processing RTP packets  . . . . . . . . . . . . . . . . . . .  64
+   8.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  66
+     8.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  66
+     8.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  70
+   9.  Security Considerations . . . . . . . . . . . . . . . . . . .  80
+   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  80
+   11. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  81
+   12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  81
+     12.1.  Normative References . . . . . . . . . . . . . . . . . .  81
+     12.2.  Informative References . . . . . . . . . . . . . . . . .  84
+   Appendix A.  Change log . . . . . . . . . . . . . . . . . . . . .  85
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  90
 
 1.  Introduction
 
    This document describes how the W3C WEBRTC RTCPeerConnection
    interface [W3C.WD-webrtc-20140617] is used to control the setup,
    management and teardown of a multimedia session.
-
 
 
 
@@ -1159,9 +1159,9 @@ Internet-Draft                    JSEP                    September 2016
       parameters; all streams other than the first will be marked as
       bundle-only.  This policy aims to minimize candidate gathering and
       maximize multiplexing, at the cost of less compatibility with
-      legacy endpoints.  When acting as answerer, if there if no bundle
-      group in the offer, the implementation will reject all but the
-      first m= section.
+      legacy endpoints.  When acting as answerer, the implementation
+      will reject any m= sections other than the first m= section,
+      unless they are in the same bundle group as that m= section.
 
    As it provides the best tradeoff between performance and
    compatibility with legacy endpoints, the default bundle policy MUST
@@ -2522,11 +2522,12 @@ Uberti, et al.           Expires March 21, 2017                [Page 45]
 Internet-Draft                    JSEP                    September 2016
 
 
-   o  The bundle policy is "max-bundle", the m= section is not in a
-      bundle group, and this is not the first m= section.
+   o  The bundle policy is "max-bundle", and this is not the first m=
+      section or in the same bundle group as the first m= section.
 
-   o  The bundle policy is "balanced", the m= section is not in a bundle
-      group, and this is not the first m= section for this media type.
+   o  The bundle policy is "balanced", and this is not the first m=
+      section for this media type or in the same bundle group as the
+      first m= section for this media type.
 
    o  The RTP/RTCP multiplexing policy is "require" and the m= section
       doesn't contain an "a=rtcp-mux" attribute.
@@ -2569,7 +2570,6 @@ Internet-Draft                    JSEP                    September 2016
       [RFC3264], Section 6.1.  The audio and video codecs that MUST be
       supported are specified in [I-D.ietf-rtcweb-audio](see Section 3)
       and [I-D.ietf-rtcweb-video](see Section 5).
-
 
 
 
@@ -3570,13 +3570,13 @@ Internet-Draft                    JSEP                    September 2016
 
    RTP demux algo goes here
 
-7.  Examples
+7.  Processing RTP packets
 
-   Note that this example section shows several SDP fragments.  To
-   format in 72 columns, some of the lines in SDP have been split into
-   multiple lines, where leading whitespace indicates that a line is a
-   continuation of the previous line.  In addition, some blank lines
-   have been added to improve readability but are not valid in SDP.
+   Note: The following algorithm does not yet have WG consensus but is
+   included here as something concrete for the working group to discuss.
+
+   When an RTP packet is received by a transport and passes SRTP
+   authentication, that packet needs to be routed to the correct
 
 
 
@@ -3586,10 +3586,74 @@ Uberti, et al.           Expires March 21, 2017                [Page 64]
 Internet-Draft                    JSEP                    September 2016
 
 
+   RtpReceiver.  For each transport, the following steps MUST be
+   followed to prepare to route packets:
+
+      Construct a table mapping MID to RtpReceiver for each RtpReceiver
+      configured to receive from this transport.
+
+      Construct a table mapping SSRC to RtpReceiver for each RtpReceiver
+      configured to receive from this transport and for each SSRC that
+      RtpReceiver is configured to receive.  Some of the SSRCs may be
+      presesnt in the m= section corresponding to that RtpReceiver in
+      the remote description.
+
+      Construct a table mapping payload type to RtpReceiver for each
+      RtpReceiver configured to receive from this transport and for each
+      payload type that RtpReceiver is configured to receive.  The
+      payload types of a given RtpReceiver are found in the m= section
+      corresponding to that RtpReceiver in the local description.  If
+      any payload type could map to more than one RtpReceiver, map to
+      the RtpReceiver whose m= section appears earliest in the local
+      description.
+
+   For each RTP packet received, the following steps MUST be followed to
+   route the packet:
+
+      If the packet has a MID and that MID is not in the table mapping
+      MID to RtpReceiver, drop the packet and stop.
+
+      If the packet has a MID and that MID is in the table mapping MID
+      to RtpReceiver, update the SSRC mapping table to include an entry
+      mapping the packet's SSRC to the RtpReceiver.
+
+      If the packet's SSRC is in the SSRC mapping table, route the
+      packet to the mapped RtpReceiver and stop.
+
+      If the packet's payload type is in the payload type table, update
+      the the SSRC mapping table to include an entry mapping the
+      packet's SSRC to the RtpReceiver.  Deliver the packet to the
+      RtpReceiver and stop.
+
+      Otherwise, drop the packet.
+
+   After packets are routed to the RtpReceiver, further processing of
+   the RTP packets is done at the RtpReceiver level.  This includes
+   using [I-D.ietf-mmusic-rid] to determine which RTP streams depend on
+   or repair other RTP streams.
+
+   As RtpTransceivers (and, thus, RtpReceivers) are added, removed,
+   stopped, or reconfigured, the tables above must also be updated.
+
+
+
+Uberti, et al.           Expires March 21, 2017                [Page 65]
+
+Internet-Draft                    JSEP                    September 2016
+
+
+8.  Examples
+
+   Note that this example section shows several SDP fragments.  To
+   format in 72 columns, some of the lines in SDP have been split into
+   multiple lines, where leading whitespace indicates that a line is a
+   continuation of the previous line.  In addition, some blank lines
+   have been added to improve readability but are not valid in SDP.
+
    More examples of SDP for WebRTC call flows can be found in
    [I-D.nandakumar-rtcweb-sdp].
 
-7.1.  Simple Example
+8.1.  Simple Example
 
    This section shows a very simple example that sets up a minimal audio
    / video call between two browsers and does not use trickle ICE.  The
@@ -3629,15 +3693,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-
-
-
-
-
-
-
-
-Uberti, et al.           Expires March 21, 2017                [Page 65]
+Uberti, et al.           Expires March 21, 2017                [Page 66]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3693,7 +3749,7 @@ AliceUA->BobUA:     media sent from Alice to Bob
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 66]
+Uberti, et al.           Expires March 21, 2017                [Page 67]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3749,7 +3805,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 67]
+Uberti, et al.           Expires March 21, 2017                [Page 68]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3805,7 +3861,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 68]
+Uberti, et al.           Expires March 21, 2017                [Page 69]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3837,7 +3893,7 @@ Internet-Draft                    JSEP                    September 2016
    a=ssrc-group:FID 3229706345 3229706346
 
 
-7.2.  Normal Examples
+8.2.  Normal Examples
 
    This section shows a typical example of a session between two
    browsers setting up an audio channel and a data channel.  Trickle ICE
@@ -3861,7 +3917,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 69]
+Uberti, et al.           Expires March 21, 2017                [Page 70]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3917,7 +3973,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 70]
+Uberti, et al.           Expires March 21, 2017                [Page 71]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -3973,7 +4029,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 71]
+Uberti, et al.           Expires March 21, 2017                [Page 72]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4029,7 +4085,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 72]
+Uberti, et al.           Expires March 21, 2017                [Page 73]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4085,7 +4141,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 73]
+Uberti, et al.           Expires March 21, 2017                [Page 74]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4141,7 +4197,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 74]
+Uberti, et al.           Expires March 21, 2017                [Page 75]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4197,7 +4253,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 75]
+Uberti, et al.           Expires March 21, 2017                [Page 76]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4253,7 +4309,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 76]
+Uberti, et al.           Expires March 21, 2017                [Page 77]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4309,7 +4365,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 77]
+Uberti, et al.           Expires March 21, 2017                [Page 78]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4365,7 +4421,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 78]
+Uberti, et al.           Expires March 21, 2017                [Page 79]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4381,7 +4437,7 @@ Internet-Draft                    JSEP                    September 2016
    a=rtcp-fb:100 nack pli
 
 
-8.  Security Considerations
+9.  Security Considerations
 
    The IETF has published separate documents
    [I-D.ietf-rtcweb-security-arch] [I-D.ietf-rtcweb-security] describing
@@ -4410,7 +4466,7 @@ Internet-Draft                    JSEP                    September 2016
    Applications which wish to conceal their public IP address should
    instead configure the ICE agent to use only relay candidates.
 
-9.  IANA Considerations
+10.  IANA Considerations
 
    This document requires no actions from IANA.
 
@@ -4421,12 +4477,12 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 79]
+Uberti, et al.           Expires March 21, 2017                [Page 80]
 
 Internet-Draft                    JSEP                    September 2016
 
 
-10.  Acknowledgements
+11.  Acknowledgements
 
    Significant text incorporated in the draft as well and review was
    provided by Peter Thatcher, Taylor Brandstetter, Harald Alvestrand
@@ -4434,9 +4490,9 @@ Internet-Draft                    JSEP                    September 2016
    Andrew Hutton, Richard Ejzak, Adam Bergkvist and Matthew Kaufman all
    provided valuable feedback on this proposal.
 
-11.  References
+12.  References
 
-11.1.  Normative References
+12.1.  Normative References
 
    [I-D.ietf-avtext-rid]
               Roach, A., Nandakumar, S., and P. Thatcher, "RTP Stream
@@ -4477,7 +4533,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 80]
+Uberti, et al.           Expires March 21, 2017                [Page 81]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4533,7 +4589,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 81]
+Uberti, et al.           Expires March 21, 2017                [Page 82]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4589,7 +4645,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 82]
+Uberti, et al.           Expires March 21, 2017                [Page 83]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4619,7 +4675,7 @@ Internet-Draft                    JSEP                    September 2016
               Real-time Transport Protocol (SRTP)", RFC 6904, April
               2013.
 
-11.2.  Informative References
+12.2.  Informative References
 
    [I-D.ietf-rtcweb-ip-handling]
               Uberti, J. and G. Shieh, "WebRTC IP Address Handling
@@ -4645,7 +4701,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 83]
+Uberti, et al.           Expires March 21, 2017                [Page 84]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4701,7 +4757,7 @@ Appendix A.  Change log
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 84]
+Uberti, et al.           Expires March 21, 2017                [Page 85]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4757,7 +4813,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 85]
+Uberti, et al.           Expires March 21, 2017                [Page 86]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4813,7 +4869,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 86]
+Uberti, et al.           Expires March 21, 2017                [Page 87]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4869,7 +4925,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 87]
+Uberti, et al.           Expires March 21, 2017                [Page 88]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4925,7 +4981,7 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 88]
+Uberti, et al.           Expires March 21, 2017                [Page 89]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -4981,7 +5037,7 @@ Authors' Addresses
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 89]
+Uberti, et al.           Expires March 21, 2017                [Page 90]
 
 Internet-Draft                    JSEP                    September 2016
 
@@ -5037,4 +5093,4 @@ Internet-Draft                    JSEP                    September 2016
 
 
 
-Uberti, et al.           Expires March 21, 2017                [Page 90]
+Uberti, et al.           Expires March 21, 2017                [Page 91]
