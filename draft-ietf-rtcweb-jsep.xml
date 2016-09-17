@@ -3277,14 +3277,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 allows many types of lines, not all of which are
                 relevant to JSEP applications. For each line, the
                 implementation will first ensure it is syntactically
-                correct according its defining ABNF, check that it
+                correct according to its defining ABNF, check that it
                 conforms to <xref target="RFC4566" /> and <xref
                 target="RFC3264" /> semantics, and then either parse and
                 store or discard the provided value, as described
-                below. A partial list of ABNF definitions for SDP
-                attributes can found in:</t>
+                below.</t>
 
-                <texttable anchor="sdp_abnf"
+                <t>When performing syntax validation, the following list of ABNF
+                definitions for SDP attributes is used:</t>
+
+                <texttable anchor="sdp-abnf"
                 title="SDP ABNF References">
                     <ttcol align='left'>Attribute</ttcol>
                     <ttcol align='left'>Reference</ttcol>
@@ -3308,10 +3310,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     <c><xref target="RFC4566" /> Section 9</c>
                     <c>quality</c>
                     <c> <xref target="RFC4566" /> Section 9</c>
-                    <c>msid</c>
-                    <c><xref target="I-D.ietf-mmusic-msid" /> Section 2</c>
                     <c>rtcp</c>
-                    <c><xref target=" RFC3605" /> Section 2.1</c>
+                    <c><xref target="RFC3605" /> Section 2.1</c>
                     <c>setup</c>
                     <c> <xref target="RFC4145" /> Section 3, 4, and 5</c>
                     <c>connection</c>
@@ -3321,9 +3321,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     <c>rtcp-fb</c>
                     <c><xref target="RFC4585" /> Section 4.2</c>
                     <c>candidate</c>
-                    <c> <xref target="RFC5245" /> Section 15</c>
+                    <c><xref target="RFC5245" /> Section 15.1</c>
+                    <c>remote-candidates</c>
+                    <c><xref target="RFC5245" /> Section 15.2</c>
+                    <c>ice-lite</c>
+                    <c><xref target="RFC5245" /> Section 15.3</c>
+                    <c>ice-ufrag</c>
+                    <c><xref target="RFC5245" /> Section 15.4</c>
+                    <c>ice-pwd</c>
+                    <c><xref target="RFC5245" /> Section 15.4</c>
+                    <c>ice-options</c>
+                    <c><xref target="RFC5245" /> Section 15.5</c>
                     <c>extmap</c>
-                    <c>  <xref target="RFC5285" /> Section 7</c>
+                    <c><xref target="RFC5285" /> Section 7</c>
                     <c>mid</c>
                     <c><xref target="RFC5888" /> Section 4 and 5</c>
                     <c>group</c>
@@ -3332,15 +3342,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     <c><xref target="RFC6236" /> Section 3.1</c>
                     <c>extmap (encrypt option)</c>
                     <c><xref target="RFC6904" /> Section 4</c>
+                    <c>msid</c>
+                    <c><xref target="I-D.ietf-mmusic-msid" /> Section 2</c>
+                    <c>rid</c>
+                    <c><xref target="I-D.ietf-mmusic-rid" /> [TODO]</c>
+                    <c>simulcast</c>
+                    <c><xref target="I-D.ietf-mmusic-sdp-simulcast" /> [TODO]</c>
                 </texttable>
 
-                <t>[TODO: ensure that every line is listed below.]</t>
-
-                <t>If the line is not well-formed, or cannot be parsed
+                <t>If any line is not well-formed, or cannot be parsed
                 as described, the parser MUST stop with an error and
-                reject the session description. This ensures that
-                implementations do not accidentally misinterpret
-                ambiguous SDP.</t>
+                reject the session description, even if the value is to be
+                discarded. This ensures that implementations do not
+                accidentally misinterpret ambiguous SDP.</t>
 
                 <section title="Session-Level Parsing"
                 anchor="sec.session-level-parse">
@@ -3354,9 +3368,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     "a=") can occur in any order, and their ordering is
                     not meaningful.</t>
 
-                    <t>For non-attribute (non-"a=") lines, their
-                    sequencing, syntax, and semantics, are checked, as
-                    mentioned above. The following lines are not
+                    <t> The following non-attribute lines are not
                     meaningful in the JSEP context and MAY be discarded
                     once they have been checked.
                     <list>
@@ -3375,7 +3387,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         but their values are not used.</t>
                     </list></t>
 
-                    <t>The remaining lines are processed as follows:
+                    <t>The remaining non-attribute lines are processed as
+                    follows:
                     <list>
 
                         <t>The "v=" line MUST have a version of 0, as
@@ -3392,8 +3405,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
                     </list></t>
 
-                    <t>Specific processing MUST be applied for the
+                    <t>Finally, the attribute lines are processed. Specific
+                    processing MUST be applied for the
                     following session-level attribute ("a=") lines:
+
                     <list style="symbols">
 
                         <t>Any "a=group" lines are parsed as specified
@@ -3432,9 +3447,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         <t>Any "a=extmap" lines are parsed as specified
                         in <xref target="RFC5285" />, Section 5, and
                         their values are stored.</t>
-
-                        <!-- <t> TODO - are there any other attributes
-                        valid at session level. </t> -->
 
                     </list></t>
 
@@ -3568,11 +3580,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
                         <t>Any "a=candidate" attributes MUST be parsed
                         as specified in <xref target="RFC5245" />,
-                        Section 4.3, and their values stored.</t>
+                        Section 15.1, and their values stored.</t>
 
                         <t>Any "a=remote-candidates" attributes MUST be
                         parsed as specified in <xref target="RFC5245"
-                        />, Section 4.3, but their values are
+                        />, Section 15.2, but their values are
                         ignored.</t>
 
                         <t>If present, a single "a=end-of-candidates"
