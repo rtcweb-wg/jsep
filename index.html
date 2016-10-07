@@ -354,12 +354,12 @@ li, p {
 <link href="#rfc.authors" rel="Chapter"/>
 
 
-  <meta name="generator" content="xml2rfc version 2.5.1 - http://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.5.2 - http://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2016-9-17" />
+  <meta name="dct.issued" scheme="ISO8601" content="2016-10-7" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -383,7 +383,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: March 21, 2017</td>
+  <td class="left">Expires: April 10, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -396,7 +396,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">September 17, 2016</td>
+  <td class="right">October 7, 2016</td>
 </tr>
 
     	
@@ -416,7 +416,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on March 21, 2017.</p>
+<p>This Internet-Draft will expire on April 10, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -922,7 +922,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>To properly indicate use of DTLS, the &lt;proto&gt; field MUST be set to "UDP/TLS/RTP/SAVPF", as specified in <a href="#RFC5764">[RFC5764]</a>, Section 8, if the default candidate uses UDP transport, or "TCP/DTLS/RTP/SAVPF", as specified in <a href="#I-D.nandakumar-mmusic-proto-iana-registration">[I-D.nandakumar-mmusic-proto-iana-registration]</a> if the default candidate uses TCP transport.</li>
 </ul>
 <p id="rfc.section.5.2.1.p.7">The m= line MUST be followed immediately by a "c=" line, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.7. Again, as no candidates have yet been gathered, the "c=" line must contain the "dummy" value "IN IP4 0.0.0.0", as defined in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 5.1.</p>
-<p id="rfc.section.5.2.1.p.8">Each m= section MUST include the following attribute lines: </p>
+<p><a href="#I-D.ietf-mmusic-sdp-mux-attributes">[I-D.ietf-mmusic-sdp-mux-attributes]</a> groups SDP attributes into different categories. To avoid unnecessary duplication when bundling, Section 8.1 of <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a> specifies that attributes of category IDENTICAL or TRANSPORT should not be repeated in bundled m= sections.  </p>
+<p id="rfc.section.5.2.1.p.9">The following attributes, which are of a category other than IDENTICAL or TRANSPORT, MUST be included in each m= section: </p>
+<p/>
 
 <ul>
   <li>An "a=mid" line, as specified in <a href="#RFC5888">[RFC5888]</a>, Section 4. When generating mid values, it is RECOMMENDED that the values be 3 bytes or less, to allow them to efficiently fit into the RTP header extension defined in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 11.</li>
@@ -933,12 +935,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If this m= section is for video media, and there are known limitations on the size of images which can be decoded, an "a=imageattr" line, as specified in <a href="#sec.imageattr">Section 3.6</a>.</li>
   <li>For each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx" with the clock rate of the primary codec and an "a=fmtp" line that references the payload type of the primary codec, as specified in <a href="#RFC4588">[RFC4588]</a>, Section 8.1.</li>
   <li>For each supported FEC mechanism, "a=rtpmap" and "a=fmtp" lines, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6. The FEC mechanisms that MUST be supported are specified in <a href="#I-D.ietf-rtcweb-fec">[I-D.ietf-rtcweb-fec]</a>, Section 6, and specific usage for each media type is outlined in Sections 4 and 5.</li>
-  <li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li>
-  <li>One or more "a=fingerprint" line(s) for each of the endpoint's certificates, as specified in <a href="#I-D.ietf-mmusic-4572-update">[I-D.ietf-mmusic-4572-update]</a>.  </li>
-  <li>An "a=setup" line, as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763">[RFC5763]</a>, Section 5. The role value in the offer MUST be "actpass".</li>
-  <li>An "a=rtcp-mux" line, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.1.</li>
-  <li>An "a=rtcp-mux-only" line, as specified in <a href="#I-D.ietf-mmusic-mux-exclusive">[I-D.ietf-mmusic-mux-exclusive]</a> Section 4, if and only if the RTP/RTCP multiplexing policy is "require". </li>
-  <li>An "a=rtcp-rsize" line, as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5.</li>
   <li>For each supported RTP header extension, an "a=extmap" line, as specified in <a href="#RFC5285">[RFC5285]</a>, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in <a href="#RFC6904">[RFC6904]</a>, Section 4.</li>
   <li>For each supported RTCP feedback mechanism, an "a=rtcp-fb" mechanism, as specified in <a href="#RFC4585">[RFC4585]</a>, Section 4.2.  The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, Section 5.1.</li>
   <li>An "a=ssrc" line, as specified in <a href="#RFC5576">[RFC5576]</a>, Section 4.1, indicating the SSRC to be used for sending media, along with the mandatory "cname" source attribute, as specified in Section 6.1, indicating the CNAME for the source. The CNAME MUST be generated in accordance with Section 4.9 of <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>.</li>
@@ -949,20 +945,33 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If the RtpTransceiver's RtpSender is active, and the application has specified RID values or has specified more than one encoding in the RtpSenders's parameters, an "a=rid" line for each encoding specified. The "a=rid" line is specified in <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a>, and its direction MUST be "send". If the application has chosen a RID value, it MUST be used as the rid-identifier; otherwise a RID value MUST be generated by the implementation.  When generating RID values, it is RECOMMENDED that the values be 3 bytes or less, to allow them to efficiently fit into the RTP header extension defined in <a href="#I-D.ietf-avtext-rid">[I-D.ietf-avtext-rid]</a>, Section 11. If no encodings have been specified, or only one encoding is specified but without a RID value, then no "a=rid" lines are generated.</li>
   <li>If the RtpTransceiver's RtpSender is active and more than one "a=rid" line has been generated, an "a=simulcast" line, with direction "send", as defined in <a href="#I-D.ietf-mmusic-sdp-simulcast">[I-D.ietf-mmusic-sdp-simulcast]</a>, Section 6.2. The list of RIDs MUST include all of the RID identifiers used in the "a=rid" lines for this m= section.</li>
 </ul>
-<p id="rfc.section.5.2.1.p.9">Lastly, if a data channel has been created, a m= section MUST be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field MUST be set to "UDP/DTLS/SCTP" if the default candidate uses UDP transport, or "TCP/DTLS/SCTP" if the default candidate uses TCP transport <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>.  The "fmt" value MUST be set to "webrtc-datachannel" as specified in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.</p>
-<p id="rfc.section.5.2.1.p.10">Within the data m= section, the "a=mid", "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", and "a=setup" lines MUST be included as mentioned above, along with an "a=fmtp:webrtc-datachannel" line and an "a=sctp-port" line referencing the SCTP port number as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.</p>
-<p id="rfc.section.5.2.1.p.11">Once all m= sections have been generated, a session-level "a=group" attribute MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. This attribute MUST have semantics "bundle", and MUST include the mid identifiers of each m= section. The effect of this is that the browser offers all m= sections as one bundle group. However, whether the m= sections are bundle-only or not depends on the bundle policy.</p>
-<p id="rfc.section.5.2.1.p.12">The next step is to generate session-level lip sync groups as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7. For each MediaStream referenced by more than one RtpTransceiver (by passing those MediaStreams as arguments to the addTrack and addTransceiver methods), a group of type "LS" MUST be added that contains the mid values for each RtpTransceiver.</p>
-<p id="rfc.section.5.2.1.p.13">Attributes which SDP permits to either be at the session level or the media level SHOULD generally be at the media level even if they are identical.  This promotes readability, especially if one of a set of initially identical attributes is subsequently changed.</p>
-<p id="rfc.section.5.2.1.p.14">Attributes other than the ones specified above MAY be included, except for the following attributes which are specifically incompatible with the requirements of <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, and MUST NOT be included: </p>
+<p id="rfc.section.5.2.1.p.11">The following attributes, which are of category IDENTICAL or TRANSPORT, MUST appear only in "m=" sections which either have a unique address or which are associated with the bundle-tag.  (In initial offers, this means those "m=" sections which do not contain an "a=bundle-only" attribute.  </p>
+<p/>
+
+<ul>
+  <li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li>
+  <li>An "a=fingerprint" line for each of the endpoint's certificates, as specified in <a href="#RFC4572">[RFC4572]</a>, Section 5; the digest algorithm used for the fingerprint MUST match that used in the certificate signature.</li>
+  <li>An "a=setup" line, as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763">[RFC5763]</a>, Section 5. The role value in the offer MUST be "actpass".</li>
+  <li>An "a=rtcp-mux" line, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.1.</li>
+  <li>An "a=rtcp-rsize" line, as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5.</li>
+  <li>[TODO: rtcp-fb?]</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.5.2.1.p.13">Lastly, if a data channel has been created, a m= section MUST be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field MUST be set to "UDP/DTLS/SCTP" if the default candidate uses UDP transport, or "TCP/DTLS/SCTP" if the default candidate uses TCP transport <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>.  The "fmt" value MUST be set to "webrtc-datachannel" as specified in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.</p>
+<p id="rfc.section.5.2.1.p.14">Within the data m= section, the "a=mid", "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", and "a=setup" lines MUST be included as mentioned above, along with an "a=fmtp:webrtc-datachannel" line and an "a=sctp-port" line referencing the SCTP port number as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.</p>
+<p id="rfc.section.5.2.1.p.15">Once all m= sections have been generated, a session-level "a=group" attribute MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. This attribute MUST have semantics "bundle", and MUST include the mid identifiers of each m= section. The effect of this is that the browser offers all m= sections as one bundle group. However, whether the m= sections are bundle-only or not depends on the bundle policy.</p>
+<p id="rfc.section.5.2.1.p.16">The next step is to generate session-level lip sync groups as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7. For each MediaStream referenced by more than one RtpTransceiver (by passing those MediaStreams as arguments to the addTrack and addTransceiver methods), a group of type "LS" MUST be added that contains the mid values for each RtpTransceiver.</p>
+<p id="rfc.section.5.2.1.p.17">Attributes which SDP permits to either be at the session level or the media level SHOULD generally be at the media level even if they are identical.  This promotes readability, especially if one of a set of initially identical attributes is subsequently changed.</p>
+<p id="rfc.section.5.2.1.p.18">Attributes other than the ones specified above MAY be included, except for the following attributes which are specifically incompatible with the requirements of <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, and MUST NOT be included: </p>
 
 <ul>
   <li>"a=crypto"</li>
   <li>"a=key-mgmt"</li>
   <li>"a=ice-lite"</li>
 </ul>
-<p id="rfc.section.5.2.1.p.15">Note that when bundle is used, any additional attributes that are added MUST follow the advice in <a href="#I-D.ietf-mmusic-sdp-mux-attributes">[I-D.ietf-mmusic-sdp-mux-attributes]</a> on how those attributes interact with bundle.</p>
-<p id="rfc.section.5.2.1.p.16">Note that these requirements are in some cases stricter than those of SDP. Implementations MUST be prepared to accept compliant SDP even if it would not conform to the requirements for generating SDP in this specification.</p>
+<p id="rfc.section.5.2.1.p.19">Note that when bundle is used, any additional attributes that are added MUST follow the advice in <a href="#I-D.ietf-mmusic-sdp-mux-attributes">[I-D.ietf-mmusic-sdp-mux-attributes]</a> on how those attributes interact with bundle.</p>
+<p id="rfc.section.5.2.1.p.20">Note that these requirements are in some cases stricter than those of SDP. Implementations MUST be prepared to accept compliant SDP even if it would not conform to the requirements for generating SDP in this specification.</p>
 <h3 id="rfc.section.5.2.2"><a href="#rfc.section.5.2.2">5.2.2.</a> <a href="#sec.subsequent-offers" id="sec.subsequent-offers">Subsequent Offers</a></h3>
 <p id="rfc.section.5.2.2.p.1">When createOffer is called a second (or later) time, or is called after a local description has already been installed, the processing is somewhat different than for an initial offer.</p>
 <p id="rfc.section.5.2.2.p.2">If the initial offer was not applied using setLocalDescription, meaning the PeerConnection is still in the "stable" state, the steps for generating an initial offer should be followed, subject to the following restriction: </p>
@@ -1036,7 +1045,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>The &lt;proto&gt; field MUST be set to exactly match the &lt;proto&gt; field for the corresponding m= line in the offer.</li>
 </ul>
 <p id="rfc.section.5.3.1.p.9">The m= line MUST be followed immediately by a "c=" line, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.7. Again, as no candidates have yet been gathered, the "c=" line must contain the "dummy" value "IN IP4 0.0.0.0", as defined in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 5.1.</p>
-<p id="rfc.section.5.3.1.p.10">If the offer supports bundle, all m= sections to be bundled must use the same ICE credentials and candidates; all m= sections not being bundled must use unique ICE credentials and candidates. Each m= section MUST include the following: </p>
+<p id="rfc.section.5.3.1.p.10">If the offer supports bundle, all m= sections to be bundled must use the same ICE credentials and candidates; all m= sections not being bundled must use unique ICE credentials and candidates.  Each m= section MUST contain the following attributes (which are of attribute types other than IDENTICAL and TRANSPORT): </p>
 
 <ul>
   <li>If and only if present in the offer, an "a=mid" line, as specified in <a href="#RFC5888">[RFC5888]</a>, Section 9.1.  The "mid" value MUST match that specified in the offer.</li>
@@ -1047,21 +1056,27 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If this m= section is for video media, and there are known limitations on the size of images which can be decoded, an "a=imageattr" line, as specified in <a href="#sec.imageattr">Section 3.6</a>.</li>
   <li>If "rtx" is present in the offer, for each primary codec where RTP retransmission should be used, a corresponding "a=rtpmap" line indicating "rtx" with the clock rate of the primary codec and an "a=fmtp" line that references the payload type of the primary codec, as specified in <a href="#RFC4588">[RFC4588]</a>, Section 8.1.</li>
   <li>For each supported FEC mechanism, "a=rtpmap" and "a=fmtp" lines, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6. The FEC mechanisms that MUST be supported are specified in <a href="#I-D.ietf-rtcweb-fec">[I-D.ietf-rtcweb-fec]</a>, Section 6, and specific usage for each media type is outlined in Sections 4 and 5.</li>
-  <li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li>
-  <li>One or more "a=fingerprint" line(s) for each of the endpoint's certificates, as specified in <a href="#I-D.ietf-mmusic-4572-update">[I-D.ietf-mmusic-4572-update]</a>.  </li>
-  <li>An "a=setup" line, as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763">[RFC5763]</a>, Section 5. The role value in the answer MUST be "active" or "passive"; the "active" role is RECOMMENDED.</li>
-  <li>If present in the offer, an "a=rtcp-mux" line, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.1.  If the "require" RTCP multiplexing policy is set and no "a=rtcp-mux" line is present in the offer, then the m=line MUST be marked as rejected by setting the port in the m= line to zero, as indicated in <a href="#RFC3264">[RFC3264]</a>, Section 6.</li>
-  <li>If present in the offer, an "a=rtcp-mux-only" line, as specified in <a href="#I-D.ietf-mmusic-mux-exclusive">[I-D.ietf-mmusic-mux-exclusive]</a>, Section 4.3.</li>
-  <li>If present in the offer, an "a=rtcp-rsize" line, as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5.</li>
   <li>For each supported RTP header extension that is present in the offer, an "a=extmap" line, as specified in <a href="#RFC5285">[RFC5285]</a>, Section 5. The list of header extensions that SHOULD/MUST be supported is specified in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, Section 5.2. Any header extensions that require encryption MUST be specified as indicated in <a href="#RFC6904">[RFC6904]</a>, Section 4.</li>
   <li>For each supported RTCP feedback mechanism that is present in the offer, an "a=rtcp-fb" mechanism, as specified in <a href="#RFC4585">[RFC4585]</a>, Section 4.2.  The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, Section 5.1.</li>
   <li>If the RtpSender of the RtpTransceiver associated with this m=section is active: <ul><li>An "a=msid" line, as specified in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 2.</li><li>An "a=ssrc" line, as specified in <a href="#RFC5576">[RFC5576]</a>, Section 4.1, indicating the SSRC to be used for sending media, along with the mandatory "cname" source attribute, as specified in Section 6.1, indicating the CNAME for the source. The CNAME MUST be generated in accordance with Section 4.9 of <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>.</li><li>If RTX has been negotiated for this m= section, another "a=ssrc" line with the RTX SSRC, and an "a=ssrc-group" line, as specified in <a href="#RFC5576">[RFC5576]</a>, section 4.2, with semantics set to "FID" and including the primary and RTX SSRCs.</li><li>If FEC has been negotiated for this m= section, another "a=ssrc" line with the FEC SSRC, and an "a=ssrc-group" line with semantics set to "FEC-FR" and including the primary and FEC SSRCs, as specified in <a href="#RFC5956">[RFC5956]</a>, section 4.3. For simplicity, if both RTX and FEC are supported, the FEC SSRC MUST be the same as the RTX SSRC.</li></ul></li>
 </ul>
-<p id="rfc.section.5.3.1.p.11">If a data channel m= section has been offered, a m= section MUST also be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; and "fmt" fields MUST be set to exactly match the fields in the offer.</p>
-<p id="rfc.section.5.3.1.p.12">Within the data m= section, the "a=mid", "a=ice-ufrag", "a=ice-pwd", "a=candidate", "a=fingerprint", and "a=setup" lines MUST be included as mentioned above, along with an "a=fmtp:webrtc-datachannel" line and an "a=sctp-port" line referencing the SCTP port number as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.</p>
-<p id="rfc.section.5.3.1.p.13">If "a=group" attributes with semantics of "BUNDLE" are offered, corresponding session-level "a=group" attributes MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. These attributes MUST have semantics "BUNDLE", and MUST include the all mid identifiers from the offered bundle groups that have not been rejected. Note that regardless of the presence of "a=bundle-only" in the offer, no m= sections in the answer should have an "a=bundle-only" line.</p>
-<p id="rfc.section.5.3.1.p.14">Attributes that are common between all m= sections MAY be moved to session-level, if explicitly defined to be valid at session-level.</p>
-<p id="rfc.section.5.3.1.p.15">The attributes prohibited in the creation of offers are also prohibited in the creation of answers.</p>
+<p id="rfc.section.5.3.1.p.11">Each m= section which is not bundled into another m= section, MUST contain the following attributes (which are of category IDENTICAL or TRANSPORT): </p>
+<p/>
+
+<ul>
+  <li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li>
+  <li>An "a=fingerprint" line for each of the endpoint's certificates, as specified in <a href="#RFC4572">[RFC4572]</a>, Section 5; the digest algorithm used for the fingerprint MUST match that used in the certificate signature.</li>
+  <li>An "a=setup" line, as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763">[RFC5763]</a>, Section 5. The role value in the answer MUST be "active" or "passive"; the "active" role is RECOMMENDED.</li>
+  <li>If present in the offer, an "a=rtcp-mux" line, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.1.  If the "require" RTCP multiplexing policy is set and no "a=rtcp-mux" line is present in the offer, then the m=line MUST be marked as rejected by setting the port in the m= line to zero, as indicated in <a href="#RFC3264">[RFC3264]</a>, Section 6.</li>
+  <li>If present in the offer, an "a=rtcp-rsize" line, as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5.</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.5.3.1.p.13">If a data channel m= section has been offered, a m= section MUST also be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; and "fmt" fields MUST be set to exactly match the fields in the offer.</p>
+<p id="rfc.section.5.3.1.p.14">Within the data m= section, the "a=mid", "a=ice-ufrag", "a=ice-pwd", "a=candidate", "a=fingerprint", and "a=setup" lines MUST be included under the conditions described above, along with an "a=fmtp:webrtc-datachannel" line and an "a=sctp-port" line referencing the SCTP port number as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.</p>
+<p id="rfc.section.5.3.1.p.15">If "a=group" attributes with semantics of "BUNDLE" are offered, corresponding session-level "a=group" attributes MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. These attributes MUST have semantics "BUNDLE", and MUST include the all mid identifiers from the offered bundle groups that have not been rejected. Note that regardless of the presence of "a=bundle-only" in the offer, no m= sections in the answer should have an "a=bundle-only" line.</p>
+<p id="rfc.section.5.3.1.p.16">Attributes that are common between all m= sections MAY be moved to session-level, if explicitly defined to be valid at session-level.</p>
+<p id="rfc.section.5.3.1.p.17">The attributes prohibited in the creation of offers are also prohibited in the creation of answers.</p>
 <h3 id="rfc.section.5.3.2"><a href="#rfc.section.5.3.2">5.3.2.</a> <a href="#sec.subsequent-answers" id="sec.subsequent-answers">Subsequent Answers</a></h3>
 <p id="rfc.section.5.3.2.p.1">When createAnswer is called a second (or later) time, or is called after a local description has already been installed, the processing is somewhat different than for an initial answer.</p>
 <p id="rfc.section.5.3.2.p.2">If the initial answer was not applied using setLocalDescription, meaning the PeerConnection is still in the "have-remote-offer" state, the steps for generating an initial answer should be followed, subject to the following restriction: </p>
