@@ -2071,7 +2071,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               in the offer MUST be "actpass".</t>
 
               <t>An "a=dtls-id" line, as specified in
-              <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 4.</t>
+              <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5.2.</t>
 
               <t>An "a=rtcp-mux" line, as specified in
               <xref target="RFC5761"></xref>, Section 5.1.1.</t>
@@ -2095,7 +2095,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           4.1.</t>
 
           <t>Within the data m= section, the "a=mid", "a=ice-ufrag",
-          "a=ice-pwd", "a=fingerprint", and "a=setup" lines MUST be
+          "a=ice-pwd", "a=fingerprint", "a=dtls-id", and "a=setup" lines MUST be
           included as mentioned above, along with an
           "a=fmtp:webrtc-datachannel" line and an "a=sctp-port" line
           referencing the SCTP port number as defined in
@@ -2639,12 +2639,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               algorithm used for the fingerprint MUST match that used
               in the certificate signature.</t>
 
+              <t>An "a=dtls-id" line, as specified in
+              <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5.3.</t>
+
               <t>An "a=setup" line, as specified in
               <xref target="RFC4145"></xref>, Section 4, and clarified
               for use in DTLS-SRTP scenarios in
               <xref target="RFC5763"></xref>, Section 5. The role value
               in the answer MUST be "active" or "passive"; the "active"
-              role is RECOMMENDED.</t>
+              role is RECOMMENDED. The role value MUST be consistent
+              with the existing DTLS connection, if one exists and is
+              being continued.</t>
 
               <t>If present in the offer, an "a=rtcp-mux" line, as
               specified in
@@ -2668,8 +2673,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           offer.</t>
 
           <t>Within the data m= section, the "a=mid", "a=ice-ufrag",
-          "a=ice-pwd", "a=candidate", "a=fingerprint", and "a=setup"
-          lines MUST be included under the conditions described above,
+          "a=ice-pwd", "a=candidate", "a=fingerprint", "a=dtls-id",
+          and "a=setup" lines MUST be included under the conditions described above,
           along with an "a=fmtp:webrtc-datachannel" line and an
           "a=sctp-port" line referencing the SCTP port number as
           defined in
@@ -2999,6 +3004,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC4145" />, Section 4, and the setup value
             is stored.</t>
 
+            <t>If present, a single "a=dtls-id" line is parsed as
+            specified in
+            <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5,
+            and the dtls-id value is stored.</t>
+
             <t>Any "a=extmap" lines are parsed as specified in
             <xref target="RFC5285" />, Section 5, and their values are
             stored.</t>
@@ -3072,10 +3082,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC4572" />, Section 5, and the set of
             fingerprint and algorithm values is stored.</t>
 
-            <t>If present, a single "a=setup" line is parsed as
+            <t>If present, a single "a=dtls-id" line is parsed as
             specified in
-            <xref target="RFC4145" />, Section 4, and the setup value
-            is stored.</t>
+            <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5,
+            and the dtls-id value is stored.</t>
           </list></t>
 
           <t>If the "m=" proto value indicates use of RTP, as described
@@ -3202,11 +3212,20 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the size limits specified in
               <xref target="RFC5245" />, Section 15.4.</t>
 
+              <t>dtls-id value, which MUST be set according to
+              <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5.
+              If this is a re-offer and the dtls-id value is different
+              from that presently in use, then a new DTLS connection
+              MUST be established, and the ufrag and password values
+              MUST also be different. If processing an answer, the
+              dtls-id value, if present, MUST be the same as in the
+              offer.</t>
+
               <t>DTLS setup value, which MUST be set according to the
-              rules specified in
-              <xref target="RFC5763" />, Section 5, and MUST either
+              rules specified in <xref target="RFC5763"/>,
+              Section 5 and MUST
               be consistent with the selected role of the current DTLS
-              connection, if one exists.</t>
+              connection, if one exists and is being continued.</t>
 
               <t>DTLS fingerprint values, where at least one
               fingerprint MUST be present.</t>
