@@ -1217,11 +1217,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     tracks in the same MediaStream, so that they can be added to the
                     same "LS" group when creating an offer or answer.
                     addTrack attempts to minimize the number of transceivers as follows:
-                    The track will be attached to the first compatible transceiver
-                    (of the same media type) which has never had a direction of
-                    "sendonly" or "sendrecv". If no such transceiver exists,
-                    then one will be constructed as described in
-                    <xref target="sec.addTransceiver"/>.
+                    If the PeerConnection is in the "have-remote-offer"
+                    state, the track will be attached to the first compatible transceiver
+                    that was created by the most recent call to setRemoteDescription() and does not
+                    have a local track. Otherwise, a new transceiver will be created,
+                    as described in <xref target="sec.addTransceiver"/>.
                   </t>
                 </section>
 
@@ -2001,7 +2001,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                             the timing rules used for RTCP feedback. If
                             AVPF is provided, or an "a=rtcp-fb"
                             attribute is present, assume AVPF timing,
-                            i.e. a default value of "trr-int=0".
+                            i.e., a default value of "trr-int=0".
                             Otherwise, assume that AVPF is being used
                             in an AVP compatible mode and use AVP
                             timing, i.e., "trr-int=4".</t>
