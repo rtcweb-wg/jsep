@@ -661,6 +661,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         what it receives due to application preferences, e.g. a
         specific size for the window in which the video will be
         displayed.</t>
+
+        <t>Note that certain codecs support transmission of samples with aspect
+        ratios other than 1.0 (i.e., non-square pixels).
+        JSEP implementations will not transmit non-square pixels, but SHOULD
+        receive and render such video with the correct aspect ratio.
+        However, sample aspect ratio has no impact on the size negotiation
+        described below; all dimensions assume square pixels.
+        </t>
+
         <section title="Creating an imageattr Attribute">
 
           <t>In order to determine the limits on what video resolution
@@ -736,9 +745,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           performing receive-side rotation (e.g., through CVO), as it
           significantly simplifies the matching logic.</t>
 
-          <t>For an "a=imageattr recv" attribute, only size limits are
-          considered. Any other values, e.g. aspect ratio, MUST be
-          ignored.</t>
+          <t>For the purposes of resolution negotiation, only size limits are
+          considered. Any other values, e.g. picture or sample aspect ratio,
+          MUST be ignored.</t>
 
           <t>When communicating with a non-JSEP endpoint, multiple
           relevant "a=imageattr recv" attributes may be received. If
@@ -771,6 +780,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>If there is no appropriate and permitted scaling mechanism
           that allows the received size limits to be satisfied, the
           sender MUST NOT transmit the track.</t>
+
+          <t>If the attribute includes a "sar=" (sample aspect ratio) value set
+          to something other than "1.0", indicating the receiver wants to
+          receive non-square pixels, this cannot be satisfied and the sender
+          MUST NOT transmit the track.</t>
 
           <t>In the special case of receiving a maximum resolution of
           [0, 0], as described above, the sender MUST NOT transmit the
