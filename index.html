@@ -350,7 +350,8 @@ li, p {
 <link href="#rfc.references" rel="Chapter" title="12 References"/>
 <link href="#rfc.references.1" rel="Chapter" title="12.1 Normative References"/>
 <link href="#rfc.references.2" rel="Chapter" title="12.2 Informative References"/>
-<link href="#rfc.appendix.A" rel="Chapter" title="A Change log"/>
+<link href="#rfc.appendix.A" rel="Chapter" title="A Appendix A"/>
+<link href="#rfc.appendix.B" rel="Chapter" title="B Change log"/>
 <link href="#rfc.authors" rel="Chapter"/>
 
 
@@ -510,7 +511,8 @@ li, p {
 <li>12.   <a href="#rfc.references">References</a></li>
 <ul><li>12.1.   <a href="#rfc.references.1">Normative References</a></li>
 <li>12.2.   <a href="#rfc.references.2">Informative References</a></li>
-</ul><li>Appendix A.   <a href="#rfc.appendix.A">Change log</a></li>
+</ul><li>Appendix A.   <a href="#rfc.appendix.A">Appendix A</a></li>
+<li>Appendix B.   <a href="#rfc.appendix.B">Change log</a></li>
 <li><a href="#rfc.authors">Authors' Addresses</a></li>
 
 
@@ -1123,126 +1125,24 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 <h2 id="rfc.section.5.7"><a href="#rfc.section.5.7">5.7.</a> <a href="#sec.parsing-a-desc" id="sec.parsing-a-desc">Parsing a Session Description</a></h2>
 <p id="rfc.section.5.7.p.1">When a SessionDescription of any type is supplied to setLocal/RemoteDescription, the implementation must parse it and reject it if it is invalid. The exact details of this process are explained below.</p>
-<p id="rfc.section.5.7.p.2">The SDP contained in the session description object consists of a sequence of text lines, each containing a key-value expression, as described in <a href="#RFC4566">[RFC4566]</a>, Section 5. The SDP is read, line-by-line, and converted to a data structure that contains the deserialized information. However, SDP allows many types of lines, not all of which are relevant to JSEP applications. For each line, the implementation will first ensure it is syntactically correct according its defining ABNF, check that it conforms to <a href="#RFC4566">[RFC4566]</a> and <a href="#RFC3264">[RFC3264]</a> semantics, and then either parse and store or discard the provided value, as described below. A partial list of ABNF definitions for SDP attributes can found in:</p>
-<div id="rfc.table.1"/>
-<div id="sdp_abnf"/>
-<table cellpadding="3" cellspacing="0" class="tt full center">
-  <caption>SDP ABNF References</caption>
-  <thead>
-    <tr>
-      <th class="left">Attribute</th>
-      <th class="left">Reference</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="left">ptime</td>
-      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
-    </tr>
-    <tr>
-      <td class="left">maxptime</td>
-      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
-    </tr>
-    <tr>
-      <td class="left">rtpmap</td>
-      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
-    </tr>
-    <tr>
-      <td class="left">recvonly</td>
-      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
-    </tr>
-    <tr>
-      <td class="left">sendrecv</td>
-      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
-    </tr>
-    <tr>
-      <td class="left">sendonly</td>
-      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
-    </tr>
-    <tr>
-      <td class="left">inactive</td>
-      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
-    </tr>
-    <tr>
-      <td class="left">framerate</td>
-      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
-    </tr>
-    <tr>
-      <td class="left">fmtp</td>
-      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
-    </tr>
-    <tr>
-      <td class="left">quality</td>
-      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
-    </tr>
-    <tr>
-      <td class="left">msid</td>
-      <td class="left"><a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a> Section 2</td>
-    </tr>
-    <tr>
-      <td class="left">rtcp</td>
-      <td class="left"><a href="#RFC3605">[RFC3605]</a> Section 2.1</td>
-    </tr>
-    <tr>
-      <td class="left">setup</td>
-      <td class="left"><a href="#RFC4145">[RFC4145]</a> Section 3, 4, and 5</td>
-    </tr>
-    <tr>
-      <td class="left">connection</td>
-      <td class="left"><a href="#RFC4145">[RFC4145]</a> Section 3, 4, and 5</td>
-    </tr>
-    <tr>
-      <td class="left">fingerprint</td>
-      <td class="left"><a href="#RFC4572">[RFC4572]</a> Section 5</td>
-    </tr>
-    <tr>
-      <td class="left">rtcp-fb</td>
-      <td class="left"><a href="#RFC4585">[RFC4585]</a> Section 4.2</td>
-    </tr>
-    <tr>
-      <td class="left">candidate</td>
-      <td class="left"><a href="#RFC5245">[RFC5245]</a> Section 15</td>
-    </tr>
-    <tr>
-      <td class="left">extmap</td>
-      <td class="left"><a href="#RFC5285">[RFC5285]</a> Section 7</td>
-    </tr>
-    <tr>
-      <td class="left">mid</td>
-      <td class="left"><a href="#RFC5888">[RFC5888]</a> Section 4 and 5</td>
-    </tr>
-    <tr>
-      <td class="left">group</td>
-      <td class="left"><a href="#RFC5888">[RFC5888]</a> Section 4 and 5</td>
-    </tr>
-    <tr>
-      <td class="left">imageattr</td>
-      <td class="left"><a href="#RFC6236">[RFC6236]</a> Section 3.1</td>
-    </tr>
-    <tr>
-      <td class="left">extmap (encrypt option)</td>
-      <td class="left"><a href="#RFC6904">[RFC6904]</a> Section 4</td>
-    </tr>
-  </tbody>
-</table>
-<p id="rfc.section.5.7.p.3">[TODO: ensure that every line is listed below.]</p>
-<p id="rfc.section.5.7.p.4">If the line is not well-formed, or cannot be parsed as described, the parser MUST stop with an error and reject the session description. This ensures that implementations do not accidentally misinterpret ambiguous SDP.</p>
+<p id="rfc.section.5.7.p.2">The SDP contained in the session description object consists of a sequence of text lines, each containing a key-value expression, as described in <a href="#RFC4566">[RFC4566]</a>, Section 5. The SDP is read, line-by-line, and converted to a data structure that contains the deserialized information. However, SDP allows many types of lines, not all of which are relevant to JSEP applications. For each line, the implementation will first ensure it is syntactically correct according to its defining ABNF, check that it conforms to <a href="#RFC4566">[RFC4566]</a> and <a href="#RFC3264">[RFC3264]</a> semantics, and then either parse and store or discard the provided value, as described below.</p>
+<p id="rfc.section.5.7.p.3">If any line is not well-formed, or cannot be parsed as described, the parser MUST stop with an error and reject the session description, even if the value is to be discarded. This ensures that implementations do not accidentally misinterpret ambiguous SDP.</p>
 <h3 id="rfc.section.5.7.1"><a href="#rfc.section.5.7.1">5.7.1.</a> <a href="#sec.session-level-parse" id="sec.session-level-parse">Session-Level Parsing</a></h3>
 <p id="rfc.section.5.7.1.p.1">First, the session-level lines are checked and parsed. These lines MUST occur in a specific order, and with a specific syntax, as defined in <a href="#RFC4566">[RFC4566]</a>, Section 5. Note that while the specific line types (e.g. "v=", "c=") MUST occur in the defined order, lines of the same type (typically "a=") can occur in any order, and their ordering is not meaningful.</p>
-<p id="rfc.section.5.7.1.p.2">For non-attribute (non-"a=") lines, their sequencing, syntax, and semantics, are checked, as mentioned above. The following lines are not meaningful in the JSEP context and MAY be discarded once they have been checked.  </p>
+<p id="rfc.section.5.7.1.p.2">The following non-attribute lines are not meaningful in the JSEP context and MAY be discarded once they have been checked.  </p>
 
 <ul class="empty">
   <li>The "c=" line MUST be checked for syntax but its value is not used. This supersedes the guidance in <a href="#RFC5245">[RFC5245]</a>, Section 6.1, to use "ice-mismatch" to indicate mismatches between "c=" and the candidate lines; because JSEP always uses ICE, "ice-mismatch" is not useful in this context.</li>
   <li>The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are not used by this specification; they MUST be checked for syntax but their values are not used.</li>
 </ul>
-<p id="rfc.section.5.7.1.p.3">The remaining lines are processed as follows: </p>
+<p id="rfc.section.5.7.1.p.3">The remaining non-attribute lines are processed as follows: </p>
 
 <ul class="empty">
   <li>The "v=" line MUST have a version of 0, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.1.</li>
   <li>The "o=" line MUST be parsed as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.2.</li>
   <li>The "b=" line, if present, MUST be parsed as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.8, and the bwtype and bandwidth values stored.</li>
 </ul>
-<p id="rfc.section.5.7.1.p.4">Specific processing MUST be applied for the following session-level attribute ("a=") lines: </p>
+<p id="rfc.section.5.7.1.p.4">Finally, the attribute lines are processed. Specific processing MUST be applied for the following session-level attribute ("a=") lines: </p>
 
 <ul>
   <li>Any "a=group" lines are parsed as specified in <a href="#RFC5888">[RFC5888]</a>, Section 5, and the group's semantics and mids are stored.</li>
@@ -1270,6 +1170,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If present, a single "a=ice-ufrag" line is parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4, and the ufrag value is stored.</li>
   <li>If present, a single "a=ice-pwd" line is parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4, and the password value is stored.</li>
   <li>If present, a single "a=ice-options" line is parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.5, and the set of specified options is stored.</li>
+  <li>Any "a=candidate" attributes MUST be parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.1, and their values stored.</li>
+  <li>Any "a=remote-candidates" attributes MUST be parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.2, but their values are ignored.</li>
+  <li>If present, a single "a=end-of-candidates" attribute MUST be parsed as specified in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 8.2, and its presence or absence flagged and stored.</li>
   <li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC4572">[RFC4572]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
   <li>If present, a single "a=setup" line is parsed as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and the setup value is stored.</li>
 </ul>
@@ -1289,9 +1192,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If present, a single "a=rtcp-rsize" attribute MUST be parsed as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5, and its presence or absence flagged and stored.</li>
   <li>If present, a single "a=rtcp" attribute MUST be parsed as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, but its value is ignored, as this information is superfluous when using ICE.  </li>
   <li>If present, a single "a=msid" attribute MUST be parsed as specified in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 3.2, and its value stored.</li>
-  <li>Any "a=candidate" attributes MUST be parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 4.3, and their values stored.</li>
-  <li>Any "a=remote-candidates" attributes MUST be parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 4.3, but their values are ignored.</li>
-  <li>If present, a single "a=end-of-candidates" attribute MUST be parsed as specified in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 8.2, and its presence or absence flagged and stored.</li>
   <li>Any "a=imageattr" attributes MUST be parsed as specified in <a href="#RFC6236">[RFC6236]</a>, Section 3, and their values stored.</li>
   <li>Any "a=rid" lines MUST be parsed as specified in <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a>, Section 10, and their values stored.</li>
   <li>If present, a single "a=simulcast" line MUST be parsed as specified in <a href="#I-D.ietf-mmusic-sdp-simulcast">[I-D.ietf-mmusic-sdp-simulcast]</a>, and its values stored.</li>
@@ -2285,9 +2185,140 @@ a=rtcp-fb:100 nack pli
     </tr>
   </tbody>
 </table>
-<h1 id="rfc.appendix.A"><a href="#rfc.appendix.A">Appendix A.</a> <a href="#sec.change-log" id="sec.change-log">Change log</a></h1>
-<p id="rfc.section.A.p.1">Note: This section will be removed by RFC Editor before publication.</p>
-<p id="rfc.section.A.p.2">Changes in draft-16:</p>
+<h1 id="rfc.appendix.A"><a href="#rfc.appendix.A">Appendix A.</a> <a href="#sec.appendix-a" id="sec.appendix-a">Appendix A</a></h1>
+<p id="rfc.section.A.p.1">For the syntax validation performed in <a href="#sec.parsing-a-desc">Section 5.7</a>, the following list of ABNF definitions is used:</p>
+<div id="rfc.table.1"/>
+<div id="sdp-abnf"/>
+<table cellpadding="3" cellspacing="0" class="tt full center">
+  <caption>SDP ABNF References</caption>
+  <thead>
+    <tr>
+      <th class="left">Attribute</th>
+      <th class="left">Reference</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="left">ptime</td>
+      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
+    </tr>
+    <tr>
+      <td class="left">maxptime</td>
+      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
+    </tr>
+    <tr>
+      <td class="left">rtpmap</td>
+      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
+    </tr>
+    <tr>
+      <td class="left">recvonly</td>
+      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
+    </tr>
+    <tr>
+      <td class="left">sendrecv</td>
+      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
+    </tr>
+    <tr>
+      <td class="left">sendonly</td>
+      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
+    </tr>
+    <tr>
+      <td class="left">inactive</td>
+      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
+    </tr>
+    <tr>
+      <td class="left">framerate</td>
+      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
+    </tr>
+    <tr>
+      <td class="left">fmtp</td>
+      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
+    </tr>
+    <tr>
+      <td class="left">quality</td>
+      <td class="left"><a href="#RFC4566">[RFC4566]</a> Section 9</td>
+    </tr>
+    <tr>
+      <td class="left">rtcp</td>
+      <td class="left"><a href="#RFC3605">[RFC3605]</a> Section 2.1</td>
+    </tr>
+    <tr>
+      <td class="left">setup</td>
+      <td class="left"><a href="#RFC4145">[RFC4145]</a> Sections 3, 4, and 5</td>
+    </tr>
+    <tr>
+      <td class="left">connection</td>
+      <td class="left"><a href="#RFC4145">[RFC4145]</a> Sections 3, 4, and 5</td>
+    </tr>
+    <tr>
+      <td class="left">fingerprint</td>
+      <td class="left"><a href="#RFC4572">[RFC4572]</a> Section 5</td>
+    </tr>
+    <tr>
+      <td class="left">rtcp-fb</td>
+      <td class="left"><a href="#RFC4585">[RFC4585]</a> Section 4.2</td>
+    </tr>
+    <tr>
+      <td class="left">candidate</td>
+      <td class="left"><a href="#RFC5245">[RFC5245]</a> Section 15.1</td>
+    </tr>
+    <tr>
+      <td class="left">remote-candidates</td>
+      <td class="left"><a href="#RFC5245">[RFC5245]</a> Section 15.2</td>
+    </tr>
+    <tr>
+      <td class="left">ice-lite</td>
+      <td class="left"><a href="#RFC5245">[RFC5245]</a> Section 15.3</td>
+    </tr>
+    <tr>
+      <td class="left">ice-ufrag</td>
+      <td class="left"><a href="#RFC5245">[RFC5245]</a> Section 15.4</td>
+    </tr>
+    <tr>
+      <td class="left">ice-pwd</td>
+      <td class="left"><a href="#RFC5245">[RFC5245]</a> Section 15.4</td>
+    </tr>
+    <tr>
+      <td class="left">ice-options</td>
+      <td class="left"><a href="#RFC5245">[RFC5245]</a> Section 15.5</td>
+    </tr>
+    <tr>
+      <td class="left">extmap</td>
+      <td class="left"><a href="#RFC5285">[RFC5285]</a> Section 7</td>
+    </tr>
+    <tr>
+      <td class="left">mid</td>
+      <td class="left"><a href="#RFC5888">[RFC5888]</a> Section 4 and 5</td>
+    </tr>
+    <tr>
+      <td class="left">group</td>
+      <td class="left"><a href="#RFC5888">[RFC5888]</a> Section 4 and 5</td>
+    </tr>
+    <tr>
+      <td class="left">imageattr</td>
+      <td class="left"><a href="#RFC6236">[RFC6236]</a> Section 3.1</td>
+    </tr>
+    <tr>
+      <td class="left">extmap (encrypt option)</td>
+      <td class="left"><a href="#RFC6904">[RFC6904]</a> Section 4</td>
+    </tr>
+    <tr>
+      <td class="left">msid</td>
+      <td class="left"><a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a> Section 2</td>
+    </tr>
+    <tr>
+      <td class="left">rid</td>
+      <td class="left"><a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a> [TODO]</td>
+    </tr>
+    <tr>
+      <td class="left">simulcast</td>
+      <td class="left"><a href="#I-D.ietf-mmusic-sdp-simulcast">[I-D.ietf-mmusic-sdp-simulcast]</a> [TODO]</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="rfc.appendix.B"><a href="#rfc.appendix.B">Appendix B.</a> <a href="#sec.change-log" id="sec.change-log">Change log</a></h1>
+<p id="rfc.section.B.p.1">Note: This section will be removed by RFC Editor before publication.</p>
+<p id="rfc.section.B.p.2">Changes in draft-16:</p>
 <p/>
 
 <ul>
@@ -2307,7 +2338,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.4">Changes in draft-15:</p>
+<p id="rfc.section.B.p.4">Changes in draft-15:</p>
 <p/>
 
 <ul>
@@ -2321,7 +2352,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.6">Changes in draft-14:</p>
+<p id="rfc.section.B.p.6">Changes in draft-14:</p>
 <p/>
 
 <ul>
@@ -2331,7 +2362,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.8">Changes in draft-13:</p>
+<p id="rfc.section.B.p.8">Changes in draft-13:</p>
 <p/>
 
 <ul>
@@ -2355,7 +2386,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.10">Changes in draft-12:</p>
+<p id="rfc.section.B.p.10">Changes in draft-12:</p>
 <p/>
 
 <ul>
@@ -2369,7 +2400,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.12">Changes in draft-11:</p>
+<p id="rfc.section.B.p.12">Changes in draft-11:</p>
 <p/>
 
 <ul>
@@ -2379,7 +2410,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.14">Changes in draft-10:</p>
+<p id="rfc.section.B.p.14">Changes in draft-10:</p>
 <p/>
 
 <ul>
@@ -2387,7 +2418,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.16">Changes in draft-09:</p>
+<p id="rfc.section.B.p.16">Changes in draft-09:</p>
 <p/>
 
 <ul>
@@ -2401,7 +2432,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.A.p.18">Changes in draft-08: </p>
+<p id="rfc.section.B.p.18">Changes in draft-08: </p>
 
 <ul>
   <li>Added new example section and removed old examples in appendix.</li>
@@ -2417,7 +2448,7 @@ a=rtcp-fb:100 nack pli
   <li>Some reference updates.</li>
   <li>Editorial clarification.</li>
 </ul>
-<p id="rfc.section.A.p.19">Changes in draft-07: </p>
+<p id="rfc.section.B.p.19">Changes in draft-07: </p>
 
 <ul>
   <li>Expanded discussion of VAD and Opus DTX.</li>
@@ -2433,7 +2464,7 @@ a=rtcp-fb:100 nack pli
   <li>Cleaned up references.</li>
   <li>Editorial cleanup</li>
 </ul>
-<p id="rfc.section.A.p.20">Changes in draft-06: </p>
+<p id="rfc.section.B.p.20">Changes in draft-06: </p>
 
 <ul>
   <li>Reworked handling of m= line recycling.</li>
@@ -2442,25 +2473,25 @@ a=rtcp-fb:100 nack pli
   <li>Added text describing the ICE Candidate Pool and its behavior.</li>
   <li>Allowed OfferToReceiveX to create multiple recvonly m= sections.</li>
 </ul>
-<p id="rfc.section.A.p.21">Changes in draft-05: </p>
+<p id="rfc.section.B.p.21">Changes in draft-05: </p>
 
 <ul>
   <li>Fixed several issues identified in the createOffer/Answer sections during document review.</li>
   <li>Updated references.</li>
 </ul>
-<p id="rfc.section.A.p.22">Changes in draft-04: </p>
+<p id="rfc.section.B.p.22">Changes in draft-04: </p>
 
 <ul>
   <li>Filled in sections on createOffer and createAnswer.</li>
   <li>Added SDP examples.</li>
   <li>Fixed references.</li>
 </ul>
-<p id="rfc.section.A.p.23">Changes in draft-03: </p>
+<p id="rfc.section.B.p.23">Changes in draft-03: </p>
 
 <ul>
   <li>Added text describing relationship to W3C specification</li>
 </ul>
-<p id="rfc.section.A.p.24">Changes in draft-02: </p>
+<p id="rfc.section.B.p.24">Changes in draft-02: </p>
 
 <ul>
   <li>Converted from nroff</li>
@@ -2469,7 +2500,7 @@ a=rtcp-fb:100 nack pli
   <li>Align SDP handling with W3C draft</li>
   <li>Clarified section on forking.</li>
 </ul>
-<p id="rfc.section.A.p.25">Changes in draft-01: </p>
+<p id="rfc.section.B.p.25">Changes in draft-01: </p>
 
 <ul>
   <li>Added diagrams for architecture and state machine.</li>
@@ -2480,7 +2511,7 @@ a=rtcp-fb:100 nack pli
   <li>Updated suggested API and examples to match latest thinking.</li>
   <li>Suggested API and examples have been moved to an appendix.</li>
 </ul>
-<p id="rfc.section.A.p.26">Changes in draft -00: </p>
+<p id="rfc.section.B.p.26">Changes in draft -00: </p>
 
 <ul>
   <li>Migrated from draft-uberti-rtcweb-jsep-02.</li>
