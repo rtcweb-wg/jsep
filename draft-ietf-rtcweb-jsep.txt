@@ -142,17 +142,16 @@ Internet-Draft                    JSEP                      October 2016
      5.8.  Applying a Local Description  . . . . . . . . . . . . . .  58
      5.9.  Applying a Remote Description . . . . . . . . . . . . . .  59
      5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  62
-   6.  Demux placeholder . . . . . . . . . . . . . . . . . . . . . .  64
-   7.  Processing RTP packets  . . . . . . . . . . . . . . . . . . .  64
-   8.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  65
-     8.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  65
-     8.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  69
-   9.  Security Considerations . . . . . . . . . . . . . . . . . . .  79
-   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  79
-   11. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  80
-   12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  80
-     12.1.  Normative References . . . . . . . . . . . . . . . . . .  80
-     12.2.  Informative References . . . . . . . . . . . . . . . . .  83
+   6.  Processing RTP packets  . . . . . . . . . . . . . . . . . . .  64
+   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  65
+     7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  65
+     7.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  69
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  79
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  79
+   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  80
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  80
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  80
+     11.2.  Informative References . . . . . . . . . . . . . . . . .  83
    Appendix A.  Appendix A . . . . . . . . . . . . . . . . . . . . .  84
    Appendix B.  Change log . . . . . . . . . . . . . . . . . . . . .  85
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  91
@@ -162,6 +161,7 @@ Internet-Draft                    JSEP                      October 2016
    This document describes how the W3C WEBRTC RTCPeerConnection
    interface [W3C.WD-webrtc-20140617] is used to control the setup,
    management and teardown of a multimedia session.
+
 
 
 
@@ -3482,15 +3482,18 @@ Internet-Draft                    JSEP                      October 2016
       *  If the media section has RTCP mux enabled, discard any RTCP
          component, and begin or continue muxing RTCP over the RTP
          component, as specified in [RFC5761], Section 5.1.3.
-         Otherwise, transmit RTCP over the RTCP component; if no RTCP
-         component exists, because RTCP mux was previously enabled, this
-         MUST result in an error.
+         Otherwise, prepare to transmit RTCP over the RTCP component; if
+         no RTCP component exists, because RTCP mux was previously
+         enabled, this MUST result in an error.
 
       *  If the media section has reduced-size RTCP enabled, configure
          the RTCP transmission for this media section to use reduced-
          size RTCP, as specified in [RFC5506].
 
-      *  [TODO: enable appropriate rtcp-fb mechanisms]
+      *  Enable the RTCP feedback mechanisms referenced in the media
+         section for the specified media formats.  Specifically, begin
+         or continue sending the requested feedback types and reacting
+         to received feedback, as specified in [RFC4585], Section 4.2.
 
       *  If the directional attribute in the answer is of type
          "sendrecv" or "sendonly", prepare to start transmitting media
@@ -3519,9 +3522,6 @@ Internet-Draft                    JSEP                      October 2016
          association over the associated ICE component and DTLS
          connection, using the local SCTP port value from the local
          description, and the remote SCTP port value from the remote
-         description, as described in [I-D.ietf-mmusic-sctp-sdp],
-         Section 10.2.
-
 
 
 
@@ -3530,17 +3530,16 @@ Uberti, et al.           Expires April 10, 2017                [Page 63]
 Internet-Draft                    JSEP                      October 2016
 
 
+         description, as described in [I-D.ietf-mmusic-sctp-sdp],
+         Section 10.2.
+
    If the answer contains valid bundle groups, discard any ICE
    components for the m= sections that will be bundled onto the primary
    ICE components in each bundle, and begin muxing these m= sections
    accordingly, as described in
    [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 8.2.
 
-6.  Demux placeholder
-
-   RTP demux algo goes here
-
-7.  Processing RTP packets
+6.  Processing RTP packets
 
    Note: The following algorithm does not yet have WG consensus but is
    included here as something concrete for the working group to discuss.
@@ -3581,6 +3580,7 @@ Internet-Draft                    JSEP                      October 2016
 
 
 
+
 Uberti, et al.           Expires April 10, 2017                [Page 64]
 
 Internet-Draft                    JSEP                      October 2016
@@ -3604,7 +3604,7 @@ Internet-Draft                    JSEP                      October 2016
    As RtpTransceivers (and, thus, RtpReceivers) are added, removed,
    stopped, or reconfigured, the tables above must also be updated.
 
-8.  Examples
+7.  Examples
 
    Note that this example section shows several SDP fragments.  To
    format in 72 columns, some of the lines in SDP have been split into
@@ -3615,7 +3615,7 @@ Internet-Draft                    JSEP                      October 2016
    More examples of SDP for WebRTC call flows can be found in
    [I-D.nandakumar-rtcweb-sdp].
 
-8.1.  Simple Example
+7.1.  Simple Example
 
    This section shows a very simple example that sets up a minimal audio
    / video call between two browsers and does not use trickle ICE.  The
@@ -3837,7 +3837,7 @@ Internet-Draft                    JSEP                      October 2016
    a=ssrc-group:FID 3229706345 3229706346
 
 
-8.2.  Normal Examples
+7.2.  Normal Examples
 
    This section shows a typical example of a session between two
    browsers setting up an audio channel and a data channel.  Trickle ICE
@@ -4381,7 +4381,7 @@ Internet-Draft                    JSEP                      October 2016
    a=rtcp-fb:100 nack pli
 
 
-9.  Security Considerations
+8.  Security Considerations
 
    The IETF has published separate documents
    [I-D.ietf-rtcweb-security-arch] [I-D.ietf-rtcweb-security] describing
@@ -4410,7 +4410,7 @@ Internet-Draft                    JSEP                      October 2016
    Applications which wish to conceal their public IP address should
    instead configure the ICE agent to use only relay candidates.
 
-10.  IANA Considerations
+9.  IANA Considerations
 
    This document requires no actions from IANA.
 
@@ -4426,7 +4426,7 @@ Uberti, et al.           Expires April 10, 2017                [Page 79]
 Internet-Draft                    JSEP                      October 2016
 
 
-11.  Acknowledgements
+10.  Acknowledgements
 
    Significant text incorporated in the draft as well and review was
    provided by Peter Thatcher, Taylor Brandstetter, Harald Alvestrand
@@ -4434,9 +4434,9 @@ Internet-Draft                    JSEP                      October 2016
    Andrew Hutton, Richard Ejzak, Adam Bergkvist and Matthew Kaufman all
    provided valuable feedback on this proposal.
 
-12.  References
+11.  References
 
-12.1.  Normative References
+11.1.  Normative References
 
    [I-D.ietf-avtext-rid]
               Roach, A., Nandakumar, S., and P. Thatcher, "RTP Stream
@@ -4619,7 +4619,7 @@ Internet-Draft                    JSEP                      October 2016
               Real-time Transport Protocol (SRTP)", RFC 6904, April
               2013.
 
-12.2.  Informative References
+11.2.  Informative References
 
    [I-D.ietf-rtcweb-ip-handling]
               Uberti, J. and G. Shieh, "WebRTC IP Address Handling

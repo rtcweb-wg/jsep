@@ -339,17 +339,16 @@ li, p {
 <link href="#rfc.section.5.8" rel="Chapter" title="5.8 Applying a Local Description"/>
 <link href="#rfc.section.5.9" rel="Chapter" title="5.9 Applying a Remote Description"/>
 <link href="#rfc.section.5.10" rel="Chapter" title="5.10 Applying an Answer"/>
-<link href="#rfc.section.6" rel="Chapter" title="6 Demux placeholder"/>
-<link href="#rfc.section.7" rel="Chapter" title="7 Processing RTP packets"/>
-<link href="#rfc.section.8" rel="Chapter" title="8 Examples"/>
-<link href="#rfc.section.8.1" rel="Chapter" title="8.1 Simple Example"/>
-<link href="#rfc.section.8.2" rel="Chapter" title="8.2 Normal Examples"/>
-<link href="#rfc.section.9" rel="Chapter" title="9 Security Considerations"/>
-<link href="#rfc.section.10" rel="Chapter" title="10 IANA Considerations"/>
-<link href="#rfc.section.11" rel="Chapter" title="11 Acknowledgements"/>
-<link href="#rfc.references" rel="Chapter" title="12 References"/>
-<link href="#rfc.references.1" rel="Chapter" title="12.1 Normative References"/>
-<link href="#rfc.references.2" rel="Chapter" title="12.2 Informative References"/>
+<link href="#rfc.section.6" rel="Chapter" title="6 Processing RTP packets"/>
+<link href="#rfc.section.7" rel="Chapter" title="7 Examples"/>
+<link href="#rfc.section.7.1" rel="Chapter" title="7.1 Simple Example"/>
+<link href="#rfc.section.7.2" rel="Chapter" title="7.2 Normal Examples"/>
+<link href="#rfc.section.8" rel="Chapter" title="8 Security Considerations"/>
+<link href="#rfc.section.9" rel="Chapter" title="9 IANA Considerations"/>
+<link href="#rfc.section.10" rel="Chapter" title="10 Acknowledgements"/>
+<link href="#rfc.references" rel="Chapter" title="11 References"/>
+<link href="#rfc.references.1" rel="Chapter" title="11.1 Normative References"/>
+<link href="#rfc.references.2" rel="Chapter" title="11.2 Informative References"/>
 <link href="#rfc.appendix.A" rel="Chapter" title="A Appendix A"/>
 <link href="#rfc.appendix.B" rel="Chapter" title="B Change log"/>
 <link href="#rfc.authors" rel="Chapter"/>
@@ -500,17 +499,16 @@ li, p {
 </ul><li>5.8.   <a href="#rfc.section.5.8">Applying a Local Description</a></li>
 <li>5.9.   <a href="#rfc.section.5.9">Applying a Remote Description</a></li>
 <li>5.10.   <a href="#rfc.section.5.10">Applying an Answer</a></li>
-</ul><li>6.   <a href="#rfc.section.6">Demux placeholder</a></li>
-<li>7.   <a href="#rfc.section.7">Processing RTP packets</a></li>
-<li>8.   <a href="#rfc.section.8">Examples</a></li>
-<ul><li>8.1.   <a href="#rfc.section.8.1">Simple Example</a></li>
-<li>8.2.   <a href="#rfc.section.8.2">Normal Examples</a></li>
-</ul><li>9.   <a href="#rfc.section.9">Security Considerations</a></li>
-<li>10.   <a href="#rfc.section.10">IANA Considerations</a></li>
-<li>11.   <a href="#rfc.section.11">Acknowledgements</a></li>
-<li>12.   <a href="#rfc.references">References</a></li>
-<ul><li>12.1.   <a href="#rfc.references.1">Normative References</a></li>
-<li>12.2.   <a href="#rfc.references.2">Informative References</a></li>
+</ul><li>6.   <a href="#rfc.section.6">Processing RTP packets</a></li>
+<li>7.   <a href="#rfc.section.7">Examples</a></li>
+<ul><li>7.1.   <a href="#rfc.section.7.1">Simple Example</a></li>
+<li>7.2.   <a href="#rfc.section.7.2">Normal Examples</a></li>
+</ul><li>8.   <a href="#rfc.section.8">Security Considerations</a></li>
+<li>9.   <a href="#rfc.section.9">IANA Considerations</a></li>
+<li>10.   <a href="#rfc.section.10">Acknowledgements</a></li>
+<li>11.   <a href="#rfc.references">References</a></li>
+<ul><li>11.1.   <a href="#rfc.references.1">Normative References</a></li>
+<li>11.2.   <a href="#rfc.references.2">Informative References</a></li>
 </ul><li>Appendix A.   <a href="#rfc.appendix.A">Appendix A</a></li>
 <li>Appendix B.   <a href="#rfc.appendix.B">Change log</a></li>
 <li><a href="#rfc.authors">Authors' Addresses</a></li>
@@ -1258,15 +1256,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If the media section has been rejected (i.e. port is set to zero in the answer), stop any reception or transmission of media for this section, and discard any associated ICE components, as described in Section 9.2.1.3 of <a href="#RFC5245">[RFC5245]</a>.</li>
   <li>If the remote DTLS fingerprint has been changed, tear down the existing DTLS connection.</li>
   <li>If no valid DTLS connection exists, prepare to start a DTLS connection, using the specified roles and fingerprints, on any underlying ICE components, once they are active.</li>
-  <li>If the media section proto value indicates use of RTP: <ul><li>If the media section references any media formats, RTP header extensions, or RTCP feedback mechanisms that were not present in the corresponding media section in the offer, this indicates a negotiation problem and MUST result in an error.</li><li>If the media section has RTCP mux enabled, discard any RTCP component, and begin or continue muxing RTCP over the RTP component, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.3. Otherwise, transmit RTCP over the RTCP component; if no RTCP component exists, because RTCP mux was previously enabled, this MUST result in an error.</li><li>If the media section has reduced-size RTCP enabled, configure the RTCP transmission for this media section to use reduced-size RTCP, as specified in <a href="#RFC5506">[RFC5506]</a>.</li><li>[TODO: enable appropriate rtcp-fb mechanisms]</li><li>If the directional attribute in the answer is of type "sendrecv" or "sendonly", prepare to start transmitting media using the most preferred media format from the remote description that is also present in the answer, as described in <a href="#RFC3264">[RFC3264]</a>, Sections 6.1 and 7, once the underlying transport layers have been established. [TODO: add discusssion of RED/FEC/RTX/CN] The payload type mapping from the remote description is used to determine payload types for the outgoing RTP streams. Any RTP header extensions that were negotiated should be included in the outgoing RTP streams, using the extension mapping from the remote description; if the RID header extension has been negotiated, and RID values are specified, include the RID header extension in the outgoing RTP streams, as indicated in <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a>, Section 4). If simulcast is negotiated, send the number of Source RTP Streams as specified in <a href="#I-D.ietf-mmusic-sdp-simulcast">[I-D.ietf-mmusic-sdp-simulcast]</a>, Section 6.2.2.</li><li>If the directional attribute is of type "recvonly" or "inactive", stop transmitting RTP media, although RTCP should still be sent, as described in <a href="#RFC3264">[RFC3264]</a>, Section 5.1.</li></ul></li>
+  <li>If the media section proto value indicates use of RTP: <ul><li>If the media section references any media formats, RTP header extensions, or RTCP feedback mechanisms that were not present in the corresponding media section in the offer, this indicates a negotiation problem and MUST result in an error.</li><li>If the media section has RTCP mux enabled, discard any RTCP component, and begin or continue muxing RTCP over the RTP component, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.3. Otherwise, prepare to transmit RTCP over the RTCP component; if no RTCP component exists, because RTCP mux was previously enabled, this MUST result in an error.</li><li>If the media section has reduced-size RTCP enabled, configure the RTCP transmission for this media section to use reduced-size RTCP, as specified in <a href="#RFC5506">[RFC5506]</a>.</li><li>Enable the RTCP feedback mechanisms referenced in the media section for the specified media formats. Specifically, begin or continue sending the requested feedback types and reacting to received feedback, as specified in <a href="#RFC4585">[RFC4585]</a>, Section 4.2.  </li><li>If the directional attribute in the answer is of type "sendrecv" or "sendonly", prepare to start transmitting media using the most preferred media format from the remote description that is also present in the answer, as described in <a href="#RFC3264">[RFC3264]</a>, Sections 6.1 and 7, once the underlying transport layers have been established. [TODO: add discusssion of RED/FEC/RTX/CN] The payload type mapping from the remote description is used to determine payload types for the outgoing RTP streams. Any RTP header extensions that were negotiated should be included in the outgoing RTP streams, using the extension mapping from the remote description; if the RID header extension has been negotiated, and RID values are specified, include the RID header extension in the outgoing RTP streams, as indicated in <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a>, Section 4). If simulcast is negotiated, send the number of Source RTP Streams as specified in <a href="#I-D.ietf-mmusic-sdp-simulcast">[I-D.ietf-mmusic-sdp-simulcast]</a>, Section 6.2.2.</li><li>If the directional attribute is of type "recvonly" or "inactive", stop transmitting RTP media, although RTCP should still be sent, as described in <a href="#RFC3264">[RFC3264]</a>, Section 5.1.</li></ul></li>
   <li>If the media section proto value indicates use of SCTP: <ul><li>If no SCTP association yet exists, prepare to initiate a SCTP association over the associated ICE component and DTLS connection, using the local SCTP port value from the local description, and the remote SCTP port value from the remote description, as described in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 10.2.</li></ul></li>
 </ul>
 <p id="rfc.section.5.10.p.3">If the answer contains valid bundle groups, discard any ICE components for the m= sections that will be bundled onto the primary ICE components in each bundle, and begin muxing these m= sections accordingly, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 8.2.</p>
-<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> Demux placeholder</h1>
-<p id="rfc.section.6.p.1">RTP demux algo goes here</p>
-<h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#sec.rtp.demux" id="sec.rtp.demux">Processing RTP packets</a></h1>
-<p id="rfc.section.7.p.1">Note: The following algorithm does not yet have WG consensus but is included here as something concrete for the working group to discuss.</p>
-<p id="rfc.section.7.p.2">When an RTP packet is received by a transport and passes SRTP authentication, that packet needs to be routed to the correct RtpReceiver. For each transport, the following steps MUST be followed to prepare to route packets:</p>
+<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#sec.rtp.demux" id="sec.rtp.demux">Processing RTP packets</a></h1>
+<p id="rfc.section.6.p.1">Note: The following algorithm does not yet have WG consensus but is included here as something concrete for the working group to discuss.</p>
+<p id="rfc.section.6.p.2">When an RTP packet is received by a transport and passes SRTP authentication, that packet needs to be routed to the correct RtpReceiver. For each transport, the following steps MUST be followed to prepare to route packets:</p>
 <p/>
 
 <ul class="empty">
@@ -1276,7 +1272,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 
 <p> </p>
-<p id="rfc.section.7.p.4">For each RTP packet received, the following steps MUST be followed to route the packet:</p>
+<p id="rfc.section.6.p.4">For each RTP packet received, the following steps MUST be followed to route the packet:</p>
 <p/>
 
 <ul class="empty">
@@ -1288,14 +1284,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 
 <p> </p>
-<p id="rfc.section.7.p.6">After packets are routed to the RtpReceiver, further processing of the RTP packets is done at the RtpReceiver level.  This includes using <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a> to determine which RTP streams depend on or repair other RTP streams.</p>
-<p id="rfc.section.7.p.7">As RtpTransceivers (and, thus, RtpReceivers) are added, removed, stopped, or reconfigured, the tables above must also be updated.</p>
-<h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#sec.examples" id="sec.examples">Examples</a></h1>
-<p id="rfc.section.8.p.1">Note that this example section shows several SDP fragments. To format in 72 columns, some of the lines in SDP have been split into multiple lines, where leading whitespace indicates that a line is a continuation of the previous line. In addition, some blank lines have been added to improve readability but are not valid in SDP.</p>
-<p id="rfc.section.8.p.2">More examples of SDP for WebRTC call flows can be found in <a href="#I-D.nandakumar-rtcweb-sdp">[I-D.nandakumar-rtcweb-sdp]</a>.</p>
-<h2 id="rfc.section.8.1"><a href="#rfc.section.8.1">8.1.</a> <a href="#sec.simple-examples" id="sec.simple-examples">Simple Example</a></h2>
-<p id="rfc.section.8.1.p.1">This section shows a very simple example that sets up a minimal audio / video call between two browsers and does not use trickle ICE. The example in the following section provides a more realistic example of what would happen in a normal browser to browser connection.</p>
-<p id="rfc.section.8.1.p.2">The flow shows Alice's browser initiating the session to Bob's browser. The messages from Alice's JS to Bob's JS are assumed to flow over some signaling protocol via a web server.  The JS on both Alice's side and Bob's side waits for all candidates before sending the offer or answer, so the offers and answers are complete. Trickle ICE is not used. Both Alice and Bob are using the default policy of balanced.</p>
+<p id="rfc.section.6.p.6">After packets are routed to the RtpReceiver, further processing of the RTP packets is done at the RtpReceiver level.  This includes using <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a> to determine which RTP streams depend on or repair other RTP streams.</p>
+<p id="rfc.section.6.p.7">As RtpTransceivers (and, thus, RtpReceivers) are added, removed, stopped, or reconfigured, the tables above must also be updated.</p>
+<h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#sec.examples" id="sec.examples">Examples</a></h1>
+<p id="rfc.section.7.p.1">Note that this example section shows several SDP fragments. To format in 72 columns, some of the lines in SDP have been split into multiple lines, where leading whitespace indicates that a line is a continuation of the previous line. In addition, some blank lines have been added to improve readability but are not valid in SDP.</p>
+<p id="rfc.section.7.p.2">More examples of SDP for WebRTC call flows can be found in <a href="#I-D.nandakumar-rtcweb-sdp">[I-D.nandakumar-rtcweb-sdp]</a>.</p>
+<h2 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1.</a> <a href="#sec.simple-examples" id="sec.simple-examples">Simple Example</a></h2>
+<p id="rfc.section.7.1.p.1">This section shows a very simple example that sets up a minimal audio / video call between two browsers and does not use trickle ICE. The example in the following section provides a more realistic example of what would happen in a normal browser to browser connection.</p>
+<p id="rfc.section.7.1.p.2">The flow shows Alice's browser initiating the session to Bob's browser. The messages from Alice's JS to Bob's JS are assumed to flow over some signaling protocol via a web server.  The JS on both Alice's side and Bob's side waits for all candidates before sending the offer or answer, so the offers and answers are complete. Trickle ICE is not used. Both Alice and Bob are using the default policy of balanced.</p>
 <pre>
               
 //                  set up local media state
@@ -1342,7 +1338,7 @@ AliceUA-&gt;BobUA:     media sent from Alice to Bob
 
 </pre>
 <p/>
-<p id="rfc.section.8.1.p.4">The SDP for |offer-A1| looks like:</p>
+<p id="rfc.section.7.1.p.4">The SDP for |offer-A1| looks like:</p>
 <pre>
               
 v=0
@@ -1414,7 +1410,7 @@ a=end-of-candidates
           
 </pre>
 <p/>
-<p id="rfc.section.8.1.p.6">The SDP for |answer-A1| looks like:</p>
+<p id="rfc.section.7.1.p.6">The SDP for |answer-A1| looks like:</p>
 <pre>
               
 v=0
@@ -1472,8 +1468,8 @@ a=ssrc-group:FID 3229706345 3229706346
           
 </pre>
 <p/>
-<h2 id="rfc.section.8.2"><a href="#rfc.section.8.2">8.2.</a> <a href="#sec.normal-examples" id="sec.normal-examples">Normal Examples</a></h2>
-<p id="rfc.section.8.2.p.1">This section shows a typical example of a session between two browsers setting up an audio channel and a data channel.  Trickle ICE is used in full trickle mode with a bundle policy of max-bundle, an RTCP mux policy of require, and a single TURN server. Later, two video flows, one for the presenter and one for screen sharing, are added to the session. This example shows Alice's browser initiating the session to Bob's browser.  The messages from Alice's JS to Bob's JS are assumed to flow over some signaling protocol via a web server.</p>
+<h2 id="rfc.section.7.2"><a href="#rfc.section.7.2">7.2.</a> <a href="#sec.normal-examples" id="sec.normal-examples">Normal Examples</a></h2>
+<p id="rfc.section.7.2.p.1">This section shows a typical example of a session between two browsers setting up an audio channel and a data channel.  Trickle ICE is used in full trickle mode with a bundle policy of max-bundle, an RTCP mux policy of require, and a single TURN server. Later, two video flows, one for the presenter and one for screen sharing, are added to the session. This example shows Alice's browser initiating the session to Bob's browser.  The messages from Alice's JS to Bob's JS are assumed to flow over some signaling protocol via a web server.</p>
 <pre>
               
 //                  set up local media state
@@ -1563,7 +1559,7 @@ AliceUA-&gt;BobUA:     audio+video+data sent from Alice to Bob
 
 </pre>
 <p/>
-<p id="rfc.section.8.2.p.3">The SDP for |offer-B1| looks like:</p>
+<p id="rfc.section.7.2.p.3">The SDP for |offer-B1| looks like:</p>
 <pre>
               
 v=0
@@ -1609,14 +1605,14 @@ a=setup:actpass
          
 </pre>
 <p/>
-<p id="rfc.section.8.2.p.5">The SDP for |candidate-B1| looks like:</p>
+<p id="rfc.section.7.2.p.5">The SDP for |candidate-B1| looks like:</p>
 <pre>
               
 candidate:109270923 1 udp 2122194687 192.168.1.2 51556 typ host
          
 </pre>
 <p/>
-<p id="rfc.section.8.2.p.7">The SDP for |candidate-B2| looks like:</p>
+<p id="rfc.section.7.2.p.7">The SDP for |candidate-B2| looks like:</p>
 <pre>
               
 candidate:4036177503 1 udp 1685987071 11.22.33.44 52546 typ srflx
@@ -1624,7 +1620,7 @@ candidate:4036177503 1 udp 1685987071 11.22.33.44 52546 typ srflx
          
 </pre>
 <p/>
-<p id="rfc.section.8.2.p.9">The SDP for |answer-B1| looks like:</p>
+<p id="rfc.section.7.2.p.9">The SDP for |answer-B1| looks like:</p>
 <pre>
               
 v=0
@@ -1668,14 +1664,14 @@ a=setup:active
          
 </pre>
 <p/>
-<p id="rfc.section.8.2.p.11">The SDP for |candidate-B3| looks like:</p>
+<p id="rfc.section.7.2.p.11">The SDP for |candidate-B3| looks like:</p>
 <pre>
               
 candidate:109270924 1 udp 2122194687 192.168.2.3 61665 typ host
      
 </pre>
 <p/>
-<p id="rfc.section.8.2.p.13">The SDP for |candidate-B4| looks like:</p>
+<p id="rfc.section.7.2.p.13">The SDP for |candidate-B4| looks like:</p>
 <pre>
               
 candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
@@ -1683,7 +1679,7 @@ candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
      
 </pre>
 <p/>
-<p id="rfc.section.8.2.p.15">The SDP for |offer-B2| looks like: (note the increment of the version number in the o= line, and the c= and a=rtcp lines, which indicate the local candidate that was selected)</p>
+<p id="rfc.section.7.2.p.15">The SDP for |offer-B2| looks like: (note the increment of the version number in the o= line, and the c= and a=rtcp lines, which indicate the local candidate that was selected)</p>
 <pre>
               
 v=0
@@ -1791,7 +1787,7 @@ a=ssrc-group:FID 2366781083 2366781084
          
 </pre>
 <p/>
-<p id="rfc.section.8.2.p.17">The SDP for |answer-B2| looks like: (note the use of setup:passive to maintain the existing DTLS roles, and the use of a=recvonly to indicate that the video streams are one-way)</p>
+<p id="rfc.section.7.2.p.17">The SDP for |answer-B2| looks like: (note the use of setup:passive to maintain the existing DTLS roles, and the use of a=recvonly to indicate that the video streams are one-way)</p>
 <pre>
               
 v=0
@@ -1880,16 +1876,16 @@ a=rtcp-fb:100 nack pli
          
 </pre>
 <p/>
-<h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a> <a href="#sec.security-considerations" id="sec.security-considerations">Security Considerations</a></h1>
-<p id="rfc.section.9.p.1">The IETF has published separate documents <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a> <a href="#I-D.ietf-rtcweb-security">[I-D.ietf-rtcweb-security]</a> describing the security architecture for WebRTC as a whole. The remainder of this section describes security considerations for this document.</p>
-<p id="rfc.section.9.p.2">While formally the JSEP interface is an API, it is better to think of it is an Internet protocol, with the JS being untrustworthy from the perspective of the browser. Thus, the threat model of <a href="#RFC3552">[RFC3552]</a> applies. In particular, JS can call the API in any order and with any inputs, including malicious ones.  This is particularly relevant when we consider the SDP which is passed to setLocalDescription(). While correct API usage requires that the application pass in SDP which was derived from createOffer() or createAnswer(), there is no guarantee that applications do so. The browser MUST be prepared for the JS to pass in bogus data instead.</p>
-<p id="rfc.section.9.p.3">Conversely, the application programmer MUST recognize that the JS does not have complete control of browser behavior. One case that bears particular mention is that editing ICE candidates out of the SDP or suppressing trickled candidates does not have the expected behavior: implementations will still perform checks from those candidates even if they are not sent to the other side.  Thus, for instance, it is not possible to prevent the remote peer from learning your public IP address by removing server reflexive candidates. Applications which wish to conceal their public IP address should instead configure the ICE agent to use only relay candidates.</p>
-<h1 id="rfc.section.10"><a href="#rfc.section.10">10.</a> <a href="#sec.iana-considerations" id="sec.iana-considerations">IANA Considerations</a></h1>
-<p id="rfc.section.10.p.1">This document requires no actions from IANA.</p>
-<h1 id="rfc.section.11"><a href="#rfc.section.11">11.</a> <a href="#sec.acknowledgements" id="sec.acknowledgements">Acknowledgements</a></h1>
-<p id="rfc.section.11.p.1">Significant text incorporated in the draft as well and review was provided by Peter Thatcher, Taylor Brandstetter, Harald Alvestrand and Suhas Nandakumar.  Dan Burnett, Neil Stratford, Anant Narayanan, Andrew Hutton, Richard Ejzak, Adam Bergkvist and Matthew Kaufman all provided valuable feedback on this proposal.  </p>
-<h1 id="rfc.references"><a href="#rfc.references">12.</a> References</h1>
-<h2 id="rfc.references.1"><a href="#rfc.references.1">12.1.</a> Normative References</h2>
+<h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#sec.security-considerations" id="sec.security-considerations">Security Considerations</a></h1>
+<p id="rfc.section.8.p.1">The IETF has published separate documents <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a> <a href="#I-D.ietf-rtcweb-security">[I-D.ietf-rtcweb-security]</a> describing the security architecture for WebRTC as a whole. The remainder of this section describes security considerations for this document.</p>
+<p id="rfc.section.8.p.2">While formally the JSEP interface is an API, it is better to think of it is an Internet protocol, with the JS being untrustworthy from the perspective of the browser. Thus, the threat model of <a href="#RFC3552">[RFC3552]</a> applies. In particular, JS can call the API in any order and with any inputs, including malicious ones.  This is particularly relevant when we consider the SDP which is passed to setLocalDescription(). While correct API usage requires that the application pass in SDP which was derived from createOffer() or createAnswer(), there is no guarantee that applications do so. The browser MUST be prepared for the JS to pass in bogus data instead.</p>
+<p id="rfc.section.8.p.3">Conversely, the application programmer MUST recognize that the JS does not have complete control of browser behavior. One case that bears particular mention is that editing ICE candidates out of the SDP or suppressing trickled candidates does not have the expected behavior: implementations will still perform checks from those candidates even if they are not sent to the other side.  Thus, for instance, it is not possible to prevent the remote peer from learning your public IP address by removing server reflexive candidates. Applications which wish to conceal their public IP address should instead configure the ICE agent to use only relay candidates.</p>
+<h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a> <a href="#sec.iana-considerations" id="sec.iana-considerations">IANA Considerations</a></h1>
+<p id="rfc.section.9.p.1">This document requires no actions from IANA.</p>
+<h1 id="rfc.section.10"><a href="#rfc.section.10">10.</a> <a href="#sec.acknowledgements" id="sec.acknowledgements">Acknowledgements</a></h1>
+<p id="rfc.section.10.p.1">Significant text incorporated in the draft as well and review was provided by Peter Thatcher, Taylor Brandstetter, Harald Alvestrand and Suhas Nandakumar.  Dan Burnett, Neil Stratford, Anant Narayanan, Andrew Hutton, Richard Ejzak, Adam Bergkvist and Matthew Kaufman all provided valuable feedback on this proposal.  </p>
+<h1 id="rfc.references"><a href="#rfc.references">11.</a> References</h1>
+<h2 id="rfc.references.1"><a href="#rfc.references.1">11.1.</a> Normative References</h2>
 <table>
   <tbody>
     <tr>
@@ -2098,7 +2094,7 @@ a=rtcp-fb:100 nack pli
     </tr>
   </tbody>
 </table>
-<h2 id="rfc.references.2"><a href="#rfc.references.2">12.2.</a> Informative References</h2>
+<h2 id="rfc.references.2"><a href="#rfc.references.2">11.2.</a> Informative References</h2>
 <table>
   <tbody>
     <tr>
