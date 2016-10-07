@@ -2158,10 +2158,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     target="I-D.ietf-ice-trickle"></xref>, Section
                     5.1.</t>
 
-                    <t>Each m= section MUST include the following
-                    attribute lines:
+                    <t>
+                      <xref target="I-D.ietf-mmusic-sdp-mux-attributes"/> groups SDP attributes
+                      into different categories. To avoid unnecessary duplication when
+                      bundling, Section 8.1 of <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation"/>
+                      specifies that attributes of category IDENTICAL or TRANSPORT should not be repeated
+                      in bundled m= sections.
+                    </t>
+                    <t>
+                      The following attributes, which are of a category other than IDENTICAL
+                      or TRANSPORT, MUST be included in each m= section:
+                    </t>
+                    <t>
                     <list style="symbols">
-
                         <t>An "a=mid" line, as specified in <xref
                         target="RFC5888"></xref>, Section 4. When
                         generating mid values, it is RECOMMENDED that
@@ -2218,33 +2227,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         in <xref target="I-D.ietf-rtcweb-fec"></xref>,
                         Section 6, and specific usage for each media
                         type is outlined in Sections 4 and 5.</t>
-
-                        <t>"a=ice-ufrag" and "a=ice-pwd" lines, as
-                        specified in <xref target="RFC5245"></xref>,
-                        Section 15.4.</t>
-
-                        <t>One or more "a=fingerprint" line(s) for
-                        each of the endpoint's certificates, as
-                        specified in <xref
-                        target="I-D.ietf-mmusic-4572-update"></xref>.
-                        </t>
-
-                        <t>An "a=setup" line, as specified in <xref
-                        target="RFC4145"></xref>, Section 4, and
-                        clarified for use in DTLS-SRTP scenarios in
-                        <xref target="RFC5763"></xref>, Section 5. The
-                        role value in the offer MUST be "actpass".</t>
-
-                        <t>An "a=rtcp-mux" line, as specified in <xref
-                        target="RFC5761"></xref>, Section 5.1.1.</t>
-
-                        <t>An "a=rtcp-mux-only" line, as specified in
-                        <xref target="I-D.ietf-mmusic-mux-exclusive"
-                        /> Section 4, if and only if the RTP/RTCP
-                        multiplexing policy is "require". </t>
-
-                        <t>An "a=rtcp-rsize" line, as specified in <xref
-                        target="RFC5506"></xref>, Section 5.</t>
 
                         <t>For each supported RTP header extension, an
                         "a=extmap" line, as specified in <xref
@@ -2367,7 +2349,41 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         include all of the RID identifiers used in the
                         "a=rid" lines for this m= section.</t>
                     </list></t>
+                    <t>
+                      The following attributes, which are of category
+                      IDENTICAL or TRANSPORT, MUST appear only in "m=" sections which either
+                      have a unique address or which are associated with the bundle-tag.
+                      (In initial offers, this means those "m=" sections which do not
+                      contain an "a=bundle-only" attribute.
+                    </t>
+                    <t>
+                    <list style="symbols">
+                        <t>"a=ice-ufrag" and "a=ice-pwd" lines, as
+                        specified in <xref target="RFC5245"></xref>,
+                        Section 15.4.</t>
 
+                        <t>An "a=fingerprint" line for each of the
+                        endpoint's certificates, as specified in <xref
+                        target="RFC4572"></xref>, Section 5; the digest
+                        algorithm used for the fingerprint MUST match
+                        that used in the certificate signature.</t>
+
+                        <t>An "a=setup" line, as specified in <xref
+                        target="RFC4145"></xref>, Section 4, and
+                        clarified for use in DTLS-SRTP scenarios in
+                        <xref target="RFC5763"></xref>, Section 5. The
+                        role value in the offer MUST be "actpass".</t>
+
+                        <t>An "a=rtcp-mux" line, as specified in <xref
+                        target="RFC5761"></xref>, Section 5.1.1.</t>
+
+                        <t>An "a=rtcp-rsize" line, as specified in <xref
+                        target="RFC5506"></xref>, Section 5.</t>
+
+                        <t>[TODO: rtcp-fb?]</t>
+                    </list>
+                    </t>
+                    
                     <t>Lastly, if a data channel has been created, a m=
                     section MUST be generated for data. The
                     &lt;media&gt; field MUST be set to "application" and
@@ -2857,8 +2873,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     <t>If the offer supports bundle, all m= sections to
                     be bundled must use the same ICE credentials and
                     candidates; all m= sections not being bundled must
-                    use unique ICE credentials and candidates. Each m=
-                    section MUST include the following:
+                    use unique ICE credentials and candidates.
+                    Each m= section MUST contain the following attributes
+                    (which are of attribute types
+                    other than IDENTICAL and TRANSPORT):
                     <list style="symbols">
 
                         <t>If and only if present in the offer, an
@@ -2916,41 +2934,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         <xref target="I-D.ietf-rtcweb-fec"></xref>,
                         Section 6, and specific usage for each media
                         type is outlined in Sections 4 and 5.</t>
-
-                        <t>"a=ice-ufrag" and "a=ice-pwd" lines, as
-                        specified in <xref target="RFC5245"></xref>,
-                        Section 15.4.</t>
-
-                        <t>One or more "a=fingerprint" line(s) for
-                        each of the endpoint's certificates, as
-                        specified in <xref
-                        target="I-D.ietf-mmusic-4572-update"></xref>.
-                        </t>
-
-                        <t>An "a=setup" line, as specified in <xref
-                        target="RFC4145"></xref>, Section 4, and
-                        clarified for use in DTLS-SRTP scenarios in
-                        <xref target="RFC5763"></xref>, Section 5. The
-                        role value in the answer MUST be "active" or
-                        "passive"; the "active" role is RECOMMENDED.</t>
-
-                        <t>If present in the offer, an "a=rtcp-mux"
-                        line, as specified in <xref
-                        target="RFC5761"></xref>, Section 5.1.1.  If the
-                        "require" RTCP multiplexing policy is set and no
-                        "a=rtcp-mux" line is present in the offer, then
-                        the m=line MUST be marked as rejected by setting
-                        the port in the m= line to zero, as indicated in
-                        <xref target="RFC3264"></xref>, Section 6.</t>
-
-                        <t>If present in the offer, an "a=rtcp-mux-only" line,
-                        as specified in <xref
-                        target="I-D.ietf-mmusic-mux-exclusive" />, Section
-                        4.3.</t>
-
-                        <t>If present in the offer, an "a=rtcp-rsize"
-                        line, as specified in <xref
-                        target="RFC5506"></xref>, Section 5.</t>
 
                         <t>For each supported RTP header extension that
                         is present in the offer, an "a=extmap" line, as
@@ -3010,6 +2993,45 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         </list></t>
                     </list></t>
 
+
+                    <t>
+                      Each m= section which is not bundled into another
+                      m= section, MUST contain the following attributes
+                      (which are of category IDENTICAL or TRANSPORT):
+                    </t>
+                    <t>
+                    <list style="symbols">
+                        <t>"a=ice-ufrag" and "a=ice-pwd" lines, as
+                        specified in <xref target="RFC5245"></xref>,
+                        Section 15.4.</t>
+
+                        <t>An "a=fingerprint" line for each of the
+                        endpoint's certificates, as specified in <xref
+                        target="RFC4572"></xref>, Section 5; the digest
+                        algorithm used for the fingerprint MUST match
+                        that used in the certificate signature.</t>
+
+                        <t>An "a=setup" line, as specified in <xref
+                        target="RFC4145"></xref>, Section 4, and
+                        clarified for use in DTLS-SRTP scenarios in
+                        <xref target="RFC5763"></xref>, Section 5. The
+                        role value in the answer MUST be "active" or
+                        "passive"; the "active" role is RECOMMENDED.</t>
+
+                        <t>If present in the offer, an "a=rtcp-mux"
+                        line, as specified in <xref
+                        target="RFC5761"></xref>, Section 5.1.1.  If the
+                        "require" RTCP multiplexing policy is set and no
+                        "a=rtcp-mux" line is present in the offer, then
+                        the m=line MUST be marked as rejected by setting
+                        the port in the m= line to zero, as indicated in
+                        <xref target="RFC3264"></xref>, Section 6.</t>
+
+                        <t>If present in the offer, an "a=rtcp-rsize"
+                        line, as specified in <xref
+                        target="RFC5506"></xref>, Section 5.</t>
+                        </list>
+                    </t>
                     <t>If a data channel m= section has been offered, a
                     m= section MUST also be generated for data. The
                     &lt;media&gt; field MUST be set to "application" and
@@ -3019,7 +3041,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     <t>Within the data m= section, the "a=mid",
                     "a=ice-ufrag", "a=ice-pwd", "a=candidate",
                     "a=fingerprint", and "a=setup" lines MUST be
-                    included as mentioned above, along with an
+                    included under the conditions described above, along with an
                     "a=fmtp:webrtc-datachannel" line and an
                     "a=sctp-port" line referencing the SCTP port number
                     as defined in <xref
@@ -3028,7 +3050,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
                     <t>If "a=group" attributes with semantics of
                     "BUNDLE" are offered, corresponding session-level
-                    "a=group" attributes MUST be added as specified in
+                    "a=group" attributes MUST be added as specified in          
                     <xref target="RFC5888"></xref>. These attributes
                     MUST have semantics "BUNDLE", and MUST include the
                     all mid identifiers from the offered bundle groups
@@ -3044,7 +3066,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     <t>The attributes prohibited in the creation of
                     offers are also prohibited in the creation of
                     answers.</t>
-                </section>
+                  </section>
                 <section title="Subsequent Answers"
                 anchor="sec.subsequent-answers">
 
