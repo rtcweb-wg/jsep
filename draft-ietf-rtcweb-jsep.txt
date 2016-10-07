@@ -1197,10 +1197,11 @@ Internet-Draft                    JSEP                      October 2016
    using the MediaStream argument to associate the track with other
    tracks in the same MediaStream, so that they can be added to the same
    "LS" group when creating an offer or answer.  addTrack attempts to
-   minimize the number of transceivers as follows: The track will be
-   attached to the first compatible transceiver (of the same media type)
-   which has never had a direction of "sendonly" or "sendrecv".  If no
-   such transceiver exists, then one will be constructed as described in
+   minimize the number of transceivers as follows: If the PeerConnection
+   is in the "have-remote-offer" state, the track will be attached to
+   the first compatible transceiver that was created by the most recent
+   call to setRemoteDescription() and does not have a local track.
+   Otherwise, a new transceiver will be created, as described in
    Section 4.1.3.
 
 4.1.3.  addTransceiver
@@ -1225,7 +1226,6 @@ Internet-Draft                    JSEP                      October 2016
    it to the PeerConnection.  If no data channel currently exists for
    this PeerConnection, then a new offer/answer exchange is required.
    All data channels on a given PeerConnection share the same SCTP/DTLS
-
 
 
 
@@ -1852,7 +1852,7 @@ Internet-Draft                    JSEP                      October 2016
 
    o  The use of AVPF or AVP simply controls the timing rules used for
       RTCP feedback.  If AVPF is provided, or an "a=rtcp-fb" attribute
-      is present, assume AVPF timing, i.e. a default value of "trr-
+      is present, assume AVPF timing, i.e., a default value of "trr-
       int=0".  Otherwise, assume that AVPF is being used in an AVP
       compatible mode and use AVP timing, i.e., "trr-int=4".
 
