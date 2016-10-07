@@ -35,11 +35,11 @@ ipr="trust200902">
             <organization>Cisco</organization>
             <address>
                 <postal>
-                    <street>170 West Tasman Drive</street>
-                    <city>San Jose</city>
-                    <region>CA</region>
-                    <code>95134</code>
-                    <country>USA</country>
+                    <street>400 3rd Avenue SW</street>
+                    <city>Calgary</city>
+                    <region>AB</region>
+                    <code>T2P 4H2</code>
+                    <country>Canada</country>
                 </postal>
                 <email>fluffy@iii.ca</email>
             </address>
@@ -1171,11 +1171,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         bundle-only. This policy aims to minimize
                         candidate gathering and maximize multiplexing,
                         at the cost of less compatibility with legacy
-                        endpoints. When acting as answerer, if there
-                        if no bundle group in the offer, the
-                        implementation will reject all but the first
-                        m= section.</t>
-
+                        endpoints. When acting as answerer, the implementation
+                        will reject any m= sections other than the first m=
+                        section, unless they are in the same bundle group as that m= section.
+                        </t>
                     </list></t>
 
                     <t>As it provides the best tradeoff between
@@ -1765,29 +1764,42 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 <section title="addIceCandidate"
                 anchor="sec.addicecandidate">
 
-                    <t>The addIceCandidate method provides a remote
-                    candidate to the ICE Agent, which, if parsed
-                    successfully, will be added to the current and/or
-                    pending remote description according to the rules
-                    defined for Trickle ICE.
-                    If the MID, m-line index, or candidate string provided in the ICE candidate is
+                  <t>
+                    The addIceCandidate method provides a remote
+                    candidate to the ICE Agent, which, if parsed successfully, will be
+                    added to the current and/or pending remote description according to
+                    the rules defined for Trickle ICE.
+                    The pair of MID and ufrag is used to
+                    determine the m= section and ICE candidate generation to which the
+                    candidate belongs. If the MID is not present, the m= line index is used
+                    to look up the locally generated MID (see <xref
+                    target="sec.applying-a-remote-desc"/>), which is used in place of
+                    a supplied MID. If these values or the candidate string are
                     invalid, an error is generated.
-                    If present, ufrag is used to determine which
-                    generation of ICE candidates the candidate belongs to;
-                    this resolves ambiguities when trickle ICE is in progress
-                    during an ICE restart. If the ufrag is present and
-                    does not match any remote description, an error is generated.
-                    If the ufrag is absent, the candidate MUST be assumed to belong to
-                    the most recently applied remote description.
-                    Connectivity checks will
-                    be sent to the new candidate.
-                    </t>
+                  </t>
+                  <t>
+                    The purpose of
+                    the ufrag is to resolve ambiguities when trickle ICE is in progress
+                    during an ICE restart.  If the ufrag is absent, the candidate MUST be
+                    assumed to belong to the most recently applied remote description.
+                    Connectivity checks will be sent to the new candidate.
+                  </t>
 
-                    <t>This method can also be used to provide an
-                    end-of-candidates indication (as defined in <xref
-                    target="I-D.ietf-ice-trickle" />) to the ICE Agent
-                    for all media descriptions in the last remote
-                    description.</t>
+                  <t>
+                    This method can also be used to provide an
+                    end-of-candidates indication to the ICE Agent,
+                    as defined in <xref target="I-D.ietf-ice-trickle" />).
+                    The MID and ufrag are used as described above to determine
+                    the m= section and ICE generation for which candidate
+                    gathering is complete. If the ufrag is not present, then
+                    the end-of-candidates indication MUST be assumed to
+                    apply to the relevant m= section in the
+                    most recently applied remote description.
+                    If neither the MID nor the m= index is present,
+                    then the indication MUST
+                    be assumed to apply to all m= sections in the most
+                    recently applied remote description.
+                  </t>
 
                     <t>This call will result in a change to the state
                     of the ICE Agent, and may result in a change to
@@ -2799,13 +2811,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
                       <t>No supported codec is present in the offer.</t>
 
-                      <t>The bundle policy is "max-bundle", the m=
-                      section is not in a bundle group, and this is not
-                      the first m= section.</t>
+                      <t>The bundle policy is "max-bundle", and this is
+                      not the first m= section or in the same
+                      bundle group as the first m= section.</t>
 
-                      <t>The bundle policy is "balanced", the m=
-                      section is not in a bundle group, and this is not
-                      the first m= section for this media type.</t>
+                      <t>The bundle policy is "balanced", and this is not
+                      the first m= section for this media type or
+                      in the same bundle group as the first m=
+                      section for this media type.</t>
 
                       <t>The RTP/RTCP multiplexing policy is "require"
                       and the m= section doesn't contain an
@@ -4051,6 +4064,89 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
         <section title="Demux placeholder">
           <t>RTP demux algo goes here</t>
+        </section>
+        <section title="Processing RTP packets"
+                 anchor="sec.rtp.demux">
+          <t>Note: The following algorithm does not yet have WG
+          consensus but is included here as something concrete for the
+          working group to discuss.</t>
+          <t>When an RTP packet is received by a transport and passes
+          SRTP authentication, that packet needs to be routed to the
+          correct RtpReceiver. For each transport, the following steps
+          MUST be followed to prepare to route packets:</t>
+
+          <t>
+            <list>
+              <t>Construct a table mapping MID to RtpReceiver for each
+              RtpReceiver configured to receive from this
+              transport.</t>
+              
+              <t>Construct a table mapping SSRC to RtpReceiver for
+              each RtpReceiver configured to receive from this
+              transport and for each SSRC that RtpReceiver is
+              configured to receive.  Some of the SSRCs may be
+              presesnt in the m= section corresponding to that
+              RtpReceiver in the remote description.</t>
+
+              <t>Construct a table mapping payload type to RtpReceiver
+              for each RtpReceiver configured to receive from this
+              transport and for each payload type that RtpReceiver is
+              configured to receive.  The payload types of a given
+              RtpReceiver are found in the m= section corresponding to
+              that RtpReceiver in the local description.  If any
+              payload type could map to more than one RtpReceiver, map
+              to the RtpReceiver whose m= section appears earliest in
+              the local description.</t>
+            </list>
+          </t>
+
+          <t>For each RTP packet
+          received, the following steps MUST be followed to route
+          the packet:</t>
+
+          <t>
+            <list>
+              <t>
+                If the packet has a MID and that MID is not in the
+                table mapping MID to RtpReceiver, drop the packet and
+                stop.
+              </t>
+              <t>
+                If the packet has a MID and that MID is in the table
+                mapping MID to RtpReceiver, update the SSRC mapping
+                table to include an entry mapping the packet's SSRC to
+                the RtpReceiver.
+              </t>
+              <t>
+                If the packet's SSRC is in the SSRC mapping table,
+                route the packet to the mapped RtpReceiver and stop.
+              </t>
+              <t>
+                If the packet's payload type is in the payload type
+                table, update the the SSRC mapping table to include an
+                entry mapping the packet's SSRC to the
+                RtpReceiver. Deliver the packet to the RtpReceiver and
+                stop.
+              </t>
+              <t>
+                Otherwise, drop the packet.
+              </t>
+            </list>
+          </t>
+          <t>
+            After packets are routed to the RtpReceiver, further
+            processing of the RTP packets is done at the RtpReceiver
+            level.  This includes using <xref
+            target="I-D.ietf-mmusic-rid" /> to determine which RTP
+            streams depend on or repair other RTP streams.
+          </t>
+
+          <t>
+            As RtpTransceivers (and, thus, RtpReceivers) are added,
+            removed, stopped, or reconfigured, the tables above must
+            also be updated.  
+          </t>
+
         </section>
         <section title="Examples" anchor="sec.examples">
 
@@ -5941,6 +6037,47 @@ a=rtcp-fb:100 nack pli
 
             <t>Note: This section will be removed by RFC Editor before
             publication.</t>
+
+	    <t>Changes in draft-16:</t>
+            <t>
+              <list style="symbols">
+
+                <t>Update addIceCandidate to indicate ICE generation
+                and allow per-m= section end-of-candidates.</t>
+
+		<t> Update fingerprint handling to use
+		draft-ietf-mmusic-4572-update.</t>
+
+		<t> Update text around SDP processing of RTP
+		header extensions and payload formats.</t>
+
+		<t> Add sections on simulcast, addTransceiver, and
+                createDataChannel.</t>
+
+		<t> Clarify text to ensure that the session ID is 
+		a positive 63 bit integer.  </t>
+
+		<t> Clarify SDP processing for direction indication.  </t>
+
+ 		<t> Describe SDP processing for	rtcp-mux-only. </t>
+
+		<t> Specify how SDP session version in o= line.  </t>
+
+		<t> Require that when doing an re-offer, the capabilities
+		of the new session are mostly required to be a subset of the
+		previously negotiated session. </t>
+
+		<t> Clarified ICE restart interaction with bundle-only.  </t>
+
+		<t> Remove support for changing SDP before calling setLocalDescription.</t>
+
+                <t> Specify algorithm for demuxing RTP based on MID, PT, and SSRC.</t>
+
+                <t> Clarify rules for rejecting m= lines when bundle policy is balanced
+                or max-bundle. </t>
+
+              </list>
+            </t>
 
             <t>Changes in draft-15:</t>
             <t>
