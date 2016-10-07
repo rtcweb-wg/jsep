@@ -456,16 +456,12 @@ setRemote(ANSWER) |                                   |
         <section title="RtpSenders" anchor="sec.rtpsenders">
 
           <t>RtpSenders allow the application to control how RTP media
-          is sent. In particular, the application can control whether
-          an RtpSender is active or not, which affects the
-          directionality attribute of the associated m= section.</t>
+          is sent.</t>
         </section>
         <section title="RtpReceivers" anchor="sec.rtpreceivers">
 
           <t>RtpReceivers allows the application to control how RTP
-          media is received. In particular, the application can control
-          whether an RtpReceiver is active or not, which affects the
-          directionality attribute of the associated m= section.</t>
+          media is received.</t>
         </section>
       </section>
       <section title="ICE" anchor="sec.ice">
@@ -1984,8 +1980,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the first m= section for this media type, an
               "a=bundle-only" line.</t>
 
-              <t>If the RtpSender of the RtpTransceiver associated with
-              this m=section is active:
+              <t>If the RtpTransceiver has a sendrecv or sendonly
+              direction:
               <list style="symbols">
 
                 <t>An "a=msid" line, as specified in
@@ -2017,11 +2013,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                 SSRC MUST be the same as the RTX SSRC.</t>
               </list></t>
 
-              <t>If the RtpTransceiver's RtpSender is active, and the
-              application has specified RID values or has specified
-              more than one encoding in the RtpSenders's parameters, an
-              "a=rid" line for each encoding specified. The "a=rid"
-              line is specified in
+              <t>If the RtpTransceiver has a sendrecv or sendonly
+              direction, and the application has specified RID values or
+              has specified more than one encoding in the RtpSenders's
+              parameters, an "a=rid" line for each encoding specified.
+              The "a=rid" line is specified in
               <xref target="I-D.ietf-mmusic-rid"></xref>, and its
               direction MUST be "send". If the application has chosen a
               RID value, it MUST be used as the rid-identifier;
@@ -2035,9 +2031,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               is specified but without a RID value, then no "a=rid"
               lines are generated.</t>
 
-              <t>If the RtpTransceiver's RtpSender is active and more
-              than one "a=rid" line has been generated, an
-              "a=simulcast" line, with direction "send", as defined in
+              <t>If the RtpTransceiver has a sendrecv or sendonly
+              direction and more than one "a=rid" line has been generated,
+              an "a=simulcast" line, with direction "send", as defined in
               <xref target="I-D.ietf-mmusic-sdp-simulcast"></xref>,
               Section 6.2. The list of RIDs MUST include all of the RID
               identifiers used in the "a=rid" lines for this m=
@@ -2586,8 +2582,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="I-D.ietf-rtcweb-rtp-usage"></xref>, Section
             5.1.</t>
 
-            <t>If the RtpSender of the RtpTransceiver associated with
-            this m=section is active:
+            <t>If the RtpTransceiver has a sendrecv or sendonly direction:
             <list style="symbols">
 
               <t>An "a=msid" line, as specified in
@@ -3412,8 +3407,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               RtpTransceiver.</t>
 
               <t>If no RtpTransceiver was found in the previous step,
-              create one with an inactive RtpSender and active
-              RtpReceiver.</t>
+              create one with a recvonly direction.</t>
 
               <t>Associate the found or created RtpTransceiver with the
               m= section by setting the value of the RtpTransceiver's
