@@ -950,8 +950,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       to implement JSEP functionality. The actual API exposed in the
       W3C API may have somewhat different syntax, but should map easily
       to these concepts.</t>
-      <section title="Methods" anchor="sec.methods">
-        <section title="Constructor" anchor="sec.constructor">
+      <section title="PeerConnection" anchor="sec.peerconnection">
+        <section title="Constructor" anchor="sec.pc-constructor">
 
           <t>The PeerConnection constructor allows the application to
           specify global parameters for the media session, such as the
@@ -1096,55 +1096,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           assignments), and a set of encodings for the media (used for
           simulcast as described in
           <xref target="sec.simulcast" />).</t>
-        </section>
-
-        <section title="stopTransceiver" anchor="sec.transceiver-stop">
-          <t>
-            The stopTransceiver method stops an RtpTransceiver.  This
-            will cause future calls to createOffer to generate a zero
-            port for an associated m= section.  See below for more
-            details.
-          </t>
-        </section>
-        <section title="isTransceiverStopped" anchor="sec.transceiver-stopped">
-          <t>
-            The isTransceiverStopped method returns "true" if
-            the transceiver has been stopped, either by a call
-            to stopTransceiver or by a call to
-            setLocalDescription, and "false" otherwise.
-          </t>
-          <t>
-            A stopped RtpTransceiver does not send any
-            outgoing RTP or RTCP or process any incoming RTP
-            or RTCP.  It cannot be restarted.
-          </t>
-        </section>
-        <section title="setTransceiverDirection" anchor="sec.transceiver-set-direction">
-          <t>
-            The setTransceiverDirection method sets the
-            direction of a transceiver, which affects the
-            direction attribute of an associated m= section on
-            future calls to createOffer and createAnswer.
-          </t>
-        </section>
-        <section title="setCodecPreferences" anchor="sec.transceiver-set-codec-preferences">
-          <t>
-            The setCodecPreferences method sets the codec
-            preferences of a transceiver, which affect the
-            presence and order of codecs of an associated
-            m=section on future calls to createOffer and
-            createAnswer.
-          </t>
-          <t>
-            The codec preferences of an RtpTransceiver can
-            affect calls to createOffer and createAnswer by
-            either excluding codecs (in which case the
-            corresponding media formats will be excluded) or
-            by changing the order of codecs (in which case the
-            order of the media formats will match).  The codec
-            preferences cannot add media formats that would
-           otherwise not be present.
-          </t>
         </section>
 
         <section title="createDataChannel"
@@ -1610,6 +1561,56 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>This call will result in a change to the state of the ICE
           Agent, and may result in a change to media state if it
           results in connectivity being established.</t>
+        </section>
+      </section>
+      <section title="RtpTransceiver" anchor="sec.transceiver">
+        <section title="stop" anchor="sec.transceiver-stop">
+          <t>
+            The stop method stops an RtpTransceiver.  This
+            will cause future calls to createOffer to generate a zero
+            port for the associated m= section.  See below for more
+            details.
+          </t>
+        </section>
+        <section title="isStopped" anchor="sec.transceiver-stopped">
+          <t>
+            The isStopped method returns "true" if
+            the transceiver has been stopped, either by a call
+            to stopTransceiver or by a call to
+            setLocalDescription, and "false" otherwise.
+          </t>
+          <t>
+            A stopped RtpTransceiver does not send any
+            outgoing RTP or RTCP or process any incoming RTP
+            or RTCP.  It cannot be restarted.
+          </t>
+        </section>
+        <section title="setDirection" anchor="sec.transceiver-set-direction">
+          <t>
+            The setTransceiverDirection method sets the
+            direction of a transceiver, which affects the
+            direction attribute of the associated m= section on
+            future calls to createOffer and createAnswer.
+          </t>
+        </section>
+        <section title="setCodecPreferences" anchor="sec.transceiver-set-codec-preferences">
+          <t>
+            The setCodecPreferences method sets the codec
+            preferences of a transceiver, which affect the
+            presence and order of codecs of the associated
+            m= section on future calls to createOffer and
+            createAnswer.
+          </t>
+          <t>
+            The codec preferences of an RtpTransceiver can
+            affect calls to createOffer and createAnswer by
+            either excluding codecs (in which case the
+            corresponding media formats will be excluded) or
+            by changing the order of codecs (in which case the
+            order of the media formats will match).  The codec
+            preferences cannot add media formats that would
+            otherwise not be present.
+          </t>
         </section>
       </section>
     </section>
