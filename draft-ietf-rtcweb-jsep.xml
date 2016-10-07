@@ -1602,14 +1602,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             createAnswer.
           </t>
           <t>
-            The codec preferences of an RtpTransceiver can
-            affect calls to createOffer and createAnswer by
-            either excluding codecs (in which case the
-            corresponding media formats will be excluded) or
-            by changing the order of codecs (in which case the
-            order of the media formats will match).  The codec
-            preferences cannot add media formats that would
-            otherwise not be present.
+            The codec preferences of an RtpTransceiver can cause codecs
+            to be excluded by subsequent calls to createOffer and
+            createAnswer, in which case the corresponding media formats
+            in the associated m= section will be excluded. The codec
+            preferences cannot add media formats that would otherwise not
+            be present.
+          </t>
+          <t>
+            The codec preferences of an RtpTransceiver can also determine
+            the order of codecs in subsequent calls to createOffer (if an
+            answer containing the transceiver has not yet been applied),
+            in which case the order of the media formats in the associated
+            m= section will match. The codec preferences cannot change the
+            order of codecs in an answer, and cannot change the order of
+            codecs after an answer containing the transceiver has been
+            applied.
           </t>
           <t>
             Note that, as described in <xref target="RFC3264">
@@ -1618,8 +1626,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the remote description. So, the order of codecs in
             setCodecPreferences does not affect which codec the
             implementation decides to send. It only affects which codecs
-            the implementation indicates that it prefers to receive via
-            the offer or answer.
+            the implementation indicates that it prefers to receive, via
+            the offer.
           </t>
         </section>
       </section>
