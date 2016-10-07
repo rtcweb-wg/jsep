@@ -82,7 +82,7 @@ Table of Contents
        3.5.3.  ICE Candidate Policy  . . . . . . . . . . . . . . . .  13
        3.5.4.  ICE Candidate Pool  . . . . . . . . . . . . . . . . .  14
      3.6.  Video Size Negotiation  . . . . . . . . . . . . . . . . .  14
-       3.6.1.  Creating an imageattr Attribute . . . . . . . . . . .  15
+       3.6.1.  Creating an imageattr Attribute . . . . . . . . . . .  14
        3.6.2.  Interpreting an imageattr Attribute . . . . . . . . .  16
      3.7.  Simulcast . . . . . . . . . . . . . . . . . . . . . . . .  17
      3.8.  Interactions With Forking . . . . . . . . . . . . . . . .  18
@@ -575,16 +575,11 @@ Internet-Draft                    JSEP                      October 2016
 3.4.2.  RtpSenders
 
    RtpSenders allow the application to control how RTP media is sent.
-   In particular, the application can control whether an RtpSender is
-   active or not, which affects the directionality attribute of the
-   associated m= section.
 
 3.4.3.  RtpReceivers
 
    RtpReceivers allows the application to control how RTP media is
-   received.  In particular, the application can control whether an
-   RtpReceiver is active or not, which affects the directionality
-   attribute of the associated m= section.
+   received.
 
 3.5.  ICE
 
@@ -610,6 +605,11 @@ Internet-Draft                    JSEP                      October 2016
    each new ICE candidate becomes available, the ICE Agent will supply
    it to the application via an additional event; these candidates will
    also automatically be added to the current and/or pending local
+   session description.  Finally, when all candidates have been
+   gathered, an event will be dispatched to signal that the gathering
+   process is complete.
+
+
 
 
 
@@ -617,10 +617,6 @@ Uberti, et al.           Expires April 10, 2017                [Page 11]
 
 Internet-Draft                    JSEP                      October 2016
 
-
-   session description.  Finally, when all candidates have been
-   gathered, an event will be dispatched to signal that the gathering
-   process is complete.
 
    Note that gathering phases only gather the candidates needed by
    new/recycled/restarting m= lines; other m= lines continue to use
@@ -667,14 +663,15 @@ Internet-Draft                    JSEP                      October 2016
    "candidate-attribute" field defined for ICE.  For example:
 
 
+   candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
+
+
+
 
 
 Uberti, et al.           Expires April 10, 2017                [Page 12]
 
 Internet-Draft                    JSEP                      October 2016
-
-
-   candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 
    The IceCandidate object also contains fields to indicate which m=
@@ -722,6 +719,9 @@ Internet-Draft                    JSEP                      October 2016
    To administer the ICE candidate policy, the browser will determine
    the current setting at the start of each gathering phase.  Then,
    during the gathering phase, the browser MUST NOT expose candidates
+   disallowed by the current policy to the application, use them as the
+   source of connectivity checks, or indirectly expose them via other
+   fields, such as the raddr/rport attributes for other ICE candidates.
 
 
 
@@ -730,9 +730,6 @@ Uberti, et al.           Expires April 10, 2017                [Page 13]
 Internet-Draft                    JSEP                      October 2016
 
 
-   disallowed by the current policy to the application, use them as the
-   source of connectivity checks, or indirectly expose them via other
-   fields, such as the raddr/rport attributes for other ICE candidates.
    Later, if a different policy is specified by the application, the
    application can apply it by kicking off a new gathering phase via an
    ICE restart.
@@ -775,9 +772,12 @@ Internet-Draft                    JSEP                      October 2016
    constrain what it receives due to application preferences, e.g. a
    specific size for the window in which the video will be displayed.
 
+3.6.1.  Creating an imageattr Attribute
 
-
-
+   In order to determine the limits on what video resolution a receiver
+   wants to receive, it will intersect its decoder hard limits with any
+   mandatory constraints that have been applied to the associated
+   MediaStreamTrack.  If the decoder limits are unknown, e.g. when using
 
 
 
@@ -786,12 +786,6 @@ Uberti, et al.           Expires April 10, 2017                [Page 14]
 Internet-Draft                    JSEP                      October 2016
 
 
-3.6.1.  Creating an imageattr Attribute
-
-   In order to determine the limits on what video resolution a receiver
-   wants to receive, it will intersect its decoder hard limits with any
-   mandatory constraints that have been applied to the associated
-   MediaStreamTrack.  If the decoder limits are unknown, e.g. when using
    a software decoder, the mandatory constraints are used directly.  For
    the answerer, these mandatory constraints can be applied to the
    remote MediaStreamTracks that are created by a setRemoteDescription
@@ -833,6 +827,12 @@ Internet-Draft                    JSEP                      October 2016
 
    a=imageattr:* recv [x=[16:640],y=[16:360],q=1.0]
 
+   This declaration indicates that the receiver is capable of decoding
+   any image resolution from 16x16 up to 640x360 pixels.
+
+
+
+
 
 
 
@@ -841,9 +841,6 @@ Uberti, et al.           Expires April 10, 2017                [Page 15]
 
 Internet-Draft                    JSEP                      October 2016
 
-
-   This declaration indicates that the receiver is capable of decoding
-   any image resolution from 16x16 up to 640x360 pixels.
 
 3.6.2.  Interpreting an imageattr Attribute
 
@@ -890,6 +887,9 @@ Internet-Draft                    JSEP                      October 2016
    provide the desired resolution.  Otherwise, the sender MUST NOT apply
    upscaling.  The sender SHOULD NOT upscale in other cases, even if the
    policy permits it.  Upscaling MUST NOT change the track aspect ratio.
+
+
+
 
 
 
@@ -2064,8 +2064,8 @@ Internet-Draft                    JSEP                      October 2016
       policy is set to "balanced", and this is not the first m= section
       for this media type, an "a=bundle-only" line.
 
-   o  If the RtpSender of the RtpTransceiver associated with this
-      m=section is active:
+   o  If the RtpTransceiver has a sendrecv or sendonly direction:
+
 
 
 
@@ -2096,10 +2096,10 @@ Internet-Draft                    JSEP                      October 2016
          RTX and FEC are supported, the FEC SSRC MUST be the same as the
          RTX SSRC.
 
-   o  If the RtpTransceiver's RtpSender is active, and the application
-      has specified RID values or has specified more than one encoding
-      in the RtpSenders's parameters, an "a=rid" line for each encoding
-      specified.  The "a=rid" line is specified in
+   o  If the RtpTransceiver has a sendrecv or sendonly direction, and
+      the application has specified RID values or has specified more
+      than one encoding in the RtpSenders's parameters, an "a=rid" line
+      for each encoding specified.  The "a=rid" line is specified in
       [I-D.ietf-mmusic-rid], and its direction MUST be "send".  If the
       application has chosen a RID value, it MUST be used as the rid-
       identifier; otherwise a RID value MUST be generated by the
@@ -2110,18 +2110,18 @@ Internet-Draft                    JSEP                      October 2016
       specified, or only one encoding is specified but without a RID
       value, then no "a=rid" lines are generated.
 
-   o  If the RtpTransceiver's RtpSender is active and more than one
-      "a=rid" line has been generated, an "a=simulcast" line, with
-      direction "send", as defined in [I-D.ietf-mmusic-sdp-simulcast],
-      Section 6.2.  The list of RIDs MUST include all of the RID
-      identifiers used in the "a=rid" lines for this m= section.
+   o  If the RtpTransceiver has a sendrecv or sendonly direction and
+      more than one "a=rid" line has been generated, an "a=simulcast"
+      line, with direction "send", as defined in
+      [I-D.ietf-mmusic-sdp-simulcast], Section 6.2.  The list of RIDs
+      MUST include all of the RID identifiers used in the "a=rid" lines
+      for this m= section.
 
    The following attributes, which are of category IDENTICAL or
    TRANSPORT, MUST appear only in "m=" sections which either have a
    unique address or which are associated with the bundle-tag.  (In
    initial offers, this means those "m=" sections which do not contain
    an "a=bundle-only" attribute.
-
 
 
 
@@ -2621,11 +2621,11 @@ Internet-Draft                    JSEP                      October 2016
       MUST be supported is specified in [I-D.ietf-rtcweb-rtp-usage],
       Section 5.1.
 
-   o  If the RtpSender of the RtpTransceiver associated with this
-      m=section is active:
+   o  If the RtpTransceiver has a sendrecv or sendonly direction:
 
       *  An "a=msid" line, as specified in [I-D.ietf-mmusic-msid],
          Section 2.
+
 
 
 
@@ -3351,7 +3351,7 @@ Internet-Draft                    JSEP                      October 2016
             RtpTransceiver.
 
          +  If no RtpTransceiver was found in the previous step, create
-            one with an inactive RtpSender and active RtpReceiver.
+            one with a recvonly direction.
 
 
 
