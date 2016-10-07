@@ -1243,6 +1243,56 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                   </t>
                 </section>
 
+                <section title="stopTransceiver" anchor="sec.transceiver-stop">
+                  <t>
+                    The stopTransceiver method stops an RtpTransceiver.
+                    See <xref target="sec.transceiver-stopped"/> for more details.
+                  </t>
+                 </section>
+
+                <section title="isTransceiverStopped" anchor="sec.transceiver-stopped">
+                  <t>
+                    The isTransceiverStopped method returns true if
+                    the transceiver has been stopped, either by a call
+                    to stopTransceiver or by a call to
+                    setRemoteDescription, and false otherwise.
+                  </t>
+                  <t>
+                    A stopped RtpTransceiver does not send any
+                    outgoing RTP or RTCP or process any incoming RTP
+                    or RTCP.
+                  </t>
+                 </section>
+
+                <section title="setTransceiverDirection" anchor="sec.transceiver-set-direction">
+                  <t>
+                    The setTransceiverDirection method sets the
+                    direction of a transceiver, which affects the
+                    direction attribute of an associted m=section on
+                    future calls to createOffer and createAnswer.
+                  </t>
+                 </section>
+
+                <section title="setCodecPreferences" anchor="sec.transceiver-set-codec-preferences">
+                  <t>
+                    The setCodecPreferences method sets the codec
+                    preferences of a transceiver, which affect the
+                    presence and order of codecs of an associated
+                    m=section on future calls to createOffer and
+                    createAnswer.
+                  </t>
+                  <t>
+                    The codec preferences of an RtpTransceiver can
+                    affect calls to createOffer and createAnswer by
+                    either excluding codecs (in which case the
+                    corresponding media formats will be excluded) or
+                    by changing the order of codecs (in which case the
+                    order of the media formats will match).  The codec
+                    preferenes cannot add media formats that would
+                    otherwise not be present.
+                  </t>
+                 </section>
+
                 <section title="createDataChannel" anchor="sec.createDataChannel">
                   <t>
                     The createDataChannel method creates a new data
@@ -2147,6 +2197,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         /> if the default candidate uses TCP
                         transport.</t>
 
+                        <t>If codec preferences have been set for the
+                        associated RtpTransceiver, media formats MUST
+                        be generated in the corresponding order.</t>
                     </list></t>
 
                     <t>The m= line MUST be followed immediately by a
@@ -2189,11 +2242,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         <t>A direction attribute which is the same as that
                         of the associated transceiver.</t>
 
-                        <t>For each supported codec, "a=rtpmap" and
-                        "a=fmtp" lines, as specified in <xref
-                        target="RFC4566"></xref>, Section 6. The audio
-                        and video codecs that MUST be supported are
-                        specified in
+                        <t>For each supported codec not excluded by
+                        the codec preferences of associated
+                        transceiver, "a=rtpmap" and "a=fmtp" lines, as
+                        specified in <xref target="RFC4566"></xref>,
+                        Section 6. The audio and video codecs that
+                        MUST be supported are specified in
                         <xref target="I-D.ietf-rtcweb-audio">
                         </xref>(see Section 3) and
                         <xref target="I-D.ietf-rtcweb-video">
@@ -2636,10 +2690,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                     corresponding m= section in the current remote
                     description:
                     <list style="symbols">
-
                         <t>The m= line and corresponding "a=rtpmap" and
-                        "a=fmtp" lines MUST only include codecs present
-                        in the most recent answer.</t>
+                        "a=fmtp" lines MUST only include codecs which are present
+                        in the most recent answer and which are not excluded by the
+                        codec preferences of the associated RtpTransceiver.</t>
 
                         <t>The RTP header extensions MUST only include
                         those that are present in the most recent answer.</t>
@@ -2895,7 +2949,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         of the associated transceiver.</t>
 
                         <t>For each supported codec that is present in
-                        the offer, "a=rtpmap" and "a=fmtp" lines, as
+                        the offer and not excluded by the
+                        codec preferences of the associated RtpTransceiver,
+                        "a=rtpmap" and "a=fmtp" lines, as
                         specified in <xref target="RFC4566"></xref>,
                         Section 6, and <xref target="RFC3264"></xref>,
                         Section 6.1.  The audio and video codecs that
@@ -3881,7 +3937,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
                         </list></t>
 
                         <t>For each specified media format that is also
-                        supported by the local implementation, establish
+                        supported by the local implementation and not excluded by the
+                        codec preferences of the associated RtpTransceiver, establish
                         a mapping between the specified payload type and
                         the media format, as described in
                         <xref target="RFC3264" />, Section 6.1.
