@@ -3438,10 +3438,23 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the meaning of this construct at the media level is not
             well defined.</t>
 
-            <t>[TODO: handling of CN, telephone-event, "red"]</t>
-
             <t>If the media section is of type audio:
             <list style="symbols">
+
+              <t>For each specified "CN" media format, enable DTX for
+              all supported media formats with the same clockrate,
+              as described in <xref target="RFC3389" />,
+              Section 5, except for formats that have their own internal DTX
+              mechanisms. DTX for such formats (e.g., Opus) is controlled via
+              fmtp parameters, as discussed in
+              <xref target="sec.voiceactivitydetection1" />.</t>
+
+              <t>For each specified "telephone-event" media format, enable DTMF
+              transmission for all supported media formats with the same
+              clockrate, as described in <xref target="RFC4733" />, Section
+              2.5.1.2. If the application attempts to transmit DTMF when using
+              a media format that does not have a corresponding telephone-event
+              format, this MUST result in an error.</t>
 
               <t>For any specified "ptime" value, configure the
               available media formats to use the specified packet size.
@@ -3507,38 +3520,59 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             use reduced-size RTCP, as specified in
             <xref target="RFC5506" />.</t>
 
-            <t>Enable the RTCP feedback mechanisms referenced in the media
-            section for the specified media formats. Specifically,
-            begin or continue sending the requested feedback types and
-            reacting to received feedback, as specified in
-            <xref target="RFC4585" />, Section 4.2.
-            </t>
-
             <t>If the directional attribute in the answer is of type
-            "sendrecv" or "sendonly", prepare to start transmitting
-            media using the most preferred media format from the remote
+            "sendrecv" or "sendonly", choose the media format to send as
+            the most preferred media format from the remote
             description that is also present in the answer, as
             described in
-            <xref target="RFC3264" />, Sections 6.1 and 7, once the
-            underlying transport layers have been established. [TODO:
-            add discusssion of RED/FEC/RTX/CN] The payload type mapping
+            <xref target="RFC3264" />, Sections 6.1 and 7, and start
+            transmitting RTP media once the underlying transport layers have
+            been established. If a SSRC has not already been chosen for this
+            outgoing RTP stream, choose a random one.</t>
+
+            <t>The payload type mapping
             from the remote description is used to determine payload
-            types for the outgoing RTP streams. Any RTP header
+            types for the outgoing RTP streams, including the payload type for
+            the send media format chosen above. Any RTP header
             extensions that were negotiated should be included in the
             outgoing RTP streams, using the extension mapping from the
             remote description; if the RID header extension has been
             negotiated, and RID values are specified, include the RID
             header extension in the outgoing RTP streams, as indicated
             in
-            <xref target="I-D.ietf-mmusic-rid"></xref>, Section 4). If
-            simulcast is negotiated, send the number of Source RTP
+            <xref target="I-D.ietf-mmusic-rid"></xref>, Section 4.</t>
+
+            <t>If simulcast has been negotiated, send the number of Source RTP
             Streams as specified in
             <xref target="I-D.ietf-mmusic-sdp-simulcast"></xref>,
             Section 6.2.2.</t>
 
+            <t>If the send media format chosen above has a corresponding "rtx"
+            media format, or a FEC mechanism has been negotiated, establish a
+            Redundancy RTP Stream with a random SSRC for each Source RTP Stream,
+            and start or continue transmitting RTX/FEC packets as needed.
+            </t>
+
+            <t>If the send media format chosen above has a corresponding "red"
+            media format of the same clockrate, allow redundant encoding using
+            the specified format for resiliency purposes, as discussed in
+            <xref target="I-D.ietf-rtcweb-fec" />, Section 3.2. Note that unlike
+            RTX or FEC media formats, the "red" format is transmitted on the
+            Source RTP Stream, not the Redundancy RTP Stream.</t>
+
+            <t>Enable the RTCP feedback mechanisms referenced in the media
+            section for all Source RTP Streams using the specified
+            media formats. Specifically,
+            begin or continue sending the requested feedback types and
+            reacting to received feedback, as specified in
+            <xref target="RFC4585" />, Section 4.2. When sending RTCP feedback,
+            use the SSRC of an outgoing Source RTP Stream as the RTCP sender
+            SSRC; if no outgoing Source RTP Stream exists, choose a random one.
+            </t>
+
             <t>If the directional attribute is of type "recvonly" or
-            "inactive", stop transmitting RTP media, although RTCP
-            should still be sent, as described in
+            "inactive", stop transmitting all RTP media, but continue sending
+            RTCP, as described in
             <xref target="RFC3264" />, Section 5.1.</t>
           </list></t>
 
@@ -5411,6 +5445,16 @@ a=rtcp-fb:100 nack pli
         value='draft-ietf-rtcweb-ip-handling-01' />
         <format type='TXT'
         target='http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-ip-handling-01.txt' />
+      </reference>
+      <reference  anchor='RFC4733' target='http://www.rfc-editor.org/info/rfc4733'>
+        <front>
+          <title>RTP Payload for DTMF Digits, Telephony Tones, and Telephony Signals</title>
+          <author initials='H.' surname='Schulzrinne' fullname='H. Schulzrinne'><organization /></author>
+          <author initials='T.' surname='Taylor' fullname='T. Taylor'><organization /></author>
+          <date year='2006' month='December' />
+        </front>
+        <seriesInfo name='RFC' value='4733'/>
+        <seriesInfo name='DOI' value='10.17487/RFC4733'/>
       </reference>
     </references>
     <section title="Appendix A" anchor="sec.appendix-a">
