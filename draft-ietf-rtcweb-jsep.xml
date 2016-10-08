@@ -2032,6 +2032,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="RFC5763"></xref>, Section 5. The role value
               in the offer MUST be "actpass".</t>
 
+              <t>An "a=dtls-id" line, as specified in
+              <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5.2.</t>
+
               <t>An "a=rtcp-mux" line, as specified in
               <xref target="RFC5761"></xref>, Section 5.1.1.</t>
 
@@ -2054,7 +2057,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           4.1.</t>
 
           <t>Within the data m= section, the "a=mid", "a=ice-ufrag",
-          "a=ice-pwd", "a=fingerprint", and "a=setup" lines MUST be
+          "a=ice-pwd", "a=fingerprint", "a=dtls-id", and "a=setup" lines MUST be
           included as mentioned above, along with an
           "a=fmtp:webrtc-datachannel" line and an "a=sctp-port" line
           referencing the SCTP port number as defined in
@@ -2577,7 +2580,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               for use in DTLS-SRTP scenarios in
               <xref target="RFC5763"></xref>, Section 5. The role value
               in the answer MUST be "active" or "passive"; the "active"
-              role is RECOMMENDED.</t>
+              role is RECOMMENDED. The role value MUST be consistent
+              with the existing DTLS connection, if one exists and is
+              being continued.</t>
+
+              <t>An "a=dtls-id" line, as specified in
+              <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5.3.</t>
 
               <t>If present in the offer, an "a=rtcp-mux" line, as
               specified in
@@ -2601,8 +2609,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           offer.</t>
 
           <t>Within the data m= section, the "a=mid", "a=ice-ufrag",
-          "a=ice-pwd", "a=candidate", "a=fingerprint", and "a=setup"
-          lines MUST be included under the conditions described above,
+          "a=ice-pwd", "a=candidate", "a=fingerprint", "a=dtls-id",
+          and "a=setup" lines MUST be included under the conditions described above,
           along with an "a=fmtp:webrtc-datachannel" line and an
           "a=sctp-port" line referencing the SCTP port number as
           defined in
@@ -2932,6 +2940,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC4145" />, Section 4, and the setup value
             is stored.</t>
 
+            <t>If present, a single "a=dtls-id" line is parsed as
+            specified in
+            <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5,
+            and the dtls-id value is stored.</t>
+
             <t>Any "a=extmap" lines are parsed as specified in
             <xref target="RFC5285" />, Section 5, and their values are
             stored.</t>
@@ -3004,11 +3017,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Any "a=fingerprint" lines are parsed as specified in
             <xref target="RFC4572" />, Section 5, and the set of
             fingerprint and algorithm values is stored.</t>
-
-            <t>If present, a single "a=setup" line is parsed as
-            specified in
-            <xref target="RFC4145" />, Section 4, and the setup value
-            is stored.</t>
           </list></t>
 
           <t>If the "m=" proto value indicates use of RTP, as described
@@ -3135,12 +3143,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the size limits specified in
               <xref target="RFC5245" />, Section 15.4.</t>
 
+              <t>dtls-id value, which MUST be set according to
+              <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5.
+              If this is a re-offer and the dtls-id value is different
+              from that presently in use, the DTLS connection is not being
+              continued and the remote description MUST be part of an
+              ICE restart, together with new ufrag and password
+              values. If this is an answer, the
+              dtls-id value, if present, MUST be the same as in the
+              offer.</t>
+
               <t>DTLS setup value, which MUST be set according to the
-              rules specified in
-              <xref target="RFC5763" />, Section 5, and MUST be
-              consistent with the selected role of the current DTLS
-              connection, if one exists.[TODO: may need revision, i.e.,
-              use of actpass</t>
+              rules specified in <xref target="RFC5763"/>,
+              Section 5 and MUST
+              be consistent with the selected role of the current DTLS
+              connection, if one exists and is being continued.</t>
 
               <t>DTLS fingerprint values, where at least one
               fingerprint MUST be present.</t>
@@ -3456,8 +3473,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           components, as described in Section 9.2.1.3 of
           <xref target="RFC5245" />.</t>
 
-          <t>If the remote DTLS fingerprint has been changed, tear down
-          the existing DTLS connection.</t>
+          <t>If the remote DTLS fingerprint has been changed or
+          the dtls-id has changed, tear down the DTLS connection.
+          If a DTLS connection needs to be torn down but the answer
+          does not indicate an ICE restart, an error MUST be generated.
+          If an ICE restart is performed without a change in dtls-id
+          or fingerprint, then the same DTLS connection is continued over
+          the new ICE channel.</t>
 
           <t>If no valid DTLS connection exists, prepare to start a
           DTLS connection, using the specified roles and fingerprints,
@@ -5072,6 +5094,27 @@ a=rtcp-fb:100 nack pli
         value='draft-ietf-mmusic-4572-update-05' />
         <format type='TXT'
         target='http://www.ietf.org/internet-drafts/draft-ietf-mmusic-4572-update-05.txt' />
+      </reference>
+      <reference anchor="I-D.ietf-mmusic-dtls-sdp">
+        <front>
+          <title>Using the SDP Offer/Answer Mechanism for DTLS</title>
+
+          <author initials="C" surname="Holmberg" fullname="Christer Holmberg">
+            <organization/>
+          </author>
+
+          <author initials="R" surname="Shpount" fullname="Roman Shpount">
+            <organization/>
+          </author>
+
+          <date month="July" day="18" year="2016"/>
+
+          <abstract><t>This draft defines the SDP offer/answer procedures for negotiating and establishing a DTLS association.  The draft also defines the criteria for when a new DTLS association must be established.  The draft updates RFC 5763 and RFC 7345, by replacing common SDP offer/ answer procedures with a reference to this specification.  This draft defines a new SDP media-level attribute, 'dtls-id'.</t></abstract>
+
+        </front>
+
+        <seriesInfo name="Internet-Draft" value="draft-ietf-mmusic-dtls-sdp-14"/>
+        <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-mmusic-dtls-sdp-14.txt"/>
       </reference>
     </references>
     <references title="Informative References">
