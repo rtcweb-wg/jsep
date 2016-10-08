@@ -2639,9 +2639,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               algorithm used for the fingerprint MUST match that used
               in the certificate signature.</t>
 
-              <t>An "a=dtls-id" line, as specified in
-              <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5.3.</t>
-
               <t>An "a=setup" line, as specified in
               <xref target="RFC4145"></xref>, Section 4, and clarified
               for use in DTLS-SRTP scenarios in
@@ -2650,6 +2647,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               role is RECOMMENDED. The role value MUST be consistent
               with the existing DTLS connection, if one exists and is
               being continued.</t>
+
+              <t>An "a=dtls-id" line, as specified in
+              <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5.3.</t>
 
               <t>If present in the offer, an "a=rtcp-mux" line, as
               specified in
@@ -3215,9 +3215,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>dtls-id value, which MUST be set according to
               <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5.
               If this is a re-offer and the dtls-id value is different
-              from that presently in use, then a new DTLS connection
-              MUST be established, and the ufrag and password values
-              MUST also be different. If processing an answer, the
+              from that presently in use, the DTLS connection is not being
+              continued and the remote description MUST be part of an
+              ICE restart, together with new ufrag and password
+              values. If processing an answer, the
               dtls-id value, if present, MUST be the same as in the
               offer.</t>
 
@@ -3409,6 +3410,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>If an "a=end-of-candidates" attribute is present, process
           the end-of-candidates indication as described in
           <xref target="I-D.ietf-ice-trickle" /> Section 11.</t>
+
+          <t>If the dtls-id has changed from the previous remote description,
+          then a new DTLS connection MUST be formed as described in
+          <xref target="I-D.ietf-mmusic-dtls-sdp"/> Sections 5.5
+          and 6. Any new DTLS connection MUST always be associated with
+          an ICE restart with the new connection being established
+          over the newly established ICE channel. If a new dtls-id
+          is received without an ICE restart, an error MUST be generated.
+          If an ICE restart is performed without a change in dtls-id,
+          then the same DTLS connection is continued over the new
+          ICE channel.</t>
 
           <t>If the media section proto value indicates use of RTP:
           <list style="symbols">
