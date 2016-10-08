@@ -1607,27 +1607,27 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             createAnswer, in which case the corresponding media formats
             in the associated m= section will be excluded. The codec
             preferences cannot add media formats that would otherwise not
-            be present.
+            be present. This includes codecs that were not negotiated in a
+            previous offer/answer exchange that included the transceiver.
           </t>
           <t>
             The codec preferences of an RtpTransceiver can also determine
-            the order of codecs in subsequent calls to createOffer (if an
-            answer containing the transceiver has not yet been applied),
-            in which case the order of the media formats in the associated
-            m= section will match. The codec preferences cannot change the
-            order of codecs in an answer, and cannot change the order of
-            codecs after an answer containing the transceiver has been
-            applied.
+            the order of codecs in subsequent calls to createOffer and
+            createAnswer, in which case the order of the media formats in
+            the associated m= section will match. However, the codec
+            preferences cannot change the order of the media formats after
+            an answer containing the transceiver has been applied. At this
+            point, codecs can only be removed, not reordered.
           </t>
           <t>
             Note that, as described in <xref target="RFC3264">
             </xref>(offer/answer), Section 5.1 and Section 7, the
             implementation SHOULD use the first media format listed in
-            the remote description. So, the order of codecs in
+            the remote description to send. So, the order of codecs in
             setCodecPreferences does not affect which codec the
             implementation decides to send. It only affects which codecs
             the implementation indicates that it prefers to receive, via
-            the offer.
+            the offer or answer.
           </t>
         </section>
       </section>
@@ -2380,7 +2380,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             lines MUST only include codecs present in the most recent
             answer which have not been excluded by the codec preferences
             of the associated transceiver. The media formats MUST be
-            generated in the same order as in the most recent answer.</t>
+            generated in the same order as in the current local
+            description.</t>
 
             <t>The RTP header extensions MUST only include those that
             are present in the most recent answer.</t>
@@ -2619,6 +2620,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="I-D.ietf-rtcweb-video"></xref>(see Section
             5).</t>
 
+            <t>If codec preferences have been set for the associated
+            transceiver, media formats MUST be generated in the
+            corresponding order.</t>
+
             <t>If this m= section is for media with configurable frame
             sizes, e.g. audio, an "a=maxptime" line, indicating the
             smallest of the maximum supported frame sizes out of all
@@ -2811,6 +2816,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             case, if no candidates of the desired type have yet been
             gathered, dummy values MUST be used, as described in the
             initial answer section above.</t>
+
+            <t>The media formats MUST be generated in the same order as in
+            the current local description.</t>
 
             <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
             same, unless the m= section is restarting, in which case
