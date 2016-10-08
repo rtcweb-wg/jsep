@@ -141,9 +141,9 @@ Internet-Draft                    JSEP                      October 2016
        5.7.3.  Semantics Verification  . . . . . . . . . . . . . . .  56
      5.8.  Applying a Local Description  . . . . . . . . . . . . . .  57
      5.9.  Applying a Remote Description . . . . . . . . . . . . . .  58
-     5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  61
-   6.  Processing RTP packets  . . . . . . . . . . . . . . . . . . .  63
-   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  64
+     5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  62
+   6.  Processing RTP packets  . . . . . . . . . . . . . . . . . . .  64
+   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  65
      7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  65
      7.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  69
    8.  Security Considerations . . . . . . . . . . . . . . . . . . .  79
@@ -153,7 +153,7 @@ Internet-Draft                    JSEP                      October 2016
      11.1.  Normative References . . . . . . . . . . . . . . . . . .  80
      11.2.  Informative References . . . . . . . . . . . . . . . . .  83
    Appendix A.  Appendix A . . . . . . . . . . . . . . . . . . . . .  85
-   Appendix B.  Change log . . . . . . . . . . . . . . . . . . . . .  85
+   Appendix B.  Change log . . . . . . . . . . . . . . . . . . . . .  86
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  91
 
 1.  Introduction
@@ -3391,12 +3391,33 @@ Internet-Draft                    JSEP                      October 2016
          meaning of this construct at the media level is not well
          defined.
 
-      *  [TODO: handling of CN, telephone-event, "red"]
-
       *  If the media section is of type audio:
+
+         +  For each specified "CN" media format, enable DTX for all
+            supported media formats with the same clockrate, as
+            described in [RFC3389], Section 5, except for formats that
+            have their own internal DTX mechanisms.  DTX for such
+            formats (e.g., Opus) is controlled via fmtp parameters, as
+            discussed in Section 5.2.3.2.
+
+         +  For each specified "telephone-event" media format, enable
+            DTMF transmission for all supported media formats with the
+            same clockrate, as described in [RFC4733], Section 2.5.1.2.
+            If the application attempts to transmit DTMF when using a
+            media format that does not have a corresponding telephone-
+            event format, this MUST result in an error.
 
          +  For any specified "ptime" value, configure the available
             media formats to use the specified packet size.  If the
+
+
+
+
+Uberti, et al.           Expires April 11, 2017                [Page 61]
+
+Internet-Draft                    JSEP                      October 2016
+
+
             specified size is not supported for a media format, use the
             next closest value instead.
 
@@ -3410,13 +3431,6 @@ Internet-Draft                    JSEP                      October 2016
    a description of type "pranswer" or "answer".
 
    For each media section, the following steps MUST be performed:
-
-
-
-Uberti, et al.           Expires April 11, 2017                [Page 61]
-
-Internet-Draft                    JSEP                      October 2016
-
 
    o  If the media section has been rejected (i.e. port is set to zero
       in the answer), stop any reception or transmission of media for
@@ -3452,20 +3466,6 @@ Internet-Draft                    JSEP                      October 2016
          the RTCP transmission for this media section to use reduced-
          size RTCP, as specified in [RFC5506].
 
-      *  Enable the RTCP feedback mechanisms referenced in the media
-         section for the specified media formats.  Specifically, begin
-         or continue sending the requested feedback types and reacting
-         to received feedback, as specified in [RFC4585], Section 4.2.
-
-      *  If the directional attribute in the answer is of type
-         "sendrecv" or "sendonly", prepare to start transmitting media
-         using the most preferred media format from the remote
-         description that is also present in the answer, as described in
-         [RFC3264], Sections 6.1 and 7, once the underlying transport
-         layers have been established.  [TODO: add discusssion of
-         RED/FEC/RTX/CN] The payload type mapping from the remote
-         description is used to determine payload types for the outgoing
-         RTP streams.  Any RTP header extensions that were negotiated
 
 
 
@@ -3474,17 +3474,61 @@ Uberti, et al.           Expires April 11, 2017                [Page 62]
 Internet-Draft                    JSEP                      October 2016
 
 
-         should be included in the outgoing RTP streams, using the
-         extension mapping from the remote description; if the RID
-         header extension has been negotiated, and RID values are
-         specified, include the RID header extension in the outgoing RTP
-         streams, as indicated in [I-D.ietf-mmusic-rid], Section 4).  If
-         simulcast is negotiated, send the number of Source RTP Streams
-         as specified in [I-D.ietf-mmusic-sdp-simulcast], Section 6.2.2.
+      *  If the directional attribute in the answer is of type
+         "sendrecv" or "sendonly", choose the media format to send as
+         the most preferred media format from the remote description
+         that is also present in the answer, as described in [RFC3264],
+         Sections 6.1 and 7, and start transmitting RTP media once the
+         underlying transport layers have been established.  If a SSRC
+         has not already been chosen for this outgoing RTP stream,
+         choose a random one.
+
+      *  The payload type mapping from the remote description is used to
+         determine payload types for the outgoing RTP streams, including
+         the payload type for the send media format chosen above.  Any
+         RTP header extensions that were negotiated should be included
+         in the outgoing RTP streams, using the extension mapping from
+         the remote description; if the RID header extension has been
+         negotiated, and RID values are specified, include the RID
+         header extension in the outgoing RTP streams, as indicated in
+         [I-D.ietf-mmusic-rid], Section 4.
+
+      *  If simulcast has been negotiated, send the number of Source RTP
+         Streams as specified in [I-D.ietf-mmusic-sdp-simulcast],
+         Section 6.2.2.
+
+      *  If the send media format chosen above has a corresponding "rtx"
+         media format, or a FEC mechanism has been negotiated, establish
+         a Redundancy RTP Stream with a random SSRC for each Source RTP
+         Stream, and start or continue transmitting RTX/FEC packets as
+         needed.
+
+      *  If the send media format chosen above has a corresponding "red"
+         media format of the same clockrate, allow redundant encoding
+         using the specified format for resiliency purposes, as
+         discussed in [I-D.ietf-rtcweb-fec], Section 3.2.  Note that
+         unlike RTX or FEC media formats, the "red" format is
+         transmitted on the Source RTP Stream, not the Redundancy RTP
+         Stream.
+
+      *  Enable the RTCP feedback mechanisms referenced in the media
+         section for all Source RTP Streams using the specified media
+         formats.  Specifically, begin or continue sending the requested
+         feedback types and reacting to received feedback, as specified
+         in [RFC4585], Section 4.2.  When sending RTCP feedback, use the
+         SSRC of an outgoing Source RTP Stream as the RTCP sender SSRC;
+         if no outgoing Source RTP Stream exists, choose a random one.
 
       *  If the directional attribute is of type "recvonly" or
-         "inactive", stop transmitting RTP media, although RTCP should
-         still be sent, as described in [RFC3264], Section 5.1.
+         "inactive", stop transmitting all RTP media, but continue
+         sending RTCP, as described in [RFC3264], Section 5.1.
+
+
+
+Uberti, et al.           Expires April 11, 2017                [Page 63]
+
+Internet-Draft                    JSEP                      October 2016
+
 
    o  If the media section proto value indicates use of SCTP:
 
@@ -3522,14 +3566,6 @@ Internet-Draft                    JSEP                      October 2016
 
       Construct a table mapping payload type to RtpReceiver for each
       RtpReceiver configured to receive from this transport and for each
-
-
-
-Uberti, et al.           Expires April 11, 2017                [Page 63]
-
-Internet-Draft                    JSEP                      October 2016
-
-
       payload type that RtpReceiver is configured to receive.  The
       payload types of a given RtpReceiver are found in the m= section
       corresponding to that RtpReceiver in the local description.  If
@@ -3542,6 +3578,13 @@ Internet-Draft                    JSEP                      October 2016
 
       If the packet has a MID and that MID is not in the table mapping
       MID to RtpReceiver, drop the packet and stop.
+
+
+
+Uberti, et al.           Expires April 11, 2017                [Page 64]
+
+Internet-Draft                    JSEP                      October 2016
+
 
       If the packet has a MID and that MID is in the table mapping MID
       to RtpReceiver, update the SSRC mapping table to include an entry
@@ -3576,16 +3619,6 @@ Internet-Draft                    JSEP                      October 2016
    More examples of SDP for WebRTC call flows can be found in
    [I-D.nandakumar-rtcweb-sdp].
 
-
-
-
-
-
-Uberti, et al.           Expires April 11, 2017                [Page 64]
-
-Internet-Draft                    JSEP                      October 2016
-
-
 7.1.  Simple Example
 
    This section shows a very simple example that sets up a minimal audio
@@ -3600,39 +3633,6 @@ Internet-Draft                    JSEP                      October 2016
    the offer or answer, so the offers and answers are complete.  Trickle
    ICE is not used.  Both Alice and Bob are using the default policy of
    balanced.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4662,6 +4662,11 @@ Internet-Draft                    JSEP                      October 2016
               Hakenberg, "RTP Retransmission Payload Format", RFC 4588,
               July 2006.
 
+   [RFC4733]  Schulzrinne, H. and T. Taylor, "RTP Payload for DTMF
+              Digits, Telephony Tones, and Telephony Signals", RFC 4733,
+              DOI 10.17487/RFC4733, December 2006,
+              <http://www.rfc-editor.org/info/rfc4733>.
+
    [RFC5506]  Johansson, I. and M. Westerlund, "Support for Reduced-Size
               Real-Time Transport Control Protocol (RTCP): Opportunities
               and Consequences", RFC 5506, April 2009.
@@ -4689,12 +4694,7 @@ Internet-Draft                    JSEP                      October 2016
               DOI 10.17487/RFC6464, December 2011,
               <http://www.rfc-editor.org/info/rfc6464>.
 
-   [W3C.WD-webrtc-20140617]
-              Bergkvist, A., Burnett, D., Narayanan, A., and C.
-              Jennings, "WebRTC 1.0: Real-time Communication Between
-              Browsers", World Wide Web Consortium WD WD-webrtc-
-              20140617, June 2014,
-              <http://www.w3.org/TR/2011/WD-webrtc-20140617>.
+
 
 
 
@@ -4705,6 +4705,13 @@ Uberti, et al.           Expires April 11, 2017                [Page 84]
 
 Internet-Draft                    JSEP                      October 2016
 
+
+   [W3C.WD-webrtc-20140617]
+              Bergkvist, A., Burnett, D., Narayanan, A., and C.
+              Jennings, "WebRTC 1.0: Real-time Communication Between
+              Browsers", World Wide Web Consortium WD WD-webrtc-
+              20140617, June 2014,
+              <http://www.w3.org/TR/2011/WD-webrtc-20140617>.
 
 Appendix A.  Appendix A
 
@@ -4747,13 +4754,6 @@ Appendix A.  Appendix A
 
                        Table 1: SDP ABNF References
 
-Appendix B.  Change log
-
-   Note: This section will be removed by RFC Editor before publication.
-
-   Changes in draft-16:
-
-
 
 
 
@@ -4761,6 +4761,12 @@ Uberti, et al.           Expires April 11, 2017                [Page 85]
 
 Internet-Draft                    JSEP                      October 2016
 
+
+Appendix B.  Change log
+
+   Note: This section will be removed by RFC Editor before publication.
+
+   Changes in draft-16:
 
    o  Update addIceCandidate to indicate ICE generation and allow per-m=
       section end-of-candidates.
@@ -4803,12 +4809,6 @@ Internet-Draft                    JSEP                      October 2016
    o  Rewrite LS handling text to indicate edge cases and that we're
       living with them.
 
-   o  Require that answerer reject m= lines when there are no codecs in
-      common.
-
-   o  Enforce max-bundle on offer processing.
-
-   o  Fix TIAS formula to handle bits vs. kilobits.
 
 
 
@@ -4817,6 +4817,13 @@ Uberti, et al.           Expires April 11, 2017                [Page 86]
 
 Internet-Draft                    JSEP                      October 2016
 
+
+   o  Require that answerer reject m= lines when there are no codecs in
+      common.
+
+   o  Enforce max-bundle on offer processing.
+
+   o  Fix TIAS formula to handle bits vs. kilobits.
 
    o  Describe addTrack algorithm.
 
@@ -4860,19 +4867,18 @@ Internet-Draft                    JSEP                      October 2016
 
    o  Make it clear when an ICE restart should occur.
 
-   o  Resolve reference TODOs.
-
-   o  Remove MSID semantics.
-
-   o  ice-options are now at session level.
-
-
 
 
 Uberti, et al.           Expires April 11, 2017                [Page 87]
 
 Internet-Draft                    JSEP                      October 2016
 
+
+   o  Resolve reference TODOs.
+
+   o  Remove MSID semantics.
+
+   o  ice-options are now at session level.
 
    o  Default RTCP mux policy is now 'require'.
 
@@ -4917,18 +4923,18 @@ Internet-Draft                    JSEP                      October 2016
 
    o  Added canTrickle mechanism.
 
-   o  Added section on subsequent answers and, answer options.
-
-   o  Added text defining set{Local,Remote}Description behavior.
-
-   Changes in draft-08:
-
 
 
 Uberti, et al.           Expires April 11, 2017                [Page 88]
 
 Internet-Draft                    JSEP                      October 2016
 
+
+   o  Added section on subsequent answers and, answer options.
+
+   o  Added text defining set{Local,Remote}Description behavior.
+
+   Changes in draft-08:
 
    o  Added new example section and removed old examples in appendix.
 
@@ -4972,12 +4978,6 @@ Internet-Draft                    JSEP                      October 2016
    o  Guidance on whether attributes should be defined at the media
       level or the session level.
 
-   o  Renamed "default" bundle policy to "balanced".
-
-   o  Removed default ICE candidate pool size and clarify how it works.
-
-   o  Defined a canonical order for assignment of MSTs to m= lines.
-
 
 
 
@@ -4985,6 +4985,12 @@ Uberti, et al.           Expires April 11, 2017                [Page 89]
 
 Internet-Draft                    JSEP                      October 2016
 
+
+   o  Renamed "default" bundle policy to "balanced".
+
+   o  Removed default ICE candidate pool size and clarify how it works.
+
+   o  Defined a canonical order for assignment of MSTs to m= lines.
 
    o  Removed discussion of rehydration.
 
@@ -5029,18 +5035,17 @@ Internet-Draft                    JSEP                      October 2016
 
    o  Converted from nroff
 
-   o  Removed comparisons to old approaches abandoned by the working
-      group
-
-   o  Removed stuff that has moved to W3C specification
-
-
 
 
 Uberti, et al.           Expires April 11, 2017                [Page 90]
 
 Internet-Draft                    JSEP                      October 2016
 
+
+   o  Removed comparisons to old approaches abandoned by the working
+      group
+
+   o  Removed stuff that has moved to W3C specification
 
    o  Align SDP handling with W3C draft
 
@@ -5084,11 +5089,6 @@ Authors' Addresses
    Canada
 
    Email: fluffy@iii.ca
-
-
-
-
-
 
 
 
