@@ -1620,14 +1620,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             point, codecs can only be removed, not reordered.
           </t>
           <t>
-            Note that, as described in <xref target="RFC3264">
-            </xref>(offer/answer), Section 5.1 and Section 7, the
-            implementation SHOULD use the first media format listed in
-            the remote description to send. So, the order of codecs in
-            setCodecPreferences does not affect which codec the
-            implementation decides to send. It only affects which codecs
-            the implementation indicates that it prefers to receive, via
-            the offer or answer.
+            Note that the order of codecs in setCodecPreferences does not
+            affect which codec the implementation decides to send. It only
+            affects which codecs the implementation indicates that it prefers
+            to receive, via the offer or answer.
           </t>
         </section>
       </section>
@@ -1930,6 +1926,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             specified in
             <xref target="I-D.nandakumar-mmusic-proto-iana-registration" /> if
             the default candidate uses TCP transport.</t>
+
+            <t>If codec preferences have been set for the associated
+            transceiver, media formats MUST be generated in the
+            corresponding order.</t>
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -1979,10 +1979,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               3) and
               <xref target="I-D.ietf-rtcweb-video"></xref>(see Section
               5).</t>
-
-              <t>If codec preferences have been set for the associated
-              transceiver, media formats MUST be generated in the
-              corresponding order.</t>
 
               <t>If this m= section is for media with configurable
               frame sizes, e.g. audio, an "a=maxptime" line, indicating
@@ -2379,9 +2375,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>The m= line and corresponding "a=rtpmap" and "a=fmtp"
             lines MUST only include codecs present in the most recent
             answer which have not been excluded by the codec preferences
-            of the associated transceiver. The media formats MUST be
-            generated in the same order as in the current local
-            description.</t>
+            of the associated transceiver.</t>
+
+            <t>The media formats on the m= line MUST be generated in the
+            same order as in the current local description.</t>
 
             <t>The RTP header extensions MUST only include those that
             are present in the most recent answer.</t>
@@ -2578,6 +2575,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>The &lt;proto&gt; field MUST be set to exactly match the
             &lt;proto&gt; field for the corresponding m= line in the
             offer.</t>
+
+            <t>If codec preferences have been set for the associated
+            transceiver, media formats MUST be generated in the
+            corresponding order.</t>
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -2619,10 +2620,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             and
             <xref target="I-D.ietf-rtcweb-video"></xref>(see Section
             5).</t>
-
-            <t>If codec preferences have been set for the associated
-            transceiver, media formats MUST be generated in the
-            corresponding order.</t>
 
             <t>If this m= section is for media with configurable frame
             sizes, e.g. audio, an "a=maxptime" line, indicating the
@@ -2817,8 +2814,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             gathered, dummy values MUST be used, as described in the
             initial answer section above.</t>
 
-            <t>The media formats MUST be generated in the same order as in
-            the current local description.</t>
+            <t>The media formats on the m= line MUST be generated in the
+            same order as in the current local description.</t>
 
             <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
             same, unless the m= section is restarting, in which case
