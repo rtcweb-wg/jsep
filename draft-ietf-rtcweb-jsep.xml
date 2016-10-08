@@ -960,8 +960,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       to implement JSEP functionality. The actual API exposed in the
       W3C API may have somewhat different syntax, but should map easily
       to these concepts.</t>
-      <section title="Methods" anchor="sec.methods">
-        <section title="Constructor" anchor="sec.constructor">
+      <section title="PeerConnection" anchor="sec.peerconnection">
+        <section title="Constructor" anchor="sec.pc-constructor">
 
           <t>The PeerConnection constructor allows the application to
           specify global parameters for the media session, such as the
@@ -1107,6 +1107,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           simulcast as described in
           <xref target="sec.simulcast" />).</t>
         </section>
+
         <section title="createDataChannel"
         anchor="sec.createDataChannel">
 
@@ -1572,6 +1573,74 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           results in connectivity being established.</t>
         </section>
       </section>
+      <section title="RtpTransceiver" anchor="sec.transceiver">
+        <section title="stop" anchor="sec.transceiver-stop">
+          <t>
+            The stop method stops an RtpTransceiver.  This
+            will cause future calls to createOffer to generate a zero
+            port for the associated m= section.  See below for more
+            details.
+          </t>
+        </section>
+        <section title="stopped" anchor="sec.transceiver-stopped">
+          <t>
+            The stopped method returns "true" if the transceiver has
+            been stopped, either by a call to stopTransceiver or by
+            applying an answer that rejects the associated m= section, and
+            "false" otherwise.
+          </t>
+          <t>
+            A stopped RtpTransceiver does not send any
+            outgoing RTP or RTCP or process any incoming RTP
+            or RTCP. It cannot be restarted.
+          </t>
+        </section>
+        <section title="setDirection" anchor="sec.transceiver-set-direction">
+          <t>
+            The setDirection method sets the direction of a transceiver,
+            which affects the direction attribute of the associated m=
+            section on future calls to createOffer and createAnswer.
+          </t>
+          <t>
+            TODO: Write example showing how this might be used and how it
+            affects offers/answers/reoffers. Maybe something like:
+            "sendonly" remote offer, setDirection("sendonly"), "inactive"
+            answer, "sendonly" reoffer.
+          </t>
+        </section>
+        <section title="setCodecPreferences" anchor="sec.transceiver-set-codec-preferences">
+          <t>
+            The setCodecPreferences method sets the codec preferences of a
+            transceiver, which in turn affect the presence and order of
+            codecs of the associated m= section on future calls to
+            createOffer and createAnswer. Note that setCodecPreferences
+            does not directly affect which codec the implemtation decides
+            to send. It only affects which codecs the implementation
+            indicates that it prefers to receive, via the offer or answer.
+            Even when a codec is excluded by setCodecPreferences, it still
+            may be used to send until the next offer/answer exchange
+            discards it.
+          </t>
+          <t>
+            The codec preferences of an RtpTransceiver can cause codecs
+            to be excluded by subsequent calls to createOffer and
+            createAnswer, in which case the corresponding media formats
+            in the associated m= section will be excluded. The codec
+            preferences cannot add media formats that would otherwise not
+            be present. This includes codecs that were not negotiated in a
+            previous offer/answer exchange that included the transceiver.
+          </t>
+          <t>
+            The codec preferences of an RtpTransceiver can also determine
+            the order of codecs in subsequent calls to createOffer and
+            createAnswer, in which case the order of the media formats in
+            the associated m= section will match. However, the codec
+            preferences cannot change the order of the media formats after
+            an answer containing the transceiver has been applied. At this
+            point, codecs can only be removed, not reordered.
+          </t>
+        </section>
+      </section>
     </section>
     <section title="SDP Interaction Procedures"
     anchor="sec.sdp-interaction-procedure">
@@ -1871,6 +1940,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             specified in
             <xref target="I-D.nandakumar-mmusic-proto-iana-registration" /> if
             the default candidate uses TCP transport.</t>
+
+            <t>If codec preferences have been set for the associated
+            transceiver, media formats MUST be generated in the
+            corresponding order, and MUST exclude any codecs not present
+            in the codec preferences.</t>
+
+            <t>Unless excluded by the above restrictions, the media
+            formats MUST include the mandatory audio/video codecs as
+            specified in
+            <xref target="I-D.ietf-rtcweb-audio"></xref>(see Section 3)
+            and
+            <xref target="I-D.ietf-rtcweb-video"></xref>(see Section
+            5).</t>
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -1911,14 +1993,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>A direction attribute which is the same as that of the
               associated transceiver.</t>
 
-              <t>For each supported codec, "a=rtpmap" and "a=fmtp"
-              lines, as specified in
-              <xref target="RFC4566"></xref>, Section 6. The audio and
-              video codecs that MUST be supported are specified in
-              <xref target="I-D.ietf-rtcweb-audio"></xref>(see Section
-              3) and
-              <xref target="I-D.ietf-rtcweb-video"></xref>(see Section
-              5).</t>
+              <t>For each media format on the m= line,
+              "a=rtpmap" and "a=fmtp" lines, as specified in
+              <xref target="RFC4566"></xref>, Section 6, and
+              <xref target="RFC3264"></xref>, Section 5.1.</t>
 
               <t>If this m= section is for media with configurable
               frame sizes, e.g. audio, an "a=maxptime" line, indicating
@@ -2268,7 +2346,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>The m= line and corresponding "a=rtpmap" and "a=fmtp"
             lines MUST only include codecs present in the most recent
-            answer.</t>
+            answer which have not been excluded by the codec preferences
+            of the associated transceiver.</t>
+
+            <t>The media formats on the m= line MUST be generated in the
+            same order as in the current local description.</t>
 
             <t>The RTP header extensions MUST only include those that
             are present in the most recent answer.</t>
@@ -2465,6 +2547,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>The &lt;proto&gt; field MUST be set to exactly match the
             &lt;proto&gt; field for the corresponding m= line in the
             offer.</t>
+
+            <t>If codec preferences have been set for the associated
+            transceiver, media formats MUST be generated in the
+            corresponding order, and MUST exclude any codecs not present
+            in the codec preferences or not present in the offer.</t>
+
+            <t>Unless excluded by the above restrictions, the media
+            formats MUST include the mandatory audio/video codecs as
+            specified in
+            <xref target="I-D.ietf-rtcweb-audio"></xref>(see Section 3)
+            and
+            <xref target="I-D.ietf-rtcweb-video"></xref>(see Section
+            5).</t>
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -2495,15 +2590,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>A direction attribute which is the same as that of the
             associated transceiver.</t>
 
-            <t>For each supported codec that is present in the offer,
+            <t>For each media format on the m= line,
             "a=rtpmap" and "a=fmtp" lines, as specified in
             <xref target="RFC4566"></xref>, Section 6, and
-            <xref target="RFC3264"></xref>, Section 6.1. The audio and
-            video codecs that MUST be supported are specified in
-            <xref target="I-D.ietf-rtcweb-audio"></xref>(see Section 3)
-            and
-            <xref target="I-D.ietf-rtcweb-video"></xref>(see Section
-            5).</t>
+            <xref target="RFC3264"></xref>, Section 6.1.</t>
 
             <t>If this m= section is for media with configurable frame
             sizes, e.g. audio, an "a=maxptime" line, indicating the
@@ -2677,6 +2767,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             case, if no candidates of the desired type have yet been
             gathered, dummy values MUST be used, as described in the
             initial answer section above.</t>
+
+            <t>The media formats on the m= line MUST be generated in the
+            same order as in the current local description.</t>
 
             <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
             same, unless the m= section is restarting, in which case
