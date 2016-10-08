@@ -3626,12 +3626,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Construct a table mapping incoming SSRC to RtpReceiver for each
           RtpReceiver configured to receive from this transport and for
           each SSRC that RtpReceiver is configured to receive. Some of
-          the SSRCs may be presesnt in the m= section corresponding to
+          the SSRCs may be present in the m= section corresponding to
           that RtpReceiver in the remote description.</t>
 
-	  <t>Construct a table mapping outgoing SSRC to RtpSender for each
+          <t>Construct a table mapping outgoing SSRC to RtpSender for each
           RtpSender configured to transmit from this transport and for
-          each SSRC that RtpSender is configured to use when sending. </t>
+          each SSRC that RtpSender is configured to use when sending.</t>
 
           <t>Construct a table mapping payload type to RtpReceiver for
           each RtpReceiver configured to receive from this transport
@@ -3646,35 +3646,32 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <t>For each RTCP packet received, the following steps MUST be
       followed:</t>
-      
+
       <t>
         <list>
+          <t>For each SDES item in the RTCP packet which contains a
+          MID that is in the table mapping MID to a RtpReceiver, update the
+          incoming SSRC mapping table to include an entry the SSRC for that SDED
+          item to the RtpReceiver associated with the MID.</t>
 
-	  <t>For each SDES item in the RTCP packet, if the RTCP packet
-	  has a SDES with a MID, and that MID is in the table mapping
-	  MID to a RtpReceiver, update the incoming SSRC mapping table
-	  to include an entry mapping the SSRC for that SDES item to
-	  the RtpReceiver associated with the MID.</t>
+          <t> For each Receiver Report in the RTCP packet, if the SSRC
+          for the Receiver Report is found in the outgoing SSRC table,
+          deliver a copy of the RTCP packet to the RtpSender found
+          in the outgoing SSRC table.</t>
 
-	  <t> For each Receiver Report in the RTCP packet, if the SSRC
-	  for the Receiver Report is found in the outgoing SSRC table,
-	  deliver a copy of the RTCP packet to the RtpSender found
-	  in the outgoing SSRC table.  </t>
+          <t> For each Sender Report in the RTCP packet, if the SSRC
+          for the Sender Report is found in the incoming SSRC table,
+          deliver a copy of the RTCP packet to the RtpReceiver found
+          in the incoming SSRC table.</t>
 
-	  <t> For each Sender Report in the RTCP packet, if the SSRC
-	  for the Sender Report is found in the incoming SSRC table,
-	  deliver a copy of the RTCP packet to the RtpReceiver found
-	  in the incoming SSRC table.  </t>
-
-	  <t> For any BYE or APP RTCP packets, for each SSRC and CSRC
-	  in the BYE or APP packet, if the value of the SSRC or CSRC
-	  is found in the incoming SSRC table, deliver a copy of the
-	  RTCP packet to the RtpReceiver in the incoming SSRC
-	  table. </t>
-	  
-	</list>
+          <t> For any BYE or APP RTCP packets, for each SSRC and CSRC
+          in the BYE or APP packet, if the value of the SSRC or CSRC
+          is found in the incoming SSRC table, deliver a copy of the
+          RTCP packet to the RtpReceiver in the incoming SSRC
+          table.</t>
+        </list>
       </t>
-      
+
       <t>For each RTP packet received, the following steps MUST be
       followed to route the packet:</t>
 
@@ -3705,9 +3702,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       processing of the RTP packets is done at the RtpReceiver level.
       This includes using
       <xref target="I-D.ietf-mmusic-rid" /> to determine which RTP
-      streams depend on or repair other RTP streams. If the RTP packet
-      did not have PT that matched any codec for this RtpReceiver, the
-      packet would be dropped. </t>
+      streams depend on or repair other RTP streams. If the RTP packet's
+      PT does not match any codec in use at the RtpReceiver, the
+      packet will be dropped.</t>
 
       <t>As RtpTransceivers (and, thus, RtpReceivers) are added,
       removed, stopped, or reconfigured, the tables above must also be
