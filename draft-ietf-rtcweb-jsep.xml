@@ -3647,7 +3647,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </t>
 
       <t>As RtpTransceivers (and, thus, RtpReceivers) are added,
-      removed, stopped, or reconfigured, the tables above must also be 
+      removed, stopped, or reconfigured, the tables above must also be
       updated.</t>
 
       <t>For each RTP packet received, the following steps MUST be
@@ -3655,77 +3655,75 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
       <t>
         <list>
-
           <t>If the packet has a MID and that MID is not in the table
           mapping MID to RtpReceiver, drop the packet and stop.</t>
 
           <t>If the packet has a MID and that MID is in the table
           mapping MID to RtpReceiver, update the incoming SSRC mapping
-          table to include an entry mapping the packet's SSRC to the
-          RtpReceiver.</t>
+          table to include an entry that maps the packet's SSRC to the
+          RtpReceiver for that MID.</t>
 
           <t>If the packet's SSRC is in the incoming SSRC mapping
-          table, route the packet to the mapped RtpReceiver and
+          table, deliver the packet to the associated RtpReceiver and
           stop.</t>
 
           <t>If the packet's payload type is in the payload type
           table, update the the incoming SSRC mapping table to include
-          an entry mapping the packet's SSRC to the
-          RtpReceiver. Deliver the packet to the RtpReceiver and
-          stop.</t>
+          an entry that maps the packet's SSRC to the
+          RtpReceiver for that payload type. In addition, deliver the packet
+          to the associated RtpReceiver and stop.</t>
 
           <t>Otherwise, drop the packet.</t>
         </list>
       </t>
 
-       <t>For each RTCP packet received, the following steps MUST be 
-      followed:</t>
+      <t>For each RTCP packet received (including each RTCP packet that is part
+      of a compound RTCP packet), the following type-specific handling
+      MUST be performed to route the packet:</t>
 
       <t>
         <list>
-          <t>For each Receiver Report in the RTCP packet, if the
-          sender SSRC 
-          for the Receiver Report is found in the outgoing SSRC table,
-          deliver a copy of the RTCP packet to the RtpSender found in 
-          the outgoing SSRC table.</t>
+          <t>If the packet is of type SR, and the sender SSRC for the
+          packet is found in the incoming SSRC table, deliver a copy of the
+          packet to the RtpReceiver associated with that SSRC. In addition,
+          for each report block in the report whose SSRC is found in the
+          outgoing SSRC table, deliver a copy of the RTCP packet to the
+          RtpSender associated with that SSRC.</t>
 
-          <t>For each Sender Report in the RTCP packet, if the sender
-          SSRC for the Sender Report is found in the incoming SSRC
-          table, deliver a copy of the RTCP packet to the RtpReceiver
-          found in the incoming SSRC table.  For each source SSRC in
-          the Sender Report packet, if the source SSRC is found in the
-          outgoing SSRC table, deliver a copy of the RTCP packet to
-          the RtpSender found in the outgoing SSRC table.</t>
+          <t>If the packet is of type RR, for each report block in the
+          packet whose SSRC is found in the outgoing SSRC table, deliver a copy
+          of the RTCP packet to the RtpSender associated with that SSRC.</t>
 
-          <t>For any BYE or APP RTCP packets, for each SSRC and CSRC 
-          in the BYE or APP packet, if the value of the SSRC or CSRC 
-          is found in the incoming SSRC table, deliver a copy of the 
-          RTCP packet to the RtpReceiver in the incoming SSRC 
-          table.</t>
+          <t>If the packet is of type SDES, and the sender SSRC for
+          the packet is found in the incoming SSRC table, deliver the
+          packet to the RtpReceiver associated with that SSRC. In addition, for
+          each chunk in the packet that contains a MID that is in the table
+          mapping MID to RtpReceiver, update the incoming SSRC mapping
+          table to include an entry that maps the SSRC for that chunk to
+          the RtpReceiver associated with that MID. (This case can occur
+          when RTCP for a source is received before any RTP packets.)</t>
 
-          <t>For any RTCP Feedback messages (see <xref
-          target="RFC4585"></xref>), if the media source SSRC from the
-          Feedback message is found in the outgoing SSRC table,
-          deliver a copy of the RTCP packet to the RtpSender found in
-          the outgoing SSRC table.</t>
+          <t>If the packet is of type BYE, for each SSRC indicated in the
+          packet that is found in the incoming SSRC table, deliver a copy of the
+          packet to the RtpReceiver associated with that SSRC.</t>
 
-          <t>For each SDES item in the RTCP packet that contains a 
-          MID that is in the table mapping MID to RtpReceiver, update 
-          the incoming SSRC mapping table to include an entry the SSRC 
-          for that SDES item to the RtpReceiver associated with the 
-          MID.</t>
+          <t>If the packet is of type RTPFB or PSFB, as defined in
+          <xref target="RFC4585" />, and the media source SSRC for the packet
+          is found in the outgoing SSRC table, deliver the packet
+          to the RtpSender associated with that SSRC.</t>
 
         </list>
       </t>
 
      <t>After packets are routed to the RtpReceiver, further
-      processing of the RTP packets is done by the RtpReceiver level.
-      This includes using <xref target="I-D.ietf-mmusic-rid" /> to
-      determine which RTP streams depend on or repair other RTP
-      streams. If the RTP packet's PT does not match any codec in use
-      at the RtpReceiver, the packet will be dropped.</t>
-
+      processing of the RTP packets is done at the RtpReceiver level.
+      This includes using <xref target="I-D.ietf-mmusic-rid" /> to distinguish
+      between multiple Encoded Streams, as well as determine
+      which Source RTP stream should be repaired by a given Redundancy
+      RTP stream. If the RTP packet's PT does not match any codec in use
+      by the RtpReceiver, the packet will be dropped.</t>
     </section>
+
     <section title="Examples" anchor="sec.examples">
 
       <t>Note that this example section shows several SDP fragments. To
