@@ -2285,13 +2285,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             NOT contain any ICE credentials.</t>
 
             <t>If the m= section is not bundled into another
-            m= section, an "a=rtcp" attribute line MUST be added with
-            the port and address of the appropriate default candidate,
-            either the default RTP or RTCP candidate, depending on
-            whether RTCP multiplexing is enabled in the answer. Note
-            that if RTCP multiplexing is being offered, but not yet
-            active, the default RTCP candidate MUST be used, as
-            indicated in
+            m= section, and either the answer rejected RTCP multiplexing
+            or RTCP multiplexing is being offered, but is not yet active,
+            an "a=rtcp" attribute line MUST be added with
+            of the default RTCP candidate, as indicated in
             <xref target="RFC5761"></xref>, section 5.1.3. In each
             </t>
 
@@ -2677,7 +2674,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>An "a=rtcp" line, as specified in
               <xref target="RFC3605"></xref>, Section 2.1, containing the
               dummy value "9 IN IP4 0.0.0.0", because no candidates have
-              yet been gathered.</t>
+              yet been gathered if and only if the m= line is being accepted
+              and there is no "a=rtcp-mux" line in the offer.
+              </t>
+
               <t>If present in the offer, an "a=rtcp-mux" line, as
               specified in
               <xref target="RFC5761"></xref>, Section 5.1.1. If the
@@ -2772,14 +2772,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             section is bundled into another m= section, it still MUST
             NOT contain any ICE credentials.</t>
 
-            <t>If the m= section is not bundled into another
-            m= section, an "a=rtcp" attribute line MUST be added with
-            the port and address of the appropriate default candidate,
-            either the default RTP or RTCP candidate, depending on
-            whether RTCP multiplexing is enabled in the answer. In each
-            case, if no candidates of the desired type have yet been
-            gathered, dummy values MUST be used, as described in the
-            initial answer section above.</t>
+            <t>If the m= section is not bundled into another m=
+            section and RTCP multiplexing is not active, an "a=rtcp" attribute
+            line MUST be added with the port and address of the default RTCP
+            candidate, depending on whether RTCP multiplexing is enabled in the
+            answer. If no candidates have yet been gathered, dummy values MUST be
+            used, as described in the initial answer section above.</t>
 
             <t>If the m= section is not bundled into another m=
             section, for each candidate that has been gathered during
