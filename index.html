@@ -364,7 +364,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2016-10-12" />
+  <meta name="dct.issued" scheme="ISO8601" content="2016-10-20" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -388,7 +388,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: April 15, 2017</td>
+  <td class="left">Expires: April 23, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -401,7 +401,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">October 12, 2016</td>
+  <td class="right">October 20, 2016</td>
 </tr>
 
     	
@@ -421,7 +421,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 15, 2017.</p>
+<p>This Internet-Draft will expire on April 23, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -955,7 +955,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
   <li>An "a=mid" line, as specified in <a href="#RFC5888">[RFC5888]</a>, Section 4. When generating mid values, it is RECOMMENDED that the values be 3 bytes or less, to allow them to efficiently fit into the RTP header extension defined in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 11.</li>
-  <li>An "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because no candidates have yet been gathered.</li>
   <li>A direction attribute which is the same as that of the associated transceiver.</li>
   <li>For each media format on the m= line, "a=rtpmap" and "a=fmtp" lines, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6, and <a href="#RFC3264">[RFC3264]</a>, Section 5.1.</li>
   <li>If this m= section is for media with configurable frame sizes, e.g. audio, an "a=maxptime" line, indicating the smallest of the maximum supported frame sizes out of all codecs included above, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6.</li>
@@ -979,6 +978,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>An "a=fingerprint" line for each of the endpoint's certificates, as specified in <a href="#RFC4572">[RFC4572]</a>, Section 5; the digest algorithm used for the fingerprint MUST match that used in the certificate signature.</li>
   <li>An "a=setup" line, as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763">[RFC5763]</a>, Section 5. The role value in the offer MUST be "actpass".</li>
   <li>An "a=dtls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.2.</li>
+  <li>An "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because no candidates have yet been gathered.</li>
   <li>An "a=rtcp-mux" line, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.1.</li>
   <li>An "a=rtcp-rsize" line, as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5.</li>
   <li>[TODO: rtcp-fb?]</li>
@@ -1015,9 +1015,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If an RtpTransceiver is stopped and is not associated with an m= section, an m= section MUST NOT be generated for it. This prevents adding back RtpTransceivers whose m= sections were recycled and used for a new RtpTransceiver in a previous offer/ answer exchange, as described above.</li>
   <li>If an RtpTransceiver has been stopped and is associated with an m= section, and the m= section is not being recycled as described above, an m= section MUST be generated for it with the port set to zero and the "a=msid" line removed.</li>
   <li>For RtpTransceivers that are not stopped, the "a=msid" line MUST stay the same if they are present in the current description.</li>
-  <li>Each "m=" and c=" line MUST be filled in with the port, protocol, and address of the default candidate for the m= section, as described in <a href="#RFC5245">[RFC5245]</a>, Section 4.3. If ICE checking has already completed for one or more candidate pairs and a candidate pair is in active use, then that pair MUST be used, even if ICE has not yet completed. Note that this differs from the guidance in <a href="#RFC5245">[RFC5245]</a>, Section 9.1.2.2, which only refers to offers created when ICE has completed. Each "a=rtcp" attribute line MUST also be filled in with the port and address of the appropriate default candidate, either the default RTP or RTCP candidate, depending on whether RTCP multiplexing is currently active or not. Note that if RTCP multiplexing is being offered, but not yet active, the default RTCP candidate MUST be used, as indicated in <a href="#RFC5761">[RFC5761]</a>, section 5.1.3. In each case, if no candidates of the desired type have yet been gathered, dummy values MUST be used, as described above.</li>
+  <li>Each "m=" and c=" line MUST be filled in with the port, protocol, and address of the default candidate for the m= section, as described in <a href="#RFC5245">[RFC5245]</a>, Section 4.3. If ICE checking has already completed for one or more candidate pairs and a candidate pair is in active use, then that pair MUST be used, even if ICE has not yet completed. Note that this differs from the guidance in <a href="#RFC5245">[RFC5245]</a>, Section 9.1.2.2, which only refers to offers created when ICE has completed. In each case, if no RTP candidates have yet been gathered, dummy values MUST be used, as described above.</li>
   <li>Each "a=mid" line MUST stay the same.</li>
   <li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the ICE configuration has changed (either changes to the supported STUN/TURN servers, or the ICE candidate policy), or the "IceRestart" option ( <a href="#sec.icerestart">Section 5.2.3.1</a> was specified. If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.</li>
+  <li>If the m= section is not bundled into another m= section, an "a=rtcp" attribute line MUST be added with of the default RTCP candidate, as indicated in <a href="#RFC5761">[RFC5761]</a>, section 5.1.3.</li>
   <li>If the m= section is not bundled into another m= section, for each candidate that has been gathered during the most recent gathering phase (see <a href="#sec.ice-gather-overview">Section 3.5.1</a>), an "a=candidate" line MUST be added, as defined in <a href="#RFC5245">[RFC5245]</a>, Section 4.3., paragraph 3.  If candidate gathering for the section has completed, an "a=end-of-candidates" attribute MUST be added, as described in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 9.3.  If the m= section is bundled into another m= section, both "a=candidate" and "a=end-of-candidates" MUST be omitted.</li>
   <li>For RtpTransceivers that are still present, the "a=msid" line MUST stay the same.</li>
   <li>For RtpTransceivers that are still present, the "a=rid" lines MUST stay the same.</li>
@@ -1025,7 +1026,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If any RtpTransceiver has been stopped, the port MUST be set to zero and the "a=msid" line MUST be removed.</li>
   <li>If any RtpTransceiver has been added, and there exists a m= section with a zero port in the current local description or the current remote description, that m= section MUST be recycled by generating a m= section for the added RtpTransceiver as if the m= section were being added to session description, except that instead of adding it, the generated m= section replaces the m= section with a zero port.</li>
 </ul>
-<p id="rfc.section.5.2.2.p.5">If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "remote-pranswer" or "stable" states, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "local-offer" state above.</p>
+<p id="rfc.section.5.2.2.p.5">If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "remote-pranswer" or "stable" states, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "local-offer" state above.  </p>
 <p id="rfc.section.5.2.2.p.6">In addition, for each non-recycled, non-rejected m= section in the new offer, the following adjustments are made based on the contents of the corresponding m= section in the current remote description: </p>
 
 <ul>
@@ -1033,6 +1034,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>The media formats on the m= line MUST be generated in the same order as in the current local description.</li>
   <li>The RTP header extensions MUST only include those that are present in the most recent answer.</li>
   <li>The RTCP feedback extensions MUST only include those that are present in the most recent answer.</li>
+  <li>The "a=rtcp" line MUST be added if the most recent answer did not include an "a=rtcp-mux" line; otherwise it MUST NOT be added.</li>
   <li>The "a=rtcp-mux" line MUST only be added if present in the most recent answer.</li>
   <li>The "a=rtcp-mux-only" line MUST only be added if present in the most recent answer.</li>
   <li>The "a=rtcp-rsize" line MUST only be added if present in the most recent answer.</li>
@@ -1079,7 +1081,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
   <li>If and only if present in the offer, an "a=mid" line, as specified in <a href="#RFC5888">[RFC5888]</a>, Section 9.1. The "mid" value MUST match that specified in the offer.</li>
-  <li>An "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because no candidates have yet been gathered.</li>
   <li>A direction attribute which is the same as that of the associated transceiver.</li>
   <li>For each media format on the m= line, "a=rtpmap" and "a=fmtp" lines, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6, and <a href="#RFC3264">[RFC3264]</a>, Section 6.1.</li>
   <li>If this m= section is for media with configurable frame sizes, e.g. audio, an "a=maxptime" line, indicating the smallest of the maximum supported frame sizes out of all codecs included above, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 6.</li>
@@ -1098,7 +1099,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>An "a=fingerprint" line for each of the endpoint's certificates, as specified in <a href="#RFC4572">[RFC4572]</a>, Section 5; the digest algorithm used for the fingerprint MUST match that used in the certificate signature.</li>
   <li>An "a=setup" line, as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763">[RFC5763]</a>, Section 5. The role value in the answer MUST be "active" or "passive"; the "active" role is RECOMMENDED. The role value MUST be consistent with the existing DTLS connection, if one exists and is being continued.</li>
   <li>An "a=dtls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.3.</li>
-  <li>If present in the offer, an "a=rtcp-mux" line, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.1. If the "require" RTCP multiplexing policy is set and no "a=rtcp-mux" line is present in the offer, then the m=line MUST be marked as rejected by setting the port in the m= line to zero, as indicated in <a href="#RFC3264">[RFC3264]</a>, Section 6.</li>
+  <li>If present in the offer, an "a=rtcp-mux" line, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.1.  Otherwise, an "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0" (because no candidates have yet been gathered).</li>
   <li>If present in the offer, an "a=rtcp-rsize" line, as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5.</li>
 </ul>
 
@@ -1119,9 +1120,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
   <li>The "s=" and "t=" lines MUST stay the same.</li>
-  <li>Each "m=" and c=" line MUST be filled in with the port and address of the default candidate for the m= section, as described in <a href="#RFC5245">[RFC5245]</a>, Section 4.3. Note, however, that the m= line protocol need not match the default candidate, because this protocol value must instead match what was supplied in the offer, as described above. Each "a=rtcp" attribute line MUST also be filled in with the port and address of the appropriate default candidate, either the default RTP or RTCP candidate, depending on whether RTCP multiplexing is enabled in the answer. In each case, if no candidates of the desired type have yet been gathered, dummy values MUST be used, as described in the initial answer section above.</li>
+  <li>Each "m=" and c=" line MUST be filled in with the port and address of the default candidate for the m= section, as described in <a href="#RFC5245">[RFC5245]</a>, Section 4.3. Note, however, that the m= line protocol need not match the default candidate, because this protocol value must instead match what was supplied in the offer, as described above.</li>
   <li>The media formats on the m= line MUST be generated in the same order as in the current local description.</li>
   <li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the m= section is restarting, in which case new ICE credentials must be created as specified in <a href="#RFC5245">[RFC5245]</a>, Section 9.2.1.1. If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.</li>
+  <li>If the m= section is not bundled into another m= section and RTCP multiplexing is not active, an "a=rtcp" attribute line MUST be filled in with the port and address of the default RTCP candidate. If no RTCP candidates have yet been gathered, dummy values MUST be used, as described in the initial answer section above.</li>
   <li>If the m= section is not bundled into another m= section, for each candidate that has been gathered during the most recent gathering phase (see <a href="#sec.ice-gather-overview">Section 3.5.1</a>), an "a=candidate" line MUST be added, as defined in <a href="#RFC5245">[RFC5245]</a>, Section 4.3., paragraph 3.  If candidate gathering for the section has completed, an "a=end-of-candidates" attribute MUST be added, as described in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 9.3.  If the m= section is bundled into another m= section, both "a=candidate" and "a=end-of-candidates" MUST be omitted.</li>
   <li>For RtpTransceivers that are not stopped, the "a=msid" line MUST stay the same.</li>
 </ul>
