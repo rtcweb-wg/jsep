@@ -1985,11 +1985,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation">
               </xref>, Section 11.</t>
 
-              <t>An "a=rtcp" line, as specified in
-              <xref target="RFC3605"></xref>, Section 2.1, containing
-              the dummy value "9 IN IP4 0.0.0.0", because no candidates
-              have yet been gathered.</t>
-
               <t>A direction attribute which is the same as that of the
               associated transceiver.</t>
 
@@ -2094,7 +2089,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>
             <list style="symbols">
-
               <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in
               <xref target="RFC5245"></xref>, Section 15.4.</t>
 
@@ -2112,6 +2106,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>An "a=dtls-id" line, as specified in
               <xref target="I-D.ietf-mmusic-dtls-sdp"/> Section 5.2.</t>
+
+              <t>An "a=rtcp" line, as specified in
+              <xref target="RFC3605"></xref>, Section 2.1, containing
+              the dummy value "9 IN IP4 0.0.0.0", because no candidates
+              have yet been gathered.</t>
 
               <t>An "a=rtcp-mux" line, as specified in
               <xref target="RFC5761"></xref>, Section 5.1.1.</t>
@@ -2270,16 +2269,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             MUST be used, even if ICE has not yet completed. Note that
             this differs from the guidance in
             <xref target="RFC5245" />, Section 9.1.2.2, which only
-            refers to offers created when ICE has completed. Each
-            "a=rtcp" attribute line MUST also be filled in with the
-            port and address of the appropriate default candidate,
-            either the default RTP or RTCP candidate, depending on
-            whether RTCP multiplexing is currently active or not. Note
-            that if RTCP multiplexing is being offered, but not yet
-            active, the default RTCP candidate MUST be used, as
-            indicated in
-            <xref target="RFC5761"></xref>, section 5.1.3. In each
-            case, if no candidates of the desired type have yet been
+            refers to offers created when ICE has completed. In each
+            case, if no RTP candidates have yet been
             gathered, dummy values MUST be used, as described
             above.</t>
 
@@ -2292,6 +2283,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="sec.icerestart" /> was specified. If the m=
             section is bundled into another m= section, it still MUST
             NOT contain any ICE credentials.</t>
+
+            <t>If the m= section is not bundled into another
+            m= section, an "a=rtcp" attribute line MUST be added with
+            of the default RTCP candidate, as indicated in
+            <xref target="RFC5761"></xref>, section 5.1.3.</t>
 
             <t>If the m= section is not bundled into another m=
             section, for each candidate that has been gathered during
@@ -2336,7 +2332,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           PeerConnection is in the "remote-pranswer" or "stable"
           states, an offer is generated based on the negotiated session
           descriptions by following the steps mentioned for the
-          "local-offer" state above.</t>
+          "local-offer" state above.
+          </t>
 
           <t>In addition, for each non-recycled, non-rejected m=
           section in the new offer, the following adjustments are made
@@ -2357,6 +2354,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>The RTCP feedback extensions MUST only include those
             that are present in the most recent answer.</t>
+
+            <t>The "a=rtcp" line MUST be added if the most recent
+            answer did not include an "a=rtcp-mux" line; otherwise
+            it MUST NOT be added.</t>
 
             <t>The "a=rtcp-mux" line MUST only be added if present in
             the most recent answer.</t>
@@ -2582,11 +2583,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC5888"></xref>, Section 9.1. The "mid"
             value MUST match that specified in the offer.</t>
 
-            <t>An "a=rtcp" line, as specified in
-            <xref target="RFC3605"></xref>, Section 2.1, containing the
-            dummy value "9 IN IP4 0.0.0.0", because no candidates have
-            yet been gathered.</t>
-
             <t>A direction attribute which is the same as that of the
             associated transceiver.</t>
 
@@ -2679,12 +2675,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>If present in the offer, an "a=rtcp-mux" line, as
               specified in
-              <xref target="RFC5761"></xref>, Section 5.1.1. If the
-              "require" RTCP multiplexing policy is set and no
-              "a=rtcp-mux" line is present in the offer, then the
-              m=line MUST be marked as rejected by setting the port in
-              the m= line to zero, as indicated in
-              <xref target="RFC3264"></xref>, Section 6.</t>
+              <xref target="RFC5761"></xref>, Section 5.1.1.
+              Otherwise, an "a=rtcp" line, as specified in
+              <xref target="RFC3605"></xref>, Section 2.1, containing the
+              dummy value "9 IN IP4 0.0.0.0" (because no candidates have
+              yet been gathered).</t>
 
               <t>If present in the offer, an "a=rtcp-rsize" line, as
               specified in
@@ -2759,14 +2754,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC5245"></xref>, Section 4.3. Note, however,
             that the m= line protocol need not match the default
             candidate, because this protocol value must instead match
-            what was supplied in the offer, as described above. Each
-            "a=rtcp" attribute line MUST also be filled in with the
-            port and address of the appropriate default candidate,
-            either the default RTP or RTCP candidate, depending on
-            whether RTCP multiplexing is enabled in the answer. In each
-            case, if no candidates of the desired type have yet been
-            gathered, dummy values MUST be used, as described in the
-            initial answer section above.</t>
+            what was supplied in the offer, as described above.</t>
 
             <t>The media formats on the m= line MUST be generated in the
             same order as in the current local description.</t>
@@ -2777,6 +2765,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC5245"></xref>, Section 9.2.1.1. If the m=
             section is bundled into another m= section, it still MUST
             NOT contain any ICE credentials.</t>
+
+            <t>If the m= section is not bundled into another m=
+            section and RTCP multiplexing is not active, an "a=rtcp" attribute
+            line MUST be filled in with the port and address of the default RTCP
+            candidate. If no RTCP candidates have yet been gathered, dummy values MUST be
+            used, as described in the initial answer section above.</t>
 
             <t>If the m= section is not bundled into another m=
             section, for each candidate that has been gathered during
