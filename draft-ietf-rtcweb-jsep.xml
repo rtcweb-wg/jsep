@@ -1990,8 +1990,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               the dummy value "9 IN IP4 0.0.0.0", because no candidates
               have yet been gathered.</t>
 
-              <t>A direction attribute which is the same as that of the
-              associated transceiver.</t>
+              <t>A direction attribute for the associated RtpTransceiver,
+              described by <xref target="sec.answer-dirattr"></xref>.</t>
 
               <t>For each media format on the m= line,
               "a=rtpmap" and "a=fmtp" lines, as specified in
@@ -2823,6 +2823,35 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             VoiceActivityDetection to true would result in an answer
             with CN codecs and "usedtx=0").</t>
           </section>
+        </section>
+        <section title="Direction Attribute in Answers"
+        anchor="sec.answer-dirattr">
+
+          <t><xref target="RFC3264"></xref> direction attributes
+          (defined in Section 6.1) in answers are chosen according to
+          the direction attribute in the remote offer and the direction
+          of the corresponding RtpTransceiver, by choosing the
+          intersection of the two directions in the following table:</t>
+
+          <figure>
+            <artwork>
+              <![CDATA[
+                     +---------------------------------------------------+
+                     |                  RtpTransceiver                   |
+                     +------------+------------+------------+------------+
+                     |  sendrecv  |  sendonly  |  recvonly  |  inactive  |
+    +---+------------+------------+------------+------------+------------+
+    |   |  sendrecv  |  sendrecv  |  sendonly  |  recvonly  |  inactive  |
+    | o +------------+------------+------------+------------+------------+
+    | f |  sendonly  |  recvonly  |  inactive  |  recvonly  |  inactive  |
+    | f +------------+------------+------------+------------+------------+
+    | e |  recvonly  |  sendonly  |  sendonly  |  inactive  |  inactive  |
+    | r +------------+------------+------------+------------+------------+
+    |   |  inactive  |  inactive  |  inactive  |  inactive  |  inactive  |
+    +---+------------+------------+------------+------------+------------+
+]]>
+            </artwork>
+          </figure>
         </section>
       </section>
       <section title="Modifying an Offer or Answer"
