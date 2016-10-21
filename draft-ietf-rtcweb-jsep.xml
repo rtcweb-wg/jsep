@@ -1602,10 +1602,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             section on future calls to createOffer and createAnswer.
           </t>
           <t>
-            TODO: Write example showing how this might be used and how it
-            affects offers/answers/reoffers. Maybe something like:
-            "sendonly" remote offer, setDirection("sendonly"), "inactive"
-            answer, "sendonly" reoffer.
+            When creating offers, the transceiver direction is directly
+            reflected in the output, even for reoffers. When creating answers,
+            the transceiver direction is intersected with the offered direction,
+            as explained in the <xref section="sec.generating-an-answer" />
+            section below.
           </t>
         </section>
         <section title="setCodecPreferences" anchor="sec.transceiver-set-codec-preferences">
@@ -1985,14 +1986,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation">
               </xref>, Section 11.</t>
 
-              <t>A direction attribute, determined by applying the
-              rules regarding the offered direction specified
-              in <xref target="RFC3264" />, Section 6.1, and then
-              intersecting with the direction of the associated
-              RtpTransceiver. For example,
-              in the case where an m= section is offered as "sendonly",
-              and the local transceiver is set to "sendrecv", the
-              result in the answer is a "recvonly" direction.</t>
+              <t>A direction attribute which is the same as that of the
+              associated transceiver.</t>
 
               <t>For each media format on the m= line,
               "a=rtpmap" and "a=fmtp" lines, as specified in
@@ -2586,8 +2581,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC5888"></xref>, Section 9.1. The "mid"
             value MUST match that specified in the offer.</t>
 
-            <t>A direction attribute which is the same as that of the
-            associated transceiver.</t>
+            <t>A direction attribute, determined by applying the
+            rules regarding the offered direction specified
+            in <xref target="RFC3264" />, Section 6.1, and then
+            intersecting with the direction of the associated
+            RtpTransceiver. For example,
+            in the case where an m= section is offered as "sendonly",
+            and the local transceiver is set to "sendrecv", the
+            result in the answer is a "recvonly" direction.</t>
 
             <t>For each media format on the m= line,
             "a=rtpmap" and "a=fmtp" lines, as specified in
