@@ -364,7 +364,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2016-10-21" />
+  <meta name="dct.issued" scheme="ISO8601" content="2016-12-16" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -388,7 +388,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: April 24, 2017</td>
+  <td class="left">Expires: June 19, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -401,7 +401,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">October 21, 2016</td>
+  <td class="right">December 16, 2016</td>
 </tr>
 
     	
@@ -421,7 +421,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 24, 2017.</p>
+<p>This Internet-Draft will expire on June 19, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -788,7 +788,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h4 id="rfc.section.4.1.7.2"><a href="#rfc.section.4.1.7.2">4.1.7.2.</a> <a href="#sec.rollback" id="sec.rollback">Rollback</a></h4>
 <p id="rfc.section.4.1.7.2.p.1">In certain situations it may be desirable to "undo" a change made to setLocalDescription or setRemoteDescription.  Consider a case where a call is ongoing, and one side wants to change some of the session parameters; that side generates an updated offer and then calls setLocalDescription. However, the remote side, either before or after setRemoteDescription, decides it does not want to accept the new parameters, and sends a reject message back to the offerer. Now, the offerer, and possibly the answerer as well, need to return to a stable state and the previous local/remote description. To support this, we introduce the concept of "rollback".</p>
 <p id="rfc.section.4.1.7.2.p.2">A rollback discards any proposed changes to the session, returning the state machine to the stable state, and setting the pending local and/or remote description back to null. Any resources or candidates that were allocated by the abandoned local description are discarded; any media that is received will be processed according to the previous local and remote descriptions. Rollback can only be used to cancel proposed changes; there is no support for rolling back from a stable state to a previous stable state. Note that this implies that once the answerer has performed setLocalDescription with his answer, this cannot be rolled back.</p>
-<p id="rfc.section.4.1.7.2.p.3">A rollback will disassociate any RtpTransceivers that were associated with m= sections by the application of the rolled-back session description (see <a href="#sec.applying-a-remote-desc">Section 5.9</a> and <a href="#sec.applying-a-local-desc">Section 5.8</a>). This means that some RtpTransceivers that were previously associated will no longer be associated with any m= section; in such cases, the value of the RtpTransceiver's mid attribute MUST be set to null. RtpTransceivers that were created by applying a remote offer that was subsequently rolled back MUST be removed. However, a RtpTransceiver MUST NOT be removed if the RtpTransceiver's RtpSender was activated by the addTrack method. This is so that an application may call addTrack, then call setRemoteDescription with an offer, then roll back that offer, then call createOffer and have a m= section for the added track appear in the generated offer.</p>
+<p id="rfc.section.4.1.7.2.p.3">A rollback will disassociate any RtpTransceivers that were associated with m= sections by the application of the rolled-back session description (see <a href="#sec.applying-a-remote-desc">Section 5.9</a> and <a href="#sec.applying-a-local-desc">Section 5.8</a>). This means that some RtpTransceivers that were previously associated will no longer be associated with any m= section; in such cases, the value of the RtpTransceiver's mid attribute MUST be set to null. RtpTransceivers that were created by applying a remote offer that was subsequently rolled back MUST be removed. However, a RtpTransceiver MUST NOT be removed if a track was attached to the RtpTransceiver via the addTrack method. This is so that an application may call addTrack, then call setRemoteDescription with an offer, then roll back that offer, then call createOffer and have a m= section for the added track appear in the generated offer.</p>
 <p id="rfc.section.4.1.7.2.p.4">A rollback is performed by supplying a session description of type "rollback" with empty contents to either setLocalDescription or setRemoteDescription, depending on which was most recently used (i.e. if the new offer was supplied to setLocalDescription, the rollback should be done using setLocalDescription as well).</p>
 <h3 id="rfc.section.4.1.8"><a href="#rfc.section.4.1.8">4.1.8.</a> <a href="#sec.setlocaldescription" id="sec.setlocaldescription">setLocalDescription</a></h3>
 <p id="rfc.section.4.1.8.p.1">The setLocalDescription method instructs the PeerConnection to apply the supplied session description as its local configuration. The type field indicates whether the description should be processed as an offer, provisional answer, or final answer; offers and answers are checked differently, using the various rules that exist for each SDP line.</p>
