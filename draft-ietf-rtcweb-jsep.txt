@@ -5,10 +5,10 @@
 Network Working Group                                          J. Uberti
 Internet-Draft                                                    Google
 Intended status: Standards Track                             C. Jennings
-Expires: June 19, 2017                                             Cisco
+Expires: July 9, 2017                                              Cisco
                                                         E. Rescorla, Ed.
                                                                  Mozilla
-                                                       December 16, 2016
+                                                         January 5, 2017
 
 
                Javascript Session Establishment Protocol
@@ -36,11 +36,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on June 19, 2017.
+   This Internet-Draft will expire on July 9, 2017.
 
 Copyright Notice
 
-   Copyright (c) 2016 IETF Trust and the persons identified as the
+   Copyright (c) 2017 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Uberti, et al.            Expires June 19, 2017                 [Page 1]
+Uberti, et al.            Expires July 9, 2017                  [Page 1]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    the Trust Legal Provisions and are provided without warranty as
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Uberti, et al.            Expires June 19, 2017                 [Page 2]
+Uberti, et al.            Expires July 9, 2017                  [Page 2]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
        4.1.15. setConfiguration  . . . . . . . . . . . . . . . . . .  29
@@ -120,35 +120,37 @@ Internet-Draft                    JSEP                     December 2016
        4.2.1.  stop  . . . . . . . . . . . . . . . . . . . . . . . .  31
        4.2.2.  stopped . . . . . . . . . . . . . . . . . . . . . . .  31
        4.2.3.  setDirection  . . . . . . . . . . . . . . . . . . . .  31
-       4.2.4.  setCodecPreferences . . . . . . . . . . . . . . . . .  31
+       4.2.4.  direction . . . . . . . . . . . . . . . . . . . . . .  31
+       4.2.5.  currentDirection  . . . . . . . . . . . . . . . . . .  32
+       4.2.6.  setCodecPreferences . . . . . . . . . . . . . . . . .  32
    5.  SDP Interaction Procedures  . . . . . . . . . . . . . . . . .  32
-     5.1.  Requirements Overview . . . . . . . . . . . . . . . . . .  32
-       5.1.1.  Implementation Requirements . . . . . . . . . . . . .  32
+     5.1.  Requirements Overview . . . . . . . . . . . . . . . . . .  33
+       5.1.1.  Implementation Requirements . . . . . . . . . . . . .  33
        5.1.2.  Usage Requirements  . . . . . . . . . . . . . . . . .  34
        5.1.3.  Profile Names and Interoperability  . . . . . . . . .  34
      5.2.  Constructing an Offer . . . . . . . . . . . . . . . . . .  35
-       5.2.1.  Initial Offers  . . . . . . . . . . . . . . . . . . .  35
+       5.2.1.  Initial Offers  . . . . . . . . . . . . . . . . . . .  36
        5.2.2.  Subsequent Offers . . . . . . . . . . . . . . . . . .  41
        5.2.3.  Options Handling  . . . . . . . . . . . . . . . . . .  44
-         5.2.3.1.  IceRestart  . . . . . . . . . . . . . . . . . . .  44
-         5.2.3.2.  VoiceActivityDetection  . . . . . . . . . . . . .  44
-     5.3.  Generating an Answer  . . . . . . . . . . . . . . . . . .  45
-       5.3.1.  Initial Answers . . . . . . . . . . . . . . . . . . .  45
-       5.3.2.  Subsequent Answers  . . . . . . . . . . . . . . . . .  49
+         5.2.3.1.  IceRestart  . . . . . . . . . . . . . . . . . . .  45
+         5.2.3.2.  VoiceActivityDetection  . . . . . . . . . . . . .  45
+     5.3.  Generating an Answer  . . . . . . . . . . . . . . . . . .  46
+       5.3.1.  Initial Answers . . . . . . . . . . . . . . . . . . .  46
+       5.3.2.  Subsequent Answers  . . . . . . . . . . . . . . . . .  50
        5.3.3.  Options Handling  . . . . . . . . . . . . . . . . . .  51
          5.3.3.1.  VoiceActivityDetection  . . . . . . . . . . . . .  51
-     5.4.  Modifying an Offer or Answer  . . . . . . . . . . . . . .  51
+     5.4.  Modifying an Offer or Answer  . . . . . . . . . . . . . .  52
      5.5.  Processing a Local Description  . . . . . . . . . . . . .  52
-     5.6.  Processing a Remote Description . . . . . . . . . . . . .  52
+     5.6.  Processing a Remote Description . . . . . . . . . . . . .  53
      5.7.  Parsing a Session Description . . . . . . . . . . . . . .  53
-       5.7.1.  Session-Level Parsing . . . . . . . . . . . . . . . .  53
+       5.7.1.  Session-Level Parsing . . . . . . . . . . . . . . . .  54
        5.7.2.  Media Section Parsing . . . . . . . . . . . . . . . .  55
-       5.7.3.  Semantics Verification  . . . . . . . . . . . . . . .  57
-     5.8.  Applying a Local Description  . . . . . . . . . . . . . .  58
+       5.7.3.  Semantics Verification  . . . . . . . . . . . . . . .  58
+     5.8.  Applying a Local Description  . . . . . . . . . . . . . .  59
      5.9.  Applying a Remote Description . . . . . . . . . . . . . .  60
-     5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  63
-   6.  Processing RTP/RTCP packets . . . . . . . . . . . . . . . . .  65
-   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  67
+     5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  64
+   6.  Processing RTP/RTCP packets . . . . . . . . . . . . . . . . .  66
+   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  68
      7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  68
      7.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  72
    8.  Security Considerations . . . . . . . . . . . . . . . . . . .  81
@@ -163,11 +165,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-
-
-Uberti, et al.            Expires June 19, 2017                 [Page 3]
+Uberti, et al.            Expires July 9, 2017                  [Page 3]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
 1.  Introduction
@@ -221,9 +221,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                 [Page 4]
+Uberti, et al.            Expires July 9, 2017                  [Page 4]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    initial setup is complete.  This process can be repeated for
@@ -277,9 +277,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                 [Page 5]
+Uberti, et al.            Expires July 9, 2017                  [Page 5]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    directly.  This was rejected based on a feeling that requiring
@@ -333,9 +333,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                 [Page 6]
+Uberti, et al.            Expires July 9, 2017                  [Page 6]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    application has complete control over which offers and answers get
@@ -389,9 +389,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                 [Page 7]
+Uberti, et al.            Expires July 9, 2017                  [Page 7]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    this case, the offerer's media handler must be aware of the details
@@ -445,9 +445,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                 [Page 8]
+Uberti, et al.            Expires July 9, 2017                  [Page 8]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
                        setRemote(OFFER)               setLocal(PRANSWER)
@@ -501,9 +501,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                 [Page 9]
+Uberti, et al.            Expires July 9, 2017                  [Page 9]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
 3.3.  Session Description Format
@@ -557,9 +557,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 10]
+Uberti, et al.            Expires July 9, 2017                 [Page 10]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    RtpTransceivers are created but not yet associated with a m= section,
@@ -613,9 +613,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 11]
+Uberti, et al.            Expires July 9, 2017                 [Page 11]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    Note that gathering phases only gather the candidates needed by
@@ -669,9 +669,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 12]
+Uberti, et al.            Expires July 9, 2017                 [Page 12]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    The IceCandidate object also contains fields to indicate which m=
@@ -725,9 +725,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 13]
+Uberti, et al.            Expires July 9, 2017                 [Page 13]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    Later, if a different policy is specified by the application, the
@@ -781,9 +781,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 14]
+Uberti, et al.            Expires July 9, 2017                 [Page 14]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
 3.6.1.  Creating an imageattr Attribute
@@ -837,9 +837,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 15]
+Uberti, et al.            Expires July 9, 2017                 [Page 15]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    This declaration indicates that the receiver is capable of decoding
@@ -893,9 +893,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 16]
+Uberti, et al.            Expires July 9, 2017                 [Page 16]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    upscaling.  The sender SHOULD NOT upscale in other cases, even if the
@@ -949,9 +949,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 17]
+Uberti, et al.            Expires July 9, 2017                 [Page 17]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    currently not surfaced through any API.  This means that established
@@ -1005,9 +1005,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 18]
+Uberti, et al.            Expires July 9, 2017                 [Page 18]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    JSEP handles sequential forking well, allowing the application to
@@ -1061,9 +1061,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 19]
+Uberti, et al.            Expires July 9, 2017                 [Page 19]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    description and their own local and remote addresses.  The media flow
@@ -1117,9 +1117,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 20]
+Uberti, et al.            Expires July 9, 2017                 [Page 20]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    potentially long periods of time, this must only occur upon
@@ -1173,9 +1173,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 21]
+Uberti, et al.            Expires July 9, 2017                 [Page 21]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    As it provides the best tradeoff between performance and
@@ -1229,9 +1229,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 22]
+Uberti, et al.            Expires July 9, 2017                 [Page 22]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
 4.1.4.  createDataChannel
@@ -1285,9 +1285,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 23]
+Uberti, et al.            Expires July 9, 2017                 [Page 23]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    Session descriptions generated by createOffer must be immediately
@@ -1341,9 +1341,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 24]
+Uberti, et al.            Expires July 9, 2017                 [Page 24]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    description used as an "offer" may be applied anytime the
@@ -1397,9 +1397,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 25]
+Uberti, et al.            Expires July 9, 2017                 [Page 25]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    As an example, consider a typical web application that will set up a
@@ -1453,9 +1453,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 26]
+Uberti, et al.            Expires July 9, 2017                 [Page 26]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    rolled back MUST be removed.  However, a RtpTransceiver MUST NOT be
@@ -1509,9 +1509,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 27]
+Uberti, et al.            Expires July 9, 2017                 [Page 27]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
 4.1.9.  setRemoteDescription
@@ -1565,9 +1565,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 28]
+Uberti, et al.            Expires July 9, 2017                 [Page 28]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
 4.1.13.  pendingRemoteDescription
@@ -1621,9 +1621,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 29]
+Uberti, et al.            Expires July 9, 2017                 [Page 29]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    o  Any changes to the STUN/TURN servers to use affect the next
@@ -1677,9 +1677,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 30]
+Uberti, et al.            Expires July 9, 2017                 [Page 30]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    This method can also be used to provide an end-of-candidates
@@ -1724,20 +1724,40 @@ Internet-Draft                    JSEP                     December 2016
    transceiver direction is intersected with the offered direction, as
    explained in the Section 5.3 section below.
 
-4.2.4.  setCodecPreferences
+4.2.4.  direction
+
+   The direction method returns the last value passed into setDirection.
+   If setDirection has never been called, it returns the direction the
+   transceiver was initialized with.
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 31]
+
+Internet-Draft                    JSEP                      January 2017
+
+
+4.2.5.  currentDirection
+
+   The currentDirection method returns the last negotiated direction for
+   the transceiver's associated m= section.  More specifically, it
+   returns the [RFC3264] directional attribute of the associated m=
+   section in the last applied answer, with "send" and "recv" directions
+   reversed if it was a remote answer.  For example, if the directional
+   attribute for the associated m= section in a remote answer is
+   "recvonly", currentDirection returns "sendonly".
+
+   If an answer that references this transceiver has not yet been
+   applied, or if the transceiver is stopped, currentDirection returns
+   null.
+
+4.2.6.  setCodecPreferences
 
    The setCodecPreferences method sets the codec preferences of a
    transceiver, which in turn affect the presence and order of codecs of
    the associated m= section on future calls to createOffer and
    createAnswer.  Note that setCodecPreferences does not directly affect
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 31]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    which codec the implemtation decides to send.  It only affects which
    codecs the implementation indicates that it prefers to receive, via
    the offer or answer.  Even when a codec is excluded by
@@ -1765,6 +1785,15 @@ Internet-Draft                    JSEP                     December 2016
    This section describes the specific procedures to be followed when
    creating and parsing SDP objects.
 
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 32]
+
+Internet-Draft                    JSEP                      January 2017
+
+
 5.1.  Requirements Overview
 
    JSEP implementations must comply with the specifications listed below
@@ -1786,13 +1815,6 @@ Internet-Draft                    JSEP                     December 2016
 
    R-1   [RFC4566] is the base SDP specification and MUST be
          implemented.
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 32]
-
-Internet-Draft                    JSEP                     December 2016
-
 
    R-2   [RFC5764] MUST be supported for signaling the UDP/TLS/RTP/SAVPF
          [RFC5764], TCP/DTLS/RTP/SAVPF [RFC7850], "UDP/DTLS/SCTP"
@@ -1820,6 +1842,14 @@ Internet-Draft                    JSEP                     December 2016
 
    R-8   The bundle mechanism in
          [I-D.ietf-mmusic-sdp-bundle-negotiation] MUST be supported to
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 33]
+
+Internet-Draft                    JSEP                      January 2017
+
+
          signal the ability to multiplex RTP streams on a single UDP
          port, in order to avoid excessive use of port number resources.
 
@@ -1840,15 +1870,6 @@ Internet-Draft                    JSEP                     December 2016
 
    R-14  [RFC4588] MUST be implemented to signal RTX payload type
          associations.
-
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 33]
-
-Internet-Draft                    JSEP                     December 2016
-
 
    R-15  [RFC3556] with bandwidth modifiers MAY be supported for
          specifying RTCP bandwidth as a fraction of the media bandwidth,
@@ -1877,6 +1898,14 @@ Internet-Draft                    JSEP                     December 2016
    For media m= sections, JSEP endpoints MUST support both the "UDP/TLS/
    RTP/SAVPF" and "TCP/DTLS/RTP/SAVPF" profiles and MUST indicate one of
    these two profiles for each media m= line they produce in an offer.
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 34]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    For data m= sections, JSEP endpoints must support both the "UDP/DTLS/
    SCTP" and "TCP/DTLS/SCTP" profiles and MUST indicate one of these two
    profiles for each data m= line they produce in an offer.  Because ICE
@@ -1898,13 +1927,6 @@ Internet-Draft                    JSEP                     December 2016
 
    o  Any profile matching the following patterns MUST be accepted:
       "RTP/[S]AVP[F]" and "(UDP/TCP)/TLS/RTP/SAVP[F]"
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 34]
-
-Internet-Draft                    JSEP                     December 2016
-
 
    o  Because DTLS-SRTP is REQUIRED, the choice of SAVP or AVP has no
       effect; support for DTLS-SRTP is determined by the presence of one
@@ -1932,6 +1954,14 @@ Internet-Draft                    JSEP                     December 2016
    [I-D.ietf-rtcweb-rtp-usage].  The exact details of this process are
    explained below.
 
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 35]
+
+Internet-Draft                    JSEP                      January 2017
+
+
 5.2.1.  Initial Offers
 
    When createOffer is called for the first time, the result is known as
@@ -1953,15 +1983,6 @@ Internet-Draft                    JSEP                     December 2016
       The value of the <nettype> <addrtype> <unicast-address> tuple
       SHOULD be set to a non-meaningful address, such as IN IP4 0.0.0.0,
       to prevent leaking the local address in this field.  As mentioned
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 35]
-
-Internet-Draft                    JSEP                     December 2016
-
-
       in [RFC4566], the entire o= line needs to be unique, but selecting
       a random number for <sess-id> is sufficient to accomplish this.
 
@@ -1989,6 +2010,14 @@ Internet-Draft                    JSEP                     December 2016
    The next step is to generate m= sections, as specified in [RFC4566]
    Section 5.14.  An m= section is generated for each RtpTransceiver
    that has been added to the PeerConnection.  This is done in the order
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 36]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    that their associated RtpTransceivers were added to the
    PeerConnection and excludes RtpTransceivers that are stopped and not
    associated with an m= section (either due to an m= section being
@@ -2008,15 +2037,6 @@ Internet-Draft                    JSEP                     December 2016
    Each m= section should be generated as specified in [RFC4566],
    Section 5.14.  For the m= line itself, the following rules MUST be
    followed:
-
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 36]
-
-Internet-Draft                    JSEP                     December 2016
-
 
    o  The port value is set to the port of the default ICE candidate for
       this m= section, but given that no candidates have yet been
@@ -2046,6 +2066,14 @@ Internet-Draft                    JSEP                     December 2016
    [I-D.ietf-mmusic-sdp-mux-attributes] groups SDP attributes into
    different categories.  To avoid unnecessary duplication when
    bundling, Section 8.1 of [I-D.ietf-mmusic-sdp-bundle-negotiation]
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 37]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    specifies that attributes of category IDENTICAL or TRANSPORT should
    not be repeated in bundled m= sections.
 
@@ -2064,15 +2092,6 @@ Internet-Draft                    JSEP                     December 2016
    o  For each media format on the m= line, "a=rtpmap" and "a=fmtp"
       lines, as specified in [RFC4566], Section 6, and [RFC3264],
       Section 5.1.
-
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 37]
-
-Internet-Draft                    JSEP                     December 2016
-
 
    o  If this m= section is for media with configurable frame sizes,
       e.g. audio, an "a=maxptime" line, indicating the smallest of the
@@ -2102,6 +2121,15 @@ Internet-Draft                    JSEP                     December 2016
       that require encryption MUST be specified as indicated in
       [RFC6904], Section 4.
 
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 38]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    o  For each supported RTCP feedback mechanism, an "a=rtcp-fb"
       mechanism, as specified in [RFC4585], Section 4.2.  The list of
       RTCP feedback mechanisms that SHOULD/MUST be supported is
@@ -2122,14 +2150,6 @@ Internet-Draft                    JSEP                     December 2016
       than one encoding in the RtpSenders's parameters, an "a=rid" line
       for each encoding specified.  The "a=rid" line is specified in
       [I-D.ietf-mmusic-rid], and its direction MUST be "send".  If the
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 38]
-
-Internet-Draft                    JSEP                     December 2016
-
-
       application has chosen a RID value, it MUST be used as the rid-
       identifier; otherwise a RID value MUST be generated by the
       implementation.  When generating RID values, it is RECOMMENDED
@@ -2157,6 +2177,15 @@ Internet-Draft                    JSEP                     December 2016
 
    o  An "a=fingerprint" line for each of the endpoint's certificates,
       as specified in [RFC4572], Section 5; the digest algorithm used
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 39]
+
+Internet-Draft                    JSEP                      January 2017
+
+
       for the fingerprint MUST match that used in the certificate
       signature.
 
@@ -2178,14 +2207,6 @@ Internet-Draft                    JSEP                     December 2016
    Lastly, if a data channel has been created, a m= section MUST be
    generated for data.  The <media> field MUST be set to "application"
    and the <proto> field MUST be set to "UDP/DTLS/SCTP" if the default
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 39]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    candidate uses UDP transport, or "TCP/DTLS/SCTP" if the default
    candidate uses TCP transport [I-D.ietf-mmusic-sctp-sdp].  The "fmt"
    value MUST be set to "webrtc-datachannel" as specified in
@@ -2212,6 +2233,15 @@ Internet-Draft                    JSEP                     December 2016
 
    Attributes which SDP permits to either be at the session level or the
    media level SHOULD generally be at the media level even if they are
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 40]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    identical.  This promotes readability, especially if one of a set of
    initially identical attributes is subsequently changed.
 
@@ -2234,13 +2264,6 @@ Internet-Draft                    JSEP                     December 2016
    SDP.  Implementations MUST be prepared to accept compliant SDP even
    if it would not conform to the requirements for generating SDP in
    this specification.
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 40]
-
-Internet-Draft                    JSEP                     December 2016
-
 
 5.2.2.  Subsequent Offers
 
@@ -2267,6 +2290,14 @@ Internet-Draft                    JSEP                     December 2016
    Note that if the application creates an offer by reading
    currentLocalDescription instead of calling createOffer, the returned
    SDP may be different than when setLocalDescription was originally
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 41]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    called, due to the addition of gathered ICE candidates, but the
    <session-version> will not have changed.  There are no known
    scenarios in which this causes problems, but if this is a concern,
@@ -2290,14 +2321,6 @@ Internet-Draft                    JSEP                     December 2016
 
    o  If an RtpTransceiver is stopped and is not associated with an m=
       section, an m= section MUST NOT be generated for it.  This
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 41]
-
-Internet-Draft                    JSEP                     December 2016
-
-
       prevents adding back RtpTransceivers whose m= sections were
       recycled and used for a new RtpTransceiver in a previous offer/
       answer exchange, as described above.
@@ -2321,6 +2344,15 @@ Internet-Draft                    JSEP                     December 2016
       yet been gathered, dummy values MUST be used, as described above.
 
    o  Each "a=mid" line MUST stay the same.
+
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 42]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless
       the ICE configuration has changed (either changes to the supported
@@ -2346,14 +2378,6 @@ Internet-Draft                    JSEP                     December 2016
    o  For RtpTransceivers that are still present, the "a=msid" line MUST
       stay the same.
 
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 42]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    o  For RtpTransceivers that are still present, the "a=rid" lines MUST
       stay the same.
 
@@ -2377,6 +2401,14 @@ Internet-Draft                    JSEP                     December 2016
    pranswer" or "stable" states, an offer is generated based on the
    negotiated session descriptions by following the steps mentioned for
    the "local-offer" state above.
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 43]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    In addition, for each non-recycled, non-rejected m= section in the
    new offer, the following adjustments are made based on the contents
@@ -2402,14 +2434,6 @@ Internet-Draft                    JSEP                     December 2016
    o  The "a=rtcp-mux" line MUST only be added if present in the most
       recent answer.
 
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 43]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    o  The "a=rtcp-mux-only" line MUST only be added if present in the
       most recent answer.
 
@@ -2430,6 +2454,17 @@ Internet-Draft                    JSEP                     December 2016
    The createOffer method takes as a parameter an RTCOfferOptions
    object.  Special processing is performed when generating a SDP
    description if the following options are present.
+
+
+
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 44]
+
+Internet-Draft                    JSEP                      January 2017
+
 
 5.2.3.1.  IceRestart
 
@@ -2459,13 +2494,6 @@ Internet-Draft                    JSEP                     December 2016
    receives, at the cost of some fidelity, depending on the quality of
    the remote VAD algorithm.
 
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 44]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    If the "VoiceActivityDetection" option is specified, with a value of
    "false", the browser MUST NOT emit "CN" codecs.  For codecs that have
    their own internal silence suppression support, the appropriate fmtp
@@ -2482,6 +2510,17 @@ Internet-Draft                    JSEP                     December 2016
    The "VoiceActivityDetection" option does not have any impact on the
    setting of the "vad" value in the signaling of the client to mixer
    audio level header extension described in [RFC6464], Section 4.
+
+
+
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 45]
+
+Internet-Draft                    JSEP                      January 2017
+
 
 5.3.  Generating an Answer
 
@@ -2514,14 +2553,6 @@ Internet-Draft                    JSEP                     December 2016
 
    The next step is to generate session-level lip sync groups as defined
    in [RFC5888], Section 7.  For each group of type "LS" present in the
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 45]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    offer, determine which of the local RtpTransceivers identified by
    that group's mid values reference a common local MediaStream (as
    specified in the addTrack and addTransceiver methods).  If at least
@@ -2539,6 +2570,14 @@ Internet-Draft                    JSEP                     December 2016
 
    The next step is to go through each offered m= section.  Each offered
    m= section will have an associated RtpTransceiver, as described in
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 46]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    Section 5.9.  If there are more RtpTransceivers than there are m=
    sections, the unmatched RtpTransceivers will need to be associated in
    a subsequent offer.
@@ -2569,15 +2608,6 @@ Internet-Draft                    JSEP                     December 2016
 
    o  The port value would normally be set to the port of the default
       ICE candidate for this m= section, but given that no candidates
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 46]
-
-Internet-Draft                    JSEP                     December 2016
-
-
       have yet been gathered, the "dummy" port value of 9 (Discard) MUST
       be used, as indicated in [I-D.ietf-ice-trickle], Section 5.1.
 
@@ -2596,6 +2626,14 @@ Internet-Draft                    JSEP                     December 2016
 
    The m= line MUST be followed immediately by a "c=" line, as specified
    in [RFC4566], Section 5.7.  Again, as no candidates have yet been
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 47]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    gathered, the "c=" line must contain the "dummy" value "IN IP4
    0.0.0.0", as defined in [I-D.ietf-ice-trickle], Section 5.1.
 
@@ -2625,15 +2663,6 @@ Internet-Draft                    JSEP                     December 2016
       maximum supported frame sizes out of all codecs included above, as
       specified in [RFC4566], Section 6.
 
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 47]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    o  If this m= section is for video media, and there are known
       limitations on the size of images which can be decoded, an
       "a=imageattr" line, as specified in Section 3.6.
@@ -2653,6 +2682,14 @@ Internet-Draft                    JSEP                     December 2016
    o  For each supported RTP header extension that is present in the
       offer, an "a=extmap" line, as specified in [RFC5285], Section 5.
       The list of header extensions that SHOULD/MUST be supported is
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 48]
+
+Internet-Draft                    JSEP                      January 2017
+
+
       specified in [I-D.ietf-rtcweb-rtp-usage], Section 5.2.  Any header
       extensions that require encryption MUST be specified as indicated
       in [RFC6904], Section 4.
@@ -2682,14 +2719,6 @@ Internet-Draft                    JSEP                     December 2016
 
    o  An "a=setup" line, as specified in [RFC4145], Section 4, and
       clarified for use in DTLS-SRTP scenarios in [RFC5763], Section 5.
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 48]
-
-Internet-Draft                    JSEP                     December 2016
-
-
       The role value in the answer MUST be "active" or "passive"; the
       "active" role is RECOMMENDED.  The role value MUST be consistent
       with the existing DTLS connection, if one exists and is being
@@ -2708,6 +2737,15 @@ Internet-Draft                    JSEP                     December 2016
 
    If a data channel m= section has been offered, a m= section MUST also
    be generated for data.  The <media> field MUST be set to
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 49]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    "application" and the <proto> and "fmt" fields MUST be set to exactly
    match the fields in the offer.
 
@@ -2738,14 +2776,6 @@ Internet-Draft                    JSEP                     December 2016
    after a local description has already been installed, the processing
    is somewhat different than for an initial answer.
 
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 49]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    If the initial answer was not applied using setLocalDescription,
    meaning the PeerConnection is still in the "have-remote-offer" state,
    the steps for generating an initial answer should be followed,
@@ -2764,6 +2794,14 @@ Internet-Draft                    JSEP                     December 2016
 
    o  Each "m=" and c=" line MUST be filled in with the port and address
       of the default candidate for the m= section, as described in
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 50]
+
+Internet-Draft                    JSEP                      January 2017
+
+
       [RFC5245], Section 4.3.  Note, however, that the m= line protocol
       need not match the default candidate, because this protocol value
       must instead match what was supplied in the offer, as described
@@ -2794,14 +2832,6 @@ Internet-Draft                    JSEP                     December 2016
       section, both "a=candidate" and "a=end-of-candidates" MUST be
       omitted.
 
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 50]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    o  For RtpTransceivers that are not stopped, the "a=msid" line MUST
       stay the same.
 
@@ -2820,6 +2850,14 @@ Internet-Draft                    JSEP                     December 2016
    Silence suppression in the answer is handled as described in
    Section 5.2.3.2, with one exception: if support for silence
    suppression was not indicated in the offer, the
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 51]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    VoiceActivityDetection parameter has no effect, and the answer should
    be generated as if VoiceActivityDetection was set to false.  This is
    done on a per-codec basis (e.g., if the offerer somehow offered
@@ -2850,14 +2888,6 @@ Internet-Draft                    JSEP                     December 2016
    As always, the application is solely responsible for what it sends to
    the other party, and all incoming SDP will be processed by the
    browser to the extent of its capabilities.  It is an error to assume
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 51]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    that all SDP is well-formed; however, one should be able to assume
    that any implementation of this specification will be able to
    process, as a remote offer or answer, unmodified SDP coming from any
@@ -2876,6 +2906,13 @@ Internet-Draft                    JSEP                     December 2016
 
       *  If the type is "pranswer" or "answer", the PeerConnection state
          MUST be either "have-remote-offer" or "have-local-pranswer".
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 52]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  If the type is not correct for the current state, processing MUST
       stop and an error MUST be returned.
@@ -2904,16 +2941,6 @@ Internet-Draft                    JSEP                     December 2016
    o  If the type is not correct for the current state, processing MUST
       stop and an error MUST be returned.
 
-
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 52]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    o  Next, the SessionDescription is parsed into a data structure, as
       described in the Section 5.7 section below.  If parsing fails for
       any reason, processing MUST stop and an error MUST be returned.
@@ -2935,6 +2962,14 @@ Internet-Draft                    JSEP                     December 2016
    information.  However, SDP allows many types of lines, not all of
    which are relevant to JSEP applications.  For each line, the
    implementation will first ensure it is syntactically correct
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 53]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    according to its defining ABNF, check that it conforms to [RFC4566]
    and [RFC3264] semantics, and then either parse and store or discard
    the provided value, as described below.
@@ -2962,14 +2997,6 @@ Internet-Draft                    JSEP                     December 2016
       candidate lines; because JSEP always uses ICE, "ice-mismatch" is
       not useful in this context.
 
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 53]
-
-Internet-Draft                    JSEP                     December 2016
-
-
       The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are
       not used by this specification; they MUST be checked for syntax
       but their values are not used.
@@ -2991,6 +3018,13 @@ Internet-Draft                    JSEP                     December 2016
 
    o  Any "a=group" lines are parsed as specified in [RFC5888],
       Section 5, and the group's semantics and mids are stored.
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 54]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  If present, a single "a=ice-lite" line is parsed as specified in
       [RFC5245], Section 15.3, and a value indicating the presence of
@@ -3017,15 +3051,6 @@ Internet-Draft                    JSEP                     December 2016
       [I-D.ietf-mmusic-dtls-sdp] Section 5, and the dtls-id value is
       stored.
 
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 54]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    o  Any "a=extmap" lines are parsed as specified in [RFC5285],
       Section 5, and their values are stored.
 
@@ -3047,6 +3072,15 @@ Internet-Draft                    JSEP                     December 2016
    o  As with the "c=" line at the session level, the "c=" line MUST be
       parsed according to [RFC4566], Section 5.7, but its value is not
       used.
+
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 55]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  The "b=" line, if present, MUST be parsed as specified in
       [RFC4566], Section 5.8, and the bwtype and bandwidth values
@@ -3075,13 +3109,6 @@ Internet-Draft                    JSEP                     December 2016
       parsed as specified in [I-D.ietf-ice-trickle], Section 8.2, and
       its presence or absence flagged and stored.
 
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 55]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    o  Any "a=fingerprint" lines are parsed as specified in [RFC4572],
       Section 5, and the set of fingerprint and algorithm values is
       stored.
@@ -3101,6 +3128,15 @@ Internet-Draft                    JSEP                     December 2016
 
    o  If present, a single "a=maxptime" line MUST be parsed as described
       in [RFC4566], Section 6, and its value stored.
+
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 56]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  If present, a single direction attribute line (e.g.  "a=sendrecv")
       MUST be parsed as described in [RFC4566], Section 6, and its value
@@ -3131,13 +3167,6 @@ Internet-Draft                    JSEP                     December 2016
       specified in [RFC3605], Section 2.1, but its value is ignored, as
       this information is superfluous when using ICE.
 
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 56]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    o  If present, a single "a=msid" attribute MUST be parsed as
       specified in [I-D.ietf-mmusic-msid], Section 3.2, and its value
       stored.
@@ -3154,6 +3183,16 @@ Internet-Draft                    JSEP                     December 2016
 
    Otherwise, if the "m=" proto value indicates use of SCTP, the
    following attribute lines MUST be processed:
+
+
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 57]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  The "m=" fmt value MUST be parsed as specified in
       [I-D.ietf-mmusic-sctp-sdp], Section 4.3, and the application
@@ -3186,14 +3225,6 @@ Internet-Draft                    JSEP                     December 2016
          [I-D.ietf-mmusic-dtls-sdp] Section 5.  If this is a re-offer
          and the dtls-id value is different from that presently in use,
          the DTLS connection is not being continued and the remote
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 57]
-
-Internet-Draft                    JSEP                     December 2016
-
-
          description MUST be part of an ICE restart, together with new
          ufrag and password values.  If this is an answer, the dtls-id
          value, if present, MUST be the same as in the offer.
@@ -3208,6 +3239,16 @@ Internet-Draft                    JSEP                     December 2016
 
    o  All RID values referenced in an "a=simulcast" line MUST exist as
       "a=rid" lines.
+
+
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 58]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  Each m= section is also checked to ensure prohibited features are
       not used.  If this is a local description, the "ice-lite"
@@ -3240,16 +3281,6 @@ Internet-Draft                    JSEP                     December 2016
    bounds, or cannot be applied, processing MUST stop and an error MUST
    be returned.
 
-
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 58]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    o  If this media section is new, begin gathering candidates for it,
       as defined in [RFC5245], Section 4.1.1, unless it has been marked
       as bundle-only.
@@ -3267,6 +3298,13 @@ Internet-Draft                    JSEP                     December 2016
          (which should only happen when applying an offer), find one and
          associate it with this m= section according to the following
          steps:
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 59]
+
+Internet-Draft                    JSEP                      January 2017
+
 
          +  Find the RtpTransceiver that corresponds to the m= section
             with the same MID in the created offer.
@@ -3297,15 +3335,6 @@ Internet-Draft                    JSEP                     December 2016
       *  For each specified "rtx" media format, establish a mapping
          between the RTX payload type and its associated primary payload
          type, as described in [RFC4588], Sections 8.6 and 8.7.  If any
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 59]
-
-Internet-Draft                    JSEP                     December 2016
-
-
          referenced primary payload types are not present, this MUST
          result in an error.
 
@@ -3323,6 +3352,15 @@ Internet-Draft                    JSEP                     December 2016
 
    The following steps are performed at the media engine level to apply
    a remote description.
+
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 60]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    The following steps MUST be performed for attributes at the session
    level; if any parameters are out of bounds, or cannot be applied,
@@ -3355,13 +3393,6 @@ Internet-Draft                    JSEP                     December 2016
       the ufrag and password in an answer if and only if ICE is
       restarting, as described in Section 9.2.1.1 of [RFC5245].
 
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 60]
-
-Internet-Draft                    JSEP                     December 2016
-
-
    o  Configure the ICE components associated with this media section to
       use the supplied ICE remote ufrag and password for their
       connectivity checks.
@@ -3379,6 +3410,13 @@ Internet-Draft                    JSEP                     December 2016
       *  If the m= section is being recycled (see Section 5.2.2),
          dissociate the currently associated RtpTransceiver by setting
          its mid attribute to null.
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 61]
+
+Internet-Draft                    JSEP                      January 2017
+
 
       *  If the m= section is not associated with any RtpTransceiver
          (possibly because it was dissociated in the previous step),
@@ -3410,14 +3448,6 @@ Internet-Draft                    JSEP                     December 2016
          records the payload type to be used in outgoing RTP packets
          when sending each specified media format, as well as the
          relative preference for each format that is indicated in their
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 61]
-
-Internet-Draft                    JSEP                     December 2016
-
-
          ordering.  If any indicated media format is not supported by
          the local implementation, it MUST be ignored.
 
@@ -3436,6 +3466,14 @@ Internet-Draft                    JSEP                     December 2016
          extension ID and URI, as described in [RFC5285], Section 5.
          Specifically, this means that the implementation records the
          extension ID to be used in outgoing RTP packets when sending
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 62]
+
+Internet-Draft                    JSEP                      January 2017
+
+
          each specified header extension.  If any indicated RTP header
          extension is not supported by the local implementation, it MUST
          be ignored.
@@ -3467,13 +3505,6 @@ Internet-Draft                    JSEP                     December 2016
 
       *  If the media section is of type audio:
 
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 62]
-
-Internet-Draft                    JSEP                     December 2016
-
-
          +  For each specified "CN" media format, enable DTX for all
             supported media formats with the same clockrate, as
             described in [RFC3389], Section 5, except for formats that
@@ -3490,6 +3521,15 @@ Internet-Draft                    JSEP                     December 2016
 
          +  For any specified "ptime" value, configure the available
             media formats to use the specified packet size.  If the
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 63]
+
+Internet-Draft                    JSEP                      January 2017
+
+
             specified size is not supported for a media format, use the
             next closest value instead.
 
@@ -3522,14 +3562,6 @@ Internet-Draft                    JSEP                     December 2016
 
    o  If the media section proto value indicates use of RTP:
 
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 63]
-
-Internet-Draft                    JSEP                     December 2016
-
-
       *  If the media section references any media formats, RTP header
          extensions, or RTCP feedback mechanisms that were not present
          in the corresponding media section in the offer, this indicates
@@ -3545,6 +3577,14 @@ Internet-Draft                    JSEP                     December 2016
       *  If the media section has reduced-size RTCP enabled, configure
          the RTCP transmission for this media section to use reduced-
          size RTCP, as specified in [RFC5506].
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 64]
+
+Internet-Draft                    JSEP                      January 2017
+
 
       *  If the directional attribute in the answer is of type
          "sendrecv" or "sendonly", choose the media format to send as
@@ -3578,14 +3618,6 @@ Internet-Draft                    JSEP                     December 2016
       *  If the send media format chosen above has a corresponding "red"
          media format of the same clockrate, allow redundant encoding
          using the specified format for resiliency purposes, as
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 64]
-
-Internet-Draft                    JSEP                     December 2016
-
-
          discussed in [I-D.ietf-rtcweb-fec], Section 3.2.  Note that
          unlike RTX or FEC media formats, the "red" format is
          transmitted on the Source RTP Stream, not the Redundancy RTP
@@ -3602,6 +3634,13 @@ Internet-Draft                    JSEP                     December 2016
       *  If the directional attribute is of type "recvonly" or
          "inactive", stop transmitting all RTP media, but continue
          sending RTCP, as described in [RFC3264], Section 5.1.
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 65]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  If the media section proto value indicates use of SCTP:
 
@@ -3634,14 +3673,6 @@ Internet-Draft                    JSEP                     December 2016
       Construct a table mapping incoming SSRC to RtpReceiver for each
       RtpReceiver configured to receive from this transport and for each
       SSRC that RtpReceiver is configured to receive.  Some of the SSRCs
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 65]
-
-Internet-Draft                    JSEP                     December 2016
-
-
       may be present in the m= section corresponding to that RtpReceiver
       in the remote description.
 
@@ -3657,6 +3688,15 @@ Internet-Draft                    JSEP                     December 2016
       any payload type could map to more than one RtpReceiver, map to
       the RtpReceiver whose m= section appears earliest in the local
       description.
+
+
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 66]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    As RtpTransceivers (and, thus, RtpReceivers) are added, removed,
    stopped, or reconfigured, the tables above must also be updated.
@@ -3690,14 +3730,6 @@ Internet-Draft                    JSEP                     December 2016
       If the packet is of type SR, and the sender SSRC for the packet is
       found in the incoming SSRC table, deliver a copy of the packet to
       the RtpReceiver associated with that SSRC.  In addition, for each
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 66]
-
-Internet-Draft                    JSEP                     December 2016
-
-
       report block in the report whose SSRC is found in the outgoing
       SSRC table, deliver a copy of the RTCP packet to the RtpSender
       associated with that SSRC.
@@ -3714,6 +3746,13 @@ Internet-Draft                    JSEP                     December 2016
       to include an entry that maps the SSRC for that chunk to the
       RtpReceiver associated with that MID.  (This case can occur when
       RTCP for a source is received before any RTP packets.)
+
+
+
+Uberti, et al.            Expires July 9, 2017                 [Page 67]
+
+Internet-Draft                    JSEP                      January 2017
+
 
       If the packet is of type BYE, for each SSRC indicated in the
       packet that is found in the incoming SSRC table, deliver a copy of
@@ -3743,17 +3782,6 @@ Internet-Draft                    JSEP                     December 2016
    More examples of SDP for WebRTC call flows can be found in
    [I-D.nandakumar-rtcweb-sdp].
 
-
-
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 67]
-
-Internet-Draft                    JSEP                     December 2016
-
-
 7.1.  Simple Example
 
    This section shows a very simple example that sets up a minimal audio
@@ -3777,37 +3805,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Uberti, et al.            Expires June 19, 2017                [Page 68]
+Uberti, et al.            Expires July 9, 2017                 [Page 68]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
 //                  set up local media state
@@ -3861,9 +3861,9 @@ AliceUA->BobUA:     media sent from Alice to Bob
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 69]
+Uberti, et al.            Expires July 9, 2017                 [Page 69]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    s=-
@@ -3917,9 +3917,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 70]
+Uberti, et al.            Expires July 9, 2017                 [Page 70]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    a=setup:actpass
@@ -3973,9 +3973,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 71]
+Uberti, et al.            Expires July 9, 2017                 [Page 71]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    c=IN IP4 192.0.2.2
@@ -4029,9 +4029,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 72]
+Uberti, et al.            Expires July 9, 2017                 [Page 72]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
   AliceUA->AliceJS:   onicecandidate event with |candidate-B1| (host)
@@ -4085,9 +4085,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 73]
+Uberti, et al.            Expires July 9, 2017                 [Page 73]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
   BobJS->BobUA:       setLocalDescription with |offer-B2|
@@ -4141,9 +4141,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 74]
+Uberti, et al.            Expires July 9, 2017                 [Page 74]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    v=0
@@ -4197,9 +4197,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 75]
+Uberti, et al.            Expires July 9, 2017                 [Page 75]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    candidate:4036177503 1 udp 1685987071 11.22.33.44 52546 typ srflx
@@ -4253,9 +4253,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 76]
+Uberti, et al.            Expires July 9, 2017                 [Page 76]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    candidate:109270924 1 udp 2122194687 192.168.2.3 61665 typ host
@@ -4309,9 +4309,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 77]
+Uberti, et al.            Expires July 9, 2017                 [Page 77]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    a=end-of-candidates
@@ -4365,9 +4365,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 78]
+Uberti, et al.            Expires July 9, 2017                 [Page 78]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    a=sendrecv
@@ -4421,9 +4421,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 79]
+Uberti, et al.            Expires July 9, 2017                 [Page 79]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
@@ -4477,9 +4477,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 80]
+Uberti, et al.            Expires July 9, 2017                 [Page 80]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    a=setup:passive
@@ -4533,9 +4533,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 81]
+Uberti, et al.            Expires July 9, 2017                 [Page 81]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    Andrew Hutton, Richard Ejzak, Adam Bergkvist and Matthew Kaufman all
@@ -4589,9 +4589,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 82]
+Uberti, et al.            Expires July 9, 2017                 [Page 82]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    [I-D.ietf-mmusic-sdp-bundle-negotiation]
@@ -4645,9 +4645,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 83]
+Uberti, et al.            Expires July 9, 2017                 [Page 83]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    [RFC3261]  Rosenberg, J., Schulzrinne, H., Camarillo, G., Johnston,
@@ -4701,9 +4701,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 84]
+Uberti, et al.            Expires July 9, 2017                 [Page 84]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    [RFC5888]  Camarillo, G. and H. Schulzrinne, "The Session Description
@@ -4757,9 +4757,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 85]
+Uberti, et al.            Expires July 9, 2017                 [Page 85]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    [RFC4588]  Rey, J., Leon, D., Miyazaki, A., Varsa, V., and R.
@@ -4813,9 +4813,9 @@ Appendix A.  Appendix A
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 86]
+Uberti, et al.            Expires July 9, 2017                 [Page 86]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    +-----------------------+-------------------------------------------+
@@ -4869,9 +4869,9 @@ Appendix B.  Change log
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 87]
+Uberti, et al.            Expires July 9, 2017                 [Page 87]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    o  Add descriptions of RtpTransceiver methods.
@@ -4925,9 +4925,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 88]
+Uberti, et al.            Expires July 9, 2017                 [Page 88]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    o  Specify how SDP session version in o= line.
@@ -4981,9 +4981,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 89]
+Uberti, et al.            Expires July 9, 2017                 [Page 89]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    o  Clarified how to handle various received attributes.
@@ -5037,9 +5037,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 90]
+Uberti, et al.            Expires July 9, 2017                 [Page 90]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    o  Added additional clarity on ICE default candidates.
@@ -5093,9 +5093,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 91]
+Uberti, et al.            Expires July 9, 2017                 [Page 91]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    o  Updated ICE candidate pool default to 0.
@@ -5149,9 +5149,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 92]
+Uberti, et al.            Expires July 9, 2017                 [Page 92]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    o  Added text describing the ICE Candidate Pool and its behavior.
@@ -5205,9 +5205,9 @@ Internet-Draft                    JSEP                     December 2016
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 93]
+Uberti, et al.            Expires July 9, 2017                 [Page 93]
 
-Internet-Draft                    JSEP                     December 2016
+Internet-Draft                    JSEP                      January 2017
 
 
    o  Updated suggested API and examples to match latest thinking.
@@ -5261,4 +5261,4 @@ Authors' Addresses
 
 
 
-Uberti, et al.            Expires June 19, 2017                [Page 94]
+Uberti, et al.            Expires July 9, 2017                 [Page 94]

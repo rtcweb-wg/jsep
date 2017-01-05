@@ -317,7 +317,9 @@ li, p {
 <link href="#rfc.section.4.2.1" rel="Chapter" title="4.2.1 stop"/>
 <link href="#rfc.section.4.2.2" rel="Chapter" title="4.2.2 stopped"/>
 <link href="#rfc.section.4.2.3" rel="Chapter" title="4.2.3 setDirection"/>
-<link href="#rfc.section.4.2.4" rel="Chapter" title="4.2.4 setCodecPreferences"/>
+<link href="#rfc.section.4.2.4" rel="Chapter" title="4.2.4 direction"/>
+<link href="#rfc.section.4.2.5" rel="Chapter" title="4.2.5 currentDirection"/>
+<link href="#rfc.section.4.2.6" rel="Chapter" title="4.2.6 setCodecPreferences"/>
 <link href="#rfc.section.5" rel="Chapter" title="5 SDP Interaction Procedures"/>
 <link href="#rfc.section.5.1" rel="Chapter" title="5.1 Requirements Overview"/>
 <link href="#rfc.section.5.1.1" rel="Chapter" title="5.1.1 Implementation Requirements"/>
@@ -364,7 +366,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2016-12-16" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-1-5" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -388,7 +390,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: June 19, 2017</td>
+  <td class="left">Expires: July 9, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -401,7 +403,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">December 16, 2016</td>
+  <td class="right">January 5, 2017</td>
 </tr>
 
     	
@@ -421,11 +423,11 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on June 19, 2017.</p>
+<p>This Internet-Draft will expire on July 9, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
-<p>Copyright (c) 2016 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
+<p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
 
   
@@ -482,7 +484,9 @@ li, p {
 <ul><li>4.2.1.   <a href="#rfc.section.4.2.1">stop</a></li>
 <li>4.2.2.   <a href="#rfc.section.4.2.2">stopped</a></li>
 <li>4.2.3.   <a href="#rfc.section.4.2.3">setDirection</a></li>
-<li>4.2.4.   <a href="#rfc.section.4.2.4">setCodecPreferences</a></li>
+<li>4.2.4.   <a href="#rfc.section.4.2.4">direction</a></li>
+<li>4.2.5.   <a href="#rfc.section.4.2.5">currentDirection</a></li>
+<li>4.2.6.   <a href="#rfc.section.4.2.6">setCodecPreferences</a></li>
 </ul></ul><li>5.   <a href="#rfc.section.5">SDP Interaction Procedures</a></li>
 <ul><li>5.1.   <a href="#rfc.section.5.1">Requirements Overview</a></li>
 <ul><li>5.1.1.   <a href="#rfc.section.5.1.1">Implementation Requirements</a></li>
@@ -850,10 +854,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h3 id="rfc.section.4.2.3"><a href="#rfc.section.4.2.3">4.2.3.</a> <a href="#sec.transceiver-set-direction" id="sec.transceiver-set-direction">setDirection</a></h3>
 <p id="rfc.section.4.2.3.p.1">The setDirection method sets the direction of a transceiver, which affects the direction attribute of the associated m= section on future calls to createOffer and createAnswer.  </p>
 <p id="rfc.section.4.2.3.p.2">When creating offers, the transceiver direction is directly reflected in the output, even for reoffers. When creating answers, the transceiver direction is intersected with the offered direction, as explained in the <a href="#sec.generating-an-answer">Section 5.3</a> section below.  </p>
-<h3 id="rfc.section.4.2.4"><a href="#rfc.section.4.2.4">4.2.4.</a> <a href="#sec.transceiver-set-codec-preferences" id="sec.transceiver-set-codec-preferences">setCodecPreferences</a></h3>
-<p id="rfc.section.4.2.4.p.1">The setCodecPreferences method sets the codec preferences of a transceiver, which in turn affect the presence and order of codecs of the associated m= section on future calls to createOffer and createAnswer. Note that setCodecPreferences does not directly affect which codec the implemtation decides to send. It only affects which codecs the implementation indicates that it prefers to receive, via the offer or answer.  Even when a codec is excluded by setCodecPreferences, it still may be used to send until the next offer/answer exchange discards it.  </p>
-<p id="rfc.section.4.2.4.p.2">The codec preferences of an RtpTransceiver can cause codecs to be excluded by subsequent calls to createOffer and createAnswer, in which case the corresponding media formats in the associated m= section will be excluded. The codec preferences cannot add media formats that would otherwise not be present. This includes codecs that were not negotiated in a previous offer/answer exchange that included the transceiver.  </p>
-<p id="rfc.section.4.2.4.p.3">The codec preferences of an RtpTransceiver can also determine the order of codecs in subsequent calls to createOffer and createAnswer, in which case the order of the media formats in the associated m= section will match. However, the codec preferences cannot change the order of the media formats after an answer containing the transceiver has been applied. At this point, codecs can only be removed, not reordered.  </p>
+<h3 id="rfc.section.4.2.4"><a href="#rfc.section.4.2.4">4.2.4.</a> <a href="#sec.transceiver-direction" id="sec.transceiver-direction">direction</a></h3>
+<p id="rfc.section.4.2.4.p.1">The direction method returns the last value passed into setDirection. If setDirection has never been called, it returns the direction the transceiver was initialized with.  </p>
+<h3 id="rfc.section.4.2.5"><a href="#rfc.section.4.2.5">4.2.5.</a> <a href="#sec.transceiver-current-direction" id="sec.transceiver-current-direction">currentDirection</a></h3>
+<p id="rfc.section.4.2.5.p.1">The currentDirection method returns the last negotiated direction for the transceiver's associated m= section. More specifically, it returns the <a href="#RFC3264">[RFC3264]</a> directional attribute of the associated m= section in the last applied answer, with "send" and "recv" directions reversed if it was a remote answer. For example, if the directional attribute for the associated m= section in a remote answer is "recvonly", currentDirection returns "sendonly".  </p>
+<p id="rfc.section.4.2.5.p.2">If an answer that references this transceiver has not yet been applied, or if the transceiver is stopped, currentDirection returns null.  </p>
+<h3 id="rfc.section.4.2.6"><a href="#rfc.section.4.2.6">4.2.6.</a> <a href="#sec.transceiver-set-codec-preferences" id="sec.transceiver-set-codec-preferences">setCodecPreferences</a></h3>
+<p id="rfc.section.4.2.6.p.1">The setCodecPreferences method sets the codec preferences of a transceiver, which in turn affect the presence and order of codecs of the associated m= section on future calls to createOffer and createAnswer. Note that setCodecPreferences does not directly affect which codec the implemtation decides to send. It only affects which codecs the implementation indicates that it prefers to receive, via the offer or answer.  Even when a codec is excluded by setCodecPreferences, it still may be used to send until the next offer/answer exchange discards it.  </p>
+<p id="rfc.section.4.2.6.p.2">The codec preferences of an RtpTransceiver can cause codecs to be excluded by subsequent calls to createOffer and createAnswer, in which case the corresponding media formats in the associated m= section will be excluded. The codec preferences cannot add media formats that would otherwise not be present. This includes codecs that were not negotiated in a previous offer/answer exchange that included the transceiver.  </p>
+<p id="rfc.section.4.2.6.p.3">The codec preferences of an RtpTransceiver can also determine the order of codecs in subsequent calls to createOffer and createAnswer, in which case the order of the media formats in the associated m= section will match. However, the codec preferences cannot change the order of the media formats after an answer containing the transceiver has been applied. At this point, codecs can only be removed, not reordered.  </p>
 <h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#sec.sdp-interaction-procedure" id="sec.sdp-interaction-procedure">SDP Interaction Procedures</a></h1>
 <p id="rfc.section.5.p.1">This section describes the specific procedures to be followed when creating and parsing SDP objects.</p>
 <h2 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a> <a href="#sec.requirements-overview" id="sec.requirements-overview">Requirements Overview</a></h2>
