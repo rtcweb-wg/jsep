@@ -1379,8 +1379,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           process. When a local description is supplied, and the number
           of transports currently in use does not match the number of
           transports needed by the local description, the
-          PeerConnection will create transports as needed and begin
-          gathering candidates for them.</t>
+          PeerConnection will create transports as needed and withdraws
+          an appropriate number of ICE candidates from the candidate
+          pool or begins gathering candidates if sufficient pre-gathered
+          candidates are not available.</t>
 
           <t>If setRemoteDescription was previously called with an
           offer, and setLocalDescription is called with an answer
@@ -3552,9 +3554,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </list>The 50 is based on 50 packets per second, the 40 is
             based on an estimate of total header size, the 1000 changes
             the unit from kbps to bps (as required by TIAS), and the
-            0.95 is to allocate 5% to RTCP. If more accurate control of
-            bandwidth is needed, "TIAS" should be used instead of
-            "AS".</t>
+            0.95 is to allocate 5% to RTCP. "TIAS" is used in preference
+            to "AS" because it provides more accurate control of bandwidth.
+            </t>
 
             <t>For any "RR" or "RS" bandwidth values, handle as
             specified in
@@ -3608,7 +3610,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>If the media section has been rejected (i.e. port is set
           to zero in the answer), stop any reception or transmission of
-          media for this section, and discard any associated ICE
+          media for this section, and, if the no accepted media section
+          was bundled with this media section, discard any associated ICE
           components, as described in Section 9.2.1.3 of
           <xref target="RFC5245" />.</t>
 
