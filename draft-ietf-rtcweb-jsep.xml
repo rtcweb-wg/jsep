@@ -449,7 +449,11 @@ setRemote(ANSWER) |                                   |
           session description is applied, a m= section is always
           associated with exactly one RtpTransceiver. An RtpTransceiver
           is said to be associated with an m= section if and only if
-          its mid attribute is equal to the MID of that m= section.</t>
+          its mid attribute is equal to the MID of that m= section, or a
+          mapping exists between the transceiver and the index of that m=
+          section. The index-based mapping is required for remote
+          endpoints that don't support the MID extension; see
+          <xref target="sec.applying-a-remote-desc" />.</t>
 
           <t>RtpTransceivers can be created explicitly by the
           application or implicitly by calling setRemoteDescription
@@ -1339,7 +1343,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             that some RtpTransceivers that were previously associated
             will no longer be associated with any m= section; in such
             cases, the value of the RtpTransceiver's mid property MUST
-            be set to null. RtpTransceivers that were created by
+            be set to null, and the mapping between the transceiver and
+            its m= section index MUST be discarded, if it exists.
+            RtpTransceivers that were created by
             applying a remote offer that was subsequently rolled back
             MUST be removed. However, a RtpTransceiver MUST NOT be
             removed if a track was attached to the RtpTransceiver via
@@ -3380,7 +3386,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <xref target="sec-create-offer"></xref>.</t>
 
               <t>Set the value of the RtpTransceiver's mid property to
-              the MID of the m= section.</t>
+              the MID of the m= section, and establish a mapping between
+              the transceiver and the index of the m= section. The
+              index-based mapping is necessary in case the remote endpoint
+              does not support the MID extension.</t>
             </list></t>
 
             <t>If RTCP mux is indicated, prepare to demux RTP and RTCP
@@ -3497,7 +3506,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the m= section is being recycled (see
             <xref target="sec.subsequent-offers"></xref>), dissociate
             the currently associated RtpTransceiver by setting its mid
-            attribute to null.</t>
+            attribute to null and discarding the mapping between the
+            transceiver and its m= section index.</t>
 
             <t>If the m= section is not associated with any
             RtpTransceiver (possibly because it was dissociated in the
@@ -3519,11 +3529,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Associate the found or created RtpTransceiver with the
               m= section by setting the value of the RtpTransceiver's
               mid property to the MID of the m= section. If the m=
-              section does not include a MID (i.e., the remote side
+              section does not include a MID (i.e., the remote endpoint
               does not support the MID extension), generate a value for
               the RtpTransceiver's mid property, following the guidance
               for "a=mid" mentioned in
-              <xref target="sec.initial-offers" />.</t>
+              <xref target="sec.initial-offers" />, and associate the
+              transceiver with the m= section by establishing a mapping
+              between the transceiver and the index of the m= section.</t>
             </list></t>
 
             <t>For each specified media format that is also supported
