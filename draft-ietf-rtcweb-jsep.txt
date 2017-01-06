@@ -508,14 +508,12 @@ Internet-Draft                    JSEP                      January 2017
 
 3.3.  Session Description Format
 
-   In the WebRTC specification, session descriptions are formatted as
-   SDP messages.  While this format is not optimal for manipulation from
-   Javascript, it is widely accepted, and frequently updated with new
-   features.  Any alternate encoding of session descriptions would have
-   to keep pace with the changes to SDP, at least until the time that
-   this new encoding eclipsed SDP in popularity.  As a result, JSEP
-   currently uses SDP as the internal representation for its session
-   descriptions.
+   JSEP's session descriptions use SDP syntax for their internal
+   representation.  While this format is not optimal for manipulation
+   from Javascript, it is widely accepted, and frequently updated with
+   new features; any alternate encoding of session descriptions would
+   have to keep pace with the changes to SDP, at least until the time
+   that this new encoding eclipsed SDP in popularity.
 
    However, to simplify Javascript processing, and provide for future
    flexibility, the SDP syntax is encapsulated within a
@@ -554,6 +552,8 @@ Internet-Draft                    JSEP                      January 2017
 
    RtpTransceivers generally have a 1:1 mapping with m= sections,
    although there may be more RtpTransceivers than m= sections when
+   RtpTransceivers are created but not yet associated with a m= section,
+   or if RtpTransceivers have been stopped and disassociated from m=
 
 
 
@@ -562,8 +562,6 @@ Uberti, et al.            Expires July 10, 2017                [Page 10]
 Internet-Draft                    JSEP                      January 2017
 
 
-   RtpTransceivers are created but not yet associated with a m= section,
-   or if RtpTransceivers have been stopped and disassociated from m=
    sections.  An RtpTransceiver is never associated with more than one
    m= section, and once a session description is applied, a m= section
    is always associated with exactly one RtpTransceiver.
@@ -609,7 +607,9 @@ Internet-Draft                    JSEP                      January 2017
    gathered, an event will be dispatched to signal that the gathering
    process is complete.
 
-
+   Note that gathering phases only gather the candidates needed by
+   new/recycled/restarting m= lines; other m= lines continue to use
+   their existing candidates.  Also, when bundling is active, candidates
 
 
 
@@ -618,9 +618,6 @@ Uberti, et al.            Expires July 10, 2017                [Page 11]
 Internet-Draft                    JSEP                      January 2017
 
 
-   Note that gathering phases only gather the candidates needed by
-   new/recycled/restarting m= lines; other m= lines continue to use
-   their existing candidates.  Also, when bundling is active, candidates
    are only gathered (and exchanged) for the m= lines referenced in
    BUNDLE-tags, as described in
    [I-D.ietf-mmusic-sdp-bundle-negotiation].
@@ -666,6 +663,9 @@ Internet-Draft                    JSEP                      January 2017
    candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 
+   The IceCandidate object also contains fields to indicate which m=
+   line it should be associated with.  The m= line can be identified in
+   one of two ways; either by a m= line index, or a MID.  The m= line
 
 
 
@@ -674,9 +674,6 @@ Uberti, et al.            Expires July 10, 2017                [Page 12]
 Internet-Draft                    JSEP                      January 2017
 
 
-   The IceCandidate object also contains fields to indicate which m=
-   line it should be associated with.  The m= line can be identified in
-   one of two ways; either by a m= line index, or a MID.  The m= line
    index is a zero-based index, with index N referring to the N+1th m=
    line in the SDP sent by the entity which sent the IceCandidate.  The
    MID uses the "media stream identification" attribute, as defined in
@@ -721,6 +718,9 @@ Internet-Draft                    JSEP                      January 2017
    source of connectivity checks, or indirectly expose them via other
    fields, such as the raddr/rport attributes for other ICE candidates.
    Later, if a different policy is specified by the application, the
+   application can apply it by kicking off a new gathering phase via an
+   ICE restart.
+
 
 
 
@@ -729,9 +729,6 @@ Uberti, et al.            Expires July 10, 2017                [Page 13]
 
 Internet-Draft                    JSEP                      January 2017
 
-
-   application can apply it by kicking off a new gathering phase via an
-   ICE restart.
 
 3.5.4.  ICE Candidate Pool
 
@@ -778,6 +775,9 @@ Internet-Draft                    JSEP                      January 2017
    However, sample aspect ratio has no impact on the size negotiation
    described below; all dimensions are measured in pixels, whether
    square or not.
+
+
+
 
 
 
