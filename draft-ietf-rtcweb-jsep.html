@@ -871,7 +871,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.1.p.2">The first set of specifications is the "mandatory-to-implement" set. All implementations must support these behaviors, but may not use all of them if the remote side, which may not be a JSEP endpoint, does not support them.</p>
 <p id="rfc.section.5.1.p.3">The second set of specifications is the "mandatory-to-use" set. The local JSEP endpoint and any remote endpoint must indicate support for these specifications in their session descriptions.</p>
 <h3 id="rfc.section.5.1.1"><a href="#rfc.section.5.1.1">5.1.1.</a> <a href="#sec.implementation-requirements" id="sec.implementation-requirements">Implementation Requirements</a></h3>
-<p id="rfc.section.5.1.1.p.1">This list of mandatory-to-implement specifications is derived from the requirements outlined in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>.  </p>
+<p id="rfc.section.5.1.1.p.1">Implementations of JSEP MUST conform to <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>.  This list of mandatory-to-implement specifications is derived from the requirements outlined in that document and from <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a>.</p>
+<p/>
 
 <dl>
   <dt>R-1   </dt>
@@ -883,29 +884,28 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <dt>R-4   </dt>
   <dd><a href="#RFC5763">[RFC5763]</a> MUST be implemented to signal DTLS certificate fingerprints.</dd>
   <dt>R-5   </dt>
-  <dd><a href="#RFC4568">[RFC4568]</a> MUST NOT be implemented to signal SDES SRTP keying information.</dd>
-  <dt>R-6   </dt>
   <dd><a href="#RFC5888">[RFC5888]</a> MUST be implemented for signaling grouping information, and MUST be used to identify m= lines via the a=mid attribute.</dd>
-  <dt>R-7   </dt>
+  <dt>R-6   </dt>
   <dd><a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a> MUST be supported, in order to signal associations between RTP objects and W3C MediaStreams and MediaStreamTracks in a standard way.</dd>
-  <dt>R-8   </dt>
+  <dt>R-7   </dt>
   <dd>The bundle mechanism in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a> MUST be supported to signal the ability to multiplex RTP streams on a single UDP port, in order to avoid excessive use of port number resources.</dd>
-  <dt>R-9   </dt>
+  <dt>R-8   </dt>
   <dd>The SDP attributes of "sendonly", "recvonly", "inactive", and "sendrecv" from <a href="#RFC4566">[RFC4566]</a> MUST be implemented to signal information about media direction.</dd>
-  <dt>R-10  </dt>
+  <dt>R-9   </dt>
   <dd><a href="#RFC5576">[RFC5576]</a> MUST be implemented to signal RTP SSRC values and grouping semantics.</dd>
-  <dt>R-11  </dt>
+  <dt>R-10  </dt>
   <dd><a href="#RFC4585">[RFC4585]</a> MUST be implemented to signal RTCP based feedback.</dd>
-  <dt>R-12  </dt>
+  <dt>R-11  </dt>
   <dd><a href="#RFC5761">[RFC5761]</a> MUST be implemented to signal multiplexing of RTP and RTCP.</dd>
-  <dt>R-13  </dt>
+  <dt>R-12  </dt>
   <dd><a href="#RFC5506">[RFC5506]</a> MUST be implemented to signal reduced-size RTCP messages.</dd>
-  <dt>R-14  </dt>
+  <dt>R-13  </dt>
   <dd><a href="#RFC4588">[RFC4588]</a> MUST be implemented to signal RTX payload type associations.</dd>
-  <dt>R-15  </dt>
+  <dt>R-14  </dt>
   <dd><a href="#RFC3556">[RFC3556]</a> MUST be supported for control of RTCP bandwidth limits.</dd>
 </dl>
-<p id="rfc.section.5.1.1.p.2">As required by <a href="#RFC4566">[RFC4566]</a>, Section 5.13, JSEP implementations MUST ignore unknown attribute (a=) lines.</p>
+<p id="rfc.section.5.1.1.p.3">The SDES SRTP keying mechanism from <a href="#RFC4568">[RFC4568]</a> MUST NOT be implemented, as discussed in <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a>.</p>
+<p id="rfc.section.5.1.1.p.4">As required by <a href="#RFC4566">[RFC4566]</a>, Section 5.13, JSEP implementations MUST ignore unknown attribute (a=) lines.</p>
 <h3 id="rfc.section.5.1.2"><a href="#rfc.section.5.1.2">5.1.2.</a> <a href="#sec.usage-requirements" id="sec.usage-requirements">Usage Requirements</a></h3>
 <p id="rfc.section.5.1.2.p.1">All session descriptions handled by JSEP endpoints, both local and remote, MUST indicate support for the following specifications. If any of these are absent, this omission MUST be treated as an error.  </p>
 
@@ -1265,7 +1265,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
   <li>If this media section is new, begin gathering candidates for it, as defined in <a href="#RFC5245">[RFC5245]</a>, Section 4.1.1, unless it has been marked as bundle-only.</li>
   <li>Or, if the ICE ufrag and password values have changed, and it has not been marked as bundle-only, trigger the ICE Agent to start an ICE restart, and begin gathering new candidates for the media section as described in <a href="#RFC5245">[RFC5245]</a>, Section 9.1.1.1. If this description is an answer, also start checks on that media section as defined in <a href="#RFC5245">[RFC5245]</a>, Section 9.3.1.1.</li>
-  <li>If the media section proto value indicates use of RTP: <ul><li>If there is no RtpTransceiver associated with this m= section (which should only happen when applying an offer), find one and associate it with this m= section according to the following steps: <ul><li>Find the RtpTransceiver that corresponds to the m= section with the same MID in the created offer.</li><li>Set the value of the RtpTransceiver's mid attribute to the MID of the m= section.</li></ul></li><li>If RTCP mux is indicated, prepare to demux RTP and RTCP from the RTP ICE component, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.3. If RTCP mux is not indicated, but was previously negotiated, i.e., the RTCP ICE component no longer exists, this MUST result in an error.</li><li>For each specified RTP header extension, establish a mapping between the extension ID and URI, as described in section 6 of <a href="#RFC5285">[RFC5285]</a>. If any indicated RTP header extension is not supported, this MUST result in an error.</li><li>If the MID header extension is supported, prepare to demux RTP data intended for this media section based on the MID header extension, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 14.</li><li>For each specified media format, establish a mapping between the payload type and the actual media format, as described in <a href="#RFC3264">[RFC3264]</a>, Section 6.1. If any indicated media format is not supported, this MUST result in an error.</li><li>For each specified "rtx" media format, establish a mapping between the RTX payload type and its associated primary payload type, as described in <a href="#RFC4588">[RFC4588]</a>, Sections 8.6 and 8.7. If any referenced primary payload types are not present, this MUST result in an error.</li><li>If the directional attribute is of type "sendrecv" or "recvonly", enable receipt and decoding of media.</li></ul></li>
+  <li>If the media section proto value indicates use of RTP: <ul><li>If there is no RtpTransceiver associated with this m= section (which should only happen when applying an offer), find one and associate it with this m= section according to the following steps: <ul><li>Find the RtpTransceiver that corresponds to the m= section with the same MID in the created offer.</li><li>Set the value of the RtpTransceiver's mid attribute to the MID of the m= section.</li></ul></li><li>If RTCP mux is indicated, prepare to demux RTP and RTCP from the RTP ICE component, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.3. If RTCP mux is not indicated, but was previously negotiated, i.e., the RTCP ICE component no longer exists, this MUST result in an error.</li><li>For each specified RTP header extension, establish a mapping between the extension ID and URI, as described in section 6 of <a href="#RFC5285">[RFC5285]</a>. If any indicated RTP header extension is not supported, this MUST result in an error.</li><li>If the MID header extension is supported, prepare to demux RTP streams intended for this media section based on the MID header extension, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 14.</li><li>For each specified media format, establish a mapping between the payload type and the actual media format, as described in <a href="#RFC3264">[RFC3264]</a>, Section 6.1. If any indicated media format is not supported, this MUST result in an error.</li><li>For each specified "rtx" media format, establish a mapping between the RTX payload type and its associated primary payload type, as described in <a href="#RFC4588">[RFC4588]</a>, Sections 8.6 and 8.7. If any referenced primary payload types are not present, this MUST result in an error.</li><li>If the directional attribute is of type "sendrecv" or "recvonly", enable receipt and decoding of media.</li></ul></li>
 </ul>
 <p id="rfc.section.5.8.p.4">Finally, if this description is of type "pranswer" or "answer", follow the processing defined in the <a href="#sec.applying-an-answer">Section 5.10</a> section below.</p>
 <h2 id="rfc.section.5.9"><a href="#rfc.section.5.9">5.9.</a> <a href="#sec.applying-a-remote-desc" id="sec.applying-a-remote-desc">Applying a Remote Description</a></h2>
