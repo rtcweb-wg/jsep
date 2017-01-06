@@ -1448,7 +1448,7 @@ Internet-Draft                    JSEP                      January 2017
    description (see Section 5.9 and Section 5.8).  This means that some
    RtpTransceivers that were previously associated will no longer be
    associated with any m= section; in such cases, the value of the
-   RtpTransceiver's mid attribute MUST be set to null.  RtpTransceivers
+   RtpTransceiver's mid property MUST be set to null.  RtpTransceivers
    that were created by applying a remote offer that was subsequently
 
 
@@ -1706,7 +1706,7 @@ Internet-Draft                    JSEP                      January 2017
    The stopped property indicates whether the transceiver has been
    stopped, either by a call to stopTransceiver or by applying an answer
    that rejects the associated m= section.  In either of these cases, it
-   is set to "true" and otherwise will be set to "false".
+   is set to "true", and otherwise will be set to "false".
 
    A stopped RtpTransceiver does not send any outgoing RTP or RTCP or
    process any incoming RTP or RTCP.  It cannot be restarted.
@@ -1714,19 +1714,19 @@ Internet-Draft                    JSEP                      January 2017
 4.2.3.  setDirection
 
    The setDirection method sets the direction of a transceiver, which
-   affects the direction attribute of the associated m= section on
-   future calls to createOffer and createAnswer.
+   affects the direction property of the associated m= section on future
+   calls to createOffer and createAnswer.
 
    When creating offers, the transceiver direction is directly reflected
    in the output, even for reoffers.  When creating answers, the
    transceiver direction is intersected with the offered direction, as
    explained in the Section 5.3 section below.
 
-   Note that while setDirection sets the direction attribute of the
-   transceiver immediately (Section 4.2.4), this attribute does not
+   Note that while setDirection sets the direction property of the
+   transceiver immediately (Section 4.2.4), this property does not
    immediately affect whether the transceiver's RtpSender will send or
    its RtpReceiver will receive.  The direction in effect is represented
-   by the currentDirection attribute, which is only updated when an
+   by the currentDirection property, which is only updated when an
    answer is applied.
 
 
@@ -1740,22 +1740,22 @@ Internet-Draft                    JSEP                      January 2017
 
 4.2.4.  direction
 
-   The direction method returns the last value passed into setDirection.
-   If setDirection has never been called, it returns the direction the
-   transceiver was initialized with.
+   The direction property indicates the last value passed into
+   setDirection.  If setDirection has never been called, it is set to
+   the direction the transceiver was initialized with.
 
 4.2.5.  currentDirection
 
-   The currentDirection method returns the last negotiated direction for
-   the transceiver's associated m= section.  More specifically, it
-   returns the [RFC3264] directional attribute of the associated m=
+   The currentDirection property indicates the last negotiated direction
+   for the transceiver's associated m= section.  More specifically, it
+   indicates the [RFC3264] directional attribute of the associated m=
    section in the last applied answer, with "send" and "recv" directions
    reversed if it was a remote answer.  For example, if the directional
    attribute for the associated m= section in a remote answer is
-   "recvonly", currentDirection returns "sendonly".
+   "recvonly", currentDirection is set to "sendonly".
 
    If an answer that references this transceiver has not yet been
-   applied, or if the transceiver is stopped, currentDirection returns
+   applied, or if the transceiver is stopped, currentDirection is set to
    null.
 
 4.2.6.  setCodecPreferences
@@ -3323,7 +3323,7 @@ Internet-Draft                    JSEP                      January 2017
          +  Find the RtpTransceiver that corresponds to the m= section
             with the same MID in the created offer.
 
-         +  Set the value of the RtpTransceiver's mid attribute to the
+         +  Set the value of the RtpTransceiver's mid property to the
             MID of the m= section.
 
       *  If RTCP mux is indicated, prepare to demux RTP and RTCP from
@@ -3453,10 +3453,10 @@ Internet-Draft                    JSEP                      January 2017
 
          +  Associate the found or created RtpTransceiver with the m=
             section by setting the value of the RtpTransceiver's mid
-            attribute to the MID of the m= section.  If the m= section
+            property to the MID of the m= section.  If the m= section
             does not include a MID (i.e., the remote side does not
             support the MID extension), generate a value for the
-            RtpTransceiver mid attribute, following the guidance for
+            RtpTransceiver's mid property, following the guidance for
             "a=mid" mentioned in Section 5.2.1.
 
       *  For each specified media format that is also supported by the
