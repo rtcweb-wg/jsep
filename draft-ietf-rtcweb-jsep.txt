@@ -695,16 +695,14 @@ Internet-Draft                    JSEP                      January 2017
    possible forms of initial candidates - host, server reflexive, and
    relay.  However, in certain cases, applications may want to have more
    specific control over the gathering process, due to privacy or
-   related concerns.  For example, one may want to suppress the use of
-   host candidates, to avoid exposing information about the local
-   network, or go as far as only using relay candidates, to leak as
-   little location information as possible (note that these choices come
-   with corresponding operational costs).  To accomplish this, the
-   browser MUST allow the application to restrict which ICE candidates
-   are used in a session.  Note that this filtering is applied on top of
-   any restrictions the browser chooses to enforce regarding which IP
-   addresses are permitted for the application, as discussed in
-   [I-D.ietf-rtcweb-ip-handling].
+   related concerns.  For example, one may want to only use relay
+   candidates, to leak as little location information as possible
+   (keeping in mind that this choice comes with corresponding
+   operational costs).  To accomplish this, JSEP allows the application
+   to restrict which ICE candidates are used in a session.  Note that
+   this filtering is applied on top of any restrictions the browser
+   chooses to enforce regarding which IP addresses are permitted for the
+   application, as discussed in [I-D.ietf-rtcweb-ip-handling].
 
    There may also be cases where the application wants to change which
    types of candidates are used while the session is active.  A prime
@@ -722,6 +720,8 @@ Internet-Draft                    JSEP                      January 2017
    disallowed by the current policy to the application, use them as the
    source of connectivity checks, or indirectly expose them via other
    fields, such as the raddr/rport attributes for other ICE candidates.
+   Later, if a different policy is specified by the application, the
+
 
 
 
@@ -730,7 +730,6 @@ Uberti, et al.            Expires July 10, 2017                [Page 13]
 Internet-Draft                    JSEP                      January 2017
 
 
-   Later, if a different policy is specified by the application, the
    application can apply it by kicking off a new gathering phase via an
    ICE restart.
 
@@ -777,7 +776,8 @@ Internet-Draft                    JSEP                      January 2017
    implementations will not transmit non-square pixels, but SHOULD
    receive and render such video with the correct aspect ratio.
    However, sample aspect ratio has no impact on the size negotiation
-
+   described below; all dimensions are measured in pixels, whether
+   square or not.
 
 
 
@@ -785,9 +785,6 @@ Uberti, et al.            Expires July 10, 2017                [Page 14]
 
 Internet-Draft                    JSEP                      January 2017
 
-
-   described below; all dimensions are measured in pixels, whether
-   square or not.
 
 3.6.1.  Creating an imageattr Attribute
 
@@ -834,6 +831,9 @@ Internet-Draft                    JSEP                      January 2017
    at most 360p.  In this case, the implementation would generate this
    attribute:
 
+   a=imageattr:* recv [x=[16:640],y=[16:360],q=1.0]
+
+
 
 
 
@@ -841,8 +841,6 @@ Uberti, et al.            Expires July 10, 2017                [Page 15]
 
 Internet-Draft                    JSEP                      January 2017
 
-
-   a=imageattr:* recv [x=[16:640],y=[16:360],q=1.0]
 
    This declaration indicates that the receiver is capable of decoding
    any image resolution from 16x16 up to 640x360 pixels.
@@ -890,6 +888,8 @@ Internet-Draft                    JSEP                      January 2017
    all cases.  To address this concern, the application can set an
    upscaling policy for each sent track.  For this case, if upscaling is
    permitted by policy, the sender SHOULD apply upscaling in order to
+   provide the desired resolution.  Otherwise, the sender MUST NOT apply
+
 
 
 
@@ -898,7 +898,6 @@ Uberti, et al.            Expires July 10, 2017                [Page 16]
 Internet-Draft                    JSEP                      January 2017
 
 
-   provide the desired resolution.  Otherwise, the sender MUST NOT apply
    upscaling.  The sender SHOULD NOT upscale in other cases, even if the
    policy permits it.  Upscaling MUST NOT change the track aspect ratio.
 
@@ -946,6 +945,7 @@ Internet-Draft                    JSEP                      January 2017
    support for receipt of simulcast, and as such the remote endpoint
    will only send a single encoding per m= section.  In addition, when
    the JSEP endpoint is the answerer, the permitted encodings for the
+   RTPSender must be consistent with the offer, but this information is
 
 
 
@@ -954,7 +954,6 @@ Uberti, et al.            Expires July 10, 2017                [Page 17]
 Internet-Draft                    JSEP                      January 2017
 
 
-   RTPSender must be consistent with the offer, but this information is
    currently not surfaced through any API.  This means that established
    simulcast streams will continue to work through a received re-offer,
    but setting up initial simulcast by way of a received offer requires
@@ -1002,6 +1001,7 @@ Internet-Draft                    JSEP                      January 2017
    remote callees, where each callee can accept the call, but only one
    active session ever exists at a time; no mixing of received media is
    performed.
+
 
 
 
