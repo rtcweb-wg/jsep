@@ -1315,7 +1315,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>A rollback discards any proposed changes to the session,
             returning the state machine to the stable state, and
-            setting the pending local and/or remote description back to
+            setting the pending local and/or remote description
+            (See <xref target="sec.pendinglocaldescription"/>
+            and <xref target="sec.pendingremotedescription"/>) to
             null. Any resources or candidates that were allocated by
             the abandoned local description are discarded; any media
             that is received will be processed according to the
@@ -1336,7 +1338,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             cases, the value of the RtpTransceiver's mid property MUST
             be set to null. RtpTransceivers that were created by
             applying a remote offer that was subsequently rolled back
-            MUST be removed. However, a RtpTransceiver MUST NOT be
+            MUST be stopped and removed from the PeerConnection.
+            However, a RtpTransceiver MUST NOT be
             removed if a track was attached to the RtpTransceiver via
             the addTrack method. This is so that an application may
             call addTrack, then call setRemoteDescription with an
