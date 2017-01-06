@@ -393,14 +393,13 @@ setRemote(ANSWER) |                                   |
       <section title="Session Description Format"
       anchor="sec.session-description-forma">
 
-        <t>In the WebRTC specification, session descriptions are
-        formatted as SDP messages. While this format is not optimal for
+        <t>JSEP's session descriptions use SDP syntax for their internal
+        representation. While this format is not optimal for
         manipulation from Javascript, it is widely accepted, and
-        frequently updated with new features. Any alternate encoding of
+        frequently updated with new features; any alternate encoding of
         session descriptions would have to keep pace with the changes
         to SDP, at least until the time that this new encoding eclipsed
-        SDP in popularity. As a result, JSEP currently uses SDP as the
-        internal representation for its session descriptions.</t>
+        SDP in popularity.</t>
 
         <t>However, to simplify Javascript processing, and provide for
         future flexibility, the SDP syntax is encapsulated within a
@@ -456,12 +455,20 @@ setRemote(ANSWER) |                                   |
         <section title="RtpSenders" anchor="sec.rtpsenders">
 
           <t>RtpSenders allow the application to control how RTP media
-          is sent.</t>
+          is sent. An RtpSender is conceptually responsible for the
+          outgoing RTP stream(s) described by an m= section. This includes
+          encoding the attached MediaStreamTrack, sending RTP media
+          packets, and generating/processing RTCP for the outgoing RTP
+          streams(s).</t>
         </section>
         <section title="RtpReceivers" anchor="sec.rtpreceivers">
 
-          <t>RtpReceivers allows the application to control how RTP
-          media is received.</t>
+          <t>RtpReceivers allow the application to inspect how RTP media
+          is received. An RtpReceiver is conceptually responsible for the
+          incoming RTP stream(s) described by an m= section. This includes
+          processing received RTP media packets, decoding the incoming
+          stream(s) to produce a remote MediaStreamTrack, and
+          generating/processing RTCP for the incoming RTP stream(s).</t>
         </section>
       </section>
       <section title="ICE" anchor="sec.ice">
@@ -580,13 +587,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           server reflexive, and relay. However, in certain cases,
           applications may want to have more specific control over the
           gathering process, due to privacy or related concerns. For
-          example, one may want to suppress the use of host candidates,
-          to avoid exposing information about the local network, or go
-          as far as only using relay candidates, to leak as little
-          location information as possible (note that these choices
-          come with corresponding operational costs). To accomplish
-          this, the browser MUST allow the application to restrict
-          which ICE candidates are used in a session. Note that this
+          example, one may want to only use relay candidates, to leak as little
+          location information as possible (keeping in mind that this choice
+          comes with corresponding operational costs). To accomplish this,
+          JSEP allows the application to restrict which ICE candidates
+          are used in a session. Note that this
           filtering is applied on top of any restrictions the browser
           chooses to enforce regarding which IP addresses are permitted
           for the application, as discussed in
@@ -667,7 +672,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         JSEP implementations will not transmit non-square pixels, but SHOULD
         receive and render such video with the correct aspect ratio.
         However, sample aspect ratio has no impact on the size negotiation
-        described below; all dimensions assume square pixels.
+        described below; all dimensions are measured in pixels, whether square
+        or not.
         </t>
 
         <section title="Creating an imageattr Attribute">
@@ -846,7 +852,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         with a "send" simulcast stream description that lists each
         desired encoding, and no "recv" simulcast stream description.
         The m= section will also include an "a=rid" attribute for each
-        encoding, as specfied in
+        encoding, as specified in
         <xref target="I-D.ietf-mmusic-rid" />, Section 4; the use of
         RID identifiers allows the individual encodings to be
         disambiguated even though they are all part of the same m=
@@ -946,10 +952,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           will end up with N parallel PeerConnection sessions, each
           with a local and remote description and their own local and
           remote addresses. The media flow from these sessions can be
-          managed by specifying SDP direction attributes in the
-          descriptions, or the application can choose to play out the
-          media from all sessions mixed together. Of course, if the
-          application wants to only keep a single session, it can
+          managed using setDirection (see <xref target="sec.transceiver-set-direction"/>), or the application
+          can choose to play out the media from all sessions mixed together.
+          Of course, if the application wants to only keep a single session, it can
           simply terminate the sessions that it no longer needs.</t>
         </section>
       </section>
@@ -1064,9 +1069,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             non-multiplexing endpoints.</t>
             <t hangText="require:">The browser will only gather RTP
             candidates. This halves the number of candidates that the
-            offerer needs to gather. When acting as answerer, the
-            implementation will reject any m= section that does not
-            contain an "a=rtcp-mux" attribute.</t>
+            offerer needs to gather. Applying a description with an
+            m= section that does not contain an "a=rtcp-mux" attribute
+            will cause an error to be returned.</t>
           </list></t>
 
           <t>The default multiplexing policy MUST be set to "require".
@@ -1360,14 +1365,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>This API changes the local media state; among other
           things, it sets up local resources for receiving and decoding
           media. In order to successfully handle scenarios where the
-          application wants to offer to change from one media format to
-          a different, incompatible format, the PeerConnection must be
-          able to simultaneously support use of both the current and
-          pending local descriptions (e.g. support codecs that exist in
-          both descriptions) until a final answer is received, at which
+          application wants to offer to change from one media format to a
+          different, incompatible format, the PeerConnection must be able to
+          simultaneously support use of both the current and pending local
+          descriptions (e.g., support the codecs that exist in either
+          description). This dual processing begins when the PeerConnection
+          enters the have-local-offer state, and continues until
+          setRemoteDescription is called with either a final answer, at which
           point the PeerConnection can fully adopt the pending local
-          description, or roll back to the current description if the
-          remote side denied the change.</t>
+          description, or a rollback, which results in a revert to the current
+          local description.</t>
 
           <t>This API indirectly controls the candidate gathering
           process. When a local description is supplied, and the number
@@ -1379,7 +1386,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>If setRemoteDescription was previously called with an
           offer, and setLocalDescription is called with an answer
           (provisional or final), and the media directions are
-          compatible, and media are available to send, this will result
+          compatible, and media is available to send, this will result
           in the starting of media transmission.</t>
         </section>
         <section title="setRemoteDescription"
@@ -1398,13 +1405,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>If setLocalDescription was previously called with an
           offer, and setRemoteDescription is called with an answer
           (provisional or final), and the media directions are
-          compatible, and media are available to send, this will result
+          compatible, and media is available to send, this will result
           in the starting of media transmission.</t>
         </section>
         <section title="currentLocalDescription"
         anchor="sec.currentlocaldescription">
 
-          <t>The currentLocalDescription method returns a copy of the
+          <t>The currentLocalDescription method returns the
           current negotiated local description - i.e., the local
           description from the last successful offer/answer exchange -
           in addition to any local candidates that have been generated
@@ -1528,8 +1535,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
 
           <t>This call may result in a change to the state of the ICE
-          Agent, and may result in a change to media state if it
-          results in connectivity being established.</t>
+          Agent.</t>
         </section>
         <section title="addIceCandidate" anchor="sec.addicecandidate">
 
@@ -1579,10 +1585,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
         <section title="stopped" anchor="sec.transceiver-stopped">
           <t>
-            The stopped method returns "true" if the transceiver has
+            The stopped property indicates whether the transceiver has
             been stopped, either by a call to stopTransceiver or by
-            applying an answer that rejects the associated m= section, and
-            "false" otherwise.
+            applying an answer that rejects the associated m= section.
+            In either of these cases, it is set to "true" and otherwise
+            will be set to "false".
           </t>
           <t>
             A stopped RtpTransceiver does not send any
@@ -1602,6 +1609,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the transceiver direction is intersected with the offered direction,
             as explained in the <xref target="sec.generating-an-answer" />
             section below.
+          </t>
+          <t>
+            Note that while setDirection sets the direction attribute of
+            the transceiver immediately
+            (<xref target="sec.transceiver-direction"/>), this attribute
+            does not immediately affect whether the transceiver's
+            RtpSender will send or its RtpReceiver will receive. The
+            direction in effect is represented by the currentDirection
+            attribute, which is only updated when an answer is applied.
           </t>
         </section>
         <section title="direction" anchor="sec.transceiver-direction">
@@ -1634,7 +1650,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             transceiver, which in turn affect the presence and order of
             codecs of the associated m= section on future calls to
             createOffer and createAnswer. Note that setCodecPreferences
-            does not directly affect which codec the implemtation decides
+            does not directly affect which codec the implementation decides
             to send. It only affects which codecs the implementation
             indicates that it prefers to receive, via the offer or answer.
             Even when a codec is excluded by setCodecPreferences, it still
@@ -1764,10 +1780,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             RTX payload type associations.</t>
 
             <t>
-            <xref target="RFC3556"></xref> with bandwidth modifiers MAY
-            be supported for specifying RTCP bandwidth as a fraction of
-            the media bandwidth, RTCP fraction allocated to the senders
-            and setting maximum media bit-rate boundaries.</t>
+            <xref target="RFC3556"></xref> MUST be supported for control
+            of RTCP bandwidth limits.</t>
 
           </list></t>
 
@@ -1920,12 +1934,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The next step is to generate m= sections, as specified in
           <xref target="RFC4566" /> Section 5.14. An m= section is
           generated for each RtpTransceiver that has been added to the
-          PeerConnection. This is done in the order that their
-          associated RtpTransceivers were added to the PeerConnection
-          and excludes RtpTransceivers that are stopped and not
-          associated with an m= section (either due to an m= section
-          being recycled or an RtpTransceiver having been stopped
-          before being associated with an m= section) .</t>
+          PeerConnection, excluding any stopped RtpTransceivers.
+          This is done in the order the
+          RtpTransceivers were added to the PeerConnection.</t>
 
           <t>Each m= section, provided it is not marked as bundle-only,
           MUST generate a unique set of ICE credentials and gather its
@@ -1946,8 +1957,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <list style="symbols">
 
             <t>The port value is set to the port of the default ICE
-            candidate for this m= section, but given that no candidates
-            have yet been gathered, the "dummy" port value of 9
+            candidate for this m= section, but given that no
+            candidates are available yet, the "dummy" port value of 9
             (Discard) MUST be used, as indicated in
             <xref target="I-D.ietf-ice-trickle"></xref>, Section
             5.1.</t>
@@ -1977,7 +1988,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The m= line MUST be followed immediately by a "c=" line,
           as specified in
           <xref target="RFC4566"></xref>, Section 5.7. Again, as no
-          candidates have yet been gathered, the "c=" line must contain
+          candidates are available yet, the "c=" line must contain
           the "dummy" value "IN IP4 0.0.0.0", as defined in
           <xref target="I-D.ietf-ice-trickle"></xref>, Section 5.1.</t>
 
@@ -2546,9 +2557,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>The bundle policy is "balanced", and this is not the
             first m= section for this media type or in the same bundle
             group as the first m= section for this media type.</t>
-
-            <t>The RTP/RTCP multiplexing policy is "require" and the m=
-            section doesn't contain an "a=rtcp-mux" attribute.</t>
           </list></t>
 
           <t>Otherwise, each m= section in the answer should then be
@@ -2559,7 +2567,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>The port value would normally be set to the port of the
             default ICE candidate for this m= section, but given that
-            no candidates have yet been gathered, the "dummy" port
+            no candidates are available yet,
+            the "dummy" port
             value of 9 (Discard) MUST be used, as indicated in
             <xref target="I-D.ietf-ice-trickle"></xref>, Section
             5.1.</t>
@@ -2585,7 +2594,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The m= line MUST be followed immediately by a "c=" line,
           as specified in
           <xref target="RFC4566"></xref>, Section 5.7. Again, as no
-          candidates have yet been gathered, the "c=" line must contain
+          candidates are available yet, the "c=" line must contain
           the "dummy" value "IN IP4 0.0.0.0", as defined in
           <xref target="I-D.ietf-ice-trickle"></xref>, Section 5.1.</t>
 
@@ -2849,7 +2858,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <t>The SDP returned from createOffer or createAnswer MUST NOT
         be changed before passing it to setLocalDescription. If precise
-        control over the SDP is needed, the aformentioned
+        control over the SDP is needed, the aforementioned
         createOffer/createAnswer options or RTPSender APIs MUST be
         used.</t>
 
@@ -3281,6 +3290,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Each m= section is also checked to ensure prohibited
             features are not used. If this is a local description, the
             "ice-lite" attribute MUST NOT be specified.</t>
+
+            <t>If the RTP/RTCP multiplexing policy is "require", each m=
+            section MUST contain an "a=rtcp-mux" attribute.</t>
           </list></t>
 
           <t>If this session description is of type "pranswer" or
@@ -3298,6 +3310,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             MUST exactly match the media type and protocol values in
             the corresponding m= section in the associated offer.</t>
           </list></t>
+
+          <t>If any of the preceding checks failed, processing MUST stop
+          and an error MUST be returned.</t>
         </section>
       </section>
       <section title="Applying a Local Description"
@@ -3350,9 +3365,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>If RTCP mux is indicated, prepare to demux RTP and RTCP
             from the RTP ICE component, as specified in
-            <xref target="RFC5761"></xref>, Section 5.1.3. If RTCP mux is
-            not indicated, but was indicated in a previous description,
-            this MUST result in an error.</t>
+
+            <xref target="RFC5761" />, Section 5.1.3. If RTCP mux is
+            not indicated, but was previously negotiated, i.e., the RTCP ICE
+            component no longer exists, this MUST result in an error.</t>
 
             <t>For each specified RTP header extension, establish a
             mapping between the extension ID and URI, as described in
@@ -3409,10 +3425,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>For any specified "CT" bandwidth value, set this as the
           limit for the maximum total bitrate for all m= sections, as
           specified in Section 5.8 of
-          <xref target="RFC4566"></xref>. The implementation can decide
-          how to allocate the available bandwidth between m= sections
-          to simultaneously meet any limits on individual m= sections,
-          as well as this overall session limit.</t>
+          <xref target="RFC4566"></xref>.
+          Within this overall limit, the implementation can dynamically decide
+          how to best allocate the available bandwidth between m= sections,
+          respecting any specific limits that have been specified for
+          individual m= sections.</t>
 
           <t>For any specified "RR" or "RS" bandwidth values, handle as
           specified in
@@ -3677,9 +3694,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             media formats. Specifically,
             begin or continue sending the requested feedback types and
             reacting to received feedback, as specified in
-            <xref target="RFC4585" />, Section 4.2. When sending RTCP feedback,
-            use the SSRC of an outgoing Source RTP Stream as the RTCP sender
-            SSRC; if no outgoing Source RTP Stream exists, choose a random one.
+            <xref target="RFC4585" />, Section 4.2.
+            When sending RTCP feedback, follow the rules and
+            recommendations from <xref
+            target="I-D.ietf-avtcore-rtp-multi-stream"></xref>,
+            Section 5.4.1 to select which SSRC to use.
             </t>
 
             <t>If the directional attribute is of type "recvonly" or
@@ -4906,6 +4925,27 @@ a=rtcp-fb:100 nack pli
         type="TXT" />
       </reference>
       <!-- NORM 15 -->
+      <reference anchor='I-D.ietf-avtcore-rtp-multi-stream'>
+        <front>
+          <title>Sending Multiple RTP Streams in a Single RTP Session</title>
+          <author initials='J' surname='Lennox' fullname='Jonathan Lennox'>
+            <organization />
+          </author>
+          <author initials='M' surname='Westerlund' fullname='Magnus Westerlund'>
+            <organization />
+          </author>
+          <author initials='Q' surname='Wu' fullname='Qin Wu'>
+            <organization />
+          </author>
+          <author initials='C' surname='Perkins' fullname='Colin Perkins'>
+            <organization />
+          </author>
+          <date month='December' day='11' year='2015' />
+        </front>
+        <seriesInfo name='Internet-Draft' value='draft-ietf-avtcore-rtp-multi-stream-11' />
+        <format type='TXT'
+                target='http://www.ietf.org/internet-drafts/draft-ietf-avtcore-rtp-multi-stream-11.txt' />
+      </reference>
       <!-- NORM 16 -->
       <reference anchor='I-D.ietf-rtcweb-security'>
         <front>
