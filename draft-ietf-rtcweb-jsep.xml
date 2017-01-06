@@ -1970,11 +1970,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>To properly indicate use of DTLS, the &lt;proto&gt;
             field MUST be set to "UDP/TLS/RTP/SAVPF", as specified in
-            <xref target="RFC5764" />, Section 8, if the default
-            candidate uses UDP transport, or "TCP/DTLS/RTP/SAVPF", as
-            specified in
-            <xref target="RFC7850" /> if
-            the default candidate uses TCP transport.</t>
+            <xref target="RFC5764" />, Section 8.</t>
 
             <t>If codec preferences have been set for the associated
             transceiver, media formats MUST be generated in the
@@ -2161,9 +2157,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Lastly, if a data channel has been created, a m= section
           MUST be generated for data. The &lt;media&gt; field MUST be
           set to "application" and the &lt;proto&gt; field MUST be set
-          to "UDP/DTLS/SCTP" if the default candidate uses UDP
-          transport, or "TCP/DTLS/SCTP" if the default candidate uses
-          TCP transport
+          to "UDP/DTLS/SCTP"
           <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>. The "fmt"
           value MUST be set to "webrtc-datachannel" as specified in
           <xref target="I-D.ietf-mmusic-sctp-sdp"></xref>, Section
@@ -2247,7 +2241,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             generated &lt;session-version&gt; is independent of the
             &lt;session-version&gt; of the current local description;
             in particular, in the case where the current version is N,
-            an offer is created with version N+1, and then that offer
+            an offer is created and applied with version N+1, and then that offer
             is rolled back so that the current version is again N, the
             next generated offer will still have version N+2.</t>
           </list></t>
@@ -2359,7 +2353,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             added RtpTransceiver as if the m= section were being added
             to session description, except that instead of adding it,
             the generated m= section replaces the m= section with a
-            zero port.</t>
+            zero port. The new m= section MUST contain a new MID.</t>
           </list></t>
 
           <t>If the initial offer was applied using
@@ -2374,7 +2368,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>In addition, for each non-recycled, non-rejected m=
           section in the new offer, the following adjustments are made
           based on the contents of the corresponding m= section in the
-          current remote description:
+          current remote description, if any:
           <list style="symbols">
 
             <t>The m= line and corresponding "a=rtpmap" and "a=fmtp"
