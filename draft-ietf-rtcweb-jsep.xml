@@ -1360,10 +1360,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           things, it sets up local resources for receiving and decoding
           media. In order to successfully handle scenarios where the
           application wants to offer to change from one media format to
-          a different, incompatible format, the PeerConnection must be
-          able to simultaneously support use of both the current and
-          pending local descriptions (e.g. support codecs that exist in
-          both descriptions) until a final answer is received, at which
+          a different, incompatible format, while in the have-local-offer
+          and have-remote-pranswer, the PeerConnection must be
+          able to simultaneously support use of both the current (if any)
+          and pending local descriptions, (e.g., support codecs that exist in
+          both descriptions) until setRemoteDescription is called
+          with a final answer, at which
           point the PeerConnection can fully adopt the pending local
           description, or roll back to the current description if the
           remote side denied the change.</t>
@@ -1403,7 +1405,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="currentLocalDescription"
         anchor="sec.currentlocaldescription">
 
-          <t>The currentLocalDescription method returns a copy of the
+          <t>The currentLocalDescription method returns the
           current negotiated local description - i.e., the local
           description from the last successful offer/answer exchange -
           in addition to any local candidates that have been generated
@@ -1527,8 +1529,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
 
           <t>This call may result in a change to the state of the ICE
-          Agent, and may result in a change to media state if it
-          results in connectivity being established.</t>
+          Agent.</t>
         </section>
         <section title="addIceCandidate" anchor="sec.addicecandidate">
 
