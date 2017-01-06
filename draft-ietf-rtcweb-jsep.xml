@@ -1068,9 +1068,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             non-multiplexing endpoints.</t>
             <t hangText="require:">The browser will only gather RTP
             candidates. This halves the number of candidates that the
-            offerer needs to gather. When acting as answerer, the
-            implementation will reject any m= section that does not
-            contain an "a=rtcp-mux" attribute.</t>
+            offerer needs to gather. Applying a description with an
+            m= section that does not contain an "a=rtcp-mux" attribute
+            will cause an error to be returned.</t>
           </list></t>
 
           <t>The default multiplexing policy MUST be set to "require".
@@ -2557,9 +2557,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>The bundle policy is "balanced", and this is not the
             first m= section for this media type or in the same bundle
             group as the first m= section for this media type.</t>
-
-            <t>The RTP/RTCP multiplexing policy is "require" and the m=
-            section doesn't contain an "a=rtcp-mux" attribute.</t>
           </list></t>
 
           <t>Otherwise, each m= section in the answer should then be
@@ -3293,6 +3290,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Each m= section is also checked to ensure prohibited
             features are not used. If this is a local description, the
             "ice-lite" attribute MUST NOT be specified.</t>
+
+            <t>If the RTP/RTCP multiplexing policy is "require", each m=
+            section MUST contain an "a=rtcp-mux" attribute.</t>
           </list></t>
 
           <t>If this session description is of type "pranswer" or
@@ -3310,6 +3310,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             MUST exactly match the media type and protocol values in
             the corresponding m= section in the associated offer.</t>
           </list></t>
+
+          <t>If any of the preceding checks failed, processing MUST stop
+          and an error MUST be returned.</t>
         </section>
       </section>
       <section title="Applying a Local Description"
