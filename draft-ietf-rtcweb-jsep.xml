@@ -1359,16 +1359,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>This API changes the local media state; among other
           things, it sets up local resources for receiving and decoding
           media. In order to successfully handle scenarios where the
-          application wants to offer to change from one media format to
-          a different, incompatible format, while in the have-local-offer
-          and have-remote-pranswer, the PeerConnection must be
-          able to simultaneously support use of both the current (if any)
-          and pending local descriptions, (e.g., support codecs that exist in
-          both descriptions) until setRemoteDescription is called
-          with a final answer, at which
+          application wants to offer to change from one media format to a
+          different, incompatible format, the PeerConnection must be able to
+          simultaneously support use of both the current and pending local
+          descriptions (e.g., support the codecs that exist in either
+          description). This dual processing begins when the PeerConnection
+          enters the have-local-offer state, and continues until
+          setRemoteDescription is called with either a final answer, at which
           point the PeerConnection can fully adopt the pending local
-          description, or roll back to the current description if the
-          remote side denied the change.</t>
+          description, or a rollback, which results in a revert to the current
+          local description.</t>
 
           <t>This API indirectly controls the candidate gathering
           process. When a local description is supplied, and the number
