@@ -642,7 +642,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           larger-than-expected number of ICE components is used, or
           because the pool has not had enough time to gather
           candidates, the remaining candidates are gathered as
-          usual.</t>
+          usual. This only occurs for the first offer/answer exchange,
+          after which the candidate pool is emptied and no longer used.
+          </t>
 
           <t>One example of where this concept is useful is an
           application that expects an incoming call at some point in
@@ -1513,9 +1515,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               new ICE credentials, for the purpose of forcing an ICE
               restart and kicking off a new gathering phase, in which
               the new servers will be used. If the ICE candidate pool
-              has a nonzero size, any existing candidates will be
-              discarded, and new candidates will be gathered from the
-              new servers.</t>
+              has a nonzero size, and a local description has not yet been
+              applied, any existing candidates will be discarded, and new
+              candidates will be gathered from the new servers.</t>
 
               <t>Any change to the ICE candidate policy affects the
               next gathering phase. If an ICE gathering phase has
@@ -1526,9 +1528,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               phase occurs, and so any necessary filtering can still be
               done on any pooled candidates.</t>
 
-              <t>Any changes to the ICE candidate pool size take effect
-              immediately; if increased, additional candidates are
-              pre-gathered; if decreased, the now-superfluous
+              <t>The ICE candidate pool size MUST NOT be changed after
+              applying a local description. If a local description has not
+              yet been applied, any changes to the ICE candidate pool size
+              take effect immediately; if increased, additional candidates
+              are pre-gathered; if decreased, the now-superfluous
               candidates are discarded.</t>
 
               <t>The bundle and RTCP-multiplexing policies MUST NOT be
@@ -3732,6 +3736,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         m= sections accordingly, as described in
         <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />,
         Section 8.2.</t>
+
+        <t>If the description is of type "answer", and there are still
+        remaining candidates in the ICE candidate pool, discard them.</t>
       </section>
     </section>
     <section title="Processing RTP/RTCP packets" anchor="sec.rtp.demux">
