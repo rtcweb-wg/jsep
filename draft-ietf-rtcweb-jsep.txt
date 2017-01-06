@@ -1497,14 +1497,14 @@ Internet-Draft                    JSEP                      January 2017
    local description is supplied, and the number of transports currently
    in use does not match the number of transports needed by the local
    description, the PeerConnection will create transports as needed and
-   either withdraw an appropriate number of ICE candidates from the
-   candidate pool or begin gathering candidates if sufficient pre-
-   gathered candidates are not available.
+   begin gathering candidates for each transport, using ones from the
+   candidate pool if available.
 
    If setRemoteDescription was previously called with an offer, and
    setLocalDescription is called with an answer (provisional or final),
    and the media directions are compatible, and media is available to
    send, this will result in the starting of media transmission.
+
 
 
 
@@ -3562,7 +3562,7 @@ Internet-Draft                    JSEP                      January 2017
 
    o  If the media section has been rejected (i.e. port is set to zero
       in the answer), stop any reception or transmission of media for
-      this section, and, if there was no accepted media section bundled
+      this section, and, unless a non-rejected media section is bundled
       with this media section, discard any associated ICE components, as
       described in Section 9.2.1.3 of [RFC5245].
 
