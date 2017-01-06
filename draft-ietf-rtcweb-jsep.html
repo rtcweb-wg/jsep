@@ -954,6 +954,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>The port value is set to the port of the default ICE candidate for this m= section, but given that no candidates are available yet, the "dummy" port value of 9 (Discard) MUST be used, as indicated in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 5.1.</li>
   <li>To properly indicate use of DTLS, the &lt;proto&gt; field MUST be set to "UDP/TLS/RTP/SAVPF", as specified in <a href="#RFC5764">[RFC5764]</a>, Section 8.</li>
   <li>If codec preferences have been set for the associated transceiver, media formats MUST be generated in the corresponding order, and MUST exclude any codecs not present in the codec preferences.</li>
+  <li>The media formats in the answer MAY include codecs present in the offer that were discarded in a previous offer/answer exchange. This is necessary for compatibility with third- party call control and SIP use cases.</li>
   <li>Unless excluded by the above restrictions, the media formats MUST include the mandatory audio/video codecs as specified in <a href="#I-D.ietf-rtcweb-audio">[I-D.ietf-rtcweb-audio]</a>(see Section 3) and <a href="#I-D.ietf-rtcweb-video">[I-D.ietf-rtcweb-video]</a>(see Section 5).</li>
 </ul>
 <p id="rfc.section.5.2.1.p.7">The m= line MUST be followed immediately by a "c=" line, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.7. Again, as no candidates are available yet, the "c=" line must contain the "dummy" value "IN IP4 0.0.0.0", as defined in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 5.1.</p>
@@ -1037,7 +1038,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.2.2.p.6">In addition, for each non-recycled, non-rejected m= section in the new offer, the following adjustments are made based on the contents of the corresponding m= section in the current remote description, if any: </p>
 
 <ul>
-  <li>The m= line and corresponding "a=rtpmap" and "a=fmtp" lines MUST only include codecs present in the most recent answer which have not been excluded by the codec preferences of the associated transceiver.</li>
+  <li>The m= line and corresponding "a=rtpmap" and "a=fmtp" lines MUST only include codecs present in the most recent answer which have not been excluded by the codec preferences of the associated transceiver. Note that non-JSEP endpoints are not subject to these restrictions, and might offer media formats that were not present in the most recent answer, as specified in <a href="#RFC3264">[RFC3264]</a>, Section 8.  Therefore, JSEP endpoints MUST be prepared to receive such offers.</li>
   <li>The media formats on the m= line MUST be generated in the same order as in the current local description.</li>
   <li>The RTP header extensions MUST only include those that are present in the most recent answer.</li>
   <li>The RTCP feedback extensions MUST only include those that are present in the most recent answer.</li>
@@ -1079,7 +1080,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
   <li>The port value would normally be set to the port of the default ICE candidate for this m= section, but given that no candidates are available yet, the "dummy" port value of 9 (Discard) MUST be used, as indicated in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 5.1.</li>
   <li>The &lt;proto&gt; field MUST be set to exactly match the &lt;proto&gt; field for the corresponding m= line in the offer.</li>
-  <li>If codec preferences have been set for the associated transceiver, media formats MUST be generated in the corresponding order, and MUST exclude any codecs not present in the codec preferences or not present in the offer.</li>
+  <li>If codec preferences have been set for the associated transceiver, media formats MUST be generated in the corresponding order, and MUST exclude any codecs not present in the codec preferences or not present in the offer. Note that non-JSEP endpoints are not subject to this restriction, and might add media formats in the answer that are not present in the offer, as specified in <a href="#RFC3264">[RFC3264]</a>, Section 6.1. Therefore, JSEP endpoints MUST be prepared to receive such answers.</li>
   <li>Unless excluded by the above restrictions, the media formats MUST include the mandatory audio/video codecs as specified in <a href="#I-D.ietf-rtcweb-audio">[I-D.ietf-rtcweb-audio]</a>(see Section 3) and <a href="#I-D.ietf-rtcweb-video">[I-D.ietf-rtcweb-video]</a>(see Section 5).</li>
 </ul>
 <p id="rfc.section.5.3.1.p.9">The m= line MUST be followed immediately by a "c=" line, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.7. Again, as no candidates are available yet, the "c=" line must contain the "dummy" value "IN IP4 0.0.0.0", as defined in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 5.1.</p>
