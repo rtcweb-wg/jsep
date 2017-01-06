@@ -1333,7 +1333,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="sec.applying-a-local-desc" />). This means
             that some RtpTransceivers that were previously associated
             will no longer be associated with any m= section; in such
-            cases, the value of the RtpTransceiver's mid attribute MUST
+            cases, the value of the RtpTransceiver's mid property MUST
             be set to null. RtpTransceivers that were created by
             applying a remote offer that was subsequently rolled back
             MUST be removed. However, a RtpTransceiver MUST NOT be
@@ -1590,7 +1590,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             The stopped property indicates whether the transceiver has
             been stopped, either by a call to stopTransceiver or by
             applying an answer that rejects the associated m= section.
-            In either of these cases, it is set to "true" and otherwise
+            In either of these cases, it is set to "true", and otherwise
             will be set to "false".
           </t>
           <t>
@@ -1602,7 +1602,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="setDirection" anchor="sec.transceiver-set-direction">
           <t>
             The setDirection method sets the direction of a transceiver,
-            which affects the direction attribute of the associated m=
+            which affects the direction property of the associated m=
             section on future calls to createOffer and createAnswer.
           </t>
           <t>
@@ -1613,37 +1613,37 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             section below.
           </t>
           <t>
-            Note that while setDirection sets the direction attribute of
+            Note that while setDirection sets the direction property of
             the transceiver immediately
-            (<xref target="sec.transceiver-direction"/>), this attribute
+            (<xref target="sec.transceiver-direction"/>), this property
             does not immediately affect whether the transceiver's
             RtpSender will send or its RtpReceiver will receive. The
             direction in effect is represented by the currentDirection
-            attribute, which is only updated when an answer is applied.
+            property, which is only updated when an answer is applied.
           </t>
         </section>
         <section title="direction" anchor="sec.transceiver-direction">
           <t>
-            The direction method returns the last value passed into
+            The direction property indicates the last value passed into
             setDirection. If setDirection has never been called, it
-            returns the direction the transceiver was initialized with.
+            is set to the direction the transceiver was initialized with.
           </t>
         </section>
         <section title="currentDirection" anchor="sec.transceiver-current-direction">
           <t>
-            The currentDirection method returns the last negotiated
+            The currentDirection property indicates the last negotiated
             direction for the transceiver's associated m= section. More
-            specifically, it returns the <xref target="RFC3264"></xref>
+            specifically, it indicates the <xref target="RFC3264"></xref>
             directional attribute of the associated m= section in the last
             applied answer, with "send" and "recv" directions reversed if
             it was a remote answer. For example, if the directional
             attribute for the associated m= section in a remote answer is
-            "recvonly", currentDirection returns "sendonly".
+            "recvonly", currentDirection is set to "sendonly".
           </t>
           <t>
             If an answer that references this transceiver has not yet been
             applied, or if the transceiver is stopped, currentDirection
-            returns null.
+            is set to null.
           </t>
         </section>
         <section title="setCodecPreferences" anchor="sec.transceiver-set-codec-preferences">
@@ -3364,7 +3364,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Find the RtpTransceiver that corresponds to the m=
               section with the same MID in the created offer.</t>
 
-              <t>Set the value of the RtpTransceiver's mid attribute to
+              <t>Set the value of the RtpTransceiver's mid property to
               the MID of the m= section.</t>
             </list></t>
 
@@ -3503,10 +3503,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>Associate the found or created RtpTransceiver with the
               m= section by setting the value of the RtpTransceiver's
-              mid attribute to the MID of the m= section. If the m=
+              mid property to the MID of the m= section. If the m=
               section does not include a MID (i.e., the remote side
               does not support the MID extension), generate a value for
-              the RtpTransceiver mid attribute, following the guidance
+              the RtpTransceiver's mid property, following the guidance
               for "a=mid" mentioned in
               <xref target="sec.initial-offers" />.</t>
             </list></t>
