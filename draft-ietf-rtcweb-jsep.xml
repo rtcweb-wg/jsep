@@ -445,15 +445,15 @@ setRemote(ANSWER) |                                   |
           sections when RtpTransceivers are created but not yet
           associated with a m= section, or if RtpTransceivers have been
           stopped and disassociated from m= sections. An RtpTransceiver
-          is never associated with more than one m= section, and once a
-          session description is applied, a m= section is always
-          associated with exactly one RtpTransceiver. An RtpTransceiver
           is said to be associated with an m= section if and only if
           its mid attribute is equal to the MID of that m= section, or a
           mapping exists between the transceiver and the index of that m=
           section. The index-based mapping is required for remote
           endpoints that don't support the MID extension; see
-          <xref target="sec.applying-a-remote-desc" />.</t>
+          <xref target="sec.applying-a-remote-desc" />. An RtpTransceiver
+          is never associated with more than one m= section, and once a
+          session description is applied, a m= section is always
+          associated with exactly one RtpTransceiver.</t>
 
           <t>RtpTransceivers can be created explicitly by the
           application or implicitly by calling setRemoteDescription
@@ -2030,13 +2030,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               SHOULD be 3 bytes or less, to allow them to efficiently fit into
               the RTP header extension defined in
               <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation">
-              </xref>, Section 14. Note that the mid attribute of the
-              RtpTransceiver is not set when creating an offer; it's only
-              set when applying a description, as described in
-              <xref target="sec.applying-a-local-desc"></xref> and
-              <xref target="sec.applying-a-remote-desc"></xref>. Thus the
-              generated MID value is only considered a "proposed" MID at
-              this point.</t>
+              </xref>, Section 14. Note that this does not set the
+              RtpTransceiver mid attribute, as that only occurs when
+              the description is applied. The generated MID value can be
+              considered a "proposed" MID at this point.</t>
 
               <t>A direction attribute which is the same as that of the
               associated transceiver.</t>
