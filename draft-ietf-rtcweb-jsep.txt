@@ -925,13 +925,13 @@ Internet-Draft                    JSEP                      January 2017
    each receiving client, chooses the appropriate encoding to forward.
 
    Applications request support for simulcast by configuring multiple
-   encodings on an RTPSender, which, upon generation of an offer or
+   encodings on an RtpSender, which, upon generation of an offer or
    answer, are indicated in SDP markings on the corresponding m=
    section, as described below.  Receivers that understand simulcast and
    are willing to receive it will also include SDP markings to indicate
    their support, and JSEP endpoints will use these markings to
-   determine whether simulcast is permitted for a given RTPSender.  If
-   simulcast support is not negotiated, the RTPSender will only use the
+   determine whether simulcast is permitted for a given RtpSender.  If
+   simulcast support is not negotiated, the RtpSender will only use the
    first configured encoding.
 
    Note that the exact simulcast parameters are up to the sending
@@ -954,18 +954,18 @@ Uberti, et al.            Expires July 10, 2017                [Page 17]
 Internet-Draft                    JSEP                      January 2017
 
 
-   RTPSender must be consistent with the offer, but this information is
+   RtpSender must be consistent with the offer, but this information is
    currently not surfaced through any API.  This means that established
    simulcast streams will continue to work through a received re-offer,
    but setting up initial simulcast by way of a received offer requires
    out-of-band signaling or SDP inspection.  Future versions of this
    specification may add additional APIs to provide this control.
 
-   When using JSEP to transmit multiple encodings from a RTPSender, the
+   When using JSEP to transmit multiple encodings from a RtpSender, the
    techniques from [I-D.ietf-mmusic-sdp-simulcast] and
    [I-D.ietf-mmusic-rid] are used.  Specifically, when multiple
-   encodings have been configured for a RTPSender, the m= section for
-   the RTPSender will include an "a=simulcast" attribute, as defined in
+   encodings have been configured for a RtpSender, the m= section for
+   the RtpSender will include an "a=simulcast" attribute, as defined in
    [I-D.ietf-mmusic-sdp-simulcast], Section 6.2, with a "send" simulcast
    stream description that lists each desired encoding, and no "recv"
    simulcast stream description.  The m= section will also include an
@@ -1213,7 +1213,7 @@ Internet-Draft                    JSEP                      January 2017
 
 4.1.3.  addTransceiver
 
-   The addTransceiver method adds a new RTPTransceiver to the
+   The addTransceiver method adds a new RtpTransceiver to the
    PeerConnection.  If a MediaStreamTrack argument is provided, then the
    transceiver will be configured with that media type and the track
    will be attached to the transceiver.  Otherwise, the application MUST
@@ -2875,7 +2875,7 @@ Internet-Draft                    JSEP                      January 2017
    The SDP returned from createOffer or createAnswer MUST NOT be changed
    before passing it to setLocalDescription.  If precise control over
    the SDP is needed, the aforementioned createOffer/createAnswer
-   options or RTPSender APIs MUST be used.
+   options or RtpSender APIs MUST be used.
 
    Note that the application MAY modify the SDP to reduce the
    capabilities in the offer it sends to the far side (post-
