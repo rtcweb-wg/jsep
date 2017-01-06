@@ -753,7 +753,9 @@ Internet-Draft                    JSEP                      January 2017
    the ICE candidate event.  If the pool becomes depleted, either
    because a larger-than-expected number of ICE components is used, or
    because the pool has not had enough time to gather candidates, the
-   remaining candidates are gathered as usual.
+   remaining candidates are gathered as usual.  This only occurs for the
+   first offer/answer exchange, after which the candidate pool is
+   emptied and no longer used.
 
    One example of where this concept is useful is an application that
    expects an incoming call at some point in the future, and wants to
@@ -776,8 +778,6 @@ Internet-Draft                    JSEP                      January 2017
 
    Note that certain codecs support transmission of samples with aspect
    ratios other than 1.0 (i.e., non-square pixels).  JSEP
-   implementations will not transmit non-square pixels, but SHOULD
-   receive and render such video with the correct aspect ratio.
 
 
 
@@ -786,6 +786,8 @@ Uberti, et al.            Expires July 10, 2017                [Page 14]
 Internet-Draft                    JSEP                      January 2017
 
 
+   implementations will not transmit non-square pixels, but SHOULD
+   receive and render such video with the correct aspect ratio.
    However, sample aspect ratio has no impact on the size negotiation
    described below; all dimensions are measured in pixels, whether
    square or not.
@@ -832,8 +834,6 @@ Internet-Draft                    JSEP                      January 2017
 
    As an example, consider a system with a multiformat video decoder,
    which is capable of decoding any resolution from 48x48 to 720p, and
-   where the application has constrained the received track to at most
-
 
 
 
@@ -842,6 +842,7 @@ Uberti, et al.            Expires July 10, 2017                [Page 15]
 Internet-Draft                    JSEP                      January 2017
 
 
+   where the application has constrained the received track to at most
    360p.  In this case, the implementation would generate this
    attribute:
 
@@ -889,7 +890,6 @@ Internet-Draft                    JSEP                      January 2017
    the sender SHOULD apply downscaling to the output of the
    MediaStreamTrack in order to satisfy the limits.  Downscaling MUST
    NOT change the track aspect ratio.
-
 
 
 
@@ -1653,8 +1653,9 @@ Internet-Draft                    JSEP                      January 2017
       generate new ICE credentials, for the purpose of forcing an ICE
       restart and kicking off a new gathering phase, in which the new
       servers will be used.  If the ICE candidate pool has a nonzero
-      size, any existing candidates will be discarded, and new
-      candidates will be gathered from the new servers.
+      size, and a local description has not yet been applied, any
+      existing candidates will be discarded, and new candidates will be
+      gathered from the new servers.
 
    o  Any change to the ICE candidate policy affects the next gathering
       phase.  If an ICE gathering phase has already started or
@@ -1664,15 +1665,14 @@ Internet-Draft                    JSEP                      January 2017
       until a gathering phase occurs, and so any necessary filtering can
       still be done on any pooled candidates.
 
-   o  Any changes to the ICE candidate pool size take effect
+   o  The ICE candidate pool size MUST NOT be changed after applying a
+      local description.  If a local description has not yet been
+      applied, any changes to the ICE candidate pool size take effect
       immediately; if increased, additional candidates are pre-gathered;
       if decreased, the now-superfluous candidates are discarded.
 
    o  The bundle and RTCP-multiplexing policies MUST NOT be changed
       after the construction of the PeerConnection.
-
-   This call may result in a change to the state of the ICE Agent.
-
 
 
 
@@ -1681,6 +1681,8 @@ Uberti, et al.            Expires July 10, 2017                [Page 30]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   This call may result in a change to the state of the ICE Agent.
 
 4.1.17.  addIceCandidate
 
@@ -1728,8 +1730,6 @@ Internet-Draft                    JSEP                      January 2017
    stopped, either by a call to stopTransceiver or by applying an answer
    that rejects the associated m= section.  In either of these cases, it
    is set to "true", and otherwise will be set to "false".
-
-
 
 
 
@@ -3713,6 +3713,9 @@ Internet-Draft                    JSEP                      January 2017
    accordingly, as described in
    [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 8.2.
 
+   If the description is of type "answer", and there are still remaining
+   candidates in the ICE candidate pool, discard them.
+
 6.  Processing RTP/RTCP packets
 
    Note: The following algorithm does not yet have WG consensus but is
@@ -3742,9 +3745,6 @@ Internet-Draft                    JSEP                      January 2017
       payload types of a given RtpReceiver are found in the m= section
       corresponding to that RtpReceiver in the local description.  If
       any payload type could map to more than one RtpReceiver, map to
-      the RtpReceiver whose m= section appears earliest in the local
-      description.
-
 
 
 
@@ -3753,6 +3753,9 @@ Uberti, et al.            Expires July 10, 2017                [Page 67]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+      the RtpReceiver whose m= section appears earliest in the local
+      description.
 
    As RtpTransceivers (and, thus, RtpReceivers) are added, removed,
    stopped, or reconfigured, the tables above must also be updated.
@@ -3799,9 +3802,6 @@ Internet-Draft                    JSEP                      January 2017
       RtpReceiver associated with that SSRC.  In addition, for each
       chunk in the packet that contains a MID that is in the table
       mapping MID to RtpReceiver, update the incoming SSRC mapping table
-      to include an entry that maps the SSRC for that chunk to the
-      RtpReceiver associated with that MID.  (This case can occur when
-      RTCP for a source is received before any RTP packets.)
 
 
 
@@ -3809,6 +3809,10 @@ Uberti, et al.            Expires July 10, 2017                [Page 68]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+      to include an entry that maps the SSRC for that chunk to the
+      RtpReceiver associated with that MID.  (This case can occur when
+      RTCP for a source is received before any RTP packets.)
 
       If the packet is of type BYE, for each SSRC indicated in the
       packet that is found in the incoming SSRC table, deliver a copy of
@@ -3852,10 +3856,6 @@ Internet-Draft                    JSEP                      January 2017
    the offer or answer, so the offers and answers are complete.  Trickle
    ICE is not used.  Both Alice and Bob are using the default policy of
    balanced.
-
-
-
-
 
 
 
