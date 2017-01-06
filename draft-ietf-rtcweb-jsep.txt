@@ -2877,7 +2877,7 @@ Internet-Draft                    JSEP                      January 2017
    The SDP returned from createOffer or createAnswer MUST NOT be changed
    before passing it to setLocalDescription.  If precise control over
    the SDP is needed, the aforementioned createOffer/createAnswer
-   options or RtpSender APIs MUST be used.
+   options or RtpTransceiver APIs MUST be used.
 
    Note that the application MAY modify the SDP to reduce the
    capabilities in the offer it sends to the far side (post-
@@ -3283,10 +3283,11 @@ Internet-Draft                    JSEP                      January 2017
    The following steps are performed at the media engine level to apply
    a local description.
 
-   First, the parsed parameters are checked to ensure that they have not
-   been altered after their generation in createOffer/createAnswer, as
-   discussed in Section 5.4; otherwise, processing MUST stop and an
-   error MUST be returned.
+   First, the parsed parameters are checked to ensure that they are
+   identical to those generated in the last call to createOffer/
+   createAnswer, and thus have not been altered, as discussed in
+   Section 5.4; otherwise, processing MUST stop and an error MUST be
+   returned.
 
    Next, media sections are processed.  For each media section, the
    following steps MUST be performed; if any parameters are out of
@@ -3296,7 +3297,6 @@ Internet-Draft                    JSEP                      January 2017
    o  If this media section is new, begin gathering candidates for it,
       as defined in [RFC5245], Section 4.1.1, unless it has been marked
       as bundle-only.
-
 
 
 
