@@ -159,8 +159,8 @@ Internet-Draft                    JSEP                      January 2017
    11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  82
      11.1.  Normative References . . . . . . . . . . . . . . . . . .  82
      11.2.  Informative References . . . . . . . . . . . . . . . . .  85
-   Appendix A.  Appendix A . . . . . . . . . . . . . . . . . . . . .  86
-   Appendix B.  Change log . . . . . . . . . . . . . . . . . . . . .  87
+   Appendix A.  Appendix A . . . . . . . . . . . . . . . . . . . . .  87
+   Appendix B.  Change log . . . . . . . . . . . . . . . . . . . . .  88
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  94
 
 
@@ -3644,9 +3644,10 @@ Internet-Draft                    JSEP                      January 2017
 
          formats.  Specifically, begin or continue sending the requested
          feedback types and reacting to received feedback, as specified
-         in [RFC4585], Section 4.2.  When sending RTCP feedback, use the
-         SSRC of an outgoing Source RTP Stream as the RTCP sender SSRC;
-         if no outgoing Source RTP Stream exists, choose a random one.
+         in [RFC4585], Section 4.2.  When sending RTCP feedback, follow
+         the rules and recommendations from
+         [I-D.ietf-avtcore-rtp-multi-stream], Section 5.4.1 to select
+         which SSRC to use.
 
       *  If the directional attribute is of type "recvonly" or
          "inactive", stop transmitting all RTP media, but continue
@@ -3689,7 +3690,6 @@ Internet-Draft                    JSEP                      January 2017
       Construct a table mapping outgoing SSRC to RtpSender for each
       RtpSender configured to transmit from this transport and for each
       SSRC that RtpSender is configured to use when sending.
-
 
 
 
@@ -4545,6 +4545,12 @@ Internet-Draft                    JSEP                      January 2017
 
 11.1.  Normative References
 
+   [I-D.ietf-avtcore-rtp-multi-stream]
+              Lennox, J., Westerlund, M., Wu, Q., and C. Perkins,
+              "Sending Multiple RTP Streams in a Single RTP Session",
+              draft-ietf-avtcore-rtp-multi-stream-11 (work in progress),
+              December 2015.
+
    [I-D.ietf-avtext-rid]
               Roach, A., Nandakumar, S., and P. Thatcher, "RTP Stream
               Identifier (RID) Source Description (SDES)", draft-ietf-
@@ -4581,18 +4587,18 @@ Internet-Draft                    JSEP                      January 2017
               Constraints", draft-ietf-mmusic-rid-04 (work in progress),
               February 2016.
 
-   [I-D.ietf-mmusic-sctp-sdp]
-              Loreto, S. and G. Camarillo, "Stream Control Transmission
-              Protocol (SCTP)-Based Media Transport in the Session
-              Description Protocol (SDP)", draft-ietf-mmusic-sctp-sdp-04
-              (work in progress), June 2013.
-
 
 
 Uberti, et al.            Expires July 10, 2017                [Page 82]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   [I-D.ietf-mmusic-sctp-sdp]
+              Loreto, S. and G. Camarillo, "Stream Control Transmission
+              Protocol (SCTP)-Based Media Transport in the Session
+              Description Protocol (SDP)", draft-ietf-mmusic-sctp-sdp-04
+              (work in progress), June 2013.
 
    [I-D.ietf-mmusic-sdp-bundle-negotiation]
               Holmberg, C., Alvestrand, H., and C. Jennings,
@@ -4634,13 +4640,7 @@ Internet-Draft                    JSEP                      January 2017
               Rescorla, E., "WebRTC Security Architecture", draft-ietf-
               rtcweb-security-arch-09 (work in progress), February 2014.
 
-   [I-D.ietf-rtcweb-video]
-              Roach, A., "WebRTC Video Processing and Codec
-              Requirements", draft-ietf-rtcweb-video-00 (work in
-              progress), July 2014.
 
-   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119, March 1997.
 
 
 
@@ -4649,6 +4649,14 @@ Uberti, et al.            Expires July 10, 2017                [Page 83]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   [I-D.ietf-rtcweb-video]
+              Roach, A., "WebRTC Video Processing and Codec
+              Requirements", draft-ietf-rtcweb-video-00 (work in
+              progress), July 2014.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
 
    [RFC3261]  Rosenberg, J., Schulzrinne, H., Camarillo, G., Johnston,
               A., Peterson, J., Sparks, R., Handley, M., and E.
@@ -4688,6 +4696,16 @@ Internet-Draft                    JSEP                      January 2017
               Protocol (RTCP)-Based Feedback (RTP/AVPF)", RFC 4585, July
               2006.
 
+
+
+
+
+
+Uberti, et al.            Expires July 10, 2017                [Page 84]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    [RFC5245]  Rosenberg, J., "Interactive Connectivity Establishment
               (ICE): A Protocol for Network Address Translator (NAT)
               Traversal for Offer/Answer Protocols", RFC 5245, April
@@ -4698,13 +4716,6 @@ Internet-Draft                    JSEP                      January 2017
 
    [RFC5761]  Perkins, C. and M. Westerlund, "Multiplexing RTP Data and
               Control Packets on a Single Port", RFC 5761, April 2010.
-
-
-
-Uberti, et al.            Expires July 10, 2017                [Page 84]
-
-Internet-Draft                    JSEP                      January 2017
-
 
    [RFC5888]  Camarillo, G. and H. Schulzrinne, "The Session Description
               Protocol (SDP) Grouping Framework", RFC 5888, June 2010.
@@ -4744,6 +4755,13 @@ Internet-Draft                    JSEP                      January 2017
               Modifiers for RTP Control Protocol (RTCP) Bandwidth",
               RFC 3556, July 2003.
 
+
+
+Uberti, et al.            Expires July 10, 2017                [Page 85]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    [RFC3960]  Camarillo, G. and H. Schulzrinne, "Early Media and Ringing
               Tone Generation in the Session Initiation Protocol (SIP)",
               RFC 3960, December 2004.
@@ -4751,16 +4769,6 @@ Internet-Draft                    JSEP                      January 2017
    [RFC4568]  Andreasen, F., Baugher, M., and D. Wing, "Session
               Description Protocol (SDP) Security Descriptions for Media
               Streams", RFC 4568, July 2006.
-
-
-
-
-
-
-Uberti, et al.            Expires July 10, 2017                [Page 85]
-
-Internet-Draft                    JSEP                      January 2017
-
 
    [RFC4588]  Rey, J., Leon, D., Miyazaki, A., Varsa, V., and R.
               Hakenberg, "RTP Retransmission Payload Format", RFC 4588,
@@ -4801,14 +4809,6 @@ Internet-Draft                    JSEP                      January 2017
               20140617, June 2014,
               <http://www.w3.org/TR/2011/WD-webrtc-20140617>.
 
-Appendix A.  Appendix A
-
-   For the syntax validation performed in Section 5.7, the following
-   list of ABNF definitions is used:
-
-
-
-
 
 
 
@@ -4817,6 +4817,11 @@ Uberti, et al.            Expires July 10, 2017                [Page 86]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+Appendix A.  Appendix A
+
+   For the syntax validation performed in Section 5.7, the following
+   list of ABNF definitions is used:
 
    +-----------------------+-------------------------------------------+
    | Attribute             | Reference                                 |
@@ -4857,6 +4862,18 @@ Internet-Draft                    JSEP                      January 2017
 
                        Table 1: SDP ABNF References
 
+
+
+
+
+
+
+
+Uberti, et al.            Expires July 10, 2017                [Page 87]
+
+Internet-Draft                    JSEP                      January 2017
+
+
 Appendix B.  Change log
 
    Note: This section will be removed by RFC Editor before publication.
@@ -4866,13 +4883,6 @@ Appendix B.  Change log
    o  Split createOffer and createAnswer sections to clearly indicate
       attributes which always appear and which only appear when not
       bundled into another m= section.
-
-
-
-Uberti, et al.            Expires July 10, 2017                [Page 87]
-
-Internet-Draft                    JSEP                      January 2017
-
 
    o  Add descriptions of RtpTransceiver methods.
 
@@ -4913,6 +4923,13 @@ Internet-Draft                    JSEP                      January 2017
    o  Update text around SDP processing of RTP header extensions and
       payload formats.
 
+
+
+Uberti, et al.            Expires July 10, 2017                [Page 88]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    o  Add sections on simulcast, addTransceiver, and createDataChannel.
 
    o  Clarify text to ensure that the session ID is a positive 63 bit
@@ -4921,14 +4938,6 @@ Internet-Draft                    JSEP                      January 2017
    o  Clarify SDP processing for direction indication.
 
    o  Describe SDP processing for rtcp-mux-only.
-
-
-
-
-Uberti, et al.            Expires July 10, 2017                [Page 88]
-
-Internet-Draft                    JSEP                      January 2017
-
 
    o  Specify how SDP session version in o= line.
 
@@ -4970,6 +4979,13 @@ Internet-Draft                    JSEP                      January 2017
    o  Added discussion of RtpTransceivers + RtpSenders + RtpReceivers,
       and how they interact with createOffer/createAnswer.
 
+
+
+Uberti, et al.            Expires July 10, 2017                [Page 89]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    o  Removed obsolete OfferToReceiveX options.
 
    o  Explained how addIceCandidate can be used for end-of-candidates.
@@ -4977,14 +4993,6 @@ Internet-Draft                    JSEP                      January 2017
    Changes in draft-13:
 
    o  Clarified which SDP lines can be ignored.
-
-
-
-
-Uberti, et al.            Expires July 10, 2017                [Page 89]
-
-Internet-Draft                    JSEP                      January 2017
-
 
    o  Clarified how to handle various received attributes.
 
@@ -5026,14 +5034,6 @@ Internet-Draft                    JSEP                      January 2017
    o  Discussed downscaling and upscaling to fulfill imageattr
       requirements.
 
-   o  Updated what SDP can be modified by the application.
-
-   o  Updated to latest datachannel SDP.
-
-   o  Allowed multiple fingerprint lines.
-
-   o  Switched back to IPv4 for dummy candidates.
-
 
 
 
@@ -5041,6 +5041,14 @@ Uberti, et al.            Expires July 10, 2017                [Page 90]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Updated what SDP can be modified by the application.
+
+   o  Updated to latest datachannel SDP.
+
+   o  Allowed multiple fingerprint lines.
+
+   o  Switched back to IPv4 for dummy candidates.
 
    o  Added additional clarity on ICE default candidates.
 
@@ -5082,14 +5090,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Fixed <proto> field handling.
 
-   o  Added text describing a=rtcp attribute.
-
-   o  Reworked handling of OfferToReceiveAudio and OfferToReceiveVideo
-      per discussion at IETF 90.
-
-   o  Reworked trickle ICE handling and its impact on m= and c= lines
-      per discussion at interim.
-
 
 
 
@@ -5097,6 +5097,14 @@ Uberti, et al.            Expires July 10, 2017                [Page 91]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Added text describing a=rtcp attribute.
+
+   o  Reworked handling of OfferToReceiveAudio and OfferToReceiveVideo
+      per discussion at IETF 90.
+
+   o  Reworked trickle ICE handling and its impact on m= and c= lines
+      per discussion at interim.
 
    o  Added max-bundle-and-rtcp-mux policy.
 
@@ -5138,14 +5146,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Added Eric Rescorla as a draft editor.
 
-   o  Cleaned up references.
-
-   o  Editorial cleanup
-
-   Changes in draft-06:
-
-   o  Reworked handling of m= line recycling.
-
 
 
 
@@ -5153,6 +5153,14 @@ Uberti, et al.            Expires July 10, 2017                [Page 92]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Cleaned up references.
+
+   o  Editorial cleanup
+
+   Changes in draft-06:
+
+   o  Reworked handling of m= line recycling.
 
    o  Added handling of BUNDLE and bundle-only.
 
@@ -5194,14 +5202,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Clarified section on forking.
 
-   Changes in draft-01:
-
-   o  Added diagrams for architecture and state machine.
-
-   o  Added sections on forking and rehydration.
-
-   o  Clarified meaning of "pranswer" and "answer".
-
 
 
 
@@ -5209,6 +5209,14 @@ Uberti, et al.            Expires July 10, 2017                [Page 93]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   Changes in draft-01:
+
+   o  Added diagrams for architecture and state machine.
+
+   o  Added sections on forking and rehydration.
+
+   o  Clarified meaning of "pranswer" and "answer".
 
    o  Reworked how ICE restarts and media directions are controlled.
 
@@ -5249,14 +5257,6 @@ Authors' Addresses
    USA
 
    Email: ekr@rtfm.com
-
-
-
-
-
-
-
-
 
 
 
