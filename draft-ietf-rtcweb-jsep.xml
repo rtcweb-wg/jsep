@@ -447,7 +447,9 @@ setRemote(ANSWER) |                                   |
           stopped and disassociated from m= sections. An RtpTransceiver
           is never associated with more than one m= section, and once a
           session description is applied, a m= section is always
-          associated with exactly one RtpTransceiver.</t>
+          associated with exactly one RtpTransceiver. An RtpTransceiver
+          is said to be associated with an m= section if and only if
+          its mid attribute is equal to the MID of that m= section.</t>
 
           <t>RtpTransceivers can be created explicitly by the
           application or implicitly by calling setRemoteDescription
@@ -2016,13 +2018,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <list style="symbols">
 
               <t>An "a=mid" line, as specified in
-              <xref target="RFC5888"></xref>, Section 4. All mid values
+              <xref target="RFC5888"></xref>, Section 4. All MID values
               MUST be generated in a fashion that does not leak user
               information, e.g., randomly or using a per-PeerConnection counter, and
               SHOULD be 3 bytes or less, to allow them to efficiently fit into
               the RTP header extension defined in
               <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation">
-              </xref>, Section 14.</t>
+              </xref>, Section 14. Note that the mid attribute of the
+              RtpTransceiver is not set when creating an offer; it's only
+              set when applying a description, as described in
+              <xref target="sec.applying-a-local-desc"> and
+              <xref target="sec.applying-a-remote-desc">. Thus the
+              generated MID value is only considered a "proposed" MID at
+              this point.</t>
 
               <t>A direction attribute which is the same as that of the
               associated transceiver.</t>
@@ -3365,8 +3373,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the following steps:
             <list style="symbols">
 
-              <t>Find the RtpTransceiver that corresponds to the m=
-              section with the same MID in the created offer.</t>
+              <t>Find the RtpTransceiver that corresponds to this m=
+              section, by matching the MID of this m= section with the MID
+              that was proposed for the transceiver in the last created
+              offer, as described in
+              <xref target="sec-create-offer"></xref>.</t>
 
               <t>Set the value of the RtpTransceiver's mid property to
               the MID of the m= section.</t>
