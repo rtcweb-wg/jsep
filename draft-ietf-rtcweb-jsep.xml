@@ -3691,9 +3691,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     <section title="Processing RTP/RTCP" anchor="sec.rtp.demux">
       <t>When bundling, associating incoming RTP/RTCP with the proper
       m= section is defined in <xref
-      target="I-D.ietf-mmusic-sdp-bundle-negotiation" />.  When not
-      bundling, the proper m= section is clear from the ICE component
-      over which the RTP/RTCP is received.</t>
+      target="I-D.ietf-mmusic-sdp-bundle-negotiation" /> (The BUNDLE
+      draft does not currently contain the necessary text to describe
+      this demux, but when it does it will contain text like that
+      contained in <xref target="sec.appendix-b"
+      />appendix ***).  When not bundling, the proper m= section is
+      clear from the ICE component over which the RTP/RTCP is
+      received.</t>
 
       <t>Once the proper m= section(s) are known, RTP/RTCP is
       delivered to the RtpTransceiver(s) associated with the m=
@@ -5578,6 +5582,124 @@ a=rtcp-fb:100 nack pli
         <xref target="I-D.ietf-mmusic-dtls-sdp" />Section 4</c>
       </texttable>
     </section>
+
+    <section title="Appendix B" anchor="sec.appendix-b">
+      <t>To prepare for demultiplexing RTP packets to the correct "m="
+      line, the following steps MUST be followed for each BUNDLE
+      group.</t>
+
+      <t>
+        <list>
+          <t>Construct a table mapping MID to "m=" line for each "m="
+          line in this BUNDLE group.</t>
+
+          <t>Construct a table mapping incoming SSRC to "m=" line for
+          each "m=" line in this BUNDLE group and for each SSRC
+          configured for receiving in that "m=" line.</t>
+
+          <t>Construct a table mapping outgoing SSRC to "m=line" for
+          each "m=" line in this BUNDLE group and for each SSRC
+          configured for sending in that "m=" line.</t>
+
+          <t>Construct a table mapping payload type to "m=" line for
+          each "m=" line in the BUNDLE group and for each payload type
+          configured for receiving in that "m=" line.  If any payload
+          type is configured for receiving in more than one "m=" line
+          in the BUNDLE group, do not it include it in the table.</t>
+        </list>
+      </t>
+
+      <t>As "m=" lines are added or removed from the BUNDLE groups, or
+      their configurations are changed, the tables above must also be
+      updated.</t>
+
+      <t>For each RTP packet received, the following steps MUST be
+      followed to route the packet to the correct "m=" section within
+      a BUNDLE group:</t>
+
+      <t>
+        <list>
+          <t>If the packet has a MID and that MID is not in the table
+          mapping MID to "m=" line, drop the packet and stop.</t>
+
+          <t>If the packet has a MID and that MID is in the table
+          mapping MID to "m=" line, update the incoming SSRC mapping
+          table to include an entry that maps the packet's SSRC to the
+          "m=" line for that MID.</t>
+
+          <t>If the packet's SSRC is in the incoming SSRC mapping
+          table, route the packet to the associated "m=" line and
+          stop.</t>
+
+          <t>If the packet's payload type is in the payload type
+          table, update the the incoming SSRC mapping table to include
+          an entry that maps the packet's SSRC to the "m=" line for
+          that payload type. In addition, route the packet to the
+          associated "m=" line and stop.</t>
+
+          <t>Otherwise, drop the packet.</t>
+        </list>
+      </t>
+
+      <t>For each RTCP packet received (including each RTCP packet
+      that is part of a compound RTCP packet), the following
+      type-specific handling MUST be performed to route the
+      packet:</t>
+
+      <t>
+        <list>
+          <t>If the packet is of type SR, and the sender SSRC for the
+          packet is found in the incoming SSRC table, deliver a copy
+          of the packet to the "m=" line associated with that SSRC. In
+          addition, for each report block in the report whose SSRC is
+          found in the outgoing SSRC table, deliver a copy of the RTCP
+          packet to the "m=" line associated with that SSRC.</t>
+
+          <t>If the packet is of type RR, for each report block in the
+          packet whose SSRC is found in the outgoing SSRC table,
+          deliver a copy of the RTCP packet to the "m=" line
+          associated with that SSRC.</t>
+
+          <t>If the packet is of type SDES, and the sender SSRC for
+          the packet is found in the incoming SSRC table, deliver the
+          packet to the "m=" line associated with that SSRC. In
+          addition, for each chunk in the packet that contains a MID
+          that is in the table mapping MID to "m=" line, update the
+          incoming SSRC mapping table to include an entry that maps
+          the SSRC for that chunk to the "m=" line associated with
+          that MID. (This case can occur when RTCP for a source is
+          received before any RTP packets.)</t>
+
+          <t>If the packet is of type BYE, for each SSRC indicated in
+          the packet that is found in the incoming SSRC table, deliver
+          a copy of the packet to the "m=" line associated with that
+          SSRC.</t>
+
+          <t>If the packet is of type RTPFB or PSFB, as defined in
+          <xref target="RFC4585" />, and the media source SSRC for the
+          packet is found in the outgoing SSRC table, deliver the
+          packet to the "m=" line associated with that SSRC.</t>
+        </list>
+      </t>
+      <t>
+        If an offerer and answerer is not able to associate an RTP
+        stream with an "m=" line (using the mechanisms described in
+        this section, or using other appropriate mechanism, e.g, based
+        on the payload type value if it is unique to a single "m="
+        line), it MUST either drop the RTP/RTCP packets associated
+        with the RTP stream, or process them in an application
+        specific manner, once non-stream specific processing (e.g.,
+        related to congestion control) of the packets have
+        occurred. Note that RTCP packets can report on multiple RTP
+        streams.  If an offerer and answerer is not able to associate
+        an RTP stream with an "m=" line (the packet is dropped in the
+        description above), the application MAY process them in an
+        application specific manner, once non-stream specific
+        processing (e.g., related to congestion control) of the
+        packets have occurred.
+      </t>
+    </section>
+
     <section title="Change log" anchor="sec.change-log">
 
       <t>Note: This section will be removed by RFC Editor before
