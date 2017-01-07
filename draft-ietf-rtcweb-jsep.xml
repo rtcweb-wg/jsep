@@ -3777,122 +3777,50 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         remaining candidates in the ICE candidate pool, discard them.</t>
       </section>
     </section>
-    <section title="Processing RTP/RTCP packets" anchor="sec.rtp.demux">
+    <section title="Processing RTP/RTCP" anchor="sec.rtp.demux">
+      <t>As described in <xref target="RFC3550"/>, RTP packets are
+      associated with RTP streams <xref target="RFC7656"/>. Metadata
+      about those streams, including source description information
+      and reception quality feedback is conveyed in RTCP packets.
+      Each RTP stream is identified by an SSRC, and each RTP packet
+      carries an SSRC value that is used to associate the packet with
+      the correct RTP stream. RTCP packets also use SSRCs to identify
+      the RTP streams that the reports and metadata relate to.  RTCP
+      packets generally carry multiple SSRC values and report on, or
+      deliver source description information relating to, several RTP
+      streams.</t>
 
-      <t>Note: The following algorithm does not yet have WG consensus
-      but is included here as something concrete for the working group
-      to discuss.</t>
+      <t>Each incoming RTP stream, identified by its SSRC, is mapped to
+      an m= section in the SDP. The SDP m= sections then correspond to
+      RtpReceiver objects. This allows each RTP stream to be associated
+      with an RtpTransceiver. Further processing of the RTP stream can
+      then be done at the RtpTransceiver level.  This includes using
+      RID <xref target="I-D.ietf-mmusic-rid"/> to distinguish between
+      multiple Encoded Streams, as well as determine which Source RTP
+      stream should be repaired by a given Redundancy RTP stream.</t>
 
-      <t>When an RTP packet is received by a transport and passes SRTP
-      authentication, that packet needs to be routed to the correct
-      RtpReceiver. For each transport, the following steps MUST be
-      followed to prepare to route packets:</t>
+      <t>The process of mapping RTP streams onto m= sections depends on
+      whether streams are bundled or not. If the SDP BUNDLE extension
+      is in use, then RTP streams are mapped onto m= sections based on
+      the MID values as described in
+      <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation"/> (The BUNDLE
+      draft does not currently contain the necessary text to describe
+      this demux, but when it does it will contain text like that
+      contained in <xref target="sec.appendix-b" />).  If the
+      SDP BUNDLE extension is not in use, each m= section corresponds
+      to a transport layer connection and the RTP streams received on
+      that connection correspond to the m= section.</t>
 
-      <t>
-        <list>
-
-          <t>Construct a table mapping MID to RtpReceiver for each
-          RtpReceiver configured to receive from this transport.</t>
-
-          <t>Construct a table mapping incoming SSRC to RtpReceiver
-          for each RtpReceiver configured to receive from this
-          transport and for each SSRC that RtpReceiver is configured
-          to receive. Some of the SSRCs may be present in the m=
-          section corresponding to that RtpReceiver in the remote
-          description.</t>
-
-          <t>Construct a table mapping outgoing SSRC to RtpSender for
-          each RtpSender configured to transmit from this transport
-          and for each SSRC that RtpSender is configured to use when
-          sending.</t>
-
-          <t>Construct a table mapping payload type to RtpReceiver for
-          each RtpReceiver configured to receive from this transport
-          and for each payload type that RtpReceiver is configured to
-          receive. The payload types of a given RtpReceiver are found
-          in the m= section corresponding to that RtpReceiver in the
-          local description. If any payload type could map to more
-          than one RtpReceiver, map to the RtpReceiver whose m=
-          section appears earliest in the local description.</t>
-        </list>
+      <t>Incoming RTCP packets contain metadata including reception
+      quality feedback, source description information, and other
+      signalling relating to RTP streams. The RTCP packets are parsed,
+      the associated RTP streams are identified based on the included
+      SSRC values, and the metadata relating to those RTP streams is
+      updated (this might include updating the MID information, used
+      to associate RTP streams with m= sections, if the SDP BUNDLE
+      extension is in use). This updated metadata is available to the
+      RtpTransceiver objects associated with those RTP streams.
       </t>
-
-      <t>As RtpTransceivers (and, thus, RtpReceivers) are added,
-      removed, stopped, or reconfigured, the tables above must also be
-      updated.</t>
-
-      <t>For each RTP packet received, the following steps MUST be
-      followed to route the packet:</t>
-
-      <t>
-        <list>
-          <t>If the packet has a MID and that MID is not in the table
-          mapping MID to RtpReceiver, drop the packet and stop.</t>
-
-          <t>If the packet has a MID and that MID is in the table
-          mapping MID to RtpReceiver, update the incoming SSRC mapping
-          table to include an entry that maps the packet's SSRC to the
-          RtpReceiver for that MID.</t>
-
-          <t>If the packet's SSRC is in the incoming SSRC mapping
-          table, deliver the packet to the associated RtpReceiver and
-          stop.</t>
-
-          <t>If the packet's payload type is in the payload type
-          table, update the the incoming SSRC mapping table to include
-          an entry that maps the packet's SSRC to the
-          RtpReceiver for that payload type. In addition, deliver the packet
-          to the associated RtpReceiver and stop.</t>
-
-          <t>Otherwise, drop the packet.</t>
-        </list>
-      </t>
-
-      <t>For each RTCP packet received (including each RTCP packet that is part
-      of a compound RTCP packet), the following type-specific handling
-      MUST be performed to route the packet:</t>
-
-      <t>
-        <list>
-          <t>If the packet is of type SR, and the sender SSRC for the
-          packet is found in the incoming SSRC table, deliver a copy of the
-          packet to the RtpReceiver associated with that SSRC. In addition,
-          for each report block in the report whose SSRC is found in the
-          outgoing SSRC table, deliver a copy of the RTCP packet to the
-          RtpSender associated with that SSRC.</t>
-
-          <t>If the packet is of type RR, for each report block in the
-          packet whose SSRC is found in the outgoing SSRC table, deliver a copy
-          of the RTCP packet to the RtpSender associated with that SSRC.</t>
-
-          <t>If the packet is of type SDES, and the sender SSRC for
-          the packet is found in the incoming SSRC table, deliver the
-          packet to the RtpReceiver associated with that SSRC. In addition, for
-          each chunk in the packet that contains a MID that is in the table
-          mapping MID to RtpReceiver, update the incoming SSRC mapping
-          table to include an entry that maps the SSRC for that chunk to
-          the RtpReceiver associated with that MID. (This case can occur
-          when RTCP for a source is received before any RTP packets.)</t>
-
-          <t>If the packet is of type BYE, for each SSRC indicated in the
-          packet that is found in the incoming SSRC table, deliver a copy of the
-          packet to the RtpReceiver associated with that SSRC.</t>
-
-          <t>If the packet is of type RTPFB or PSFB, as defined in
-          <xref target="RFC4585" />, and the media source SSRC for the packet
-          is found in the outgoing SSRC table, deliver the packet
-          to the RtpSender associated with that SSRC.</t>
-
-        </list>
-      </t>
-
-     <t>After packets are routed to the RtpReceiver, further
-      processing of the RTP packets is done at the RtpReceiver level.
-      This includes using <xref target="I-D.ietf-mmusic-rid" /> to distinguish
-      between multiple Encoded Streams, as well as determine
-      which Source RTP stream should be repaired by a given Redundancy
-      RTP stream. If the RTP packet's PT does not match any codec in use
-      by the RtpReceiver, the packet will be dropped.</t>
     </section>
 
     <section title="Examples" anchor="sec.examples">
@@ -5771,6 +5699,221 @@ a=rtcp-fb:100 nack pli
         <xref target="I-D.ietf-mmusic-dtls-sdp" />Section 4</c>
       </texttable>
     </section>
+
+    <section title="Appendix B" anchor="sec.appendix-b">
+      <t>The following text is meant to completely replace section
+      "Associating RTP/RTCP Streams With Correct SDP Media
+      Description" of mmusic-sdp-bundle-negotiation. </t>
+
+      <t>As described in <xref format="default" pageno="false"
+      target="RFC3550"/>, RTP packets are associated with RTP streams <xref
+      format="default" pageno="false" target="RFC7656"/>. Each RTP stream is
+      identified by an SSRC value, and each RTP packet carries an SSRC value
+      that is used to associate the packet with the correct RTP stream. RTCP
+      packets also uses SSRCs to identify on which RTP streams any report or
+      feedback relate to. Thus, an RTCP packet will commonly carry multiple
+      SSRC values, and might therefore be providing feedback or report on
+      multiple RTP streams. </t>
+
+      <t>In order to be able to process received RTP packets correctly it
+      must be possible to associate an RTP stream with the correct "m="
+      line, as the "m=" line and SDP attributes associated with the "m="
+      line contain information needed to process the packets.</t>
+
+      <t>As all RTP streams associated with a BUNDLE group are part of the
+      same RTP session and using the same address:port combination for
+      sending and receiving RTP/RTCP packets, the local address:port
+      combination cannot be used to associate an RTP stream with the correct
+      "m=" line. In addition, multiple RTP streams might be associated with
+      the same "m=" line.</t>
+
+      <t>Also, as described in <xref format="default" pageno="false"
+      target="sec-rtp-sessions-pt"/>, the same payload type value might be
+      used by multiple RTP streams, in which case the payload type value
+      cannot be used to associate an RTP stream with the correct "m=" line.
+      However, there are cases where each "m=" line has unique payload type
+      values, and then the payload type could serve as hint to the relevant
+		   "m=" line the RTP stream is associated with.</t>
+
+      <t>An offerer and answerer can inform each other which SSRC values
+      they will use for an RTP stream by using the SDP 'ssrc' attribute
+      <xref format="default" pageno="false" target="RFC5576"/>. However, an
+      offerer will not know which SSRC values the answerer will use until
+      the offerer has received the answer providing that information. Due to
+      this, before the offerer has received the answer, the offerer will not
+      be able to associate an RTP stream with the correct "m=" line using
+      the SSRC value associated with the RTP stream. In addition, the
+      offerer and answerer may start using new SSRC values mid-session,
+      without informing each other using the SDP 'ssrc' attribute.</t>
+
+      <t>In order for an offerer and answerer to always be able to associate
+      an RTP stream with the correct "m=" line, the offerer and answerer
+      using the BUNDLE extension MUST support the mechanism defined in <xref
+      format="default" pageno="false" target="sec-receiver-id"/>, where the
+      offerer and answerer includes the identification-tag (provided by the
+      remote peer) associated with an "m=" line in the RTP Streams and in
+      RTCP SDES packets part of a BUNDLE group.</t>
+
+      <t>The mapping from an SSRC to an identification-tag is carried in
+      RTCP SDES packets or in RTP header extensions (<xref format="default"
+      pageno="false" target="sec-receiver-id"/>). Since a compound RTCP
+      packet can contain multiple RTCP SDES packets, and each RTCP SDES
+      packet can contain multiple chunks, an RTCP packet can contain several
+      SSRC to identification-tag mappings. The offerer and answerer maintain
+      tables mapping RTP streams identified by SSRC to "m=" lines identified
+      by the identification-tag.
+      When receiving an RTP packet carrying a MID header extension
+      with the identification-tag, or an RTCP packet carrying one or
+      more SDES MID items, the offerer or answerer creates a mapping
+      table entry between the SSRC value and the identification-tag,
+      in order to associate the RTP stream associated with that SSRC
+      value with the "m=" line corresponding to the identification-tag.</t>
+
+      <t>The mapping between the SSRC an identification-tag might change
+      mid-session if, for a given SSRC value, a different identification-tag
+      is provided in an RTP or RTCP packet. In that case these tables are
+      updated each time an RTP/RTCP packet containing a new mappings from
+      SSRC to identification-tag is received. Some considerations for
+      avoiding update flaps are provided in Section 4.2.6 of <xref
+      target="RFC7941"/> which should be followed. </t>
+
+      <t>If an offerer and answerer is not able to associate an RTP stream
+      with an "m=" line (using the mechanisms described in this section, or
+      using other appropriate mechanism, e.g., based on the payload type
+      value if it is unique to a single "m=" line), it MUST either drop the
+      RTP packets associated with the RTP stream, or process them in an
+      application specific manner, once non-stream specific processing
+      (e.g., related to congestion control) of the RTP packets have
+      occurred.</t>
+
+      <t>When compound RTCP packets are received, they are split
+      into their component RTCP packets and those component RTCP
+      packets are processed based on their RTCP packet type, in
+      the order in which they were placed into the compound RTCP
+      packet. Non-compound RTCP packets are processed based on
+      their RTCP packet type, in the order they are received. Information
+      in each RTCP packet can relate to one or more RTP streams.
+      For example, RTCP Sender Report (SR) and Receiver Report (RR)
+      packets include an SSRC of sender field that indicates the
+      identity of the participant that sent the RTCP packet, along
+      with a list of Report Blocks. Each report contains data on the
+      reception quality of a single RTP stream, identified by SSRC,
+      as received by the SSRC that sent the RTCP packet. Other RTCP
+      packet types similarly contain references to the SSRC of the
+      sender of the RTCP packet, and the RTP streams to which it
+      refers.</t>
+
+      <t>It should always be possible to process RTCP packets, and
+      store the received information in a data structure associated
+      with an RTP stream, identified by SSRC, for later access and
+      use. It is possible that RTCP packets relating to an SSRC can
+      be received before RTP packets relating to that SSRC, so the
+      data structures relating to an SSRC might need to be created
+      before the corresponding RTP stream is received.</t>
+
+      <t>Similarly, information relating to an RTP stream might be
+      received before the data needed to map it onto an m= line is
+      received. Information carried in RTCP packets relating to such
+      an RTP stream that is application and/or "m=" line dependent
+      MAY be dropped until the SSRCs is associated with a particular
+      "m=" line. However, information to generate RTCP report blocks
+      and other basic transport level feedback or reporting needs to
+      be retained, so RTCP reports relating to the stream can be
+      generated.</t>
+
+      <t>To prepare for demultiplexing RTP packets to the correct "m="
+      line, the following steps MUST be followed for each BUNDLE
+      group.</t>
+
+      <t>
+        <list>
+          <t>Construct a table mapping MID to "m=" line for each "m="
+          line in this BUNDLE group.  Note that an "m=" line may only
+          have one MID.</t>
+
+          <t>Construct an empty table mapping incoming SSRC to "m="
+          line.</t>
+
+          <t>Construct an empty table mapping outgoing SSRC to
+          "m=line".</t>
+
+          <t>Note that for each of these tables, there can only be one
+          mapping for any given key (MID, SSRC).  In other
+          words, the tables are not multimaps.</t>
+        </list>
+      </t>
+
+      <t>As "m=" lines are added or removed from the BUNDLE groups, or
+      their configurations are changed, the tables above must also
+      be updated.</t>
+
+      <t>For each RTP packet received, the following steps MUST be
+      followed to route the packet to the correct "m=" line within
+      a BUNDLE group.  Note that the phrase "deliver a packet to the
+      'm=' line" means to further process the packet as would normally
+      happen with RTP/RTCP if it were received on a transport
+      associated with that "m=" line outside of a BUNDLE group (if the
+      "m=" line were not BUNDLEd) including dropping an RTP packet if
+      the packet's PT does not match any PT in the "m=" line.</t>
+
+      <t>
+        <list>
+          <t>If the packet has a MID and that MID is not in the table
+          mapping MID to "m=" line, drop the packet and stop.</t>
+
+          <t>If the packet has a MID and that MID is in the table
+          mapping MID to "m=" line, update the incoming SSRC mapping
+          table to include an entry that maps the packet's SSRC to the
+          "m=" line for that MID.</t>
+
+          <t>If the packet's SSRC is in the incoming SSRC mapping
+          table, route the packet to the associated "m=" line and
+          stop.</t>
+
+          <t>Otherwise, drop the packet.</t>
+        </list>
+      </t>
+
+      <t>For each RTCP packet received (including each RTCP packet
+      that is part of a compound RTCP packet), the packet MUST be
+      routed to the appropriate handler for the SSRCs it contains
+      information about. Some examples of such handling are given
+      below.</t>
+
+      <t>
+        <list>
+          <t>If the packet is of type SR, and the sender SSRC for the
+          packet is found in the incoming SSRC table, deliver a copy of the
+          packet to the "m=" line associated with that SSRC. In addition,
+          for each report block in the report whose SSRC is found in the
+          outgoing SSRC table, deliver a copy of the RTCP packet to the
+          "m=" line associated with that SSRC.</t>
+
+          <t>If the packet is of type RR, for each report block in the
+          packet whose SSRC is found in the outgoing SSRC table, deliver a copy
+          of the RTCP packet to the "m=" line associated with that SSRC.</t>
+
+          <t>If the packet is of type SDES, and the sender SSRC for
+          the packet is found in the incoming SSRC table, deliver the
+          packet to the "m=" line associated with that SSRC. In addition, for
+          each chunk in the packet that contains a MID that is in the table
+          mapping MID to "m=" line, update the incoming SSRC mapping
+          table to include an entry that maps the SSRC for that chunk to
+          the "m=" line associated with that MID. (This case can occur
+          when RTCP for a source is received before any RTP packets.)</t>
+
+          <t>If the packet is of type BYE, for each SSRC indicated in the
+          packet that is found in the incoming SSRC table, deliver a copy of the
+          packet to the "m=" line associated with that SSRC.</t>
+
+          <t>If the packet is of type RTPFB or PSFB, as defined in
+          <xref target="RFC4585" />, and the media source SSRC for the packet
+          is found in the outgoing SSRC table, deliver the packet
+          to the "m=" line associated with that SSRC.</t>
+        </list>
+      </t>
+    </section>
+
     <section title="Change log" anchor="sec.change-log">
 
       <t>Note: This section will be removed by RFC Editor before
