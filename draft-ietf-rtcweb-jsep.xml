@@ -3763,18 +3763,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
     <section title="Processing RTP/RTCP" anchor="sec.rtp.demux">
       <t>When bundling, associating incoming RTP/RTCP with the proper
       m= section is defined in <xref
-      target="I-D.ietf-mmusic-sdp-bundle-negotiation" /> (The BUNDLE
+      target="I-D.ietf-mmusic-sdp-bundle-negotiation" />. [The BUNDLE
       draft does not currently contain the necessary text to describe
       this demux, but when it does it will contain text like that
       contained in <xref target="sec.appendix-b"
-      />).  When not bundling, the proper m= section is
+      />.]  When not bundling, the proper m= section is
       clear from the ICE component over which the RTP/RTCP is
       received.</t>
 
       <t>Once the proper m= section(s) are known, RTP/RTCP is
       delivered to the RtpTransceiver(s) associated with the m=
       section(s) and further processing of the RTP/RTCP is done at
-      the RtpTransceiver level.  This includes using <xref
+      the RtpTransceiver level.  This includes using RID <xref
       target="I-D.ietf-mmusic-rid" /> to distinguish between multiple
       Encoded Streams, as well as determine which Source RTP stream
       should be repaired by a given Redundancy RTP stream.</t>
@@ -5688,13 +5688,14 @@ a=rtcp-fb:100 nack pli
     <section title="Appendix B" anchor="sec.appendix-b">
       <t>The following text is meant to completely replace section
       "Associating RTP/RTCP Streams With Correct SDP Media
-      Description" of mmusic-sdp-bundle-negotiation. </t>
+      Description" of <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />. </t>
 
       <section title="RTP/RTCP extensions for identification-tag transport" anchor="sec-receiver-id" toc="default">
 	This section only exists to keep the reference to it below
 	valid.  If you're interested in what it really refers to, go
-	see mmusic-sdp-bundle-negotiation with the section called
-	"RTP/RTCP extensions for identification-tag transport".
+	see <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />
+	with the section called "RTP/RTCP extensions for
+	identification-tag transport".
       </section>      
 
         <t>
@@ -5702,8 +5703,8 @@ a=rtcp-fb:100 nack pli
           are associated with RTP streams as defined in <xref format="default" pageno="false" target="RFC7656"/>. 
 	  Each RTP stream is identified by an SSRC value, and each
           RTP/RTCP packet carries an SSRC value that is used to associate the packet with the correct
-          RTP stream (an RTCP packet can carry multiple SSRC values, and might therefore be associated
-          with multiple RTP streams).
+          RTP stream.  An RTCP packet can carry multiple SSRC values, and might therefore be associated
+          with multiple RTP streams.
         </t>
         <t>
           In order to be able to process received RTP/RTCP packets correctly it must be possible
@@ -5711,7 +5712,7 @@ a=rtcp-fb:100 nack pli
           associated with the "m=" line contain information needed to process the packets.
         </t>
         <t>
-          As all RTP streams associated with a BUNDLE group are using the same
+          As all RTP streams associated with a BUNDLE group use the same
           address:port combination for sending and receiving RTP/RTCP packets, the
           local address:port combination cannot be used to associate an RTP stream
           with the correct "m=" line. In addition, multiple RTP streams might be
@@ -5731,8 +5732,9 @@ a=rtcp-fb:100 nack pli
           In order for an offerer and answerer to always be able to associate an RTP stream
           with the correct "m=" line, the offerer and answerer using the BUNDLE extension MUST
           support the mechanism defined in <xref format="default" pageno="false" target="sec-receiver-id"/>.
-          where the offerer and answerer insert the identification-tag (provided by the remote peer)
-          associated with an "m=" line in RTP and RTCP packets associated with a BUNDLE group.
+          where the offerer and answerer insert the identification-tag
+          associated with an "m=" line (provided by the remote peer) 
+	  in RTP and RTCP packets associated with a BUNDLE group.
         </t>
         <t>
           The mapping from an SSRC to an identification-tag is carried in RTCP
@@ -5742,7 +5744,7 @@ a=rtcp-fb:100 nack pli
           RTCP packet can contain several SSRC to identification-tag mappings. The offerer
           and answerer maintain tables used for routing that are
           updated each time an RTP/RTCP packet contains new
-          information that affect how packets should be routed.
+          information that affects how packets should be routed.
 	</t>
 
       <t>To prepare for demultiplexing RTP packets to the correct "m="
@@ -5777,16 +5779,16 @@ a=rtcp-fb:100 nack pli
       </t>
 
       <t>As "m=" lines are added or removed from the BUNDLE groups, or
-      their configurations are changed, the tables above must also
+      their configurations are changed, the tables above MUST also
       be updated.</t>
 
       <t>For each RTP packet received, the following steps MUST be
       followed to route the packet to the correct "m=" section within
-      a BUNDLE group.  Note that the phrase "deliver a packet to the
-      'm=' line" means to further process the packet as would normally
-      happen with RTP/RTCP if it were received on a transport
-      associated with that "m=" line outside of a BUNDLE group (if the
-      "m=" line were not BUNDLEd) including dropping an RTP packet if
+      a BUNDLE group.  Note that the phrase 'deliver a packet to the
+      "m=" line' means to further process the packet as would normally
+      happen with RTP/RTCP, if it were received on a transport
+      associated with that "m=" line outside of a BUNDLE group (i.e., if the
+      "m=" line were not BUNDLEd), including dropping an RTP packet if
       the packet's PT does not match any PT in the "m=" line.</t>
 
       <t>
