@@ -150,18 +150,18 @@ Internet-Draft                    JSEP                      January 2017
      5.8.  Applying a Local Description  . . . . . . . . . . . . . .  60
      5.9.  Applying a Remote Description . . . . . . . . . . . . . .  62
      5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  65
-   6.  Processing RTP/RTCP packets . . . . . . . . . . . . . . . . .  67
-   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  69
-     7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  70
-     7.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  74
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  83
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  83
-   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  83
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  84
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  84
-     11.2.  Informative References . . . . . . . . . . . . . . . . .  87
-   Appendix A.  Appendix A . . . . . . . . . . . . . . . . . . . . .  89
-   Appendix B.  Change log . . . . . . . . . . . . . . . . . . . . .  90
+   6.  Processing RTP/RTCP . . . . . . . . . . . . . . . . . . . . .  67
+   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  68
+     7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  68
+     7.2.  Normal Examples . . . . . . . . . . . . . . . . . . . . .  72
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  81
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  81
+   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  81
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  82
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  82
+     11.2.  Informative References . . . . . . . . . . . . . . . . .  85
+   Appendix A.  Appendix A . . . . . . . . . . . . . . . . . . . . .  87
+   Appendix B.  Appendix B . . . . . . . . . . . . . . . . . . . . .  88
 
 
 
@@ -170,7 +170,8 @@ Uberti, et al.            Expires July 11, 2017                 [Page 3]
 Internet-Draft                    JSEP                      January 2017
 
 
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  96
+   Appendix C.  Change log . . . . . . . . . . . . . . . . . . . . .  91
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  98
 
 1.  Introduction
 
@@ -217,7 +218,6 @@ Internet-Draft                    JSEP                      January 2017
    To complete the offer/answer exchange, the remote party uses the
    createAnswer() API to generate an appropriate answer, applies it
    using the setLocalDescription() API, and sends the answer back to the
-   initiator over the signaling channel.  When the initiator gets that
 
 
 
@@ -226,6 +226,7 @@ Uberti, et al.            Expires July 11, 2017                 [Page 4]
 Internet-Draft                    JSEP                      January 2017
 
 
+   initiator over the signaling channel.  When the initiator gets that
    answer, it installs it using the setRemoteDescription() API, and
    initial setup is complete.  This process can be repeated for
    additional offer/answer exchanges.
@@ -272,8 +273,7 @@ Internet-Draft                    JSEP                      January 2017
    addition, it prevented the application from driving the state machine
    to a desired state, as is needed in the page reload case.
 
-   A second approach that was considered but not chosen was to decouple
-   the management of the media control objects from session
+
 
 
 
@@ -282,6 +282,8 @@ Uberti, et al.            Expires July 11, 2017                 [Page 5]
 Internet-Draft                    JSEP                      January 2017
 
 
+   A second approach that was considered but not chosen was to decouple
+   the management of the media control objects from session
    descriptions, instead offering APIs that would control each component
    directly.  This was rejected based on a feeling that requiring
    exposure of this level of complexity to the application programmer
@@ -328,8 +330,6 @@ Internet-Draft                    JSEP                      January 2017
    of the session to know how to conduct the session.  JSEP provides
    mechanisms to create offers and answers, as well as to apply them to
    a session.  However, the browser is totally decoupled from the actual
-   mechanism by which these offers and answers are communicated to the
-   remote side, including addressing, retransmission, forking, and glare
 
 
 
@@ -338,6 +338,8 @@ Uberti, et al.            Expires July 11, 2017                 [Page 6]
 Internet-Draft                    JSEP                      January 2017
 
 
+   mechanism by which these offers and answers are communicated to the
+   remote side, including addressing, retransmission, forking, and glare
    handling.  These issues are left entirely up to the application; the
    application has complete control over which offers and answers get
    handed to the browser, and when.
@@ -384,8 +386,6 @@ Internet-Draft                    JSEP                      January 2017
 
    Lastly, while the exact media parameters are only known only after an
    offer and an answer have been exchanged, it is possible for the
-   offerer to receive media after they have sent an offer and before
-   they have received an answer.  To properly process incoming media in
 
 
 
@@ -394,6 +394,8 @@ Uberti, et al.            Expires July 11, 2017                 [Page 7]
 Internet-Draft                    JSEP                      January 2017
 
 
+   offerer to receive media after they have sent an offer and before
+   they have received an answer.  To properly process incoming media in
    this case, the offerer's media handler must be aware of the details
    of the offer before the answer arrives.
 
@@ -440,14 +442,16 @@ Internet-Draft                    JSEP                      January 2017
    can provide an offer via the createOffer() method whenever the
    Javascript application needs one for the signaling.  The answerer can
    send back zero or more provisional answers, and finally end the
-   offer-answer exchange by sending a final answer.  The state machine
-   for this is as follows:
 
 
 
 Uberti, et al.            Expires July 11, 2017                 [Page 8]
 
 Internet-Draft                    JSEP                      January 2017
+
+
+   offer-answer exchange by sending a final answer.  The state machine
+   for this is as follows:
 
 
                        setRemote(OFFER)               setLocal(PRANSWER)
@@ -494,10 +498,6 @@ Internet-Draft                    JSEP                      January 2017
    Aside from these state transitions there is no other difference
    between the handling of provisional ("pranswer") and final ("answer")
    answers.
-
-
-
-
 
 
 
@@ -3734,18 +3734,18 @@ Internet-Draft                    JSEP                      January 2017
    If the description is of type "answer", and there are still remaining
    candidates in the ICE candidate pool, discard them.
 
-6.  Processing RTP/RTCP packets
+6.  Processing RTP/RTCP
 
-   Note: The following algorithm does not yet have WG consensus but is
-   included here as something concrete for the working group to discuss.
+   When bundling, associating incoming RTP/RTCP with the proper m=
+   section is defined in [I-D.ietf-mmusic-sdp-bundle-negotiation].  [The
+   BUNDLE draft does not currently contain the necessary text to
+   describe this demux, but when it does it will contain text like that
+   contained in Appendix B.]  When not bundling, the proper m= section
+   is clear from the ICE component over which the RTP/RTCP is received.
 
-   When an RTP packet is received by a transport and passes SRTP
-   authentication, that packet needs to be routed to the correct
-   RtpReceiver.  For each transport, the following steps MUST be
-   followed to prepare to route packets:
-
-      Construct a table mapping MID to RtpReceiver for each RtpReceiver
-      configured to receive from this transport.
+   Once the proper m= section(s) are known, RTP/RTCP is delivered to the
+   RtpTransceiver(s) associated with the m= section(s) and further
+   processing of the RTP/RTCP is done at the RtpTransceiver level.  This
 
 
 
@@ -3754,98 +3754,9 @@ Uberti, et al.            Expires July 11, 2017                [Page 67]
 Internet-Draft                    JSEP                      January 2017
 
 
-      Construct a table mapping incoming SSRC to RtpReceiver for each
-      RtpReceiver configured to receive from this transport and for each
-      SSRC that RtpReceiver is configured to receive.  Some of the SSRCs
-      may be present in the m= section corresponding to that RtpReceiver
-      in the remote description.
-
-      Construct a table mapping outgoing SSRC to RtpSender for each
-      RtpSender configured to transmit from this transport and for each
-      SSRC that RtpSender is configured to use when sending.
-
-      Construct a table mapping payload type to RtpReceiver for each
-      RtpReceiver configured to receive from this transport and for each
-      payload type that RtpReceiver is configured to receive.  The
-      payload types of a given RtpReceiver are found in the m= section
-      corresponding to that RtpReceiver in the local description.  If
-      any payload type could map to more than one RtpReceiver, map to
-      the RtpReceiver whose m= section appears earliest in the local
-      description.
-
-   As RtpTransceivers (and, thus, RtpReceivers) are added, removed,
-   stopped, or reconfigured, the tables above must also be updated.
-
-   For each RTP packet received, the following steps MUST be followed to
-   route the packet:
-
-      If the packet has a MID and that MID is not in the table mapping
-      MID to RtpReceiver, drop the packet and stop.
-
-      If the packet has a MID and that MID is in the table mapping MID
-      to RtpReceiver, update the incoming SSRC mapping table to include
-      an entry that maps the packet's SSRC to the RtpReceiver for that
-      MID.
-
-      If the packet's SSRC is in the incoming SSRC mapping table,
-      deliver the packet to the associated RtpReceiver and stop.
-
-      If the packet's payload type is in the payload type table, update
-      the the incoming SSRC mapping table to include an entry that maps
-      the packet's SSRC to the RtpReceiver for that payload type.  In
-      addition, deliver the packet to the associated RtpReceiver and
-      stop.
-
-      Otherwise, drop the packet.
-
-   For each RTCP packet received (including each RTCP packet that is
-   part of a compound RTCP packet), the following type-specific handling
-   MUST be performed to route the packet:
-
-
-
-
-Uberti, et al.            Expires July 11, 2017                [Page 68]
-
-Internet-Draft                    JSEP                      January 2017
-
-
-      If the packet is of type SR, and the sender SSRC for the packet is
-      found in the incoming SSRC table, deliver a copy of the packet to
-      the RtpReceiver associated with that SSRC.  In addition, for each
-      report block in the report whose SSRC is found in the outgoing
-      SSRC table, deliver a copy of the RTCP packet to the RtpSender
-      associated with that SSRC.
-
-      If the packet is of type RR, for each report block in the packet
-      whose SSRC is found in the outgoing SSRC table, deliver a copy of
-      the RTCP packet to the RtpSender associated with that SSRC.
-
-      If the packet is of type SDES, and the sender SSRC for the packet
-      is found in the incoming SSRC table, deliver the packet to the
-      RtpReceiver associated with that SSRC.  In addition, for each
-      chunk in the packet that contains a MID that is in the table
-      mapping MID to RtpReceiver, update the incoming SSRC mapping table
-      to include an entry that maps the SSRC for that chunk to the
-      RtpReceiver associated with that MID.  (This case can occur when
-      RTCP for a source is received before any RTP packets.)
-
-      If the packet is of type BYE, for each SSRC indicated in the
-      packet that is found in the incoming SSRC table, deliver a copy of
-      the packet to the RtpReceiver associated with that SSRC.
-
-      If the packet is of type RTPFB or PSFB, as defined in [RFC4585],
-      and the media source SSRC for the packet is found in the outgoing
-      SSRC table, deliver the packet to the RtpSender associated with
-      that SSRC.
-
-   After packets are routed to the RtpReceiver, further processing of
-   the RTP packets is done at the RtpReceiver level.  This includes
-   using [I-D.ietf-mmusic-rid] to distinguish between multiple Encoded
-   Streams, as well as determine which Source RTP stream should be
-   repaired by a given Redundancy RTP stream.  If the RTP packet's PT
-   does not match any codec in use by the RtpReceiver, the packet will
-   be dropped.
+   includes using RID [I-D.ietf-mmusic-rid] to distinguish between
+   multiple Encoded Streams, as well as determine which Source RTP
+   stream should be repaired by a given Redundancy RTP stream.
 
 7.  Examples
 
@@ -3857,14 +3768,6 @@ Internet-Draft                    JSEP                      January 2017
 
    More examples of SDP for WebRTC call flows can be found in
    [I-D.nandakumar-rtcweb-sdp].
-
-
-
-
-Uberti, et al.            Expires July 11, 2017                [Page 69]
-
-Internet-Draft                    JSEP                      January 2017
-
 
 7.1.  Simple Example
 
@@ -3902,22 +3805,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Uberti, et al.            Expires July 11, 2017                [Page 70]
+Uberti, et al.            Expires July 11, 2017                [Page 68]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -3973,7 +3861,7 @@ AliceUA->BobUA:     media sent from Alice to Bob
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 71]
+Uberti, et al.            Expires July 11, 2017                [Page 69]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4029,7 +3917,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 72]
+Uberti, et al.            Expires July 11, 2017                [Page 70]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4085,7 +3973,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 73]
+Uberti, et al.            Expires July 11, 2017                [Page 71]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4141,7 +4029,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 74]
+Uberti, et al.            Expires July 11, 2017                [Page 72]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4197,7 +4085,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 75]
+Uberti, et al.            Expires July 11, 2017                [Page 73]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4253,7 +4141,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 76]
+Uberti, et al.            Expires July 11, 2017                [Page 74]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4309,7 +4197,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 77]
+Uberti, et al.            Expires July 11, 2017                [Page 75]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4365,7 +4253,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 78]
+Uberti, et al.            Expires July 11, 2017                [Page 76]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4421,7 +4309,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 79]
+Uberti, et al.            Expires July 11, 2017                [Page 77]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4477,7 +4365,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 80]
+Uberti, et al.            Expires July 11, 2017                [Page 78]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4533,7 +4421,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 81]
+Uberti, et al.            Expires July 11, 2017                [Page 79]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4589,7 +4477,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 82]
+Uberti, et al.            Expires July 11, 2017                [Page 80]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4645,7 +4533,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 83]
+Uberti, et al.            Expires July 11, 2017                [Page 81]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4701,7 +4589,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 84]
+Uberti, et al.            Expires July 11, 2017                [Page 82]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4757,7 +4645,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 85]
+Uberti, et al.            Expires July 11, 2017                [Page 83]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4813,7 +4701,7 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 86]
+Uberti, et al.            Expires July 11, 2017                [Page 84]
 
 Internet-Draft                    JSEP                      January 2017
 
@@ -4863,16 +4751,25 @@ Internet-Draft                    JSEP                      January 2017
    [RFC3389]  Zopf, R., "Real-time Transport Protocol (RTP) Payload for
               Comfort Noise (CN)", RFC 3389, September 2002.
 
-   [RFC3556]  Casner, S., "Session Description Protocol (SDP) Bandwidth
-              Modifiers for RTP Control Protocol (RTCP) Bandwidth",
-              RFC 3556, July 2003.
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 87]
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 85]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   [RFC3550]  Schulzrinne, H., Casner, S., Frederick, R., and V.
+              Jacobson, "RTP: A Transport Protocol for Real-Time
+              Applications", STD 64, RFC 3550, DOI 10.17487/RFC3550,
+              July 2003, <http://www.rfc-editor.org/info/rfc3550>.
+
+   [RFC3556]  Casner, S., "Session Description Protocol (SDP) Bandwidth
+              Modifiers for RTP Control Protocol (RTCP) Bandwidth",
+              RFC 3556, July 2003.
 
    [RFC3960]  Camarillo, G. and H. Schulzrinne, "Early Media and Ringing
               Tone Generation in the Session Initiation Protocol (SIP)",
@@ -4914,6 +4811,19 @@ Internet-Draft                    JSEP                      January 2017
               DOI 10.17487/RFC6464, December 2011,
               <http://www.rfc-editor.org/info/rfc6464>.
 
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 86]
+
+Internet-Draft                    JSEP                      January 2017
+
+
+   [RFC7656]  Lennox, J., Gross, K., Nandakumar, S., Salgueiro, G., and
+              B. Burman, Ed., "A Taxonomy of Semantics and Mechanisms
+              for Real-Time Transport Protocol (RTP) Sources", RFC 7656,
+              DOI 10.17487/RFC7656, November 2015,
+              <http://www.rfc-editor.org/info/rfc7656>.
+
    [W3C.WD-webrtc-20140617]
               Bergkvist, A., Burnett, D., Narayanan, A., and C.
               Jennings, "WebRTC 1.0: Real-time Communication Between
@@ -4921,19 +4831,48 @@ Internet-Draft                    JSEP                      January 2017
               20140617, June 2014,
               <http://www.w3.org/TR/2011/WD-webrtc-20140617>.
 
-
-
-
-
-Uberti, et al.            Expires July 11, 2017                [Page 88]
-
-Internet-Draft                    JSEP                      January 2017
-
-
 Appendix A.  Appendix A
 
    For the syntax validation performed in Section 5.7, the following
    list of ABNF definitions is used:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 87]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    +-----------------------+-------------------------------------------+
    | Attribute             | Reference                                 |
@@ -4974,8 +4913,69 @@ Appendix A.  Appendix A
 
                        Table 1: SDP ABNF References
 
+Appendix B.  Appendix B
+
+   The following text is meant to completely replace section
+   "Associating RTP/RTCP Streams With Correct SDP Media Description" of
+   [I-D.ietf-mmusic-sdp-bundle-negotiation].
+
+   As described in [RFC3550], RTP/RTCP packets are associated with RTP
+   streams as defined in [RFC7656].  Each RTP stream is identified by an
+   SSRC value, and each RTP/RTCP packet carries an SSRC value that is
 
 
+
+Uberti, et al.            Expires July 11, 2017                [Page 88]
+
+Internet-Draft                    JSEP                      January 2017
+
+
+   used to associate the packet with the correct RTP stream.  An RTCP
+   packet can carry multiple SSRC values, and might therefore be
+   associated with multiple RTP streams.
+
+   In order to be able to process received RTP/RTCP packets correctly it
+   must be possible to associate an RTP stream with the correct "m="
+   line, as the "m=" line and SDP attributes associated with the "m="
+   line contain information needed to process the packets.
+
+   As all RTP streams associated with a BUNDLE group use the same
+   address:port combination for sending and receiving RTP/RTCP packets,
+   the local address:port combination cannot be used to associate an RTP
+   stream with the correct "m=" line.  In addition, multiple RTP streams
+   might be associated with the same "m=" line.
+
+   An offerer and answerer can inform each other which SSRC values they
+   will use for an RTP stream by using the SDP 'ssrc' attribute
+   [RFC5576].  However, an offerer will not know which SSRC values the
+   answerer will use until the offerer has received the answer providing
+   that information.  Due to this, before the offerer has received the
+   answer, the offerer will not be able to associate an RTP stream with
+   the correct "m=" line using the SSRC value associated with the RTP
+   stream.  In addition, the offerer and answerer may start using new
+   SSRC values mid-session, without informing each other using the SDP
+   'ssrc' attribute.
+
+   In order for an offerer and answerer to always be able to associate
+   an RTP stream with the correct "m=" line, the offerer and answerer
+   using the BUNDLE extension MUST support the mechanism defined in
+   [I-D.ietf-mmusic-sdp-bundle-negotiation] section 14.  where the
+   offerer and answerer insert the identification-tag associated with an
+   "m=" line (provided by the remote peer) into RTP and RTCP packets
+   associated with a BUNDLE group.
+
+   The mapping from an SSRC to an identification-tag is carried in RTCP
+   SDES packets or in RTP header extensions
+   ([I-D.ietf-mmusic-sdp-bundle-negotiation] section 14).  Since a
+   compound RTCP packet can contain multiple RTCP SDES packets, and each
+   RTCP SDES packet can contain multiple chunks, an RTCP packet can
+   contain several SSRC to identification-tag mappings.  The offerer and
+   answerer maintain tables used for routing that are updated each time
+   an RTP/RTCP packet contains new information that affects how packets
+   should be routed.
+
+   To prepare for demultiplexing RTP packets to the correct "m=" line,
+   the following steps MUST be followed for each BUNDLE group.
 
 
 
@@ -4986,7 +4986,99 @@ Uberti, et al.            Expires July 11, 2017                [Page 89]
 Internet-Draft                    JSEP                      January 2017
 
 
-Appendix B.  Change log
+      Construct a table mapping MID to "m=" line for each "m=" line in
+      this BUNDLE group.  Note that an "m=" line may only have one MID.
+
+      Construct a table mapping incoming SSRC to "m=" line for each "m="
+      line in this BUNDLE group and for each SSRC configured for
+      receiving in that "m=" line.
+
+      Construct a table mapping outgoing SSRC to "m=line" for each "m="
+      line in this BUNDLE group and for each SSRC configured for sending
+      in that "m=" line.
+
+      Construct a table mapping payload type to "m=" line for each "m="
+      line in the BUNDLE group and for each payload type configured for
+      receiving in that "m=" line.  If any payload type is configured
+      for receiving in more than one "m=" line in the BUNDLE group, do
+      not it include it in the table.
+
+      Note that for each of these tables, there can only be one mapping
+      for any given key (MID, SSRC, or PT).  In other words, the tables
+      are not multimaps.
+
+   As "m=" lines are added or removed from the BUNDLE groups, or their
+   configurations are changed, the tables above MUST also be updated.
+
+   For each RTP packet received, the following steps MUST be followed to
+   route the packet to the correct "m=" section within a BUNDLE group.
+   Note that the phrase 'deliver a packet to the "m=" line' means to
+   further process the packet as would normally happen with RTP/RTCP, if
+   it were received on a transport associated with that "m=" line
+   outside of a BUNDLE group (i.e., if the "m=" line were not BUNDLEd),
+   including dropping an RTP packet if the packet's PT does not match
+   any PT in the "m=" line.
+
+      If the packet has a MID and that MID is not in the table mapping
+      MID to "m=" line, drop the packet and stop.
+
+      If the packet has a MID and that MID is in the table mapping MID
+      to "m=" line, update the incoming SSRC mapping table to include an
+      entry that maps the packet's SSRC to the "m=" line for that MID.
+
+      If the packet's SSRC is in the incoming SSRC mapping table, route
+      the packet to the associated "m=" line and stop.
+
+      If the packet's payload type is in the payload type table, update
+      the the incoming SSRC mapping table to include an entry that maps
+      the packet's SSRC to the "m=" line for that payload type.  In
+      addition, route the packet to the associated "m=" line and stop.
+
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 90]
+
+Internet-Draft                    JSEP                      January 2017
+
+
+      Otherwise, drop the packet.
+
+   For each RTCP packet received (including each RTCP packet that is
+   part of a compound RTCP packet), the packet MUST be routed to the
+   appropriate handler for the SSRCs it contains information about.
+   Some examples of such handling are given below.
+
+      If the packet is of type SR, and the sender SSRC for the packet is
+      found in the incoming SSRC table, deliver a copy of the packet to
+      the "m=" line associated with that SSRC.  In addition, for each
+      report block in the report whose SSRC is found in the outgoing
+      SSRC table, deliver a copy of the RTCP packet to the "m=" line
+      associated with that SSRC.
+
+      If the packet is of type RR, for each report block in the packet
+      whose SSRC is found in the outgoing SSRC table, deliver a copy of
+      the RTCP packet to the "m=" line associated with that SSRC.
+
+      If the packet is of type SDES, and the sender SSRC for the packet
+      is found in the incoming SSRC table, deliver the packet to the
+      "m=" line associated with that SSRC.  In addition, for each chunk
+      in the packet that contains a MID that is in the table mapping MID
+      to "m=" line, update the incoming SSRC mapping table to include an
+      entry that maps the SSRC for that chunk to the "m=" line
+      associated with that MID.  (This case can occur when RTCP for a
+      source is received before any RTP packets.)
+
+      If the packet is of type BYE, for each SSRC indicated in the
+      packet that is found in the incoming SSRC table, deliver a copy of
+      the packet to the "m=" line associated with that SSRC.
+
+      If the packet is of type RTPFB or PSFB, as defined in [RFC4585],
+      and the media source SSRC for the packet is found in the outgoing
+      SSRC table, deliver the packet to the "m=" line associated with
+      that SSRC.
+
+Appendix C.  Change log
 
    Note: This section will be removed by RFC Editor before publication.
 
@@ -4997,6 +5089,14 @@ Appendix B.  Change log
       bundled into another m= section.
 
    o  Add descriptions of RtpTransceiver methods.
+
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 91]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  Describe how to process RTCP feedback attributes.
 
@@ -5035,13 +5135,6 @@ Appendix B.  Change log
    o  Update text around SDP processing of RTP header extensions and
       payload formats.
 
-
-
-Uberti, et al.            Expires July 11, 2017                [Page 90]
-
-Internet-Draft                    JSEP                      January 2017
-
-
    o  Add sections on simulcast, addTransceiver, and createDataChannel.
 
    o  Clarify text to ensure that the session ID is a positive 63 bit
@@ -5052,6 +5145,14 @@ Internet-Draft                    JSEP                      January 2017
    o  Describe SDP processing for rtcp-mux-only.
 
    o  Specify how SDP session version in o= line.
+
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 92]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  Require that when doing an re-offer, the capabilities of the new
       session are mostly required to be a subset of the previously
@@ -5091,13 +5192,6 @@ Internet-Draft                    JSEP                      January 2017
    o  Added discussion of RtpTransceivers + RtpSenders + RtpReceivers,
       and how they interact with createOffer/createAnswer.
 
-
-
-Uberti, et al.            Expires July 11, 2017                [Page 91]
-
-Internet-Draft                    JSEP                      January 2017
-
-
    o  Removed obsolete OfferToReceiveX options.
 
    o  Explained how addIceCandidate can be used for end-of-candidates.
@@ -5107,6 +5201,14 @@ Internet-Draft                    JSEP                      January 2017
    o  Clarified which SDP lines can be ignored.
 
    o  Clarified how to handle various received attributes.
+
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 93]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  Revised how attributes should be generated for bundled m= lines.
 
@@ -5146,14 +5248,6 @@ Internet-Draft                    JSEP                      January 2017
    o  Discussed downscaling and upscaling to fulfill imageattr
       requirements.
 
-
-
-
-Uberti, et al.            Expires July 11, 2017                [Page 92]
-
-Internet-Draft                    JSEP                      January 2017
-
-
    o  Updated what SDP can be modified by the application.
 
    o  Updated to latest datachannel SDP.
@@ -5163,6 +5257,14 @@ Internet-Draft                    JSEP                      January 2017
    o  Switched back to IPv4 for dummy candidates.
 
    o  Added additional clarity on ICE default candidates.
+
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 94]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    Changes in draft-11:
 
@@ -5202,14 +5304,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Fixed <proto> field handling.
 
-
-
-
-Uberti, et al.            Expires July 11, 2017                [Page 93]
-
-Internet-Draft                    JSEP                      January 2017
-
-
    o  Added text describing a=rtcp attribute.
 
    o  Reworked handling of OfferToReceiveAudio and OfferToReceiveVideo
@@ -5219,6 +5313,14 @@ Internet-Draft                    JSEP                      January 2017
       per discussion at interim.
 
    o  Added max-bundle-and-rtcp-mux policy.
+
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 95]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  Added description of maxptime handling.
 
@@ -5258,14 +5360,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Added Eric Rescorla as a draft editor.
 
-
-
-
-Uberti, et al.            Expires July 11, 2017                [Page 94]
-
-Internet-Draft                    JSEP                      January 2017
-
-
    o  Cleaned up references.
 
    o  Editorial cleanup
@@ -5275,6 +5369,14 @@ Internet-Draft                    JSEP                      January 2017
    o  Reworked handling of m= line recycling.
 
    o  Added handling of BUNDLE and bundle-only.
+
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 96]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  Clarified handling of rollback.
 
@@ -5314,14 +5416,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Clarified section on forking.
 
-
-
-
-Uberti, et al.            Expires July 11, 2017                [Page 95]
-
-Internet-Draft                    JSEP                      January 2017
-
-
    Changes in draft-01:
 
    o  Added diagrams for architecture and state machine.
@@ -5331,6 +5425,14 @@ Internet-Draft                    JSEP                      January 2017
    o  Clarified meaning of "pranswer" and "answer".
 
    o  Reworked how ICE restarts and media directions are controlled.
+
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 97]
+
+Internet-Draft                    JSEP                      January 2017
+
 
    o  Added list of parameters that can be changed in a description.
 
@@ -5373,4 +5475,14 @@ Authors' Addresses
 
 
 
-Uberti, et al.            Expires July 11, 2017                [Page 96]
+
+
+
+
+
+
+
+
+
+
+Uberti, et al.            Expires July 11, 2017                [Page 98]

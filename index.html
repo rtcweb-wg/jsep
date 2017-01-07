@@ -347,7 +347,7 @@ li, p {
 <link href="#rfc.section.5.8" rel="Chapter" title="5.8 Applying a Local Description"/>
 <link href="#rfc.section.5.9" rel="Chapter" title="5.9 Applying a Remote Description"/>
 <link href="#rfc.section.5.10" rel="Chapter" title="5.10 Applying an Answer"/>
-<link href="#rfc.section.6" rel="Chapter" title="6 Processing RTP/RTCP packets"/>
+<link href="#rfc.section.6" rel="Chapter" title="6 Processing RTP/RTCP"/>
 <link href="#rfc.section.7" rel="Chapter" title="7 Examples"/>
 <link href="#rfc.section.7.1" rel="Chapter" title="7.1 Simple Example"/>
 <link href="#rfc.section.7.2" rel="Chapter" title="7.2 Normal Examples"/>
@@ -358,7 +358,8 @@ li, p {
 <link href="#rfc.references.1" rel="Chapter" title="11.1 Normative References"/>
 <link href="#rfc.references.2" rel="Chapter" title="11.2 Informative References"/>
 <link href="#rfc.appendix.A" rel="Chapter" title="A Appendix A"/>
-<link href="#rfc.appendix.B" rel="Chapter" title="B Change log"/>
+<link href="#rfc.appendix.B" rel="Chapter" title="B Appendix B"/>
+<link href="#rfc.appendix.C" rel="Chapter" title="C Change log"/>
 <link href="#rfc.authors" rel="Chapter"/>
 
 
@@ -515,7 +516,7 @@ li, p {
 </ul><li>5.8.   <a href="#rfc.section.5.8">Applying a Local Description</a></li>
 <li>5.9.   <a href="#rfc.section.5.9">Applying a Remote Description</a></li>
 <li>5.10.   <a href="#rfc.section.5.10">Applying an Answer</a></li>
-</ul><li>6.   <a href="#rfc.section.6">Processing RTP/RTCP packets</a></li>
+</ul><li>6.   <a href="#rfc.section.6">Processing RTP/RTCP</a></li>
 <li>7.   <a href="#rfc.section.7">Examples</a></li>
 <ul><li>7.1.   <a href="#rfc.section.7.1">Simple Example</a></li>
 <li>7.2.   <a href="#rfc.section.7.2">Normal Examples</a></li>
@@ -526,7 +527,8 @@ li, p {
 <ul><li>11.1.   <a href="#rfc.references.1">Normative References</a></li>
 <li>11.2.   <a href="#rfc.references.2">Informative References</a></li>
 </ul><li>Appendix A.   <a href="#rfc.appendix.A">Appendix A</a></li>
-<li>Appendix B.   <a href="#rfc.appendix.B">Change log</a></li>
+<li>Appendix B.   <a href="#rfc.appendix.B">Appendix B</a></li>
+<li>Appendix C.   <a href="#rfc.appendix.C">Change log</a></li>
 <li><a href="#rfc.authors">Authors' Addresses</a></li>
 
 
@@ -1310,45 +1312,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 <p id="rfc.section.5.10.p.3">If the answer contains valid bundle groups, discard any ICE components for the m= sections that will be bundled onto the primary ICE components in each bundle, and begin muxing these m= sections accordingly, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 8.2.</p>
 <p id="rfc.section.5.10.p.4">If the description is of type "answer", and there are still remaining candidates in the ICE candidate pool, discard them.</p>
-<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#sec.rtp.demux" id="sec.rtp.demux">Processing RTP/RTCP packets</a></h1>
-<p id="rfc.section.6.p.1">Note: The following algorithm does not yet have WG consensus but is included here as something concrete for the working group to discuss.</p>
-<p id="rfc.section.6.p.2">When an RTP packet is received by a transport and passes SRTP authentication, that packet needs to be routed to the correct RtpReceiver. For each transport, the following steps MUST be followed to prepare to route packets:</p>
-<p/>
-
-<ul class="empty">
-  <li>Construct a table mapping MID to RtpReceiver for each RtpReceiver configured to receive from this transport.</li>
-  <li>Construct a table mapping incoming SSRC to RtpReceiver for each RtpReceiver configured to receive from this transport and for each SSRC that RtpReceiver is configured to receive. Some of the SSRCs may be present in the m= section corresponding to that RtpReceiver in the remote description.</li>
-  <li>Construct a table mapping outgoing SSRC to RtpSender for each RtpSender configured to transmit from this transport and for each SSRC that RtpSender is configured to use when sending.</li>
-  <li>Construct a table mapping payload type to RtpReceiver for each RtpReceiver configured to receive from this transport and for each payload type that RtpReceiver is configured to receive. The payload types of a given RtpReceiver are found in the m= section corresponding to that RtpReceiver in the local description. If any payload type could map to more than one RtpReceiver, map to the RtpReceiver whose m= section appears earliest in the local description.</li>
-</ul>
-
-<p> </p>
-<p id="rfc.section.6.p.4">As RtpTransceivers (and, thus, RtpReceivers) are added, removed, stopped, or reconfigured, the tables above must also be updated.</p>
-<p id="rfc.section.6.p.5">For each RTP packet received, the following steps MUST be followed to route the packet:</p>
-<p/>
-
-<ul class="empty">
-  <li>If the packet has a MID and that MID is not in the table mapping MID to RtpReceiver, drop the packet and stop.</li>
-  <li>If the packet has a MID and that MID is in the table mapping MID to RtpReceiver, update the incoming SSRC mapping table to include an entry that maps the packet's SSRC to the RtpReceiver for that MID.</li>
-  <li>If the packet's SSRC is in the incoming SSRC mapping table, deliver the packet to the associated RtpReceiver and stop.</li>
-  <li>If the packet's payload type is in the payload type table, update the the incoming SSRC mapping table to include an entry that maps the packet's SSRC to the RtpReceiver for that payload type. In addition, deliver the packet to the associated RtpReceiver and stop.</li>
-  <li>Otherwise, drop the packet.</li>
-</ul>
-
-<p> </p>
-<p id="rfc.section.6.p.7">For each RTCP packet received (including each RTCP packet that is part of a compound RTCP packet), the following type-specific handling MUST be performed to route the packet:</p>
-<p/>
-
-<ul class="empty">
-  <li>If the packet is of type SR, and the sender SSRC for the packet is found in the incoming SSRC table, deliver a copy of the packet to the RtpReceiver associated with that SSRC. In addition, for each report block in the report whose SSRC is found in the outgoing SSRC table, deliver a copy of the RTCP packet to the RtpSender associated with that SSRC.</li>
-  <li>If the packet is of type RR, for each report block in the packet whose SSRC is found in the outgoing SSRC table, deliver a copy of the RTCP packet to the RtpSender associated with that SSRC.</li>
-  <li>If the packet is of type SDES, and the sender SSRC for the packet is found in the incoming SSRC table, deliver the packet to the RtpReceiver associated with that SSRC. In addition, for each chunk in the packet that contains a MID that is in the table mapping MID to RtpReceiver, update the incoming SSRC mapping table to include an entry that maps the SSRC for that chunk to the RtpReceiver associated with that MID. (This case can occur when RTCP for a source is received before any RTP packets.)</li>
-  <li>If the packet is of type BYE, for each SSRC indicated in the packet that is found in the incoming SSRC table, deliver a copy of the packet to the RtpReceiver associated with that SSRC.</li>
-  <li>If the packet is of type RTPFB or PSFB, as defined in <a href="#RFC4585">[RFC4585]</a>, and the media source SSRC for the packet is found in the outgoing SSRC table, deliver the packet to the RtpSender associated with that SSRC.</li>
-</ul>
-
-<p> </p>
-<p id="rfc.section.6.p.9">After packets are routed to the RtpReceiver, further processing of the RTP packets is done at the RtpReceiver level.  This includes using <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a> to distinguish between multiple Encoded Streams, as well as determine which Source RTP stream should be repaired by a given Redundancy RTP stream. If the RTP packet's PT does not match any codec in use by the RtpReceiver, the packet will be dropped.</p>
+<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#sec.rtp.demux" id="sec.rtp.demux">Processing RTP/RTCP</a></h1>
+<p id="rfc.section.6.p.1">When bundling, associating incoming RTP/RTCP with the proper m= section is defined in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>. [The BUNDLE draft does not currently contain the necessary text to describe this demux, but when it does it will contain text like that contained in <a href="#sec.appendix-b">Appendix B</a>.]  When not bundling, the proper m= section is clear from the ICE component over which the RTP/RTCP is received.</p>
+<p id="rfc.section.6.p.2">Once the proper m= section(s) are known, RTP/RTCP is delivered to the RtpTransceiver(s) associated with the m= section(s) and further processing of the RTP/RTCP is done at the RtpTransceiver level.  This includes using RID <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a> to distinguish between multiple Encoded Streams, as well as determine which Source RTP stream should be repaired by a given Redundancy RTP stream.</p>
 <h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#sec.examples" id="sec.examples">Examples</a></h1>
 <p id="rfc.section.7.p.1">Note that this example section shows several SDP fragments. To format in 72 columns, some of the lines in SDP have been split into multiple lines, where leading whitespace indicates that a line is a continuation of the previous line. In addition, some blank lines have been added to improve readability but are not valid in SDP.</p>
 <p id="rfc.section.7.p.2">More examples of SDP for WebRTC call flows can be found in <a href="#I-D.nandakumar-rtcweb-sdp">[I-D.nandakumar-rtcweb-sdp]</a>.</p>
@@ -2174,6 +2140,12 @@ a=rtcp-fb:100 nack pli
     </tr>
     <tr>
       <td class="reference">
+        <b id="RFC3550">[RFC3550]</b>
+      </td>
+      <td class="top"><a>Schulzrinne, H.</a>, <a>Casner, S.</a>, <a>Frederick, R.</a> and <a>V. Jacobson</a>, "<a href="http://tools.ietf.org/html/rfc3550">RTP: A Transport Protocol for Real-Time Applications</a>", STD 64, RFC 3550, DOI 10.17487/RFC3550, July 2003.</td>
+    </tr>
+    <tr>
+      <td class="reference">
         <b id="RFC3556">[RFC3556]</b>
       </td>
       <td class="top"><a>Casner, S.</a>, "<a href="http://tools.ietf.org/html/rfc3556">Session Description Protocol (SDP) Bandwidth Modifiers for RTP Control Protocol (RTCP) Bandwidth</a>", RFC 3556, July 2003.</td>
@@ -2231,6 +2203,12 @@ a=rtcp-fb:100 nack pli
         <b id="RFC6464">[RFC6464]</b>
       </td>
       <td class="top"><a>Lennox, J.</a>, <a>Ivov, E.</a> and <a>E. Marocco</a>, "<a href="http://tools.ietf.org/html/rfc6464">A Real-time Transport Protocol (RTP) Header Extension for Client-to-Mixer Audio Level Indication</a>", RFC 6464, DOI 10.17487/RFC6464, December 2011.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC7656">[RFC7656]</b>
+      </td>
+      <td class="top"><a>Lennox, J.</a>, <a>Gross, K.</a>, <a>Nandakumar, S.</a>, <a>Salgueiro, G.</a> and <a>B. Burman</a>, "<a href="http://tools.ietf.org/html/rfc7656">A Taxonomy of Semantics and Mechanisms for Real-Time Transport Protocol (RTP) Sources</a>", RFC 7656, DOI 10.17487/RFC7656, November 2015.</td>
     </tr>
     <tr>
       <td class="reference">
@@ -2375,9 +2353,54 @@ a=rtcp-fb:100 nack pli
     </tr>
   </tbody>
 </table>
-<h1 id="rfc.appendix.B"><a href="#rfc.appendix.B">Appendix B.</a> <a href="#sec.change-log" id="sec.change-log">Change log</a></h1>
-<p id="rfc.section.B.p.1">Note: This section will be removed by RFC Editor before publication.</p>
-<p id="rfc.section.B.p.2">Changes in draft-17:</p>
+<h1 id="rfc.appendix.B"><a href="#rfc.appendix.B">Appendix B.</a> <a href="#sec.appendix-b" id="sec.appendix-b">Appendix B</a></h1>
+<p id="rfc.section.B.p.1">The following text is meant to completely replace section "Associating RTP/RTCP Streams With Correct SDP Media Description" of <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>. </p>
+<p id="rfc.section.B.p.2">As described in <a href="#RFC3550">[RFC3550]</a>, RTP/RTCP packets are associated with RTP streams as defined in <a href="#RFC7656">[RFC7656]</a>.  Each RTP stream is identified by an SSRC value, and each RTP/RTCP packet carries an SSRC value that is used to associate the packet with the correct RTP stream.  An RTCP packet can carry multiple SSRC values, and might therefore be associated with multiple RTP streams.  </p>
+<p id="rfc.section.B.p.3">In order to be able to process received RTP/RTCP packets correctly it must be possible to associate an RTP stream with the correct "m=" line, as the "m=" line and SDP attributes associated with the "m=" line contain information needed to process the packets.  </p>
+<p id="rfc.section.B.p.4">As all RTP streams associated with a BUNDLE group use the same address:port combination for sending and receiving RTP/RTCP packets, the local address:port combination cannot be used to associate an RTP stream with the correct "m=" line. In addition, multiple RTP streams might be associated with the same "m=" line.  </p>
+<p id="rfc.section.B.p.5">An offerer and answerer can inform each other which SSRC values they will use for an RTP stream by using the SDP 'ssrc' attribute <a href="#RFC5576">[RFC5576]</a>. However, an offerer will not know which SSRC values the answerer will use until the offerer has received the answer providing that information.  Due to this, before the offerer has received the answer, the offerer will not be able to associate an RTP stream with the correct "m=" line using the SSRC value associated with the RTP stream. In addition, the offerer and answerer may start using new SSRC values mid-session, without informing each other using the SDP 'ssrc' attribute.  </p>
+<p id="rfc.section.B.p.6">In order for an offerer and answerer to always be able to associate an RTP stream with the correct "m=" line, the offerer and answerer using the BUNDLE extension MUST support the mechanism defined in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a> section 14.  where the offerer and answerer insert the identification-tag associated with an "m=" line (provided by the remote peer) into RTP and RTCP packets associated with a BUNDLE group.  </p>
+<p id="rfc.section.B.p.7">The mapping from an SSRC to an identification-tag is carried in RTCP SDES packets or in RTP header extensions (<a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a> section 14).  Since a compound RTCP packet can contain multiple RTCP SDES packets, and each RTCP SDES packet can contain multiple chunks, an RTCP packet can contain several SSRC to identification-tag mappings. The offerer and answerer maintain tables used for routing that are updated each time an RTP/RTCP packet contains new information that affects how packets should be routed.  </p>
+<p id="rfc.section.B.p.8">To prepare for demultiplexing RTP packets to the correct "m=" line, the following steps MUST be followed for each BUNDLE group.</p>
+<p/>
+
+<ul class="empty">
+  <li>Construct a table mapping MID to "m=" line for each "m=" line in this BUNDLE group.  Note that an "m=" line may only have one MID.</li>
+  <li>Construct a table mapping incoming SSRC to "m=" line for each "m=" line in this BUNDLE group and for each SSRC configured for receiving in that "m=" line.</li>
+  <li>Construct a table mapping outgoing SSRC to "m=line" for each "m=" line in this BUNDLE group and for each SSRC configured for sending in that "m=" line.</li>
+  <li>Construct a table mapping payload type to "m=" line for each "m=" line in the BUNDLE group and for each payload type configured for receiving in that "m=" line.  If any payload type is configured for receiving in more than one "m=" line in the BUNDLE group, do not it include it in the table.</li>
+  <li>Note that for each of these tables, there can only be one mapping for any given key (MID, SSRC, or PT).  In other words, the tables are not multimaps.</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.B.p.10">As "m=" lines are added or removed from the BUNDLE groups, or their configurations are changed, the tables above MUST also be updated.</p>
+<p id="rfc.section.B.p.11">For each RTP packet received, the following steps MUST be followed to route the packet to the correct "m=" section within a BUNDLE group.  Note that the phrase 'deliver a packet to the "m=" line' means to further process the packet as would normally happen with RTP/RTCP, if it were received on a transport associated with that "m=" line outside of a BUNDLE group (i.e., if the "m=" line were not BUNDLEd), including dropping an RTP packet if the packet's PT does not match any PT in the "m=" line.</p>
+<p/>
+
+<ul class="empty">
+  <li>If the packet has a MID and that MID is not in the table mapping MID to "m=" line, drop the packet and stop.</li>
+  <li>If the packet has a MID and that MID is in the table mapping MID to "m=" line, update the incoming SSRC mapping table to include an entry that maps the packet's SSRC to the "m=" line for that MID.</li>
+  <li>If the packet's SSRC is in the incoming SSRC mapping table, route the packet to the associated "m=" line and stop.</li>
+  <li>If the packet's payload type is in the payload type table, update the the incoming SSRC mapping table to include an entry that maps the packet's SSRC to the "m=" line for that payload type. In addition, route the packet to the associated "m=" line and stop.</li>
+  <li>Otherwise, drop the packet.</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.B.p.13">For each RTCP packet received (including each RTCP packet that is part of a compound RTCP packet), the packet MUST be routed to the appropriate handler for the SSRCs it contains information about. Some examples of such handling are given below.</p>
+<p/>
+
+<ul class="empty">
+  <li>If the packet is of type SR, and the sender SSRC for the packet is found in the incoming SSRC table, deliver a copy of the packet to the "m=" line associated with that SSRC. In addition, for each report block in the report whose SSRC is found in the outgoing SSRC table, deliver a copy of the RTCP packet to the "m=" line associated with that SSRC.</li>
+  <li>If the packet is of type RR, for each report block in the packet whose SSRC is found in the outgoing SSRC table, deliver a copy of the RTCP packet to the "m=" line associated with that SSRC.</li>
+  <li>If the packet is of type SDES, and the sender SSRC for the packet is found in the incoming SSRC table, deliver the packet to the "m=" line associated with that SSRC. In addition, for each chunk in the packet that contains a MID that is in the table mapping MID to "m=" line, update the incoming SSRC mapping table to include an entry that maps the SSRC for that chunk to the "m=" line associated with that MID. (This case can occur when RTCP for a source is received before any RTP packets.)</li>
+  <li>If the packet is of type BYE, for each SSRC indicated in the packet that is found in the incoming SSRC table, deliver a copy of the packet to the "m=" line associated with that SSRC.</li>
+  <li>If the packet is of type RTPFB or PSFB, as defined in <a href="#RFC4585">[RFC4585]</a>, and the media source SSRC for the packet is found in the outgoing SSRC table, deliver the packet to the "m=" line associated with that SSRC.</li>
+</ul>
+
+<p> </p>
+<h1 id="rfc.appendix.C"><a href="#rfc.appendix.C">Appendix C.</a> <a href="#sec.change-log" id="sec.change-log">Change log</a></h1>
+<p id="rfc.section.C.p.1">Note: This section will be removed by RFC Editor before publication.</p>
+<p id="rfc.section.C.p.2">Changes in draft-17:</p>
 <p/>
 
 <ul>
@@ -2399,7 +2422,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.4">Changes in draft-16:</p>
+<p id="rfc.section.C.p.4">Changes in draft-16:</p>
 <p/>
 
 <ul>
@@ -2419,7 +2442,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.6">Changes in draft-15:</p>
+<p id="rfc.section.C.p.6">Changes in draft-15:</p>
 <p/>
 
 <ul>
@@ -2433,7 +2456,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.8">Changes in draft-14:</p>
+<p id="rfc.section.C.p.8">Changes in draft-14:</p>
 <p/>
 
 <ul>
@@ -2443,7 +2466,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.10">Changes in draft-13:</p>
+<p id="rfc.section.C.p.10">Changes in draft-13:</p>
 <p/>
 
 <ul>
@@ -2467,7 +2490,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.12">Changes in draft-12:</p>
+<p id="rfc.section.C.p.12">Changes in draft-12:</p>
 <p/>
 
 <ul>
@@ -2481,7 +2504,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.14">Changes in draft-11:</p>
+<p id="rfc.section.C.p.14">Changes in draft-11:</p>
 <p/>
 
 <ul>
@@ -2491,7 +2514,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.16">Changes in draft-10:</p>
+<p id="rfc.section.C.p.16">Changes in draft-10:</p>
 <p/>
 
 <ul>
@@ -2501,7 +2524,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.18">Changes in draft-09:</p>
+<p id="rfc.section.C.p.18">Changes in draft-09:</p>
 <p/>
 
 <ul>
@@ -2515,7 +2538,7 @@ a=rtcp-fb:100 nack pli
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.20">Changes in draft-08: </p>
+<p id="rfc.section.C.p.20">Changes in draft-08: </p>
 
 <ul>
   <li>Added new example section and removed old examples in appendix.</li>
@@ -2531,7 +2554,7 @@ a=rtcp-fb:100 nack pli
   <li>Some reference updates.</li>
   <li>Editorial clarification.</li>
 </ul>
-<p id="rfc.section.B.p.21">Changes in draft-07: </p>
+<p id="rfc.section.C.p.21">Changes in draft-07: </p>
 
 <ul>
   <li>Expanded discussion of VAD and Opus DTX.</li>
@@ -2547,7 +2570,7 @@ a=rtcp-fb:100 nack pli
   <li>Cleaned up references.</li>
   <li>Editorial cleanup</li>
 </ul>
-<p id="rfc.section.B.p.22">Changes in draft-06: </p>
+<p id="rfc.section.C.p.22">Changes in draft-06: </p>
 
 <ul>
   <li>Reworked handling of m= line recycling.</li>
@@ -2556,25 +2579,25 @@ a=rtcp-fb:100 nack pli
   <li>Added text describing the ICE Candidate Pool and its behavior.</li>
   <li>Allowed OfferToReceiveX to create multiple recvonly m= sections.</li>
 </ul>
-<p id="rfc.section.B.p.23">Changes in draft-05: </p>
+<p id="rfc.section.C.p.23">Changes in draft-05: </p>
 
 <ul>
   <li>Fixed several issues identified in the createOffer/Answer sections during document review.</li>
   <li>Updated references.</li>
 </ul>
-<p id="rfc.section.B.p.24">Changes in draft-04: </p>
+<p id="rfc.section.C.p.24">Changes in draft-04: </p>
 
 <ul>
   <li>Filled in sections on createOffer and createAnswer.</li>
   <li>Added SDP examples.</li>
   <li>Fixed references.</li>
 </ul>
-<p id="rfc.section.B.p.25">Changes in draft-03: </p>
+<p id="rfc.section.C.p.25">Changes in draft-03: </p>
 
 <ul>
   <li>Added text describing relationship to W3C specification</li>
 </ul>
-<p id="rfc.section.B.p.26">Changes in draft-02: </p>
+<p id="rfc.section.C.p.26">Changes in draft-02: </p>
 
 <ul>
   <li>Converted from nroff</li>
@@ -2583,7 +2606,7 @@ a=rtcp-fb:100 nack pli
   <li>Align SDP handling with W3C draft</li>
   <li>Clarified section on forking.</li>
 </ul>
-<p id="rfc.section.B.p.27">Changes in draft-01: </p>
+<p id="rfc.section.C.p.27">Changes in draft-01: </p>
 
 <ul>
   <li>Added diagrams for architecture and state machine.</li>
@@ -2594,7 +2617,7 @@ a=rtcp-fb:100 nack pli
   <li>Updated suggested API and examples to match latest thinking.</li>
   <li>Suggested API and examples have been moved to an appendix.</li>
 </ul>
-<p id="rfc.section.B.p.28">Changes in draft -00: </p>
+<p id="rfc.section.C.p.28">Changes in draft -00: </p>
 
 <ul>
   <li>Migrated from draft-uberti-rtcweb-jsep-02.</li>
