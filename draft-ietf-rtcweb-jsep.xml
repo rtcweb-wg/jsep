@@ -2563,25 +2563,54 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <xref target="I-D.ietf-ice-trickle"></xref>, Section 4, is
           only included if such an option was present in the offer.</t>
 
-          <t>The next step is to generate session-level lip sync groups
-          as defined in
-          <xref target="RFC5888" />, Section 7. For each group of type
-          "LS" present in the offer, determine which of the local
-          RtpTransceivers identified by that group's mid values
-          reference a common local MediaStream (as specified in the
-          addTrack and addTransceiver methods). If at least two such
-          RtpTransceivers exist, a group of type "LS" with the mid
-          values of these RtpTransceivers MUST be added. Otherwise,
-          this indicates a difference of opinion between the offerer
-          and answerer regarding lip sync status, and as such, the
-          offered group MUST be ignored and no corresponding "LS" group
+          <t>The next step is to generate session-level lip sync
+          groups as defined in <xref target="RFC5888" />, Section
+          7. For each group of type "LS" present in the offer,
+          determine which of the local RtpTransceivers identified by
+          that group's mid values reference a common local MediaStream
+          (as specified in the addTrack and addTransceiver
+          methods). If at least two such RtpTransceivers exist, a
+          group of type "LS" with the mid values of these
+          RtpTransceivers MUST be added. Otherwise, this indicates a
+          difference of opinion between the offerer and answerer
+          regarding lip sync status, and as such, the offered group
+          MUST be ignored and no corresponding "LS" group
           generated.</t>
 
+          <t> Consider a simple case where both sides have single
+          audio and a single video MediaStreamTrack that are both
+          associated with the same MediaStream. As explained in <xref
+          target="sec-create-offer"/>, an group of type "LS" will have
+          been added to the Offer that contains the mid value for the
+          RtpTransceiver associated with each of the
+          MediaStreamTracks. In the case here, when the remote o=Offer is
+          applied, the two MediaStreamTracks will be created
+          and they will both point at the same MediaStream because the
+          offer will have had the same value in the "a=msid" line for
+          both of them.  When the answer is created, both the audio
+          and video RtpTransceivers will reference the common
+          MediaStream. This will cause the answer to add both of
+          theses MediaStreamTrack to the "LS" group in the Answer due
+          to the rules in the paragraph above.
+          </t>
+
+          <t> Complex examples where MediaStreamTrack A is
+          synchronized with B and at the same time MediaStreamTrack C,
+          D, E are also synchronized with each other but not with A
+          and B are also possible. To make these cases work, the
+          sender need to ensure A and B are in one MediaStream while
+          C,D, and E are in a different MediaStream. This will cause
+          two groups of type "LS" to be created in the Offer and as
+          long as the association of MediaStreamTracks and
+          MediaStreams are not changed between applying the remote
+          Offer and creating the Answer, the groups of type "LS" will
+          be accepted. </t>
+          
           <t>The next step is to generate m= sections for each m=
           section that is present in the remote offer, as specified in
           <xref target="RFC3264"></xref>, Section 6. For the purposes
-          of this discussion, any session-level attributes in the offer
-          that are also valid as media-level attributes SHALL be
+          of this discussion, any session-level attributes in the
+          offer that are also valid as media-level attributes SHALL be
           considered to be present in each m= section.</t>
 
           <t>The next step is to go through each offered m= section.
