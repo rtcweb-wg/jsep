@@ -94,12 +94,13 @@ ipr="trust200902">
         the Javascript Session Establishment Protocol (JSEP) that
         allows for full control of the signaling state machine from
         Javascript. As described above, JSEP assumes a model in which
-        a Javascript application runs inside a WebRTC enabled runtime
-        (the "JSEP endpoint" or "endpoint"). JSEP removes the endpoint
-        almost entirely from the core signaling flow, which is instead
+        a Javascript application runs inside a runtime containing
+        WebRTC APIs (the "JSEP implementation"). The JSEP implementation
+        almost entirely divorced from the core signaling flow, which is instead
         handled by the Javascript making use of two interfaces: (1) passing in local and remote
         session descriptions and (2) interacting with the ICE state
-        machine.</t>
+        machine. The combination of the JSEP implementation and the Javascript
+        application is referred to throughout this document as a "JSEP endpoint." </t>
 
         <t>In this document, the use of JSEP is described as if it
         always occurs between two JSEP endpoints. Note though in many cases
@@ -170,7 +171,7 @@ ipr="trust200902">
         session descriptions to the API, the API would produce and
         consume messages from this protocol. While providing a more
         high-level API, this put more control of signaling within the
-        JSEP endpoint, forcing the endpoint to have to understand and handle
+        JSEP implementation, forcing the endpoint to have to understand and handle
         concepts like signaling glare. In addition, it prevented the
         application from driving the state machine to a desired state,
         as is needed in the page reload case.</t>
@@ -192,7 +193,7 @@ ipr="trust200902">
 
         <t>One variation on JSEP that was considered was to keep the
         basic session description-oriented API, but to move the
-        mechanism for generating offers and answers out of the JSEP endpoint.
+        mechanism for generating offers and answers out of the JSEP implementation,
         Instead of providing createOffer/createAnswer methods within
         the endpoint, this approach would instead expose a
         getCapabilities API which would provide the application with
@@ -229,13 +230,13 @@ ipr="trust200902">
         <xref target="RFC3264"></xref>(offer/answer) in order for both
         sides of the session to know how to conduct the session. JSEP
         provides mechanisms to create offers and answers, as well as to
-        apply them to a session. However, the JSEP endpoint is totally
+        apply them to a session. However, the JSEP implementation is totally
         decoupled from the actual mechanism by which these offers and
         answers are communicated to the remote side, including
         addressing, retransmission, forking, and glare handling. These
         issues are left entirely up to the application; the application
         has complete control over which offers and answers get handed
-        to the JSEP endpoint, and when.</t>
+        to the JSEP implementation, and when.</t>
         <figure anchor="fig-sigModel" title="JSEP Signaling Model">
           <artwork>
             <![CDATA[
@@ -247,7 +248,7 @@ ipr="trust200902">
           V                                            V
     +-----------+                                +-----------+
     |   JSEP    |<----------- Media ------------>|   JSEP    |
-    | Endpoint  |                                | Endpoint  |
+    |   Impl.   |                                |   Impl.   |
     +-----------+                                +-----------+
 ]]>
 </artwork>
@@ -428,7 +429,7 @@ setRemote(ANSWER) |                                   |
 
         <t>In order to give the application control over various common
         session parameters, JSEP provides control surfaces which tell
-        the JSEP endpoint how to generate session descriptions. This avoids
+        the JSEP implementation how to generate session descriptions. This avoids
         the need for Javascript to modify session descriptions in most
         cases.</t>
 
@@ -1836,7 +1837,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Usage Requirements"
         anchor="sec.usage-requirements">
 
-          <t>All session descriptions handled by JSEP endpoints, both
+          <t>All session descriptions handled by JSEP implementations, both
           local and remote, MUST indicate support for the following
           specifications. If any of these are absent, this omission
           MUST be treated as an error.
@@ -1858,11 +1859,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <section title="Profile Names and Interoperability"
         anchor="sec.profile-names">
 
-          <t>For media m= sections, JSEP endpoints MUST support both
+          <t>For media m= sections, JSEP implementations MUST support both
           the "UDP/TLS/ RTP/SAVPF" and "TCP/DTLS/RTP/SAVPF" profiles
           and MUST indicate one of these two profiles for each media m=
           line they produce in an offer. For data m= sections, JSEP
-          endpoints must support both the "UDP/DTLS/SCTP" and
+          implementations must support both the "UDP/DTLS/SCTP" and
           "TCP/DTLS/SCTP" profiles and MUST indicate one of these two
           profiles for each data m= line they produce in an offer.
           Because ICE can select either TCP or UDP transport depending
@@ -1875,7 +1876,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           might generate "RTP/AVP" but supply "a=fingerprint" and
           "a=rtcp-fb" attributes, indicating its willingness to support
           "(UDP,TCP)/TLS/RTP/SAVPF". In order to simplify compatibility
-          with such endpoints, JSEP endpoints MUST follow the following
+          with such endpoints, JSEP implementations MUST follow the following
           rules when processing the media m= sections in an offer:</t>
 
           <t>
@@ -1901,13 +1902,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               that AVPF is being used in an AVP compatible mode and
               use a value of "trr-int=4000".</t>
 
-              <t>For data m= sections, JSEP endpoints MUST support
+              <t>For data m= sections, JSEP implementations MUST support
               receiving the "UDP/DTLS/SCTP", "TCP/DTLS/SCTP", or
               "DTLS/SCTP" (for backwards compatibility) profiles.</t>
             </list>
           </t>
 
-          <t>Note that re-offers by JSEP endpoints MUST use the correct
+          <t>Note that re-offers by JSEP implementations MUST use the correct
           profile strings even if the initial offer/answer exchange
           used an (incorrect) older profile string.</t>
         </section>
@@ -2432,7 +2433,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             are not subject to these restrictions, and might offer media
             formats that were not present in the most recent answer, as
             specified in <xref target="RFC3264"></xref>, Section 8.
-            Therefore, JSEP endpoints MUST be prepared to receive such
+            Therefore, JSEP implementations MUST be prepared to receive such
             offers.</t>
 
             <t>The media formats on the m= line MUST be generated in the
@@ -2642,7 +2643,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             that non-JSEP endpoints are not subject to this restriction,
             and might add media formats in the answer that are not present
             in the offer, as specified in <xref target="RFC3264"></xref>,
-            Section 6.1. Therefore, JSEP endpoints MUST be prepared to
+            Section 6.1. Therefore, JSEP implementations MUST be prepared to
             receive such answers.</t>
 
             <t>Unless excluded by the above restrictions, the media
