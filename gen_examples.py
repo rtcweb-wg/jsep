@@ -186,7 +186,7 @@ def print_desc(d):
 def example1():
   ms1 = [
     { 'type': 'audio', 'mid': 'a1',
-      'msid': '61317484-2ed4-49d7-9eb7-1414322a7aae',
+      'msid': '47017fee-b6c1-4162-929c-a25110252400',
       'local_port': 56500, 'ice_ufrag': 'ETEn',
       'ice_pwd': 'OtSK0WpNtpUjkY4+86js7ZQl', 'dtls_dir': 'actpass' },
     { 'type': 'video', 'mid': 'v1',
