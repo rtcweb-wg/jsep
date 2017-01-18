@@ -1,7 +1,6 @@
-# TODO: LS groups
 # TODO: strip empty attribs
-# TODO: fix 0.0.0.0 in reoffers
-# TODO: fix bundle-only
+# TODO: fix bundle-only (not in subsequent offers?)
+# TODO: LS groups
 # TODO: rtcp-mux-only
 
 class PeerConnection:
@@ -137,7 +136,7 @@ class PeerConnection:
       return self.DATA_SDP
 
   def select_default_candidates(self, m_section, num_components):
-    if self.trickle:
+    if self.trickle and self.version == 1:
       default_ip = '0.0.0.0'
       default_port = default_rtcp = 9
     else:
@@ -180,7 +179,7 @@ class PeerConnection:
       if not self.trickle:
         sdp += self.create_candidates(copy, num_components)
         sdp += self.END_OF_CANDIDATES_SDP
-    elif stype == 'offer' and self.version == 1:
+    elif stype == 'offer':
       sdp += self.BUNDLE_ONLY_SDP
     return sdp
 
