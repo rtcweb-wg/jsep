@@ -5874,13 +5874,27 @@ a=rtcp-fb:100 nack pli
           when RTCP for a source is received before any RTP packets.)</t>
 
           <t>If the packet is of type BYE, for each SSRC indicated in the
-          packet that is found in the incoming SSRC table, deliver a copy of the
-          packet to the "m=" line associated with that SSRC.</t>
-
-          <t>If the packet is of type RTPFB or PSFB, as defined in
-          <xref target="RFC4585" />, and the media source SSRC for the packet
-          is found in the outgoing SSRC table, deliver the packet
+          packet that is found in the incoming SSRC table, deliver a copy
+          of the packet to the "m=" line associated with that SSRC.</t>
+		
+	  <t>If the packet is an FIR (PT=PSFB, FMT=4), as defined in
+          <xref target="RFC5104" />, the SSRC found in each FCI entry
+          is matched against the outgoing SSRC table and a copy of the
+          packet is delivered to the "m=" lines associated with each
+          SSRC.</t>
+		
+	  <t>If the packet is an LRR (PT=PSFB, FMT=TBD) as defined in
+          <xref target="draft-ietf-avtext-lrr" />, the SSRC found in each
+          FCI entry is matched against the outgoing SSRC table and a copy of
+          the packet is delivered to the "m=" lines associated with each SSRC.</t>
+		
+          <t>If the packet is of type RTPFB or type PSFB defined in
+          <xref target="RFC4585" />, and the media source SSRC for the
+          packet is found in the outgoing SSRC table, deliver the packet
           to the "m=" line associated with that SSRC.</t>
+		
+	  <t>If the packet is of type APP, deliver a copy of the packet to
+          each "m=" line.</t>
         </list>
       </t>
     </section>
