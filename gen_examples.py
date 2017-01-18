@@ -1,4 +1,3 @@
-# TODO: strip empty attribs
 # TODO: fix bundle-only (not in subsequent offers?)
 # TODO: LS groups
 # TODO: rtcp-mux-only
@@ -13,32 +12,10 @@ class PeerConnection:
     a=group:BUNDLE {1}
     """
 
-  TRANSPORT_SDP_PRE_RTCP = \
- """a=ice-ufrag:{0[ice_ufrag]}
-    a=ice-pwd:{0[ice_pwd]}
-    a=fingerprint:sha-256 {0[dtls_fingerprint]}
-    a=setup:{0[dtls_dir]}
-    a=dtls-id:1
-    """
-  TRANSPORT_SDP_RTCP = \
- """a=rtcp:{0[default_rtcp]} IN IP4 {0[default_ip]}
-    """
-  TRANSPORT_SDP_POST_RTCP = \
- """a=rtcp-mux
-    a=rtcp-rsize
-    """
-  TRANSPORT_SDP_WITH_RTCP = TRANSPORT_SDP_PRE_RTCP + TRANSPORT_SDP_RTCP + \
-                            TRANSPORT_SDP_POST_RTCP
-  TRANSPORT_SDP_NO_RTCP = TRANSPORT_SDP_PRE_RTCP + TRANSPORT_SDP_POST_RTCP
-  BUNDLE_ONLY_SDP = \
- """a=bundle-only
-    """
-
   AUDIO_SDP = \
  """m=audio {0[default_port]} UDP/TLS/RTP/SAVPF 96 0 8 97 98
     c=IN IP4 {0[default_ip]}
     a=mid:{0[mid]}
-    a=msid:{0[msid]}
     a={0[direction]}
     a=rtpmap:96 opus/48000/2
     a=rtpmap:0 PCMU/8000
@@ -48,13 +25,13 @@ class PeerConnection:
     a=maxptime:120
     a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
     a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
+    a=msid:{0[msid]}
     """
 
   VIDEO_SDP = \
  """m=video {0[default_port]} UDP/TLS/RTP/SAVPF 100 101
     c=IN IP4 {0[default_ip]}
     a=mid:{0[mid]}
-    a=msid:{0[msid]}
     a={0[direction]}
     a=rtpmap:100 VP8/90000
     a=rtpmap:101 rtx/90000
@@ -63,6 +40,7 @@ class PeerConnection:
     a=rtcp-fb:100 ccm fir
     a=rtcp-fb:100 nack
     a=rtcp-fb:100 nack pli
+    a=msid:{0[msid]}
     """
 
   DATA_SDP = \
@@ -73,12 +51,27 @@ class PeerConnection:
     a=sctp-port 5000
     """
 
+  MEDIA_TABLE = {
+    'audio': AUDIO_SDP, 'video': VIDEO_SDP, 'application': DATA_SDP
+  }
+
+  TRANSPORT_SDP = \
+ """a=ice-ufrag:{0[ice_ufrag]}
+    a=ice-pwd:{0[ice_pwd]}
+    a=fingerprint:sha-256 {0[dtls_fingerprint]}
+    a=setup:{0[dtls_dir]}
+    a=dtls-id:1
+    a=rtcp:{0[default_rtcp]} IN IP4 {0[default_ip]}
+    a=rtcp-mux
+    a=rtcp-rsize
+    """
+
+  BUNDLE_ONLY_SDP = 'a=bundle-only\n'
+
   CANDIDATE_ATTR = 'candidate:{0} {1} {2} {3} {4} {5} typ {6}'
   CANDIDATE_ATTR_WITH_RADDR = CANDIDATE_ATTR + ' raddr {7} rport {8}'
 
-  END_OF_CANDIDATES_SDP = \
- """a=end-of-candidates
-    """
+  END_OF_CANDIDATES_SDP = 'a=end-of-candidates\n'
 
   def __init__(self, session_id, trickle, bundle_policy, mux_policy,
                local_ip, stun_ip, relay_ip, fingerprint, m_sections):
@@ -92,6 +85,51 @@ class PeerConnection:
     self.fingerprint = fingerprint
     self.m_sections = m_sections
     self.version = 0
+
+  def get_port(self, m_section, type):
+    # get port if it exists, otherwise get it from the first (bundle) section
+    if type in m_section:
+      return m_section[type]
+    else:
+      return self.m_sections[0][type]
+
+  def select_default_candidates(self, m_section, num_components):
+    if self.trickle and self.version == 1:
+      default_ip = '0.0.0.0'
+      default_port = default_rtcp = 9
+    else:
+      if self.relay_ip:
+        default_ip = self.relay_ip
+        default_port = self.get_port(m_section, 'relay_port')
+      else:
+        default_ip = self.local_ip
+        default_port = self.get_port(m_section, 'local_port')
+      # tricky way to make rtcp port be rtp + 1, only if offering non-mux
+      default_rtcp = default_port + num_components - 1
+    m_section['default_ip'] = default_ip
+    m_section['default_port'] = default_port
+    m_section['default_rtcp'] = default_rtcp
+
+  def remove_attribute(self, sdp, attrib):
+    start = sdp.find(attrib)
+    if start == -1:
+      return sdp
+
+    end = sdp.find('\n', start)
+    return sdp[:start] + sdp[end + 1:]
+
+  def create_media_formatter(self, type, want_msid, want_transport,
+                             want_bundle_only, want_rtcp):
+    formatter = self.MEDIA_TABLE[type]
+    if want_transport:
+      formatter += self.TRANSPORT_SDP
+    if want_bundle_only:
+      formatter += self.BUNDLE_ONLY_SDP
+    if not want_msid:
+      formatter = self.remove_attribute(formatter, 'a=msid')
+    if not want_rtcp:
+      formatter = self.remove_attribute(formatter, 'a=rtcp')
+    return formatter
 
   def create_candidate(self, component, type, addr, port, raddr, rport):
     if type == 'host':
@@ -127,35 +165,13 @@ class PeerConnection:
                                      self.stun_ip, m_section['srflx_port'] + i)
     return sdp
 
-  def get_media_formatter(self, type):
-    if type == 'audio':
-      return self.AUDIO_SDP
-    elif type == 'video':
-      return self.VIDEO_SDP
-    else:
-      return self.DATA_SDP
-
-  def select_default_candidates(self, m_section, num_components):
-    if self.trickle and self.version == 1:
-      default_ip = '0.0.0.0'
-      default_port = default_rtcp = 9
-    else:
-      if self.relay_ip:
-        default_ip = self.relay_ip
-        default_port = m_section['relay_port']
-      else:
-        default_ip = self.local_ip
-        default_port = m_section['local_port']
-      # tricky way to make rtcp port be rtp + 1, only if offering non-mux
-      default_rtcp = default_port + num_components - 1
-    m_section['default_ip'] = default_ip
-    m_section['default_port'] = default_port
-    m_section['default_rtcp'] = default_rtcp
-
   def create_m_section(self, stype, m_section):
+    bundled = not 'ice_ufrag' in m_section
+    bundle_only = bundled and stype == 'offer'
     num_components = 1
     if self.mux_policy == 'negotiate' and stype == 'offer':
       num_components = 2
+
     copy = m_section.copy()
     self.select_default_candidates(copy, num_components)
     copy['dtls_fingerprint'] = self.fingerprint
@@ -167,20 +183,19 @@ class PeerConnection:
     else:
       copy['direction'] = 'recvonly'
 
-    sdp = self.get_media_formatter(copy['type']).format(copy)
-    # only put transport attribs into non-bundled m= sections
-    if not 'bundled' in copy or not copy['bundled']:
-      # only add a=rtcp attribute if we're not sure we're muxing
-      if stype == 'offer':
-        sdp += self.TRANSPORT_SDP_WITH_RTCP.format(copy)
-      else:
-        sdp += self.TRANSPORT_SDP_NO_RTCP.format(copy)
-      # add candidates/eoc to SDP if we're not trickling
-      if not self.trickle:
-        sdp += self.create_candidates(copy, num_components)
-        sdp += self.END_OF_CANDIDATES_SDP
-    elif stype == 'offer':
-      sdp += self.BUNDLE_ONLY_SDP
+    # create the right template and fill it in
+    formatter = self.create_media_formatter(copy['type'],
+                                            want_msid = 'msid' in copy,
+                                            want_transport = not bundled,
+                                            want_bundle_only = bundle_only,
+                                            want_rtcp = num_components == 2)
+    sdp = formatter.format(copy)
+
+    # add candidates/eoc to SDP if we're not trickling
+    if not bundled and not self.trickle:
+      sdp += self.create_candidates(copy, num_components)
+      sdp += self.END_OF_CANDIDATES_SDP
+
     return sdp
 
   def create_m_sections(self, stype):
@@ -249,8 +264,7 @@ def example1():
       'local_port': 34300, 'ice_ufrag': '6sFv',
       'ice_pwd': 'cOTZKZNVlO9RSGsEGM63JXT2', 'dtls_dir': 'active' },
     { 'type': 'video', 'mid': 'v1',
-      'msid': '4ea4d4a1-2fda-4511-a9cc-1b32c2e59552',
-      'local_port': 34300, 'bundled': True }
+      'msid': '4ea4d4a1-2fda-4511-a9cc-1b32c2e59552' }
   ]
   fp2 = '6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08'
   pc2 = PeerConnection(session_id = '6729291447651054566', trickle = False,
@@ -269,10 +283,10 @@ def example2():
   ms1 = [
     { 'type': 'audio', 'mid': 'a1',
       'msid': '57017fee-b6c1-4162-929c-a25110252400',
-      'local_port': 51556, 'ice_ufrag': 'ATEn',
-      'ice_pwd': 'AtSK0WpNtpUjkY4+86js7ZQl', 'dtls_dir': 'passive' },
-    { 'type': 'application', 'mid': 'd1',
-      'local_port': 51556, 'bundled': True }
+      'local_port': 51556, 'stun_port': 52546, 'relay_port': 61405,
+      'ice_ufrag': 'ATEn', 'ice_pwd': 'AtSK0WpNtpUjkY4+86js7ZQl',
+      'dtls_dir': 'passive' },
+    { 'type': 'application', 'mid': 'd1' }
   ]
   fp1 = '29:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2'
   pc1 = PeerConnection(session_id = '4962303333179871723', trickle = True,
@@ -284,15 +298,16 @@ def example2():
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
       'msid': '6a7b57b8-f043-4bd1-a45d-09d4dfa31226',
-      'local_port': 61665, 'ice_ufrag': '7sFv',
-      'ice_pwd': 'DOTZKZNVlO9RSGsEGM63JXT2', 'dtls_dir': 'active' },
-    { 'type': 'application', 'mid': 'd1',
-      'local_port': 61665, 'bundled': True }
+      'local_port': 61665, 'stun_port': 64532, 'relay_port': 50416,
+      'ice_ufrag': '7sFv', 'ice_pwd': 'DOTZKZNVlO9RSGsEGM63JXT2',
+      'dtls_dir': 'active' },
+    { 'type': 'application', 'mid': 'd1' }
   ]
   fp2 = '7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08'
   pc2 = PeerConnection(session_id = '7729291447651054566', trickle = True,
                        bundle_policy = 'max-bundle', mux_policy = 'require',
-                       local_ip = '192.0.2.2', stun_ip = None, relay_ip = None,
+                       local_ip = '192.168.2.3', stun_ip = '55.66.77.88',
+                       relay_ip = '66.77.88.99',
                        fingerprint = fp2, m_sections = ms2)
 
   print 'The SDP for |offer-B1| looks like:\n\n'
@@ -303,18 +318,14 @@ def example2():
   print_desc(a)
 
   ms1_video = [
-    { 'type': 'video', 'mid': 'v1', 'msid': '',
-      'local_port': 51556, 'bundled': True },
-    { 'type': 'video', 'mid': 'v2', 'msid': '',
-      'local_port': 51556, 'bundled': True }
+    { 'type': 'video', 'mid': 'v1' },
+    { 'type': 'video', 'mid': 'v2' }
   ]
   ms2_video = [
     { 'type': 'video', 'mid': 'v1',
-      'msid': '61317484-2ed4-49d7-9eb7-1414322a7aae',
-      'local_port': 61665, 'bundled': True },
+      'msid': '61317484-2ed4-49d7-9eb7-1414322a7aae' },
     { 'type': 'video', 'mid': 'v2',
-      'msid': '71317484-2ed4-49d7-9eb7-1414322a7aae',
-      'local_port': 61665, 'bundled': True }
+      'msid': '71317484-2ed4-49d7-9eb7-1414322a7aae' }
   ]
 
   pc1.m_sections.extend(ms1_video)
