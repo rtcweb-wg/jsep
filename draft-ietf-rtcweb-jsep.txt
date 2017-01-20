@@ -5026,13 +5026,13 @@ Internet-Draft                    JSEP                      January 2017
       to "m=" line, update the incoming SSRC mapping table to include an
       entry that maps the packet's SSRC to the "m=" line for that MID.
 
-      If the packet's SSRC is in the incoming SSRC mapping table, route
-      the packet to the associated "m=" line and stop.
+      If the packet's SSRC is in the incoming SSRC mapping table, check
+      that the packet's PT matches a PT included on the associated "m="
+      line.  If so, route the packet to that associated "m=" line and
+      stop; otherwise drop the packet.
 
       If the packet's payload type is in the payload type table, update
       the the incoming SSRC mapping table to include an entry that maps
-      the packet's SSRC to the "m=" line for that payload type.  In
-      addition, route the packet to the associated "m=" line and stop.
 
 
 
@@ -5041,6 +5041,9 @@ Uberti, et al.            Expires July 24, 2017                [Page 90]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+      the packet's SSRC to the "m=" line for that payload type.  In
+      addition, route the packet to the associated "m=" line and stop.
 
       Otherwise, drop the packet.
 
@@ -5087,9 +5090,6 @@ Appendix C.  Change log
    o  Update demux algorithm and move it to an appendix in preparation
       for merging it into BUNDLE.
 
-   o  Clarify why we can't handle an incoming offer to send simulcast.
-
-   o  Expand IceCandidate object text.
 
 
 
@@ -5097,6 +5097,10 @@ Uberti, et al.            Expires July 24, 2017                [Page 91]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Clarify why we can't handle an incoming offer to send simulcast.
+
+   o  Expand IceCandidate object text.
 
    o  Further document use of ICE candidate pool.
 
@@ -5142,10 +5146,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Add descriptions of RtpTransceiver methods.
 
-   o  Describe how to process RTCP feedback attributes.
-
-   o  Clarify transceiver directions and their interaction with 3264.
-
 
 
 
@@ -5153,6 +5153,10 @@ Uberti, et al.            Expires July 24, 2017                [Page 92]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Describe how to process RTCP feedback attributes.
+
+   o  Clarify transceiver directions and their interaction with 3264.
 
    o  Describe setCodecPreferences.
 
@@ -5198,10 +5202,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Specify how SDP session version in o= line.
 
-   o  Require that when doing an re-offer, the capabilities of the new
-      session are mostly required to be a subset of the previously
-      negotiated session.
-
 
 
 
@@ -5209,6 +5209,10 @@ Uberti, et al.            Expires July 24, 2017                [Page 93]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Require that when doing an re-offer, the capabilities of the new
+      session are mostly required to be a subset of the previously
+      negotiated session.
 
    o  Clarified ICE restart interaction with bundle-only.
 
@@ -5254,10 +5258,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Clarified how to handle various received attributes.
 
-   o  Revised how attributes should be generated for bundled m= lines.
-
-   o  Remove unused references.
-
 
 
 
@@ -5265,6 +5265,10 @@ Uberti, et al.            Expires July 24, 2017                [Page 94]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Revised how attributes should be generated for bundled m= lines.
+
+   o  Remove unused references.
 
    o  Remove text advocating use of unilateral PTs.
 
@@ -5310,10 +5314,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Added additional clarity on ICE default candidates.
 
-   Changes in draft-11:
-
-   o  Clarified handling of RTP CNAMEs.
-
 
 
 
@@ -5321,6 +5321,10 @@ Uberti, et al.            Expires July 24, 2017                [Page 95]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   Changes in draft-11:
+
+   o  Clarified handling of RTP CNAMEs.
 
    o  Updated what SDP lines should be processed or ignored.
 
@@ -5366,10 +5370,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Added max-bundle-and-rtcp-mux policy.
 
-   o  Added description of maxptime handling.
-
-   o  Updated ICE candidate pool default to 0.
-
 
 
 
@@ -5377,6 +5377,10 @@ Uberti, et al.            Expires July 24, 2017                [Page 96]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Added description of maxptime handling.
+
+   o  Updated ICE candidate pool default to 0.
 
    o  Resolved open issues around AppID/receiver-ID.
 
@@ -5422,10 +5426,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Added handling of BUNDLE and bundle-only.
 
-   o  Clarified handling of rollback.
-
-   o  Added text describing the ICE Candidate Pool and its behavior.
-
 
 
 
@@ -5433,6 +5433,10 @@ Uberti, et al.            Expires July 24, 2017                [Page 97]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Clarified handling of rollback.
+
+   o  Added text describing the ICE Candidate Pool and its behavior.
 
    o  Allowed OfferToReceiveX to create multiple recvonly m= sections.
 
@@ -5478,10 +5482,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Reworked how ICE restarts and media directions are controlled.
 
-   o  Added list of parameters that can be changed in a description.
-
-   o  Updated suggested API and examples to match latest thinking.
-
 
 
 
@@ -5489,6 +5489,10 @@ Uberti, et al.            Expires July 24, 2017                [Page 98]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Added list of parameters that can be changed in a description.
+
+   o  Updated suggested API and examples to match latest thinking.
 
    o  Suggested API and examples have been moved to an appendix.
 
@@ -5523,10 +5527,6 @@ Authors' Addresses
    USA
 
    Email: ekr@rtfm.com
-
-
-
-
 
 
 
