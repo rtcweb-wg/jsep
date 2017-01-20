@@ -380,12 +380,12 @@ Internet-Draft                    JSEP                      January 2017
 
    In addition, various RFCs put different conditions on the format of
    offers versus answers.  For example, an offer may propose an
-   arbitrary number of media streams (i.e. m= sections), but an answer
-   must contain the exact same number as the offer.
+   arbitrary number of m= sections (i.e., media descriptions as
+   described in [RFC4566], Section 5.14), but an answer must contain the
+   exact same number as the offer.
 
    Lastly, while the exact media parameters are only known only after an
    offer and an answer have been exchanged, it is possible for the
-   offerer to receive media after they have sent an offer and before
 
 
 
@@ -394,6 +394,7 @@ Uberti, et al.            Expires July 24, 2017                 [Page 7]
 Internet-Draft                    JSEP                      January 2017
 
 
+   offerer to receive media after they have sent an offer and before
    they have received an answer.  To properly process incoming media in
    this case, the offerer's media handler must be aware of the details
    of the offer before the answer arrives.
@@ -441,7 +442,6 @@ Internet-Draft                    JSEP                      January 2017
    can provide an offer via the createOffer() method whenever the
    Javascript application needs one for the signaling.  The answerer can
    send back zero or more provisional answers, and finally end the
-
 
 
 
@@ -1137,21 +1137,21 @@ Internet-Draft                    JSEP                      January 2017
    bundle, the multiplexing mechanism defined in
    [I-D.ietf-mmusic-sdp-bundle-negotiation].  Regardless of policy, the
    application will always try to negotiate bundle onto a single
-   transport, and will offer a single bundle group across all media
-   section; use of this single transport is contingent upon the answerer
-   accepting bundle.  However, by specifying a policy from the list
-   below, the application can control exactly how aggressively it will
-   try to bundle media streams together, which affects how it will
+   transport, and will offer a single bundle group across all m=
+   sections; use of this single transport is contingent upon the
+   answerer accepting bundle.  However, by specifying a policy from the
+   list below, the application can control exactly how aggressively it
+   will try to bundle media streams together, which affects how it will
    interoperate with a non-bundle-aware endpoint.  When negotiating with
    a non-bundle-aware endpoint, only the streams not marked as bundle-
    only streams will be established.
 
    The set of available policies is as follows:
 
-   balanced:  The first media section of each type (audio, video, or
+   balanced:  The first m= section of each type (audio, video, or
       application) will contain transport parameters, which will allow
       an answerer to unbundle that section.  The second and any
-      subsequent media section of each type will be marked bundle-only.
+      subsequent m= section of each type will be marked bundle-only.
       The result is that if there are N distinct media types, then
       candidates will be gathered for for N media streams.  This policy
       balances desire to multiplex with the need to ensure basic audio
@@ -1162,10 +1162,10 @@ Internet-Draft                    JSEP                      January 2017
 
 
 
-   max-compat:  All media sections will contain transport parameters;
-      none will be marked as bundle-only.  This policy will allow all
-      streams to be received by non-bundle-aware endpoints, but require
-      separate candidates to be gathered for each media stream.
+   max-compat:  All m= sections will contain transport parameters; none
+      will be marked as bundle-only.  This policy will allow all streams
+      to be received by non-bundle-aware endpoints, but require separate
+      candidates to be gathered for each media stream.
 
 
 
@@ -1178,7 +1178,7 @@ Uberti, et al.            Expires July 24, 2017                [Page 21]
 Internet-Draft                    JSEP                      January 2017
 
 
-   max-bundle:  Only the first media section will contain transport
+   max-bundle:  Only the first m= section will contain transport
       parameters; all streams other than the first will be marked as
       bundle-only.  This policy aims to minimize candidate gathering and
       maximize multiplexing, at the cost of less compatibility with
@@ -1225,7 +1225,7 @@ Internet-Draft                    JSEP                      January 2017
    PeerConnection, using the RtpSender argument to indicate which sender
    should have its track removed.  The sender's track is cleared, and
    the sender stops sending.  Future calls to createOffer will mark the
-   media description associated with the sender as recvonly (if
+   m= section associated with the sender as recvonly (if
 
 
 
@@ -3121,11 +3121,11 @@ Internet-Draft                    JSEP                      January 2017
       Section 5, and their values are stored.
 
    Once all the session-level lines have been parsed, processing
-   continues with the lines in media sections.
+   continues with the lines in m= sections.
 
 5.7.2.  Media Section Parsing
 
-   Like the session-level lines, the media session lines MUST occur in
+   Like the session-level lines, the media section lines MUST occur in
    the specific order and with the specific syntax defined in [RFC4566],
    Section 5.
 
@@ -3345,14 +3345,14 @@ Internet-Draft                    JSEP                      January 2017
    Section 5.4; otherwise, processing MUST stop and an error MUST be
    returned.
 
-   Next, media sections are processed.  For each media section, the
-   following steps MUST be performed; if any parameters are out of
-   bounds, or cannot be applied, processing MUST stop and an error MUST
-   be returned.
+   Next, m= sections are processed.  For each m= section, the following
+   steps MUST be performed; if any parameters are out of bounds, or
+   cannot be applied, processing MUST stop and an error MUST be
+   returned.
 
-   o  If this media section is new, begin gathering candidates for it,
-      as defined in [RFC5245], Section 4.1.1, unless it has been marked
-      as bundle-only.
+   o  If this m= section is new, begin gathering candidates for it, as
+      defined in [RFC5245], Section 4.1.1, unless it has been marked as
+      bundle-only.
 
 
 
@@ -3364,12 +3364,12 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Or, if the ICE ufrag and password values have changed, and it has
       not been marked as bundle-only, trigger the ICE Agent to start an
-      ICE restart, and begin gathering new candidates for the media
-      section as described in [RFC5245], Section 9.1.1.1.  If this
-      description is an answer, also start checks on that media section
-      as defined in [RFC5245], Section 9.3.1.1.
+      ICE restart, and begin gathering new candidates for the m= section
+      as described in [RFC5245], Section 9.1.1.1.  If this description
+      is an answer, also start checks on that media section as defined
+      in [RFC5245], Section 9.3.1.1.
 
-   o  If the media section proto value indicates use of RTP:
+   o  If the m= section proto value indicates use of RTP:
 
       *  If there is no RtpTransceiver associated with this m= section
          (which will only happen when applying an offer), find one and
@@ -3395,7 +3395,7 @@ Internet-Draft                    JSEP                      January 2017
          supported, this MUST result in an error.
 
       *  If the MID header extension is supported, prepare to demux RTP
-         streams intended for this media section based on the MID header
+         streams intended for this m= section based on the MID header
          extension, as described in
          [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 14.
 
@@ -3450,7 +3450,7 @@ Internet-Draft                    JSEP                      January 2017
    o  Any "AS" bandwidth value MUST be ignored, as the meaning of this
       construct at the session level is not well defined.
 
-   For each media section, the following steps MUST be performed; if any
+   For each m= section, the following steps MUST be performed; if any
    parameters are out of bounds, or cannot be applied, processing MUST
    stop and an error MUST be returned.
 
@@ -3486,7 +3486,7 @@ Internet-Draft                    JSEP                      January 2017
       of-candidates indication as described in [I-D.ietf-ice-trickle]
       Section 11.
 
-   o  If the media section proto value indicates use of RTP:
+   o  If the m= section proto value indicates use of RTP:
 
       *  If the m= section is being recycled (see Section 5.2.2),
          dissociate the currently associated RtpTransceiver by setting
@@ -3590,7 +3590,7 @@ Internet-Draft                    JSEP                      January 2017
          meaning of this construct at the media level is not well
          defined.
 
-      *  If the media section is of type audio:
+      *  If the m= section is of type audio:
 
          +  For each specified "CN" media format, enable DTX for all
             supported media formats with the same clockrate, as
@@ -3620,12 +3620,12 @@ Internet-Draft                    JSEP                      January 2017
    remote description, the following steps are performed when processing
    a description of type "pranswer" or "answer".
 
-   For each media section, the following steps MUST be performed:
+   For each m= section, the following steps MUST be performed:
 
-   o  If the media section has been rejected (i.e. port is set to zero
-      in the answer), stop any reception or transmission of media for
-      this section, and, unless a non-rejected media section is bundled
-      with this media section, discard any associated ICE components, as
+   o  If the m= section has been rejected (i.e. port is set to zero in
+      the answer), stop any reception or transmission of media for this
+      section, and, unless a non-rejected m= section is bundled with
+      this m= section, discard any associated ICE components, as
       described in Section 9.2.1.3 of [RFC5245].
 
    o  If the remote DTLS fingerprint has been changed or the dtls-id has
@@ -3646,23 +3646,23 @@ Internet-Draft                    JSEP                      January 2017
       connection, using the specified roles and fingerprints, on any
       underlying ICE components, once they are active.
 
-   o  If the media section proto value indicates use of RTP:
+   o  If the m= section proto value indicates use of RTP:
 
-      *  If the media section references any media formats, RTP header
+      *  If the m= section references any media formats, RTP header
          extensions, or RTCP feedback mechanisms that were not present
-         in the corresponding media section in the offer, this indicates
-         a negotiation problem and MUST result in an error.
+         in the corresponding m= section in the offer, this indicates a
+         negotiation problem and MUST result in an error.
 
-      *  If the media section has RTCP mux enabled, discard the RTCP ICE
+      *  If the m= section has RTCP mux enabled, discard the RTCP ICE
          component, if one exists, and begin or continue muxing RTCP
          over the RTP ICE component, as specified in [RFC5761],
          Section 5.1.3.  Otherwise, prepare to transmit RTCP over the
          RTCP ICE component; if no RTCP ICE component exists, because
          RTCP mux was previously enabled, this MUST result in an error.
 
-      *  If the media section has reduced-size RTCP enabled, configure
-         the RTCP transmission for this media section to use reduced-
-         size RTCP, as specified in [RFC5506].
+      *  If the m= section has reduced-size RTCP enabled, configure the
+         RTCP transmission for this m= section to use reduced-size RTCP,
+         as specified in [RFC5506].
 
       *  If the directional attribute in the answer is of type
          "sendrecv" or "sendonly", choose the media format to send as
@@ -3722,7 +3722,7 @@ Internet-Draft                    JSEP                      January 2017
          "inactive", stop transmitting all RTP media, but continue
          sending RTCP, as described in [RFC3264], Section 5.1.
 
-   o  If the media section proto value indicates use of SCTP:
+   o  If the m= section proto value indicates use of SCTP:
 
       *  If no SCTP association yet exists, prepare to initiate a SCTP
          association over the associated ICE component and DTLS
