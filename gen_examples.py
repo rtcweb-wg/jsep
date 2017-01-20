@@ -33,7 +33,6 @@ class PeerConnection:
  """m=audio {0[local_port]} UDP/TLS/RTP/SAVPF 96 0 8 97 98
     c=IN IP4 {0[local_ip]}
     a=mid:{0[mid]}
-    a=msid:{0[msid]}
     a=sendrecv
     a=rtpmap:96 opus/48000/2
     a=rtpmap:0 PCMU/8000
@@ -43,6 +42,7 @@ class PeerConnection:
     a=maxptime:120
     a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
     a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
+    a=msid:{0[ms]} {0[mst]}
     """
   # TODO: proper default candidate in c=, m=, rtcp lines
 
@@ -50,7 +50,6 @@ class PeerConnection:
  """m=video {0[local_port]} UDP/TLS/RTP/SAVPF 100 101
     c=IN IP4 {0[local_ip]}
     a=mid:{0[mid]}
-    a=msid:{0[msid]}
     a=sendrecv
     a=rtpmap:100 VP8/90000
     a=rtpmap:101 rtx/90000
@@ -59,14 +58,15 @@ class PeerConnection:
     a=rtcp-fb:100 ccm fir
     a=rtcp-fb:100 nack
     a=rtcp-fb:100 nack pli
+    a=msid:{0[ms]} {0[mst]}
     """
 
   DATA_SDP = \
  """m=application {0[local_port]} UDP/DTLS/SCTP webrtc-datachannel
     c=IN IP4 {0[local_ip]}
     a=mid:{0[mid]}
-    a=fmtp:webrtc-datachannel max-message-size=65536
-    a=sctp-port 5000
+    a=max-message-size:65536
+    a=sctp-port:5000
     """
 
   CANDIDATE_ATTR = 'candidate:{0} {1} {2} {3} {4} {5} typ {6}'
@@ -165,18 +165,25 @@ class PeerConnection:
     return self.create_sdp('answer')
 
 def print_desc(d):
-  # wrap lines as needed
   lines_pre = d['sdp'].split('\n')
   lines_post = []
   for line in lines_pre:
-    if line[:13] == 'a=fingerprint':
+    if line[:2] == 'm=' and len(lines_post) > 0:
+      # add blank line between m= sections
+      lines_post.append('')
+      lines_post.append(line)
+    elif line[:6] == 'a=msid':
+      # wrap long msid lines
+      lines_post.append(line[:43])
+      lines_post.append(' ' * 7 + line[44:83])
+    elif line[:13] == 'a=fingerprint':
+      # wrap long fingerprint lines
       lines_post.append(line[:21])
       lines_post.append(' ' * 14 + line[22:70])
       lines_post.append(' ' * 14 + line[70:117])
     else:
       lines_post.append(line)
   print '\n'.join(lines_post)
-  # TODO: Add line breaks between m= sections
 
   candidates = d['candidates']
   if len(candidates):
@@ -187,11 +194,13 @@ def print_desc(d):
 def example1():
   ms1 = [
     { 'type': 'audio', 'mid': 'a1',
-      'msid': '47017fee-b6c1-4162-929c-a25110252400',
+      'ms': '47017fee-b6c1-4162-929c-a25110252400',
+      'mst': 'f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9',
       'local_port': 56500, 'ice_ufrag': 'ETEn',
       'ice_pwd': 'OtSK0WpNtpUjkY4+86js7ZQl', 'dtls_dir': 'actpass' },
     { 'type': 'video', 'mid': 'v1',
-      'msid': '61317484-2ed4-49d7-9eb7-1414322a7aae',
+      'ms': '47017fee-b6c1-4162-929c-a25110252400',
+      'mst': 'f30bdb4a-5db8-49b5-bcdc-e0c9a23172e0',
       'local_port': 56502, 'ice_ufrag': 'BGKk',
       'ice_pwd': 'mqyWsAjvtKwTGnvhPztQ9mIf', 'dtls_dir': 'actpass' }
   ]
@@ -203,11 +212,13 @@ def example1():
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
-      'msid': '5a7b57b8-f043-4bd1-a45d-09d4dfa31226',
+      'ms': '61317484-2ed4-49d7-9eb7-1414322a7aae',
+      'mst': '5a7b57b8-f043-4bd1-a45d-09d4dfa31226',
       'local_port': 34300, 'ice_ufrag': '6sFv',
       'ice_pwd': 'cOTZKZNVlO9RSGsEGM63JXT2', 'dtls_dir': 'active' },
     { 'type': 'video', 'mid': 'v1',
-      'msid': '4ea4d4a1-2fda-4511-a9cc-1b32c2e59552',
+      'ms': '61317484-2ed4-49d7-9eb7-1414322a7aae',
+      'mst': '4ea4d4a1-2fda-4511-a9cc-1b32c2e59552',
       'local_port': 34300, 'bundled': True }
   ]
   fp2 = '6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08'
