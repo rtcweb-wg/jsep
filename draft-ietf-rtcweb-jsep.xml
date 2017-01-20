@@ -2557,7 +2557,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The first step in generating an initial answer is to
           generate session-level attributes. The process here is
-          identical to that indicated in the Initial Offers section
+          identical to that indicated in the initial offers section
           above, except that the "a=ice-options" line, with the
           "trickle" option as specified in
           <xref target="I-D.ietf-ice-trickle"></xref>, Section 4, is
@@ -2566,7 +2566,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>The next step is to generate session-level lip sync
           groups as defined in <xref target="RFC5888" />, Section
           7. For each group of type "LS" present in the offer,
-          determine which of the local RtpTransceivers identified by
+          determine which of the RtpTransceivers identified by
           that group's mid values reference a common local MediaStream
           (as specified in the addTrack and addTransceiver
           methods). If at least two such RtpTransceivers exist, a
@@ -2579,18 +2579,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t> Consider a simple case where both sides have single
           audio and a single video MediaStreamTrack that are both
-          associated with the same MediaStream. As explained in <xref
+          contained in the same MediaStream. As explained in <xref
           target="sec-create-offer"/>, an group of type "LS" will have
-          been added to the Offer that contains the mid value for the
+          been added to the offer that contains the mid value for the
           RtpTransceiver associated with each of the
-          MediaStreamTracks. In the case here, when the remote o=Offer is
+          MediaStreamTracks. In the case here, when the remote o=offer is
           applied, the two MediaStreamTracks will be created
           and they will both point at the same MediaStream because the
           offer will have had the same value in the "a=msid" line for
           both of them.  When the answer is created, both the audio
           and video RtpTransceivers will reference the common
           MediaStream. This will cause the answer to add both of
-          theses MediaStreamTrack to the "LS" group in the Answer due
+          theses MediaStreamTracks to the "LS" group in the answer due
           to the rules in the paragraph above.
           </t>
 
@@ -2598,12 +2598,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           synchronized with B and at the same time MediaStreamTrack C,
           D, E are also synchronized with each other but not with A
           and B are also possible. To make these cases work, the
-          sender need to ensure A and B are in one MediaStream while
-          C,D, and E are in a different MediaStream. This will cause
-          two groups of type "LS" to be created in the Offer and as
-          long as the association of MediaStreamTracks and
-          MediaStreams are not changed between applying the remote
-          Offer and creating the Answer, the groups of type "LS" will
+          sender needs to ensure A and B are in one MediaStream while
+          C, D, and E are in a different MediaStream. This will cause
+          two groups of type "LS" to be created in the offer and as
+          long as the local
+          MediaStreams have been added,
+          then the groups of type "LS" will
           be accepted. </t>
           
           <t>The next step is to generate m= sections for each m=
