@@ -2565,7 +2565,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The next step is to generate session-level lip sync
           groups as defined in <xref target="RFC5888" />, Section
-          7. For each group of type "LS" present in the offer,
+          7.
+          For each group of type "LS" present in the offer,
           determine which of the RtpTransceivers identified by
           that group's mid values reference a common local MediaStream
           (as specified in the addTrack and addTransceiver
@@ -2605,12 +2606,78 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           MediaStreams have been added,
           then the groups of type "LS" will
           be accepted. </t>
-          
+
+          <t>
+            A sketch of the offer would like:
+            <figure>
+              <artwork>
+                <![CDATA[
+a=group:LS A B
+a=group:LS C D E
+
+m=<the m-line for audio A>
+mid=A
+a=msid:one a1
+
+m=<the m-line for video B>
+mid=B
+a=msid:one b1
+
+m=<the m-line for audio C>
+mid=C
+a=msid:two c2
+
+m=<the m-line for video D>
+mid=D
+a=msid:two d2
+
+m=<the m-line for video E>
+mid=E
+a=msid:two e2
+                ]]>
+              </artwork>
+            </figure>
+          </t>
+
+              <t>
+            A sketch of the answer when A and B are in the first
+            MediaStream, C and E are in the second MediaStream, and D
+            is in a thrid MediaStream would look like:
+            <figure>
+              <artwork>
+                <![CDATA[
+a=group:LS A B
+a=group:LS C E
+
+m=<the m-line for audio A>
+mid=A
+a=msid:one a1
+
+m=<the m-line for video B>
+mid=B
+a=msid:one b1
+
+m=<the m-line for audio C>
+mid=C
+a=msid:two c2
+
+m=<the m-line for video D>
+mid=D
+a=msid:three d3
+
+m=<the m-line for video E>
+mid=E
+a=msid:two e2
+                ]]>
+              </artwork>
+            </figure>
+          </t>
+
           <t>The next step is to generate m= sections for each m=
           section that is present in the remote offer, as specified in
           <xref target="RFC3264"></xref>, Section 6. For the purposes
-          of this discussion, any session-level attributes in the
-          offer that are also valid as media-level attributes SHALL be
+          of this discussion, any session-level attributes in the offer
+          that are also valid as media-level attributes are
           considered to be present in each m= section.</t>
 
           <t>The next step is to go through each offered m= section.
