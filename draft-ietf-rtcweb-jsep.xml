@@ -5561,6 +5561,21 @@ a=rtcp-fb:100 nack pli
         <format type='TXT'
         target='http://www.ietf.org/internet-drafts/draft-ietf-rtcweb-ip-handling-01.txt' />
       </reference>
+      <reference anchor='I-D.ietf-avtext-lrr'>
+        <front>
+          <title>The Layer Refresh Request (LRR) RTCP Feedback Message</title>
+          <author initials='J' surname='Lennox' fullname='J. Lennox'> <organization /></author>
+          <author initials='D' surname='Hong' fullname='D. Hong'> <organization /></author>
+	  <author initials='J' surname='Uberti' fullname='J. Uberti'> <organization /></author>
+	  <author initials='S' surname='Homer' fullname='S. Homer'> <organization /></author>
+	  <author initials='M' surname='Flodman' fullname='M. Flodman'> <organization /></author>
+          <date month='July' day='08' year='2016' />
+        </front>
+        <seriesInfo name='Internet-Draft'
+        value='draft-ietf-avtext-lrr-03' />
+        <format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-ietf-avtext-lrr-03.txt' />
+      </reference>
       <reference  anchor='RFC4733' target='http://www.rfc-editor.org/info/rfc4733'>
         <front>
           <title>RTP Payload for DTMF Digits, Telephony Tones, and Telephony Signals</title>
@@ -5571,6 +5586,19 @@ a=rtcp-fb:100 nack pli
         <seriesInfo name='RFC' value='4733'/>
         <seriesInfo name='DOI' value='10.17487/RFC4733'/>
       </reference>
+      <reference  anchor='RFC5104' target='http://www.rfc-editor.org/info/rfc5104'>
+        <front>
+          <title>Codec Control Messages in the RTP Audio-Visual Profile with Feedback (AVPF)</title>
+          <author initials='S.' surname='Wenger' fullname='S. Wenger'><organization /></author>
+          <author initials='U.' surname='Chandra' fullname='U. Chandra'><organization /></author>
+	  <author initials='M.' surname='Westerlund' fullname='M. Westerlund'><organization /></author>
+	  <author initials='B.' surname='Burman' fullname='B. Burman'><organization /></author>
+          <date year='2008' month='February' />
+        </front>
+        <seriesInfo name='RFC' value='5104'/>
+        <seriesInfo name='DOI' value='10.17487/RFC5104'/>
+      </reference>
+	 
       <!-- INFORM 18 -->
       <reference  anchor='RFC3550' target='http://www.rfc-editor.org/info/rfc3550'>
 	<front>
@@ -5854,13 +5882,23 @@ a=rtcp-fb:100 nack pli
           when RTCP for a source is received before any RTP packets.)</t>
 
           <t>If the packet is of type BYE, for each SSRC indicated in the
-          packet that is found in the incoming SSRC table, deliver a copy of the
-          packet to the "m=" line associated with that SSRC.</t>
-
-          <t>If the packet is of type RTPFB or PSFB, as defined in
-          <xref target="RFC4585" />, and the media source SSRC for the packet
-          is found in the outgoing SSRC table, deliver the packet
-          to the "m=" line associated with that SSRC.</t>
+          packet that is found in the incoming SSRC table, deliver a copy
+          of the packet to the "m=" line associated with that SSRC.</t>
+		
+	  <t>If the packet is an FIR (PT=PSFB, FMT=4) as defined in
+          <xref target="RFC5104" />, or an LRR (PT=PSFB, FMT=TBD) as
+          defined in <xref target="I-D.ietf-avtext-lrr" />, for each
+          FCI entry where the SSRC is found in the outgoing SSRC table,
+          deliver a copy of the RTCP packet to the "m=" line associated
+          with that SSRC.</t>
+		
+          <t>If the packet is of type RTPFB or type PSFB defined in
+          <xref target="RFC4585" /> (but not an FIR or LRR) and the media
+          source SSRC for the packet is found in the outgoing SSRC table,
+          deliver the packet to the "m=" line associated with that SSRC.</t>
+		
+	  <t>If the packet is of type APP, deliver a copy of the packet to
+          each "m=" line.</t>
         </list>
       </t>
     </section>
