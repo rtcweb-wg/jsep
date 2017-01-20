@@ -1269,7 +1269,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 <p id="rfc.section.5.7.3.p.3">If any of the preceding checks failed, processing MUST stop and an error MUST be returned.</p>
 <h2 id="rfc.section.5.8"><a href="#rfc.section.5.8">5.8.</a> <a href="#sec.applying-a-local-desc" id="sec.applying-a-local-desc">Applying a Local Description</a></h2>
-<p id="rfc.section.5.8.p.1">The following steps are performed at the media engine level to apply a local description.</p>
+<p id="rfc.section.5.8.p.1">The following steps are performed at the media engine level to apply a local description.  If an error is returned, the session MUST be restored to the state it was in before performing these steps.</p>
 <p id="rfc.section.5.8.p.2">First, the parsed parameters are checked to ensure that they are identical to those generated in the last call to createOffer/createAnswer, and thus have not been altered, as discussed in <a href="#sec.modifying-sdp">Section 5.4</a>; otherwise, processing MUST stop and an error MUST be returned.</p>
 <p id="rfc.section.5.8.p.3">Next, m= sections are processed. For each m= section, the following steps MUST be performed; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
 
@@ -1280,8 +1280,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 <p id="rfc.section.5.8.p.4">Finally, if this description is of type "pranswer" or "answer", follow the processing defined in the <a href="#sec.applying-an-answer">Section 5.10</a> section below.</p>
 <h2 id="rfc.section.5.9"><a href="#rfc.section.5.9">5.9.</a> <a href="#sec.applying-a-remote-desc" id="sec.applying-a-remote-desc">Applying a Remote Description</a></h2>
-<p id="rfc.section.5.9.p.1">If the answer contains any "a=ice-options" attributes where "trickle" is listed as an attribute, update the PeerConnection canTrickle property to be true. Otherwise, set this property to false.</p>
-<p id="rfc.section.5.9.p.2">The following steps are performed at the media engine level to apply a remote description.</p>
+<p id="rfc.section.5.9.p.1">The following steps are performed to apply a remote description.  If an error is returned, the session MUST be restored to the state it was in before performing these steps.</p>
+<p id="rfc.section.5.9.p.2">If the answer contains any "a=ice-options" attributes where "trickle" is listed as an attribute, update the PeerConnection canTrickle property to be true. Otherwise, set this property to false.</p>
 <p id="rfc.section.5.9.p.3">The following steps MUST be performed for attributes at the session level; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
 
 <ul>
