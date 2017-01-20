@@ -677,10 +677,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         receiver can use the "a=imageattr" SDP attribute
         <xref target="RFC6236" /> to indicate what video frame sizes it
         is capable of receiving. A receiver may have hard limits on
-        what its video decoder can process, or it may wish to constrain
-        what it receives due to application preferences, e.g. a
-        specific size for the window in which the video will be
-        displayed.</t>
+        what its video decoder can process, or it may have some maximum set
+        by policy.</t>
 
         <t>Note that certain codecs support transmission of samples with aspect
         ratios other than 1.0 (i.e., non-square pixels).
@@ -693,35 +691,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <section title="Creating an imageattr Attribute">
 
-          <t>In order to determine the limits on what video resolution
-          a receiver wants to receive, it will intersect its decoder
-          hard limits with any mandatory constraints that have been
-          applied to the associated MediaStreamTrack. If the decoder
-          limits are unknown, e.g. when using a software decoder, the
-          mandatory constraints are used directly. For the answerer,
-          these mandatory constraints can be applied to the remote
-          MediaStreamTracks that are created by a setRemoteDescription
-          call, and will affect the output of the ensuing createAnswer
-          call. Any constraints set after setLocalDescription is used
-          to set the answer will result in a new offer-answer exchange.
-          For the offerer, because it does not know about any remote
-          MediaStreamTracks until it receives the answer, the offer can
-          only reflect decoder hard limits. If the offerer wishes to
-          set mandatory constraints on video resolution, it must do so
-          after receiving the answer, and the result will be a new
-          offer-answer to communicate them.</t>
-
-          <t>If there are no known decoder limits or mandatory
-          constraints, the "a=imageattr" attribute SHOULD be
-          omitted.</t>
+          <t>The receiver will first intersect any known local limits (e.g.,
+          hardware decoder capababilities, local policy) to determine the
+          absolute minimum and maximum sizes it can receive.
+          If there are no known local limits, the "a=imageattr" attribute
+          SHOULD be omitted.</t>
 
           <t>Otherwise, an "a=imageattr" attribute is created with
           "recv" direction, and the resulting resolution space formed
-          by intersecting the decoder limits and constraints is used to
+          from the aforementioned intersection is used to
           specify its minimum and maximum x= and y= values. If the
-          intersection is the null set, i.e., there are no resolutions
-          that are permitted by both the decoder and the mandatory
-          constraints, this MUST be represented by x=0 and y=0
+          intersection is the null set, i.e., the degenerate case of no
+          permitted resolutions, this MUST be represented by x=0 and y=0
           values.</t>
 
           <t>The rules here express a single set of preferences, and
@@ -732,19 +713,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           video codecs supported have the same capabilities, use of a
           single attribute, with the wildcard payload type (*), is
           RECOMMENDED. However, when the supported video codecs have
-          differing capabilities, specific "a=imageattr" attributes
+          different limitations, specific "a=imageattr" attributes
           MUST be inserted for each payload type.</t>
 
           <t>As an example, consider a system with a multiformat video decoder,
           which is capable of decoding any resolution from 48x48 to 720p,
-          and where the application has
-          constrained the received track to at most 360p. In this case,
-          the implementation would generate this attribute:</t>
+          In this case, the implementation would generate this attribute:</t>
 
-          <t>a=imageattr:* recv [x=[48:640],y=[48:360],q=1.0]</t>
+          <t>a=imageattr:* recv [x=[48:1280],y=[48:720],q=1.0]</t>
 
           <t>This declaration indicates that the receiver is capable of
-          decoding any image resolution from 48x48 up to 640x360
+          decoding any image resolution from 48x48 up to 1280x720
           pixels.</t>
         </section>
         <section title="Interpreting an imageattr Attribute">
