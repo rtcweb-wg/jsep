@@ -40,8 +40,8 @@ class PeerConnection:
     a=rtpmap:97 telephone-event/8000
     a=rtpmap:98 telephone-event/48000
     a=maxptime:120
-    a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
-    a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
+    a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
+    a=extmap:2 urn:ietf:params:rtp-hdrext:ssrc-audio-level
     a=msid:{0[ms]} {0[mst]}
     """
   # TODO: proper default candidate in c=, m=, rtcp lines
@@ -54,7 +54,7 @@ class PeerConnection:
     a=rtpmap:100 VP8/90000
     a=rtpmap:101 rtx/90000
     a=fmtp:101 apt=100
-    a=extmap:3 urn:ietf:params:rtp-hdrext:sdes:mid
+    a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
     a=rtcp-fb:100 ccm fir
     a=rtcp-fb:100 nack
     a=rtcp-fb:100 nack pli
