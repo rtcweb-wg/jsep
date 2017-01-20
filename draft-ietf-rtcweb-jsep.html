@@ -2122,6 +2122,12 @@ a=rtcp-fb:100 nack pli
   <tbody>
     <tr>
       <td class="reference">
+        <b id="I-D.ietf-avtext-lrr">[I-D.ietf-avtext-lrr]</b>
+      </td>
+      <td class="top"><a>Lennox, J.</a>, <a>Hong, D.</a>, <a>Uberti, J.</a>, <a>Homer, S.</a> and <a>M. Flodman</a>, "<a href="http://tools.ietf.org/html/draft-ietf-avtext-lrr-03">The Layer Refresh Request (LRR) RTCP Feedback Message</a>", Internet-Draft draft-ietf-avtext-lrr-03, July 2016.</td>
+    </tr>
+    <tr>
+      <td class="reference">
         <b id="I-D.ietf-rtcweb-ip-handling">[I-D.ietf-rtcweb-ip-handling]</b>
       </td>
       <td class="top"><a>Uberti, J.</a> and <a>G. Shieh</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-ip-handling-01">WebRTC IP Address Handling Recommendations</a>", Internet-Draft draft-ietf-rtcweb-ip-handling-01, March 2016.</td>
@@ -2173,6 +2179,12 @@ a=rtcp-fb:100 nack pli
         <b id="RFC4733">[RFC4733]</b>
       </td>
       <td class="top"><a>Schulzrinne, H.</a> and <a>T. Taylor</a>, "<a href="http://tools.ietf.org/html/rfc4733">RTP Payload for DTMF Digits, Telephony Tones, and Telephony Signals</a>", RFC 4733, DOI 10.17487/RFC4733, December 2006.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC5104">[RFC5104]</b>
+      </td>
+      <td class="top"><a>Wenger, S.</a>, <a>Chandra, U.</a>, <a>Westerlund, M.</a> and <a>B. Burman</a>, "<a href="http://tools.ietf.org/html/rfc5104">Codec Control Messages in the RTP Audio-Visual Profile with Feedback (AVPF)</a>", RFC 5104, DOI 10.17487/RFC5104, February 2008.</td>
     </tr>
     <tr>
       <td class="reference">
@@ -2394,7 +2406,9 @@ a=rtcp-fb:100 nack pli
   <li>If the packet is of type RR, for each report block in the packet whose SSRC is found in the outgoing SSRC table, deliver a copy of the RTCP packet to the "m=" line associated with that SSRC.</li>
   <li>If the packet is of type SDES, and the sender SSRC for the packet is found in the incoming SSRC table, deliver the packet to the "m=" line associated with that SSRC. In addition, for each chunk in the packet that contains a MID that is in the table mapping MID to "m=" line, update the incoming SSRC mapping table to include an entry that maps the SSRC for that chunk to the "m=" line associated with that MID. (This case can occur when RTCP for a source is received before any RTP packets.)</li>
   <li>If the packet is of type BYE, for each SSRC indicated in the packet that is found in the incoming SSRC table, deliver a copy of the packet to the "m=" line associated with that SSRC.</li>
-  <li>If the packet is of type RTPFB or PSFB, as defined in <a href="#RFC4585">[RFC4585]</a>, and the media source SSRC for the packet is found in the outgoing SSRC table, deliver the packet to the "m=" line associated with that SSRC.</li>
+  <li>If the packet is an FIR (PT=PSFB, FMT=4) as defined in <a href="#RFC5104">[RFC5104]</a>, or an LRR (PT=PSFB, FMT=TBD) as defined in <a href="#I-D.ietf-avtext-lrr">[I-D.ietf-avtext-lrr]</a>, for each FCI entry where the SSRC is found in the outgoing SSRC table, deliver a copy of the RTCP packet to the "m=" line associated with that SSRC.</li>
+  <li>If the packet is of type RTPFB or type PSFB defined in <a href="#RFC4585">[RFC4585]</a> (but not an FIR or LRR) and the media source SSRC for the packet is found in the outgoing SSRC table, deliver the packet to the "m=" line associated with that SSRC.</li>
+  <li>If the packet is of type APP, deliver a copy of the packet to each "m=" line.</li>
 </ul>
 
 <p> </p>

@@ -170,7 +170,7 @@ Uberti, et al.            Expires July 24, 2017                 [Page 3]
 Internet-Draft                    JSEP                      January 2017
 
 
-   Appendix C.  Change log . . . . . . . . . . . . . . . . . . . . .  91
+   Appendix C.  Change log . . . . . . . . . . . . . . . . . . . . .  92
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  99
 
 1.  Introduction
@@ -4738,6 +4738,12 @@ Internet-Draft                    JSEP                      January 2017
 
 11.2.  Informative References
 
+   [I-D.ietf-avtext-lrr]
+              Lennox, J., Hong, D., Uberti, J., Homer, S., and M.
+              Flodman, "The Layer Refresh Request (LRR) RTCP Feedback
+              Message", draft-ietf-avtext-lrr-03 (work in progress),
+              July 2016.
+
    [I-D.ietf-rtcweb-ip-handling]
               Uberti, J. and G. Shieh, "WebRTC IP Address Handling
               Recommendations", draft-ietf-rtcweb-ip-handling-01 (work
@@ -4748,12 +4754,6 @@ Internet-Draft                    JSEP                      January 2017
               draft-nandakumar-rtcweb-sdp-02 (work in progress), July
               2013.
 
-   [RFC3389]  Zopf, R., "Real-time Transport Protocol (RTP) Payload for
-              Comfort Noise (CN)", RFC 3389, September 2002.
-
-
-
-
 
 
 
@@ -4761,6 +4761,9 @@ Uberti, et al.            Expires July 24, 2017                [Page 85]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   [RFC3389]  Zopf, R., "Real-time Transport Protocol (RTP) Payload for
+              Comfort Noise (CN)", RFC 3389, September 2002.
 
    [RFC3550]  Schulzrinne, H., Casner, S., Frederick, R., and V.
               Jacobson, "RTP: A Transport Protocol for Real-Time
@@ -4788,6 +4791,11 @@ Internet-Draft                    JSEP                      January 2017
               DOI 10.17487/RFC4733, December 2006,
               <http://www.rfc-editor.org/info/rfc4733>.
 
+   [RFC5104]  Wenger, S., Chandra, U., Westerlund, M., and B. Burman,
+              "Codec Control Messages in the RTP Audio-Visual Profile
+              with Feedback (AVPF)", RFC 5104, DOI 10.17487/RFC5104,
+              February 2008, <http://www.rfc-editor.org/info/rfc5104>.
+
    [RFC5506]  Johansson, I. and M. Westerlund, "Support for Reduced-Size
               Real-Time Transport Control Protocol (RTCP): Opportunities
               and Consequences", RFC 5506, April 2009.
@@ -4801,6 +4809,15 @@ Internet-Draft                    JSEP                      January 2017
               (SRTP) Security Context Using Datagram Transport Layer
               Security (DTLS)", RFC 5763, May 2010.
 
+
+
+
+
+Uberti, et al.            Expires July 24, 2017                [Page 86]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    [RFC5764]  McGrew, D. and E. Rescorla, "Datagram Transport Layer
               Security (DTLS) Extension to Establish Keys for the Secure
               Real-time Transport Protocol (SRTP)", RFC 5764, May 2010.
@@ -4810,13 +4827,6 @@ Internet-Draft                    JSEP                      January 2017
               Mixer Audio Level Indication", RFC 6464,
               DOI 10.17487/RFC6464, December 2011,
               <http://www.rfc-editor.org/info/rfc6464>.
-
-
-
-Uberti, et al.            Expires July 24, 2017                [Page 86]
-
-Internet-Draft                    JSEP                      January 2017
-
 
    [RFC7656]  Lennox, J., Gross, K., Nandakumar, S., Salgueiro, G., and
               B. Burman, Ed., "A Taxonomy of Semantics and Mechanisms
@@ -4835,16 +4845,6 @@ Appendix A.  Appendix A
 
    For the syntax validation performed in Section 5.7, the following
    list of ABNF definitions is used:
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -5076,10 +5076,27 @@ Internet-Draft                    JSEP                      January 2017
       packet that is found in the incoming SSRC table, deliver a copy of
       the packet to the "m=" line associated with that SSRC.
 
-      If the packet is of type RTPFB or PSFB, as defined in [RFC4585],
-      and the media source SSRC for the packet is found in the outgoing
-      SSRC table, deliver the packet to the "m=" line associated with
-      that SSRC.
+      If the packet is an FIR (PT=PSFB, FMT=4) as defined in [RFC5104],
+      or an LRR (PT=PSFB, FMT=TBD) as defined in [I-D.ietf-avtext-lrr],
+      for each FCI entry where the SSRC is found in the outgoing SSRC
+      table, deliver a copy of the RTCP packet to the "m=" line
+      associated with that SSRC.
+
+      If the packet is of type RTPFB or type PSFB defined in [RFC4585]
+      (but not an FIR or LRR) and the media source SSRC for the packet
+      is found in the outgoing SSRC table, deliver the packet to the
+      "m=" line associated with that SSRC.
+
+      If the packet is of type APP, deliver a copy of the packet to each
+      "m=" line.
+
+
+
+
+Uberti, et al.            Expires July 24, 2017                [Page 91]
+
+Internet-Draft                    JSEP                      January 2017
+
 
 Appendix C.  Change log
 
@@ -5089,14 +5106,6 @@ Appendix C.  Change log
 
    o  Update demux algorithm and move it to an appendix in preparation
       for merging it into BUNDLE.
-
-
-
-
-Uberti, et al.            Expires July 24, 2017                [Page 91]
-
-Internet-Draft                    JSEP                      January 2017
-
 
    o  Clarify why we can't handle an incoming offer to send simulcast.
 
@@ -5138,6 +5147,13 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Update references.
 
+
+
+Uberti, et al.            Expires July 24, 2017                [Page 92]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    Changes in draft-17:
 
    o  Split createOffer and createAnswer sections to clearly indicate
@@ -5145,14 +5161,6 @@ Internet-Draft                    JSEP                      January 2017
       bundled into another m= section.
 
    o  Add descriptions of RtpTransceiver methods.
-
-
-
-
-Uberti, et al.            Expires July 24, 2017                [Page 92]
-
-Internet-Draft                    JSEP                      January 2017
-
 
    o  Describe how to process RTCP feedback attributes.
 
@@ -5193,14 +5201,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Add sections on simulcast, addTransceiver, and createDataChannel.
 
-   o  Clarify text to ensure that the session ID is a positive 63 bit
-      integer.
-
-   o  Clarify SDP processing for direction indication.
-
-   o  Describe SDP processing for rtcp-mux-only.
-
-   o  Specify how SDP session version in o= line.
 
 
 
@@ -5209,6 +5209,15 @@ Uberti, et al.            Expires July 24, 2017                [Page 93]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Clarify text to ensure that the session ID is a positive 63 bit
+      integer.
+
+   o  Clarify SDP processing for direction indication.
+
+   o  Describe SDP processing for rtcp-mux-only.
+
+   o  Specify how SDP session version in o= line.
 
    o  Require that when doing an re-offer, the capabilities of the new
       session are mostly required to be a subset of the previously
@@ -5250,6 +5259,13 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Removed obsolete OfferToReceiveX options.
 
+
+
+Uberti, et al.            Expires July 24, 2017                [Page 94]
+
+Internet-Draft                    JSEP                      January 2017
+
+
    o  Explained how addIceCandidate can be used for end-of-candidates.
 
    Changes in draft-13:
@@ -5257,14 +5273,6 @@ Internet-Draft                    JSEP                      January 2017
    o  Clarified which SDP lines can be ignored.
 
    o  Clarified how to handle various received attributes.
-
-
-
-
-Uberti, et al.            Expires July 24, 2017                [Page 94]
-
-Internet-Draft                    JSEP                      January 2017
-
 
    o  Revised how attributes should be generated for bundled m= lines.
 
@@ -5306,14 +5314,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Updated what SDP can be modified by the application.
 
-   o  Updated to latest datachannel SDP.
-
-   o  Allowed multiple fingerprint lines.
-
-   o  Switched back to IPv4 for dummy candidates.
-
-   o  Added additional clarity on ICE default candidates.
-
 
 
 
@@ -5321,6 +5321,14 @@ Uberti, et al.            Expires July 24, 2017                [Page 95]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Updated to latest datachannel SDP.
+
+   o  Allowed multiple fingerprint lines.
+
+   o  Switched back to IPv4 for dummy candidates.
+
+   o  Added additional clarity on ICE default candidates.
 
    Changes in draft-11:
 
@@ -5362,14 +5370,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Added text describing a=rtcp attribute.
 
-   o  Reworked handling of OfferToReceiveAudio and OfferToReceiveVideo
-      per discussion at IETF 90.
-
-   o  Reworked trickle ICE handling and its impact on m= and c= lines
-      per discussion at interim.
-
-   o  Added max-bundle-and-rtcp-mux policy.
-
 
 
 
@@ -5377,6 +5377,14 @@ Uberti, et al.            Expires July 24, 2017                [Page 96]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Reworked handling of OfferToReceiveAudio and OfferToReceiveVideo
+      per discussion at IETF 90.
+
+   o  Reworked trickle ICE handling and its impact on m= and c= lines
+      per discussion at interim.
+
+   o  Added max-bundle-and-rtcp-mux policy.
 
    o  Added description of maxptime handling.
 
@@ -5418,14 +5426,6 @@ Internet-Draft                    JSEP                      January 2017
 
    o  Cleaned up references.
 
-   o  Editorial cleanup
-
-   Changes in draft-06:
-
-   o  Reworked handling of m= line recycling.
-
-   o  Added handling of BUNDLE and bundle-only.
-
 
 
 
@@ -5433,6 +5433,14 @@ Uberti, et al.            Expires July 24, 2017                [Page 97]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Editorial cleanup
+
+   Changes in draft-06:
+
+   o  Reworked handling of m= line recycling.
+
+   o  Added handling of BUNDLE and bundle-only.
 
    o  Clarified handling of rollback.
 
@@ -5474,14 +5482,6 @@ Internet-Draft                    JSEP                      January 2017
 
    Changes in draft-01:
 
-   o  Added diagrams for architecture and state machine.
-
-   o  Added sections on forking and rehydration.
-
-   o  Clarified meaning of "pranswer" and "answer".
-
-   o  Reworked how ICE restarts and media directions are controlled.
-
 
 
 
@@ -5489,6 +5489,14 @@ Uberti, et al.            Expires July 24, 2017                [Page 98]
 
 Internet-Draft                    JSEP                      January 2017
 
+
+   o  Added diagrams for architecture and state machine.
+
+   o  Added sections on forking and rehydration.
+
+   o  Clarified meaning of "pranswer" and "answer".
+
+   o  Reworked how ICE restarts and media directions are controlled.
 
    o  Added list of parameters that can be changed in a description.
 
@@ -5527,14 +5535,6 @@ Authors' Addresses
    USA
 
    Email: ekr@rtfm.com
-
-
-
-
-
-
-
-
 
 
 
