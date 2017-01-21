@@ -23,9 +23,9 @@ class PeerConnection:
     a=rtpmap:97 telephone-event/8000
     a=rtpmap:98 telephone-event/48000
     a=maxptime:120
-    a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
-    a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
-    a=msid:{0[msid]}
+    a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
+    a=extmap:2 urn:ietf:params:rtp-hdrext:ssrc-audio-level
+    a=msid:{0[ms]} {0[mst]}
     """
 
   VIDEO_SDP = \
@@ -36,19 +36,19 @@ class PeerConnection:
     a=rtpmap:100 VP8/90000
     a=rtpmap:101 rtx/90000
     a=fmtp:101 apt=100
-    a=extmap:3 urn:ietf:params:rtp-hdrext:sdes:mid
+    a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
     a=rtcp-fb:100 ccm fir
     a=rtcp-fb:100 nack
     a=rtcp-fb:100 nack pli
-    a=msid:{0[msid]}
+    a=msid:{0[ms]} {0[mst]}
     """
 
   DATA_SDP = \
  """m=application {0[default_port]} UDP/DTLS/SCTP webrtc-datachannel
     c=IN IP4 {0[default_ip]}
     a=mid:{0[mid]}
-    a=fmtp:webrtc-datachannel max-message-size=65536
-    a=sctp-port 5000
+    a=sctp-port:5000
+    a=max-message-size:65536
     """
 
   MEDIA_TABLE = {
@@ -226,6 +226,10 @@ def print_desc(d):
       # add blank line between m= sections
       lines_post.append('')
       lines_post.append(line)
+    elif line[:6] == 'a=msid':
+      # wrap long msid lines
+      lines_post.append(line[:43])
+      lines_post.append(' ' * 7 + line[44:83])
     elif line[:13] == 'a=fingerprint':
       # wrap long fingerprint lines
       lines_post.append(line[:21])
@@ -244,11 +248,13 @@ def print_desc(d):
 def example1():
   ms1 = [
     { 'type': 'audio', 'mid': 'a1',
-      'msid': '47017fee-b6c1-4162-929c-a25110252400',
+      'ms': '47017fee-b6c1-4162-929c-a25110252400',
+      'mst': 'f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9',
       'local_port': 56500, 'ice_ufrag': 'ETEn',
       'ice_pwd': 'OtSK0WpNtpUjkY4+86js7ZQl', 'dtls_dir': 'passive' },
     { 'type': 'video', 'mid': 'v1',
-      'msid': '61317484-2ed4-49d7-9eb7-1414322a7aae',
+      'ms': '47017fee-b6c1-4162-929c-a25110252400',
+      'mst': 'f30bdb4a-5db8-49b5-bcdc-e0c9a23172e0',
       'local_port': 56502, 'ice_ufrag': 'BGKk',
       'ice_pwd': 'mqyWsAjvtKwTGnvhPztQ9mIf', 'dtls_dir': 'passive' }
   ]
@@ -260,11 +266,14 @@ def example1():
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
-      'msid': '5a7b57b8-f043-4bd1-a45d-09d4dfa31226',
+      'ms': '61317484-2ed4-49d7-9eb7-1414322a7aae',
+      'mst': '5a7b57b8-f043-4bd1-a45d-09d4dfa31226',
       'local_port': 34300, 'ice_ufrag': '6sFv',
       'ice_pwd': 'cOTZKZNVlO9RSGsEGM63JXT2', 'dtls_dir': 'active' },
     { 'type': 'video', 'mid': 'v1',
-      'msid': '4ea4d4a1-2fda-4511-a9cc-1b32c2e59552' }
+      'ms': '61317484-2ed4-49d7-9eb7-1414322a7aae',
+      'mst': '4ea4d4a1-2fda-4511-a9cc-1b32c2e59552',
+      'local_port': 34300, 'bundled': True }
   ]
   fp2 = '6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08'
   pc2 = PeerConnection(session_id = '6729291447651054566', trickle = False,
@@ -282,7 +291,7 @@ def example1():
 def example2():
   ms1 = [
     { 'type': 'audio', 'mid': 'a1',
-      'msid': '57017fee-b6c1-4162-929c-a25110252400',
+      'ms': '57017fee-b6c1-4162-929c-a25110252400',
       'local_port': 51556, 'stun_port': 52546, 'relay_port': 61405,
       'ice_ufrag': 'ATEn', 'ice_pwd': 'AtSK0WpNtpUjkY4+86js7ZQl',
       'dtls_dir': 'passive' },
@@ -297,7 +306,7 @@ def example2():
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
-      'msid': '6a7b57b8-f043-4bd1-a45d-09d4dfa31226',
+      'ms': '6a7b57b8-f043-4bd1-a45d-09d4dfa31226',
       'local_port': 61665, 'stun_port': 64532, 'relay_port': 50416,
       'ice_ufrag': '7sFv', 'ice_pwd': 'DOTZKZNVlO9RSGsEGM63JXT2',
       'dtls_dir': 'active' },
@@ -323,9 +332,9 @@ def example2():
   ]
   ms2_video = [
     { 'type': 'video', 'mid': 'v1',
-      'msid': '61317484-2ed4-49d7-9eb7-1414322a7aae' },
+      'mst': '61317484-2ed4-49d7-9eb7-1414322a7aae' },
     { 'type': 'video', 'mid': 'v2',
-      'msid': '71317484-2ed4-49d7-9eb7-1414322a7aae' }
+      'mst': '71317484-2ed4-49d7-9eb7-1414322a7aae' }
   ]
 
   pc1.m_sections.extend(ms1_video)

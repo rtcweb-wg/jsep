@@ -275,8 +275,9 @@ ipr="trust200902">
 
         <t>In addition, various RFCs put different conditions on the
         format of offers versus answers. For example, an offer may
-        propose an arbitrary number of media streams (i.e. m=
-        sections), but an answer must contain the exact same number as
+        propose an arbitrary number of m= sections (i.e., media
+        descriptions as described in <xref target="RFC4566"/>, Section
+        5.14), but an answer must contain the exact same number as
         the offer.</t>
 
         <t>Lastly, while the exact media parameters are only known only
@@ -1008,7 +1009,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation">
           </xref>. Regardless of policy, the application will always
           try to negotiate bundle onto a single transport, and will
-          offer a single bundle group across all media section; use of
+          offer a single bundle group across all m= sections; use of
           this single transport is contingent upon the answerer
           accepting bundle. However, by specifying a policy from the
           list below, the application can control exactly how
@@ -1020,10 +1021,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>The set of available policies is as follows:
           <list style="hanging">
-            <t hangText="balanced:">The first media section of each
+            <t hangText="balanced:">The first m= section of each
             type (audio, video, or application) will contain transport
             parameters, which will allow an answerer to unbundle that
-            section. The second and any subsequent media section of
+            section. The second and any subsequent m= section of
             each type will be marked bundle-only. The result is that if
             there are N distinct media types, then candidates will be
             gathered for for N media streams. This policy balances
@@ -1034,14 +1035,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             each type.</t>
 
             <t></t>
-            <t hangText="max-compat:">All media sections will contain
+            <t hangText="max-compat:">All m= sections will contain
             transport parameters; none will be marked as bundle-only.
             This policy will allow all streams to be received by
             non-bundle-aware endpoints, but require separate candidates
             to be gathered for each media stream.</t>
 
             <t></t>
-            <t hangText="max-bundle:">Only the first media section will
+            <t hangText="max-bundle:">Only the first m= section will
             contain transport parameters; all streams other than the
             first will be marked as bundle-only. This policy aims to
             minimize candidate gathering and maximize multiplexing, at
@@ -1097,7 +1098,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           PeerConnection, using the RtpSender argument to indicate
           which sender should have its track removed. The sender's track is cleared,
           and the sender stops sending.  Future calls to createOffer
-          will mark the media description associated with the sender
+          will mark the m= section associated with the sender
           as recvonly (if transceiver.currentDirection is sendrecv) or as
           inactive (if transceiver.currentDirection is sendonly).</t>
         </section>
@@ -3113,12 +3114,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </list></t>
 
           <t>Once all the session-level lines have been parsed,
-          processing continues with the lines in media sections.</t>
+          processing continues with the lines in m= sections.</t>
         </section>
         <section title="Media Section Parsing"
         anchor="sec.media-level-parse">
 
-          <t>Like the session-level lines, the media session lines MUST
+          <t>Like the session-level lines, the media section lines MUST
           occur in the specific order and with the specific syntax
           defined in
           <xref target="RFC4566" />, Section 5.</t>
@@ -3368,13 +3369,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         discussed in <xref target="sec.modifying-sdp" />; otherwise,
         processing MUST stop and an error MUST be returned.</t>
 
-        <t>Next, media sections are processed. For each media section,
+        <t>Next, m= sections are processed. For each m= section,
         the following steps MUST be performed; if any parameters are
         out of bounds, or cannot be applied, processing MUST stop and
         an error MUST be returned.
         <list style="symbols">
 
-          <t>If this media section is new, begin gathering candidates
+          <t>If this m= section is new, begin gathering candidates
           for it, as defined in
           <xref target="RFC5245" />, Section 4.1.1, unless it has been
           marked as bundle-only.</t>
@@ -3382,13 +3383,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>Or, if the ICE ufrag and password values have changed, and
           it has not been marked as bundle-only, trigger the ICE Agent
           to start an ICE restart, and begin gathering new candidates
-          for the media section as described in
+          for the m= section as described in
           <xref target="RFC5245" />, Section 9.1.1.1. If this
           description is an answer, also start checks on that media
           section as defined in
           <xref target="RFC5245" />, Section 9.3.1.1.</t>
 
-          <t>If the media section proto value indicates use of RTP:
+          <t>If the m= section proto value indicates use of RTP:
           <list style="symbols">
 
             <t>If there is no RtpTransceiver associated with this m=
@@ -3420,7 +3421,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             error.</t>
 
             <t>If the MID header extension is supported, prepare to
-            demux RTP streams intended for this media section based on the
+            demux RTP streams intended for this m= section based on the
             MID header extension, as described in
             <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />, Section 14.</t>
 
@@ -3482,7 +3483,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           defined.</t>
         </list></t>
 
-        <t>For each media section, the following steps MUST be
+        <t>For each m= section, the following steps MUST be
         performed; if any parameters are out of bounds, or cannot be
         applied, processing MUST stop and an error MUST be returned.
         <list style="symbols">
@@ -3513,7 +3514,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           the end-of-candidates indication as described in
           <xref target="I-D.ietf-ice-trickle" /> Section 11.</t>
 
-          <t>If the media section proto value indicates use of RTP:
+          <t>If the m= section proto value indicates use of RTP:
           <list style="symbols">
 
             <t>If the m= section is being recycled (see
@@ -3611,7 +3612,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the meaning of this construct at the media level is not
             well defined.</t>
 
-            <t>If the media section is of type audio:
+            <t>If the m= section is of type audio:
             <list style="symbols">
 
               <t>For each specified "CN" media format, enable DTX for
@@ -3649,14 +3650,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         when processing a description of type "pranswer" or
         "answer".</t>
 
-        <t>For each media section, the following steps MUST be
+        <t>For each m= section, the following steps MUST be
         performed:
         <list style="symbols">
 
-          <t>If the media section has been rejected (i.e. port is set
+          <t>If the m= section has been rejected (i.e. port is set
           to zero in the answer), stop any reception or transmission of
-          media for this section, and, unless a non-rejected media section is
-          bundled with this media section, discard any associated ICE
+          media for this section, and, unless a non-rejected m= section is
+          bundled with this m= section, discard any associated ICE
           components, as described in Section 9.2.1.3 of
           <xref target="RFC5245" />.</t>
 
@@ -3672,16 +3673,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           DTLS connection, using the specified roles and fingerprints,
           on any underlying ICE components, once they are active.</t>
 
-          <t>If the media section proto value indicates use of RTP:
+          <t>If the m= section proto value indicates use of RTP:
           <list style="symbols">
 
-            <t>If the media section references any media formats, RTP
+            <t>If the m= section references any media formats, RTP
             header extensions, or RTCP feedback mechanisms that were
-            not present in the corresponding media section in the
+            not present in the corresponding m= section in the
             offer, this indicates a negotiation problem and MUST result
             in an error.</t>
 
-            <t>If the media section has RTCP mux enabled, discard the
+            <t>If the m= section has RTCP mux enabled, discard the
             RTCP ICE component, if one exists, and begin or continue muxing
             RTCP over the RTP ICE component, as specified in
             <xref target="RFC5761" />, Section 5.1.3. Otherwise,
@@ -3689,8 +3690,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             ICE component exists, because RTCP mux was previously enabled, this
             MUST result in an error.</t>
 
-            <t>If the media section has reduced-size RTCP enabled,
-            configure the RTCP transmission for this media section to
+            <t>If the m= section has reduced-size RTCP enabled,
+            configure the RTCP transmission for this m= section to
             use reduced-size RTCP, as specified in
             <xref target="RFC5506" />.</t>
 
@@ -3752,7 +3753,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC3264" />, Section 5.1.</t>
           </list></t>
 
-          <t>If the media section proto value indicates use of SCTP:
+          <t>If the m= section proto value indicates use of SCTP:
           <list style="symbols">
 
             <t>If no SCTP association yet exists, prepare to initiate a
@@ -3885,10 +3886,10 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 v1
+
 m=audio 56500 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 192.0.2.1
 a=mid:a1
-a=msid:47017fee-b6c1-4162-929c-a25110252400
 a=sendrecv
 a=rtpmap:96 opus/48000/2
 a=rtpmap:0 PCMU/8000
@@ -3896,8 +3897,10 @@ a=rtpmap:8 PCMA/8000
 a=rtpmap:97 telephone-event/8000
 a=rtpmap:98 telephone-event/48000
 a=maxptime:120
-a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
-a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:2 urn:ietf:params:rtp-hdrext:ssrc-audio-level
+a=msid:47017fee-b6c1-4162-929c-a25110252400
+       f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9
 a=ice-ufrag:ETEn
 a=ice-pwd:OtSK0WpNtpUjkY4+86js7ZQl
 a=fingerprint:sha-256
@@ -3915,15 +3918,16 @@ a=end-of-candidates
 m=video 56502 UDP/TLS/RTP/SAVPF 100 101
 c=IN IP4 192.0.2.1
 a=mid:v1
-a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae
 a=sendrecv
 a=rtpmap:100 VP8/90000
 a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
-a=extmap:3 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
 a=rtcp-fb:100 ccm fir
 a=rtcp-fb:100 nack
 a=rtcp-fb:100 nack pli
+a=msid:47017fee-b6c1-4162-929c-a25110252400
+       f30bdb4a-5db8-49b5-bcdc-e0c9a23172e0
 a=ice-ufrag:BGKk
 a=ice-pwd:mqyWsAjvtKwTGnvhPztQ9mIf
 a=fingerprint:sha-256
@@ -3938,7 +3942,7 @@ a=candidate:1 1 udp 2113929471 192.0.2.1 56502 typ host
 a=candidate:1 2 udp 2113929470 192.0.2.1 56503 typ host
 a=end-of-candidates
           ]]>
-</artwork>
+            </artwork>
           </figure>
         </t>
 
@@ -3954,10 +3958,10 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 v1
+
 m=audio 34300 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 192.0.2.2
 a=mid:a1
-a=msid:5a7b57b8-f043-4bd1-a45d-09d4dfa31226
 a=sendrecv
 a=rtpmap:96 opus/48000/2
 a=rtpmap:0 PCMU/8000
@@ -3965,8 +3969,10 @@ a=rtpmap:8 PCMA/8000
 a=rtpmap:97 telephone-event/8000
 a=rtpmap:98 telephone-event/48000
 a=maxptime:120
-a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
-a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:2 urn:ietf:params:rtp-hdrext:ssrc-audio-level
+a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae
+       5a7b57b8-f043-4bd1-a45d-09d4dfa31226
 a=ice-ufrag:6sFv
 a=ice-pwd:cOTZKZNVlO9RSGsEGM63JXT2
 a=fingerprint:sha-256
@@ -3982,17 +3988,18 @@ a=end-of-candidates
 m=video 34300 UDP/TLS/RTP/SAVPF 100 101
 c=IN IP4 192.0.2.2
 a=mid:v1
-a=msid:4ea4d4a1-2fda-4511-a9cc-1b32c2e59552
 a=sendrecv
 a=rtpmap:100 VP8/90000
 a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
-a=extmap:3 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
 a=rtcp-fb:100 ccm fir
 a=rtcp-fb:100 nack
 a=rtcp-fb:100 nack pli
+a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae
+       4ea4d4a1-2fda-4511-a9cc-1b32c2e59552
           ]]>
-</artwork>
+            </artwork>
           </figure>
         </t>
       </section>
@@ -4134,8 +4141,8 @@ a=fingerprint:sha-256
 a=setup:actpass
 a=rtcp-mux
 a=rtcp-rsize
-a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
 a=extmap:2 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
 
 m=application 0 UDP/DTLS/SCTP webrtc-datachannel
 c=IN IP4 0.0.0.0
@@ -5589,7 +5596,7 @@ a=rtcp-fb:100 nack pli
         <seriesInfo name='RFC' value='5104'/>
         <seriesInfo name='DOI' value='10.17487/RFC5104'/>
       </reference>
-	 
+
       <!-- INFORM 18 -->
       <reference  anchor='RFC3550' target='http://www.rfc-editor.org/info/rfc3550'>
 	<front>
@@ -5758,14 +5765,14 @@ a=rtcp-fb:100 nack pli
       <t>
         In order for an offerer and answerer to always be able to associate an RTP stream
         with the correct "m=" line, the offerer and answerer using the BUNDLE extension MUST
-        support the mechanism defined in <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" /> section 14.
+        support the mechanism defined in <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />, Section 14.
         where the offerer and answerer insert the identification-tag
         associated with an "m=" line (provided by the remote peer)
 	into RTP and RTCP packets associated with a BUNDLE group.
       </t>
       <t>
         The mapping from an SSRC to an identification-tag is carried in RTCP
-        SDES packets or in RTP header extensions (<xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" /> section 14).
+        SDES packets or in RTP header extensions (<xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />, Section 14).
 	Since a compound RTCP packet can contain multiple
         RTCP SDES packets, and each RTCP SDES packet can contain multiple chunks, an
         RTCP packet can contain several SSRC to identification-tag mappings. The offerer
@@ -5875,20 +5882,20 @@ a=rtcp-fb:100 nack pli
           <t>If the packet is of type BYE, for each SSRC indicated in the
           packet that is found in the incoming SSRC table, deliver a copy
           of the packet to the "m=" line associated with that SSRC.</t>
-		
-	  <t>If the packet is an FIR (PT=PSFB, FMT=4) as defined in
-          <xref target="RFC5104" />, or an LRR (PT=PSFB, FMT=TBD) as
+
+          <t>If the packet is an FIR (PT=PSFB, FMT=4), as defined in
+          <xref target="RFC5104" />, or an LRR (PT=PSFB, FMT=TBD), as
           defined in <xref target="I-D.ietf-avtext-lrr" />, for each
           FCI entry where the SSRC is found in the outgoing SSRC table,
           deliver a copy of the RTCP packet to the "m=" line associated
           with that SSRC.</t>
-		
-          <t>If the packet is of type RTPFB or type PSFB defined in
-          <xref target="RFC4585" /> (but not an FIR or LRR) and the media
+
+          <t>If the packet is of type RTPFB or type PSFB, as defined in
+          <xref target="RFC4585" />, but not previously handled, and the media
           source SSRC for the packet is found in the outgoing SSRC table,
           deliver the packet to the "m=" line associated with that SSRC.</t>
-		
-	  <t>If the packet is of type APP, deliver a copy of the packet to
+
+          <t>If the packet is of type APP, deliver a copy of the packet to
           each "m=" line.</t>
         </list>
       </t>
