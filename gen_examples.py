@@ -1,5 +1,5 @@
-# TODO: fix bundle-only (not in subsequent offers?)
 # TODO: LS groups
+# TODO: msid for recvonly case?
 # TODO: rtcp-mux-only
 import argparse
 
@@ -94,10 +94,13 @@ class PeerConnection:
     else:
       return self.m_sections[0][type]
 
-  def select_default_candidates(self, m_section, num_components):
+  def select_default_candidates(self, m_section, bundle_only, num_components):
     if self.trickle and self.version == 1:
       default_ip = '0.0.0.0'
-      default_port = default_rtcp = 9
+      if not bundle_only:
+        default_port = default_rtcp = 9
+      else:
+        default_port = default_rtcp = 0
     else:
       if self.relay_ip:
         default_ip = self.relay_ip
@@ -112,22 +115,20 @@ class PeerConnection:
     m_section['default_rtcp'] = default_rtcp
 
   def remove_attribute(self, sdp, attrib):
-    start = sdp.find(attrib)
+    start = sdp.find(attrib + ':')
     if start == -1:
       return sdp
 
     end = sdp.find('\n', start)
     return sdp[:start] + sdp[end + 1:]
 
-  def create_media_formatter(self, type, want_msid, want_transport,
+  def create_media_formatter(self, type, want_transport,
                              want_bundle_only, want_rtcp):
     formatter = self.MEDIA_TABLE[type]
     if want_transport:
       formatter += self.TRANSPORT_SDP
     if want_bundle_only:
       formatter += self.BUNDLE_ONLY_SDP
-    if not want_msid:
-      formatter = self.remove_attribute(formatter, 'a=msid')
     if not want_rtcp:
       formatter = self.remove_attribute(formatter, 'a=rtcp')
     return formatter
@@ -168,32 +169,32 @@ class PeerConnection:
 
   def create_m_section(self, stype, m_section):
     bundled = not 'ice_ufrag' in m_section
-    bundle_only = bundled and stype == 'offer'
+    bundle_only = bundled and self.version == 1 and stype == 'offer'
     num_components = 1
     if self.mux_policy == 'negotiate' and stype == 'offer':
       num_components = 2
 
     copy = m_section.copy()
-    self.select_default_candidates(copy, num_components)
+    self.select_default_candidates(copy, bundle_only, num_components)
     copy['dtls_fingerprint'] = self.fingerprint
     # always use actpass in offers
     if stype == 'offer':
       copy['dtls_dir'] = 'actpass'
-    if 'msid' in copy:
-      copy['direction'] = 'sendrecv'
-    else:
-      copy['direction'] = 'recvonly'
+    if copy['type'] != 'application':
+      if copy['ms'] != '-':
+        copy['direction'] = 'sendrecv'
+      else:
+        copy['direction'] = 'recvonly'
 
     # create the right template and fill it in
     formatter = self.create_media_formatter(copy['type'],
-                                            want_msid = 'msid' in copy,
                                             want_transport = not bundled,
                                             want_bundle_only = bundle_only,
                                             want_rtcp = num_components == 2)
     sdp = formatter.format(copy)
 
     # add candidates/eoc to SDP if we're not trickling
-    if not bundled and not self.trickle:
+    if not bundled and (not self.trickle or self.version > 1):
       sdp += self.create_candidates(copy, num_components)
       sdp += self.END_OF_CANDIDATES_SDP
 
@@ -229,13 +230,18 @@ def format_desc(desc):
       lines_post.append(line)
     elif line[:6] == 'a=msid':
       # wrap long msid lines
-      lines_post.append(line[:43])
-      lines_post.append(' ' * 7 + line[44:83])
+      frags = line.split(' ')
+      lines_post.append(frags[0])
+      lines_post.append(' ' * 7 + frags[1])
     elif line[:13] == 'a=fingerprint':
       # wrap long fingerprint lines
       lines_post.append(line[:21])
       lines_post.append(' ' * 14 + line[22:70])
-      lines_post.append(' ' * 14 + line[70:117])
+      lines_post.append(' ' * 14 + line[70:])
+    elif line[:11] == 'a=candidate' and 'raddr' in line:
+      frags = line.split('raddr')
+      lines_post.append(frags[0])
+      lines_post.append(' ' * 12 + frags[1])
     else:
       lines_post.append(line)
 
@@ -263,7 +269,9 @@ def output_desc(name, desc, draft):
   if draft:
     replace_desc(name, formatted_lines, draft)
   else:
+    print '[' + name + ']'
     print '\n'.join(formatted_lines)
+    print
 
 def example1(draft):
   ms1 = [
@@ -306,11 +314,12 @@ def example1(draft):
   a = pc2.create_answer()
   output_desc('answer-A1', a, draft)
 
-def example2():
+def example2(draft):
   ms1 = [
     { 'type': 'audio', 'mid': 'a1',
       'ms': '57017fee-b6c1-4162-929c-a25110252400',
-      'local_port': 51556, 'stun_port': 52546, 'relay_port': 61405,
+      'mst': 'e83006c5-a0ff-4e0a-9ed9-d3e6747be7d9',
+      'local_port': 51556, 'srflx_port': 52546, 'relay_port': 61405,
       'ice_ufrag': 'ATEn', 'ice_pwd': 'AtSK0WpNtpUjkY4+86js7ZQl',
       'dtls_dir': 'passive' },
     { 'type': 'application', 'mid': 'd1' }
@@ -324,9 +333,10 @@ def example2():
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
-      'ms': '6a7b57b8-f043-4bd1-a45d-09d4dfa31226',
-      'local_port': 61665, 'stun_port': 64532, 'relay_port': 50416,
-      'ice_ufrag': '7sFv', 'ice_pwd': 'DOTZKZNVlO9RSGsEGM63JXT2',
+      'ms': '71317484-2ed4-49d7-9eb7-1414322a7aae',
+      'mst': '6a7b57b8-f043-4bd1-a45d-09d4dfa31226',
+      'local_port': 61665, 'srflx_port': 64532, 'relay_port': 50416,
+      'ice_ufrag': '7sFv', 'ice_pwd': 'dOTZKZNVlO9RSGsEGM63JXT2',
       'dtls_dir': 'active' },
     { 'type': 'application', 'mid': 'd1' }
   ]
@@ -337,32 +347,30 @@ def example2():
                        relay_ip = '66.77.88.99',
                        fingerprint = fp2, m_sections = ms2)
 
-  print 'The SDP for |offer-B1| looks like:\n\n'
   o = pc1.create_offer()
-  print_desc(o)
-  print 'The SDP for |answer-B1| looks like:\n\n'
+  output_desc('offer-B1', o, draft)
   a = pc2.create_answer()
-  print_desc(a)
+  output_desc('answer-B1', a, draft)
 
   ms1_video = [
-    { 'type': 'video', 'mid': 'v1' },
-    { 'type': 'video', 'mid': 'v2' }
+    { 'type': 'video', 'mid': 'v1', 'ms': '-', 'mst': '-' },
+    { 'type': 'video', 'mid': 'v2', 'ms': '-', 'mst': '-' }
   ]
   ms2_video = [
     { 'type': 'video', 'mid': 'v1',
-      'mst': '61317484-2ed4-49d7-9eb7-1414322a7aae' },
+      'ms': '71317484-2ed4-49d7-9eb7-1414322a7aae',
+      'mst': '5ea4d4a1-2fda-4511-a9cc-1b32c2e59552' },
     { 'type': 'video', 'mid': 'v2',
-      'mst': '71317484-2ed4-49d7-9eb7-1414322a7aae' }
+      'ms': '81317484-2ed4-49d7-9eb7-1414322a7aae',
+      'mst': '6ea4d4a1-2fda-4511-a9cc-1b32c2e59552' }
   ]
 
   pc1.m_sections.extend(ms1_video)
   pc2.m_sections.extend(ms2_video)
-  print 'The SDP for |offer-B2| looks like:\n\n'
   o = pc2.create_offer()
-  print_desc(o)
-  print 'The SDP for |answer-B2| looks like:\n\n'
+  output_desc('offer-B2', o, draft)
   a = pc1.create_answer()
-  print_desc(a)
+  output_desc('answer-B2', a, draft)
 
 def main():
   parser = argparse.ArgumentParser()
