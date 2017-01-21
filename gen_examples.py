@@ -1,6 +1,7 @@
 # TODO: fix bundle-only (not in subsequent offers?)
 # TODO: LS groups
 # TODO: rtcp-mux-only
+import argparse
 
 class PeerConnection:
   SESSION_SDP = \
@@ -218,8 +219,8 @@ class PeerConnection:
   def create_answer(self):
     return self.create_sdp('answer')
 
-def print_desc(d):
-  lines_pre = d['sdp'].split('\n')
+def format_desc(desc):
+  lines_pre = desc['sdp'].split('\n')[:-1]
   lines_post = []
   for line in lines_pre:
     if line[:2] == 'm=' and len(lines_post) > 0:
@@ -237,15 +238,34 @@ def print_desc(d):
       lines_post.append(' ' * 14 + line[70:117])
     else:
       lines_post.append(line)
-  print '\n'.join(lines_post)
 
-  candidates = d['candidates']
-  if len(candidates):
-    print 'Candidates:'
-    print candidates
-    print
+  return lines_post
 
-def example1():
+def replace_desc(name, desc_lines, draft):
+  # update the samples in-place in the draft
+  draft_copy = draft[:]
+  del draft[:]
+  found = False
+  for draft_line in draft_copy:
+    if found and '</artwork>' in draft_line:
+      for desc_line in desc_lines:
+        draft.append(desc_line + '\n')
+      draft.append(']]>\n')
+      found = False
+    if not found:
+      draft.append(draft_line)
+    if ('<artwork alt="' + name + '">') in draft_line:
+      found = True
+      draft.append('<![CDATA[\n')
+
+def output_desc(name, desc, draft):
+  formatted_lines = format_desc(desc)
+  if draft:
+    replace_desc(name, formatted_lines, draft)
+  else:
+    print '\n'.join(formatted_lines)
+
+def example1(draft):
   ms1 = [
     { 'type': 'audio', 'mid': 'a1',
       'ms': '47017fee-b6c1-4162-929c-a25110252400',
@@ -281,12 +301,10 @@ def example1():
                        local_ip = '192.0.2.2', stun_ip = None, relay_ip = None,
                        fingerprint = fp2, m_sections = ms2)
 
-  print 'The SDP for |offer-A1| looks like:\n\n'
   o = pc1.create_offer()
-  print_desc(o)
-  print 'The SDP for |answer-A1| looks like:\n\n'
+  output_desc('offer-A1', o, draft)
   a = pc2.create_answer()
-  print_desc(a)
+  output_desc('answer-A1', a, draft)
 
 def example2():
   ms1 = [
@@ -346,7 +364,22 @@ def example2():
   a = pc1.create_answer()
   print_desc(a)
 
-if __name__ == '__main__':
-  example1()
-  example2()
+def main():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-r', '--replace', type=str)
+  args = parser.parse_args()
 
+  draft = None
+  if args.replace:
+    f = open(args.replace, 'r')
+    draft = f.readlines()
+
+  example1(draft)
+  example2(draft)
+
+  if args.replace:
+    f = open(args.replace, 'w')
+    f.writelines(draft)
+
+if __name__ == '__main__':
+  main()
