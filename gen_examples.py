@@ -118,7 +118,10 @@ class PeerConnection:
     m_section['default_rtcp'] = default_rtcp
 
   def remove_attribute(self, sdp, attrib):
+    # look for the whole attribute, to avoid finding a=rtcp inside of a=rtcp-mux
     start = sdp.find(attrib + ':')
+    if start == -1:
+      start = sdp.find(attrib + '\n')
     if start == -1:
       return sdp
 
