@@ -3901,6 +3901,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 v1
+a=group:LS a1 v1
 
 m=audio 56500 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 192.0.2.1
@@ -3925,6 +3926,7 @@ a=setup:actpass
 a=dtls-id:1
 a=rtcp:56501 IN IP4 192.0.2.1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.0.2.1 56500 typ host
 a=candidate:1 2 udp 2113929470 192.0.2.1 56501 typ host
@@ -3952,6 +3954,7 @@ a=setup:actpass
 a=dtls-id:1
 a=rtcp:56503 IN IP4 192.0.2.1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.0.2.1 56502 typ host
 a=candidate:1 2 udp 2113929470 192.0.2.1 56503 typ host
@@ -3973,6 +3976,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 v1
+a=group:LS a1 v1
 
 m=audio 34300 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 192.0.2.2
@@ -3996,6 +4000,7 @@ a=fingerprint:sha-256
 a=setup:active
 a=dtls-id:1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.0.2.2 34300 typ host
 a=end-of-candidates
@@ -4135,6 +4140,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 d1
+a=group:LS a1
 
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 0.0.0.0
@@ -4158,6 +4164,7 @@ a=fingerprint:sha-256
 a=setup:actpass
 a=dtls-id:1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 
 m=application 0 UDP/DTLS/SCTP webrtc-datachannel
@@ -4171,27 +4178,26 @@ a=bundle-only
           </figure>
         </t>
 
-        <t>The SDP for |candidate-B1| looks like:</t>
+        <t>The SDP for |offer-B1-candidate-1| looks like:</t>
 
         <t>
           <figure>
-            <artwork alt="candidate-B1">
-              <![CDATA[
-candidate:109270923 1 udp 2122194687 192.168.1.2 51556 typ host
-         ]]>
+            <artwork alt="offer-B1-candidate-1">
+<![CDATA[
+candidate:1 1 udp 2113929471 192.168.1.2 51556 typ host
+]]>
 </artwork>
           </figure>
         </t>
 
-        <t>The SDP for |candidate-B2| looks like:</t>
+        <t>The SDP for |offer-B1-candidate-2| looks like:</t>
 
         <t>
           <figure>
-            <artwork alt="candidate-B2">
-              <![CDATA[
-candidate:4036177503 1 udp 1685987071 11.22.33.44 52546 typ srflx
-          raddr 192.168.1.2 rport 51556
-         ]]>
+            <artwork alt="offer-B1-candidate-2">
+<![CDATA[
+candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx raddr 192.168.1.2 rport 51556
+]]>
 </artwork>
           </figure>
         </t>
@@ -4208,6 +4214,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 d1
+a=group:LS a1
 
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 0.0.0.0
@@ -4231,6 +4238,7 @@ a=fingerprint:sha-256
 a=setup:active
 a=dtls-id:1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
@@ -4243,27 +4251,26 @@ a=max-message-size:65536
           </figure>
         </t>
 
-        <t>The SDP for |candidate-B3| looks like:</t>
+        <t>The SDP for |answer-B1-candidate-1| looks like:</t>
 
         <t>
           <figure>
-            <artwork alt="candidate-B3">
-              <![CDATA[
-candidate:109270924 1 udp 2122194687 192.168.2.3 61665 typ host
-     ]]>
+            <artwork alt="answer-B1-candidate-1">
+<![CDATA[
+candidate:1 1 udp 2113929471 192.168.2.3 61665 typ host
+]]>
 </artwork>
           </figure>
         </t>
 
-        <t>The SDP for |candidate-B4| looks like:</t>
+        <t>The SDP for |answer-B1-candidate-2| looks like:</t>
 
         <t>
           <figure>
-            <artwork alt="candidate-B4">
-              <![CDATA[
-candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
-          raddr 192.168.2.3 rport 61665
-     ]]>
+            <artwork alt="answer-B1-candidate-2">
+<![CDATA[
+candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx raddr 192.168.2.3 rport 61665
+]]>
 </artwork>
           </figure>
         </t>
@@ -4282,6 +4289,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 d1 v1 v2
+a=group:LS a1 v1
 
 m=audio 50416 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 66.77.88.99
@@ -4305,6 +4313,7 @@ a=fingerprint:sha-256
 a=setup:actpass
 a=dtls-id:1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.2.3 61665 typ host
 a=candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx 
@@ -4366,6 +4375,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 d1 v1 v2
+a=group:LS a1
 
 m=audio 61405 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 22.33.44.55
@@ -4389,6 +4399,7 @@ a=fingerprint:sha-256
 a=setup:passive
 a=dtls-id:1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.1.2 51556 typ host
 a=candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx 
