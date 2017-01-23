@@ -1,6 +1,7 @@
 # TODO: LS groups
 # TODO: msid for recvonly case?
 # TODO: rtcp-mux-only
+# TODO: output/replace candidates
 import argparse
 
 class PeerConnection:
