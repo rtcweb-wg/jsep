@@ -144,18 +144,14 @@ class PeerConnection:
 
   # creates 'candidate:1 1 udp 999999 1.1.1.1:1111 type host'
   def create_candidate_attr(self, component, type, addr, port, raddr, rport):
-    if type == 'host':
-      formatter = self.CANDIDATE_ATTR
-      type_priority = 126
-    elif type == 'srflx':
+    TYPE_PRIORITIES = {'host': 126, 'srflx': 110, 'relay': 0}
+    if raddr:
       formatter = self.CANDIDATE_ATTR_WITH_RADDR
-      type_priority = 110
     else:
-      formatter = self.CANDIDATE_ATTR_WITH_RADDR
-      type_priority = 0
+      formatter = self.CANDIDATE_ATTR
     foundation = 1
     protocol = 'udp'
-    priority = type_priority << 24 | (256 - component)
+    priority = TYPE_PRIORITIES[type] << 24 | (256 - component)
     return formatter.format(foundation, component, protocol, priority,
                             addr, port, type, raddr, rport)
 
@@ -164,7 +160,7 @@ class PeerConnection:
                            component, type, addr, port, raddr, rport):
     return {'ufrag': ufrag, 'index': index, 'mid': mid,
             'attr': self.create_candidate_attr(component, type, addr, port,
-                                               raddr, rport) }
+                                                    raddr, rport) }
 
   # if IP exists of type |type|, returns list of candidates with size |num|
   def maybe_create_candidates_of_type(self, m_section, index, num, type, rtype):
@@ -176,12 +172,13 @@ class PeerConnection:
         raddr = getattr(self, rtype + '_ip')
         rport = m_section[rtype + '_port']
       else:
-        raddr = rport = None
+        raddr = None
+        rport = 0
 
       for i in range(0, num):
         candidates.append(self.create_candidate_obj(
           m_section['ice_ufrag'], index, m_section['mid'],
-          i + 1, type, addr, port, raddr, rport))
+          i + 1, type, addr, port + i, raddr, rport + i))
 
     return candidates
 
@@ -260,34 +257,61 @@ class PeerConnection:
   def create_answer(self):
     return self.create_desc('answer')
 
-def format_desc(desc):
-  lines_pre = desc['sdp'].split('\n')[:-1]
+def split_line(line, *positions):
+  lines = []
+  indent = 0
+  last_pos = 0
+  if len(line) > 72:
+    for pos in positions:
+      if pos == -1:
+        break
+      lines.append(' ' * indent + line[last_pos:pos].strip())
+      if indent == 0:
+        indent = line.find(':') + 1
+      last_pos = pos
+
+  lines.append(' ' * indent + line[last_pos:].strip())
+  return lines
+
+def format_sdp(sdp):
+  lines_pre = sdp.split('\n')[:-1]
   lines_post = []
   for line in lines_pre:
-    if line[:2] == 'm=' and len(lines_post) > 0:
+    if line.startswith('m=') and len(lines_post) > 0:
       # add blank line between m= sections
       lines_post.append('')
       lines_post.append(line)
-    elif line[:6] == 'a=msid':
+    elif line.startswith('a=msid'):
       # wrap long msid lines
-      frags = line.split(' ')
-      lines_post.append(frags[0])
-      lines_post.append(' ' * 7 + frags[1])
-    elif line[:13] == 'a=fingerprint':
+      lines_post.extend(split_line(line, line.find(' ')))
+    elif line.startswith('a=fingerprint'):
       # wrap long fingerprint lines
-      lines_post.append(line[:21])
-      lines_post.append(' ' * 14 + line[22:70])
-      lines_post.append(' ' * 14 + line[70:])
-    elif line[:11] == 'a=candidate' and 'raddr' in line:
-      frags = line.split('raddr')
-      lines_post.append(frags[0])
-      lines_post.append(' ' * 12 + frags[1])
+      lines_post.extend(split_line(line, 21, 70))
+    elif line.startswith('a=candidate'):
+      # wrap long candidate lines
+      lines_post.extend(split_line(line, line.find('raddr')))
     else:
       lines_post.append(line)
-
   return lines_post
 
-def replace_artwork(name, artwork_lines, draft_lines):
+# turn a candidate object into something like
+# ufrag 7sFv
+# index 0
+# mid   a1
+# attr  candidate:1 1 udp 255 66.77.88.99 50416 typ relay
+#                 raddr 55.66.77.88 rport 64532
+def format_candidate(cand_obj):
+  lines = []
+  for key in ['ufrag', 'index', 'mid', 'attr']:
+    if key != 'attr':
+      lines.append('{0: <5} {1}'.format(key, cand_obj[key]))
+    else:
+      attr_line = 'attr  ' + cand_obj['attr']
+      lines.extend(split_line(attr_line, attr_line.find('raddr')))
+  return lines
+
+# update a specific <artwork/> in-place in the draft
+def replace_artwork(draft_lines, name, artwork_lines):
   draft_copy = draft_lines[:]
   del draft_lines[:]
   found = False
@@ -303,26 +327,27 @@ def replace_artwork(name, artwork_lines, draft_lines):
       found = True
       draft_lines.append('<![CDATA[\n')
 
-def replace_desc(name, desc_lines, candidates, draft_lines):
-  # update the samples in-place in the draft
-  replace_artwork(name, desc_lines, draft_lines)
-  for i, candidate in enumerate(candidates):
+# update a sample in-place in the draft
+def replace_desc(draft_lines, name, desc):
+  replace_artwork(draft_lines, name, format_sdp(desc['sdp']))
+  for i, candidate in enumerate(desc['candidates']):
     candidate_name = name + '-candidate-' + str(i + 1)
-    replace_artwork(candidate_name, [candidate], draft_lines)
+    replace_artwork(draft_lines, candidate_name, format_candidate(candidate))
+
+def print_desc(name, desc):
+  print '[' + name + ']'
+  print '\n'.join(format_sdp(desc['sdp']))
+  print
+  for i, candidate in enumerate(desc['candidates']):
+    print '[' + name + ' candidate ' + str(i + 1) + ']'
+    print '\n'.join(format_candidate(candidate))
+    print
 
 def output_desc(name, desc, draft_lines):
-  formatted_lines = format_desc(desc)
   if draft_lines:
-    replace_desc(name, formatted_lines, desc['candidates'], draft_lines)
+    replace_desc(draft_lines, name, desc)
   else:
-    print '[' + name + ']'
-    print '\n'.join(formatted_lines)
-    print
-    if len(desc['candidates']):
-      print '[' + name + ' candidates]'
-      for candidate in desc['candidates']:
-        print candidate
-      print
+    print_desc(name, desc)
 
 def example1(draft):
   ms1 = [
