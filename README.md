@@ -8,6 +8,10 @@ JSEP specification:
 * [Editor's copy](http://rtcweb-wg.github.io/jsep/)
 * [Working Group Draft] (http://tools.ietf.org/html/draft-ietf-rtcweb-jsep)
 
+Status Into:
+
+[Status Info](http://waffle.io/rtcweb-wg/jsep)
+
 
 Contributing
 ------------
