@@ -4,7 +4,7 @@ import random
 import sys
 import uuid
 
-FORMAT_STR1 = """
+FORMAT_STR1 = """\
   ms{0[num]} = [
     {{ 'type': 'audio', 'mid': 'a1',
       'ms': '{0[ms]}',
@@ -19,13 +19,15 @@ FORMAT_STR1 = """
   fp{0[num]}  = '{0[fp]}'
   pc{0[num]}  = PeerConnection(session_id = '{0[id]}', trickle = True,
                        bundle_policy = 'max-bundle', mux_policy = 'require',
-                       ip_last_quad = {0[ip]}, fingerprint = fp{0[num]}, m_sections = ms{0[num]})"""
+                       ip_last_quad = {0[ip]}, fingerprint = fp{0[num]}, m_sections = ms{0[num]})
+"""
 
-FORMAT_STR2 = """
+FORMAT_STR2 = """\
   o = pc1.create_offer()
   output_desc('offer-{0}1', o, draft)
   a = pc2.create_answer()
-  output_desc('answer-{0}1', a, draft)"""
+  output_desc('answer-{0}1', a, draft)
+"""
 
 def make_obj(num):
   return {
