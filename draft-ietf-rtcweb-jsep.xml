@@ -5754,9 +5754,9 @@ a=msid:-
 		  format="default" pageno="false" target="RFC7656"/>. Each RTP stream is
 		  identified by an SSRC value, and each RTP packet carries an SSRC value
 		  that is used to associate the packet with the correct RTP stream. RTCP
-		  packets also uses SSRCs to identify on which RTP streams any report or
+		  packets also use SSRCs to identify which RTP streams any report or
 		  feedback relate to. Thus, an RTCP packet will commonly carry multiple
-		  SSRC values, and might therefore be providing feedback or report on
+		  SSRC values, and might therefore be providing feedback or reports on
 		  multiple RTP streams.</t>
 
 		  <t>In order to be able to process received RTP/RTCP packets correctly it
@@ -5795,11 +5795,12 @@ a=msid:-
 		  an RTP stream with the correct "m=" line, the offerer and answerer using
 		  the BUNDLE extension MUST support the mechanism defined in Section 14,
 		  where the offerer and answerer includes the identification-tag (provided
-		  by the remote peer) associated with an "m=" line in the RTP Streams and
-		  in RTCP SDES packets part of a BUNDLE group.</t>
+		  by the remote peer) in RTCP SDES packets or the SDES header extension in
+		  order to associate RTP streams with an "m=line" that is part of a BUNDLE
+		  group.</t>
 
 		  <t>The mapping from an SSRC to an identification-tag is carried in RTCP
-		  SDES packets or in RTP header extensions (Section 14). Since a compound
+		  SDES packets or in RTP SDES header extensions (Section 14). Since a compound
 		  RTCP packet can contain multiple RTCP SDES packets, and each RTCP SDES
 		  packet can contain multiple chunks, an RTCP packet can contain several
 		  SSRC to identification-tag mappings. The offerer and answerer maintain
@@ -5838,7 +5839,7 @@ a=msid:-
 		  processing they need to be routed to the higher layer context associated
 		  with the "m=" line within the BUNDLE group. Somewhere in the process
 		  where an received RTP packet is processed to be delivered to the higher
-		  layer by RTP the matching step below MUST be performed:<list
+		  layer by RTP the matching steps below MUST be performed:<list
 			  style="numbers">
 			  <t>Reception of an RTP packet for an RTP stream that has an existing
 			  mapping in the RTP stream to m= line table. Before proceeding in
