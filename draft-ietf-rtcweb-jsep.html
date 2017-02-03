@@ -351,12 +351,13 @@ li, p {
 <link href="#rfc.section.7" rel="Chapter" title="7 Examples"/>
 <link href="#rfc.section.7.1" rel="Chapter" title="7.1 Simple Example"/>
 <link href="#rfc.section.7.2" rel="Chapter" title="7.2 Normal Example"/>
-<link href="#rfc.section.8" rel="Chapter" title="8 Security Considerations"/>
-<link href="#rfc.section.9" rel="Chapter" title="9 IANA Considerations"/>
-<link href="#rfc.section.10" rel="Chapter" title="10 Acknowledgements"/>
-<link href="#rfc.references" rel="Chapter" title="11 References"/>
-<link href="#rfc.references.1" rel="Chapter" title="11.1 Normative References"/>
-<link href="#rfc.references.2" rel="Chapter" title="11.2 Informative References"/>
+<link href="#rfc.section.8" rel="Chapter" title="8 Early Transport Warmup Example"/>
+<link href="#rfc.section.9" rel="Chapter" title="9 Security Considerations"/>
+<link href="#rfc.section.10" rel="Chapter" title="10 IANA Considerations"/>
+<link href="#rfc.section.11" rel="Chapter" title="11 Acknowledgements"/>
+<link href="#rfc.references" rel="Chapter" title="12 References"/>
+<link href="#rfc.references.1" rel="Chapter" title="12.1 Normative References"/>
+<link href="#rfc.references.2" rel="Chapter" title="12.2 Informative References"/>
 <link href="#rfc.appendix.A" rel="Chapter" title="A Appendix A"/>
 <link href="#rfc.appendix.B" rel="Chapter" title="B Appendix B"/>
 <link href="#rfc.appendix.C" rel="Chapter" title="C Change log"/>
@@ -520,12 +521,13 @@ li, p {
 <li>7.   <a href="#rfc.section.7">Examples</a></li>
 <ul><li>7.1.   <a href="#rfc.section.7.1">Simple Example</a></li>
 <li>7.2.   <a href="#rfc.section.7.2">Normal Example</a></li>
-</ul><li>8.   <a href="#rfc.section.8">Security Considerations</a></li>
-<li>9.   <a href="#rfc.section.9">IANA Considerations</a></li>
-<li>10.   <a href="#rfc.section.10">Acknowledgements</a></li>
-<li>11.   <a href="#rfc.references">References</a></li>
-<ul><li>11.1.   <a href="#rfc.references.1">Normative References</a></li>
-<li>11.2.   <a href="#rfc.references.2">Informative References</a></li>
+</ul><li>8.   <a href="#rfc.section.8">Early Transport Warmup Example</a></li>
+<li>9.   <a href="#rfc.section.9">Security Considerations</a></li>
+<li>10.   <a href="#rfc.section.10">IANA Considerations</a></li>
+<li>11.   <a href="#rfc.section.11">Acknowledgements</a></li>
+<li>12.   <a href="#rfc.references">References</a></li>
+<ul><li>12.1.   <a href="#rfc.references.1">Normative References</a></li>
+<li>12.2.   <a href="#rfc.references.2">Informative References</a></li>
 </ul><li>Appendix A.   <a href="#rfc.appendix.A">Appendix A</a></li>
 <li>Appendix B.   <a href="#rfc.appendix.B">Appendix B</a></li>
 <li>Appendix C.   <a href="#rfc.appendix.C">Change log</a></li>
@@ -795,9 +797,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.4.1.8.p.5">The only difference between a provisional and final answer is that the final answer results in the freeing of any unused resources that were allocated as a result of the offer. As such, the application can use some discretion on whether an answer should be applied as provisional or final, and can change the type of the session description as needed. For example, in a serial forking scenario, an application may receive multiple "final" answers, one from each remote endpoint. The application could choose to accept the initial answers as provisional answers, and only apply an answer as final when it receives one that meets its criteria (e.g. a live user instead of voicemail).</p>
 <p id="rfc.section.4.1.8.p.6">"rollback" is a special session description type implying that the state machine should be rolled back to the previous stable state, as described in <a href="#sec.rollback">Section 4.1.8.2</a>. The contents MUST be empty.</p>
 <h4 id="rfc.section.4.1.8.1"><a href="#rfc.section.4.1.8.1">4.1.8.1.</a> <a href="#sec.use-of-provisional-answer" id="sec.use-of-provisional-answer">Use of Provisional Answers</a></h4>
-<p id="rfc.section.4.1.8.1.p.1">Most web applications will not need to create answers using the "pranswer" type. While it is good practice to send an immediate response to an "offer", in order to warm up the session transport and prevent media clipping, the preferred handling for a web application would be to create and send an "inactive" final answer immediately after receiving the offer. Later, when the called user actually accepts the call, the application can create a new "sendrecv" offer to update the previous offer/answer pair and start the media flow. While this could also be done with an inactive "pranswer", followed by a sendrecv "answer", the initial "pranswer" leaves the offer-answer exchange open, which means that neither side can send an updated offer during this time.</p>
-<p id="rfc.section.4.1.8.1.p.2">As an example, consider a typical web application that will set up a data channel, an audio channel, and a video channel. When an endpoint receives an offer with these channels, it could send an answer accepting the data channel for two-way data, and accepting the audio and video tracks as inactive or receive-only. It could then ask the user to accept the call, acquire the local media streams, and send a new offer to the remote side moving the audio and video to be two-way media. By the time the human has accepted the call and triggered the new offer, it is likely that the ICE and DTLS handshaking for all the channels will already have finished.</p>
-<p id="rfc.section.4.1.8.1.p.3">Of course, some applications may not be able to perform this double offer-answer exchange, particularly ones that are attempting to gateway to legacy signaling protocols. In these cases, "pranswer" can still provide the application with a mechanism to warm up the transport.</p>
+<p id="rfc.section.4.1.8.1.p.1">Most applications will not need to create answers using the "pranswer" type. While it is good practice to send an immediate response to an offer, in order to warm up the session transport and prevent media clipping, the preferred handling for a JSEP application is to create and send a "sendonly" final answer with a null MediaStreamTrack immediately after receiving the offer, which will prevent media from being sent by the caller, and allow media to be sent immediately upon answer by the callee.  Later, when the callee actually accepts the call, the application can plug in the real MediaStreamTrack and create a new "sendrecv" offer to update the previous offer/answer pair and start bidirectional media flow. While this could also be done with a "sendonly" pranswer, followed by a "sendrecv" answer, the initial pranswer leaves the offer-answer exchange open, which means that the caller cannot send an updated offer during this time.</p>
+<p id="rfc.section.4.1.8.1.p.2">As an example, consider a typical JSEP application that wants to set up audio and video as quickly as possible. When the callee receives an offer with audio and video MediaStreamTracks, it will send an immediate answer accepting these tracks as sendonly (meaning that the caller will not send the callee any media yet, and because the callee has not yet added its own MediaStreamTracks, the callee will not send any media either). It will then ask the user to accept the call and acquire the needed local tracks.  Upon acceptance by the user, the application will plug in the tracks it has acquired, which, because ICE and DTLS handshaking have likely completed by this point, can start transmitting immediately.  The application will also send a new offer to the remote side indicating call acceptance and moving the audio and video to be two-way media. A detailed example flow along these lines is shown in <a href="#sec.warmup-example">Section 8</a>. </p>
+<p id="rfc.section.4.1.8.1.p.3">Of course, some applications may not be able to perform this double offer-answer exchange, particularly ones that are attempting to gateway to legacy signaling protocols. In these cases, pranswer can still provide the application with a mechanism to warm up the transport.</p>
 <h4 id="rfc.section.4.1.8.2"><a href="#rfc.section.4.1.8.2">4.1.8.2.</a> <a href="#sec.rollback" id="sec.rollback">Rollback</a></h4>
 <p id="rfc.section.4.1.8.2.p.1">In certain situations it may be desirable to "undo" a change made to setLocalDescription or setRemoteDescription.  Consider a case where a call is ongoing, and one side wants to change some of the session parameters; that side generates an updated offer and then calls setLocalDescription. However, the remote side, either before or after setRemoteDescription, decides it does not want to accept the new parameters, and sends a reject message back to the offerer. Now, the offerer, and possibly the answerer as well, need to return to a stable state and the previous local/remote description. To support this, we introduce the concept of "rollback".</p>
 <p id="rfc.section.4.1.8.2.p.2">A rollback discards any proposed changes to the session, returning the state machine to the stable state, and setting the pending local and/or remote description (see <a href="#sec.pendinglocaldescription">Section 4.1.12</a> and <a href="#sec.pendingremotedescription">Section 4.1.14</a>) to null. Any resources or candidates that were allocated by the abandoned local description are discarded; any media that is received will be processed according to the previous local and remote descriptions. Rollback can only be used to cancel proposed changes; there is no support for rolling back from a stable state to a previous stable state. Note that this implies that once the answerer has performed setLocalDescription with his answer, this cannot be rolled back.</p>
@@ -1867,16 +1869,112 @@ a=msid:- -
 
 </pre>
 <p/>
-<h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#sec.security-considerations" id="sec.security-considerations">Security Considerations</a></h1>
-<p id="rfc.section.8.p.1">The IETF has published separate documents <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a> <a href="#I-D.ietf-rtcweb-security">[I-D.ietf-rtcweb-security]</a> describing the security architecture for WebRTC as a whole. The remainder of this section describes security considerations for this document.</p>
-<p id="rfc.section.8.p.2">While formally the JSEP interface is an API, it is better to think of it is an Internet protocol, with the JS being untrustworthy from the perspective of the endpoint. Thus, the threat model of <a href="#RFC3552">[RFC3552]</a> applies. In particular, JS can call the API in any order and with any inputs, including malicious ones.  This is particularly relevant when we consider the SDP which is passed to setLocalDescription(). While correct API usage requires that the application pass in SDP which was derived from createOffer() or createAnswer(), there is no guarantee that applications do so. The JSEP implementation MUST be prepared for the JS to pass in bogus data instead.</p>
-<p id="rfc.section.8.p.3">Conversely, the application programmer MUST recognize that the JS does not have complete control of endpoint behavior. One case that bears particular mention is that editing ICE candidates out of the SDP or suppressing trickled candidates does not have the expected behavior: implementations will still perform checks from those candidates even if they are not sent to the other side.  Thus, for instance, it is not possible to prevent the remote peer from learning your public IP address by removing server reflexive candidates. Applications which wish to conceal their public IP address should instead configure the ICE agent to use only relay candidates.</p>
-<h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a> <a href="#sec.iana-considerations" id="sec.iana-considerations">IANA Considerations</a></h1>
-<p id="rfc.section.9.p.1">This document requires no actions from IANA.</p>
-<h1 id="rfc.section.10"><a href="#rfc.section.10">10.</a> <a href="#sec.acknowledgements" id="sec.acknowledgements">Acknowledgements</a></h1>
-<p id="rfc.section.10.p.1">Significant text incorporated in the draft as well and review was provided by Peter Thatcher, Taylor Brandstetter, Harald Alvestrand and Suhas Nandakumar.  Dan Burnett, Neil Stratford, Anant Narayanan, Andrew Hutton, Richard Ejzak, Adam Bergkvist and Matthew Kaufman all provided valuable feedback on this proposal.  </p>
-<h1 id="rfc.references"><a href="#rfc.references">11.</a> References</h1>
-<h2 id="rfc.references.1"><a href="#rfc.references.1">11.1.</a> Normative References</h2>
+<h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#sec.warmup-example" id="sec.warmup-example">Early Transport Warmup Example</a></h1>
+<p id="rfc.section.8.p.1">This example demonstrates the early warmup technique described in <a href="#sec.use-of-provisional-answer">Section 4.1.8.1</a>. Here, Alice's endpoint sends an offer to Bob's endpoint to start an audio/video call. Bob immediately responds with an answer that accepts the audio/video m= sections, but marks them as sendonly (from its perspective), meaning that Alice will not yet send media. This allows the JSEP implementation to start negotiating ICE and DTLS immediately. Bob's endpoint then prompts him to answer the call, and when he does, his endpoint sends a second offer which enables the audio and video m= sections, and thereby bidirectional media transmission. The advantage of such a flow is that as soon as the first answer is received, the implementation can proceed with ICE and DTLS negotiation and establish the session transport. If the transport setup completes before the second offer is sent, then media can be transmitted immediately by the callee immediately upon answering the call, minimizing perceived post-dial-delay.  The second offer/answer exchange can also change the preferred codecs or other information.  </p>
+<pre>
+//                  set up local media state
+AliceJS-&gt;AliceUA:   create new PeerConnection
+AliceJS-&gt;AliceUA:   addTrack with two tracks: audio and video
+AliceJS-&gt;AliceUA:   createOffer to get offer
+AliceJS-&gt;AliceUA:   setLocalDescription with offer
+AliceUA-&gt;AliceJS:   multiple onicecandidate events with candidates
+
+//                  wait for ICE gathering to complete
+AliceUA-&gt;AliceJS:   onicecandidate event with null candidate
+AliceJS-&gt;AliceUA:   get |offer-C1| from value of localDescription
+
+//                  |offer-C1| is sent over signaling protocol to Bob
+AliceJS-&gt;WebServer: signaling with |offer-C1|
+WebServer-&gt;BobJS:   signaling with |offer-C1|
+
+//                  |offer-C1| arrives at Bob
+BobJS-&gt;BobUA:       create a PeerConnection
+BobJS-&gt;BobUA:       setRemoteDescription with |offer-C1|
+BobUA-&gt;BobJS:       onaddtrack events for audio and video
+
+//                  Bob prepares an early answer to warm up the transport
+BobJS-&gt;BobUA:       addTransceiver with null audio and video tracks
+BobJS-&gt;BobUA:       transceiver.setDirection(sendonly) for both transceivers
+BobJS-&gt;BobUA:       createAnswer
+BobJS-&gt;BobUA:       setLocalDescription with answer
+BobUA-&gt;BobJS:       multiple onicecandidate events with candidates
+
+//                  wait for ICE gathering to complete
+BobUA-&gt;BobJS:       onicecandidate event with null candidate
+BobJS-&gt;BobUA:       get |answer-C1| from value of localDescription
+
+//                  |answer-C1| is sent over signaling protocol to Alice
+BobJS-&gt;WebServer:   signaling with |answer-C1|
+WebServer-&gt;AliceJS: signaling with |answer-C1|
+
+//                  |answer-C1| (sendonly) arrives at Alice
+AliceJS-&gt;AliceUA:   setRemoteDescription with |answer-C1|
+AliceUA-&gt;AliceJS:   onaddtrack events for audio and video
+
+//                  ICE and DTLS establish while call is ringing
+
+//                  Bob accepts call, starts media, and sends a new offer
+BobJS-&gt;BobUA:       transceiver.setTrack with audio and video tracks
+BobUA-&gt;AliceUA:     media sent from Bob to Alice
+BobJS-&gt;BobUA:       transceiver.setDirection(sendrecv) for both transceivers
+BobJS-&gt;BobUA:       createOffer
+BobJS-&gt;BobUA:       setLocalDescription with offer
+
+//                  |offer-C2| is sent over signaling protocol to Alice
+BobJS-&gt;WebServer:   signaling with |offer-C2|
+WebServer-&gt;AliceJS: signaling with |offer-C2|
+
+//                  |offer-C2| (sendrecv) arrives at Alice
+AliceJS-&gt;AliceUA:   setRemoteDescription with |offer-C2|
+AliceJS-&gt;AliceUA:   createAnswer
+AliceJS-&gt;AliceUA:   setLocalDescription with |answer-C2|
+AliceUA-&gt;BobUA:     media sent from Alice to Bob
+
+//                  |answer-C2| is sent over signaling protocol to Bob
+AliceJS-&gt;WebServer: signaling with |answer-C2|
+WebServer-&gt;BobJS:   signaling with |answer-C2|
+BobJS-&gt;BobUA:       setRemoteDescription with |answer-C2|
+
+         </pre>
+<p/>
+<p id="rfc.section.8.p.3">The SDP for |offer-C1| looks like: </p>
+<pre>
+          
+placeholder
+         
+         </pre>
+<p/>
+<p id="rfc.section.8.p.5">The SDP for |answer-C1| looks like: </p>
+<pre>
+        
+placeholder
+         
+         </pre>
+<p/>
+<p id="rfc.section.8.p.7">The SDP for |offer-C2| looks like: </p>
+<pre>
+
+placeholder
+
+         </pre>
+<p/>
+<p id="rfc.section.8.p.9">The SDP for |answer-C2| looks like: </p>
+<pre>
+           
+placeholder
+      
+         </pre>
+<p/>
+<h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a> <a href="#sec.security-considerations" id="sec.security-considerations">Security Considerations</a></h1>
+<p id="rfc.section.9.p.1">The IETF has published separate documents <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a> <a href="#I-D.ietf-rtcweb-security">[I-D.ietf-rtcweb-security]</a> describing the security architecture for WebRTC as a whole. The remainder of this section describes security considerations for this document.</p>
+<p id="rfc.section.9.p.2">While formally the JSEP interface is an API, it is better to think of it is an Internet protocol, with the JS being untrustworthy from the perspective of the endpoint. Thus, the threat model of <a href="#RFC3552">[RFC3552]</a> applies. In particular, JS can call the API in any order and with any inputs, including malicious ones.  This is particularly relevant when we consider the SDP which is passed to setLocalDescription(). While correct API usage requires that the application pass in SDP which was derived from createOffer() or createAnswer(), there is no guarantee that applications do so. The JSEP implementation MUST be prepared for the JS to pass in bogus data instead.</p>
+<p id="rfc.section.9.p.3">Conversely, the application programmer MUST recognize that the JS does not have complete control of endpoint behavior. One case that bears particular mention is that editing ICE candidates out of the SDP or suppressing trickled candidates does not have the expected behavior: implementations will still perform checks from those candidates even if they are not sent to the other side.  Thus, for instance, it is not possible to prevent the remote peer from learning your public IP address by removing server reflexive candidates. Applications which wish to conceal their public IP address should instead configure the ICE agent to use only relay candidates.</p>
+<h1 id="rfc.section.10"><a href="#rfc.section.10">10.</a> <a href="#sec.iana-considerations" id="sec.iana-considerations">IANA Considerations</a></h1>
+<p id="rfc.section.10.p.1">This document requires no actions from IANA.</p>
+<h1 id="rfc.section.11"><a href="#rfc.section.11">11.</a> <a href="#sec.acknowledgements" id="sec.acknowledgements">Acknowledgements</a></h1>
+<p id="rfc.section.11.p.1">Significant text incorporated in the draft as well and review was provided by Peter Thatcher, Taylor Brandstetter, Harald Alvestrand and Suhas Nandakumar.  Dan Burnett, Neil Stratford, Anant Narayanan, Andrew Hutton, Richard Ejzak, Adam Bergkvist and Matthew Kaufman all provided valuable feedback on this proposal.  </p>
+<h1 id="rfc.references"><a href="#rfc.references">12.</a> References</h1>
+<h2 id="rfc.references.1"><a href="#rfc.references.1">12.1.</a> Normative References</h2>
 <table>
   <tbody>
     <tr>
@@ -2097,7 +2195,7 @@ a=msid:- -
     </tr>
   </tbody>
 </table>
-<h2 id="rfc.references.2"><a href="#rfc.references.2">11.2.</a> Informative References</h2>
+<h2 id="rfc.references.2"><a href="#rfc.references.2">12.2.</a> Informative References</h2>
 <table>
   <tbody>
     <tr>
