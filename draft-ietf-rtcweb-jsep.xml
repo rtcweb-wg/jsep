@@ -5877,13 +5877,32 @@ a=msid:-
           FCI entry where the SSRC is found in the outgoing SSRC
           table, deliver a copy of the RTCP packet to the "m=" line
           associated with that SSRC.</t>
+		 
+		  <t>The RFC 4585 RTCP feedback messages allow for a number of
+		  different type of feedback messages. However, the RTCP
+		  feedback message header contains the SSRC identifying the
+		  source of the feedback messages as well as the actual type
+		  of the feedback. Some of the feedback messages also uses the
+		  target SSRC field in the header to identify which RTP stream
+		  the feedback is related to. For these types all the FCI
+		  entries, if multiple ones are forwarded to the identified
+		  handler. Examples of this pattern are: <list
+		  style="hanging">
+              
+		  <t hangText="Picture Loss Indication (PLI):">RFC 4585
+		  (PT=PSFB, FMT=1).</t>
 
-          <t>If the packet is of type RTPFB or type PSFB, as defined in
-          <xref target="RFC4585" />, but not previously handled, and
-          the media source SSRC for the packet is found in the outgoing
-          SSRC table, deliver the packet to the "m=" line associated
-          with that SSRC.</t>
+		  <t hangText="Slice Loss Indication (SLI):">RFC 4585
+		  (PT=PSFB, FMT=2).</t>
 
+		  <t hangText="Reference Picture Selection Indication
+		  (RPSI):">RFC 4585 (PT=PSFB, FMT=3).</t>
+
+		  <t hangText="Generic NACK:"><xref target="RFC4585"/>
+		  (PT=RTPFB and FMT=1).</t>
+                  
+		  </list></t>
+                
           <t>If the packet is of type APP, deliver a copy of the packet
           to each "m=" line.</t>
         </list>
