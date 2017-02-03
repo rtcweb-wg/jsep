@@ -5236,6 +5236,19 @@ a=msid:-
         <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-mmusic-dtls-sdp-14.txt"/>
       </reference>
 
+      <reference  anchor='RFC7941' target='http://www.rfc-editor.org/info/rfc7941'>
+		<front>
+		  <title>RTP Header Extension for the RTP Control Protocol (RTCP) Source Description Items</title>
+		  <author initials='M.' surname='Westerlund' fullname='M. Westerlund'><organization /></author>
+		  <author initials='B.' surname='Burman' fullname='B. Burman'><organization /></author>
+		  <author initials='R.' surname='Even' fullname='R. Even'><organization /></author>
+		  <author initials='M.' surname='Zanaty' fullname='M. Zanaty'><organization /></author>
+		  <date year='2016' month='August' />
+		</front>
+		<seriesInfo name='RFC' value='7941'/>
+		<seriesInfo name='DOI' value='10.17487/RFC7941'/>
+	  </reference>
+	  
     </references>
     <references title="Informative References">
       <!-- INFORM 1 -->
@@ -5844,6 +5857,10 @@ a=msid:-
       <t>
         <list>
 
+           <t>On reception of any compound RTCP packet, if there is an
+           RTCP SDES packet included that SHOULD be processed
+           first.</t>
+           
           <t>If the packet is of type SR, and the sender SSRC for the
           packet is found in the incoming SSRC table, deliver a copy
           of the packet to the "m=" line associated with that SSRC. In
@@ -5858,13 +5875,18 @@ a=msid:-
 
           <t>If the packet is of type SDES, and the sender SSRC for
           the packet is found in the incoming SSRC table, deliver the
-          packet to the "m=" line associated with that SSRC. In
-          addition, for each chunk in the packet that contains a MID
-          that is in the table mapping MID to "m=" line, update the
-          incoming SSRC mapping table to include an entry that maps
-          the SSRC for that chunk to the "m=" line associated with
-          that MID. (This case can occur when RTCP for a source is
-          received before any RTP packets.)</t>
+          packet to the "m=" line associated with that SSRC.
+          In addition, If that SDES packet contains SDES MID entries,
+          this can results in updates and additions to the incoming SSRC
+          to "m=" line mapping table. Thus each of the SDES MID items
+          are processed and the current table entries are checked if
+          the corresponding MID value matches the current SSRC
+          to "m=" line mapping, else the entry is updated. If there is
+          no RTP stream to "m=" line table mapping entry for the
+          received SDES item's SSRC, such an entry is created. Note,
+          that in the process of updating the table entries, update
+          flap suppression as discussed in Section 4.2.6 of <xref
+          target="RFC7941"/> needs to be considereds.</t>
 
           <t>If the packet is of type BYE, for each SSRC indicated in
           the packet that is found in the incoming SSRC table, deliver
