@@ -87,7 +87,7 @@ class PeerConnection:
     # IETF-approved example IPs
     self.host_ip = '203.0.113.' + str(ip_last_quad)
     self.srflx_ip = '198.51.100.' + str(ip_last_quad)
-    self.relay_ip = '192.0.2.200.' + str(ip_last_quad)
+    self.relay_ip = '192.0.2.' + str(ip_last_quad)
     self.version = 0
 
   def get_port(self, m_section, type):
