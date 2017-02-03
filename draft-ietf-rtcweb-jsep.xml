@@ -5856,18 +5856,11 @@ a=msid:-
           deliver a copy of the RTCP packet to the "m=" line
           associated with that SSRC.</t>
 
-          <t>If the packet is of type SDES,
-          for each chunk in the packet (as defined in Section 6.5 of
-          RFC3350), if the SSRC for that chunk is found
-          in the incoming SSRC table, deliver the
-          packet to the "m=" line associated with that SSRC. In
-          addition, for each chunk in the packet that contains a MID
-          that is in the table mapping MID to "m=" line, update the
-          incoming SSRC mapping table to include an entry that maps
-          the SSRC for that chunk to the "m=" line associated with
-          that MID. (This case can occur when RTCP for a source is
-          received before any RTP packets.)</t>
-
+          <t> An SDES packet contains zero or more chunks, where a
+          chunk contains the SSRC for the source being described by
+          the one or more items included in the chunk.  Forward the
+          SDES items in each chunk to the RTP stream's handler.</t>
+              
           <t>If the packet is of type BYE, for each SSRC indicated in
           the packet that is found in the incoming SSRC table, deliver
           a copy of the packet to the "m=" line associated with that
