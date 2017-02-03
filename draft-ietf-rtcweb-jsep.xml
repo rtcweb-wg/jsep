@@ -5866,11 +5866,26 @@ a=msid:-
           that MID. (This case can occur when RTCP for a source is
           received before any RTP packets.)</t>
 
-          <t>If the packet is of type BYE, for each SSRC indicated in
-          the packet that is found in the incoming SSRC table, deliver
-          a copy of the packet to the "m=" line associated with that
-          SSRC.</t>
+          <t>There exist some RTCP packet types that provides
+          additional information or notifies about events related to
+          the RTP stream identified. In these cases the RTP stream is
+          identified using the SSRC field value, and the information
+          is provided to the higher layer associated with the "m="
+          line for the incoming RTP stream as identified by the
+          current RTP stream to "m=" line table. For this type of
+          pattern it is common that the RTCP packets and information
+          is repeated, either periodically (e.g. SDES items), or for a
+          duration (e.g. BYE), thus suppression of repetitions can be
+          considered. Examples of these are:<list style="hanging">
 
+		  <t hangText="Goodbye (BYE) RTCP Packet:">This <xref
+		  target="RFC3550">RTP/RTCP protocol</xref> mechanism
+		  indicates that a particular RTP stream is leaving the RTP
+		  session. Thus, a most relevant event to inform the handler
+		  for this RTP steam of. </t>
+
+          </list></t>
+                  
           <t>If the packet is an FIR (PT=PSFB, FMT=4), as defined in
           <xref target="RFC5104" />, or an LRR (PT=PSFB, FMT=TBD), as
           defined in <xref target="I-D.ietf-avtext-lrr" />, for each
