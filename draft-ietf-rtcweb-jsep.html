@@ -368,7 +368,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-2-2" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-2-3" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -392,7 +392,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: August 6, 2017</td>
+  <td class="left">Expires: August 7, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">February 2, 2017</td>
+  <td class="right">February 3, 2017</td>
 </tr>
 
     	
@@ -425,7 +425,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 6, 2017.</p>
+<p>This Internet-Draft will expire on August 7, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -1379,6 +1379,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 v1
+a=group:LS a1 v1
 
 m=audio 56500 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 192.0.2.1
@@ -1446,6 +1447,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 v1
+a=group:LS a1 v1
 
 m=audio 34300 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 192.0.2.2
@@ -1589,6 +1591,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 d1
+a=group:LS a1
 
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 0.0.0.0
@@ -1612,6 +1615,7 @@ a=fingerprint:sha-256
 a=setup:actpass
 a=dtls-id:1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 
 m=application 0 UDP/DTLS/SCTP webrtc-datachannel
@@ -1623,19 +1627,18 @@ a=bundle-only
 
 </pre>
 <p/>
-<p id="rfc.section.7.2.p.5">The SDP for |candidate-B1| looks like:</p>
+<p id="rfc.section.7.2.p.5">The SDP for |offer-B1-candidate-1| looks like:</p>
 <pre>
-              
-candidate:109270923 1 udp 2122194687 192.168.1.2 51556 typ host
-         
+
+candidate:1 1 udp 2113929471 192.168.1.2 51556 typ host
+
 </pre>
 <p/>
-<p id="rfc.section.7.2.p.7">The SDP for |candidate-B2| looks like:</p>
+<p id="rfc.section.7.2.p.7">The SDP for |offer-B1-candidate-2| looks like:</p>
 <pre>
-              
-candidate:4036177503 1 udp 1685987071 11.22.33.44 52546 typ srflx
-          raddr 192.168.1.2 rport 51556
-         
+
+candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx raddr 192.168.1.2 rport 51556
+
 </pre>
 <p/>
 <p id="rfc.section.7.2.p.9">The SDP for |answer-B1| looks like:</p>
@@ -1647,6 +1650,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 d1
+a=group:LS a1
 
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 0.0.0.0
@@ -1670,6 +1674,7 @@ a=fingerprint:sha-256
 a=setup:active
 a=dtls-id:1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
@@ -1680,19 +1685,18 @@ a=max-message-size:65536
 
 </pre>
 <p/>
-<p id="rfc.section.7.2.p.11">The SDP for |candidate-B3| looks like:</p>
+<p id="rfc.section.7.2.p.11">The SDP for |answer-B1-candidate-1| looks like:</p>
 <pre>
-              
-candidate:109270924 1 udp 2122194687 192.168.2.3 61665 typ host
-     
+
+candidate:1 1 udp 2113929471 192.168.2.3 61665 typ host
+
 </pre>
 <p/>
-<p id="rfc.section.7.2.p.13">The SDP for |candidate-B4| looks like:</p>
+<p id="rfc.section.7.2.p.13">The SDP for |answer-B1-candidate-2| looks like:</p>
 <pre>
-              
-candidate:4036177504 1 udp 1685987071 55.66.77.88 64532 typ srflx
-          raddr 192.168.2.3 rport 61665
-     
+
+candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx raddr 192.168.2.3 rport 61665
+
 </pre>
 <p/>
 <p id="rfc.section.7.2.p.15">The SDP for |offer-B2| looks like: (note the increment of the version number in the o= line, and the c= and a=rtcp lines, which indicate the local candidate that was selected)</p>
@@ -1704,6 +1708,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 d1 v1 v2
+a=group:LS a1 v1
 
 m=audio 50416 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 66.77.88.99
@@ -1727,6 +1732,7 @@ a=fingerprint:sha-256
 a=setup:actpass
 a=dtls-id:1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.2.3 61665 typ host
 a=candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx 
@@ -1780,6 +1786,7 @@ s=-
 t=0 0
 a=ice-options:trickle
 a=group:BUNDLE a1 d1 v1 v2
+a=group:LS a1
 
 m=audio 61405 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 c=IN IP4 22.33.44.55
@@ -1803,6 +1810,7 @@ a=fingerprint:sha-256
 a=setup:passive
 a=dtls-id:1
 a=rtcp-mux
+a=rtcp-mux-only
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.1.2 51556 typ host
 a=candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx 
