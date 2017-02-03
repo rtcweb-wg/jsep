@@ -1292,18 +1292,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the caller cannot send an updated offer during this time.</t>
 
             <t>As an example, consider a typical JSEP application that wants to
-            set up audio and video. When the callee
-            receives an offer with these MediaStreamTracks, it could send an
-            answer accepting the audio and video tracks as sendonly (meaning
+            set up audio and video as quickly as possible. When the callee
+            receives an offer with audio and video MediaStreamTracks, it will
+            send an immediate answer accepting these tracks as sendonly (meaning
             that the caller will not send the callee any media yet, and because
             the callee has not yet added its own MediaStreamTracks, the callee
-            will not send any media either). It could
-            then ask the user to accept the call, acquire the needed local
-            tracks, and, upon acceptance, send a new offer to the remote side
-            moving the audio and video to be two-way media. By the time the user
-            accepts the call and triggers this new offer, it is likely that the
-            ICE and DTLS handshaking for all the channels will already have
-            finished. An example flow along these lines is shown in
+            will not send any media either). It will then
+            ask the user to accept the call and acquire the needed local tracks.
+            Upon acceptance by the user, the application will plug in the tracks
+            it has acquired, which, because ICE and DTLS handshaking have likely
+            completed by this point, can start transmitting immediately.
+            The application will also send a new offer to the remote side
+            indicating call acceptance and moving the audio and video to be
+            two-way media. A detailed example flow along these lines is shown in
             <xref target="sec.warmup-example"></xref>. </t>
 
             <t>Of course, some applications may not be able to perform
@@ -4513,11 +4514,10 @@ AliceUA->AliceJS:   onaddtrack events for audio and video
 
 //                  Bob accepts call, starts media, and sends a new offer
 BobJS->BobUA:       transceiver.setTrack with audio and video tracks
+BobUA->AliceUA:     media sent from Bob to Alice
 BobJS->BobUA:       transceiver.setDirection(sendrecv) for both transceivers
 BobJS->BobUA:       createOffer
 BobJS->BobUA:       setLocalDescription with offer
-BobUA->AliceUA:     media sent from Bob to Alice
-[TODO: ice restart]
 
 //                  |offer-C2| is sent over signaling protocol to Alice
 BobJS->WebServer:   signaling with |offer-C2|
