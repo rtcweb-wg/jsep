@@ -1,7 +1,5 @@
-# TODO: msid for recvonly case?
 # TODO: LS for offer-B1 (should omit?) and answer-B2 (should have v1?)
-# TODO: wrap trickle candidates
-# TODO: add relay candidates
+# TODO: add relay candidates (for A1)
 import argparse
 
 class PeerConnection:
@@ -78,24 +76,26 @@ class PeerConnection:
   END_OF_CANDIDATES_SDP = 'a=end-of-candidates\n'
 
   def __init__(self, session_id, trickle, bundle_policy, mux_policy,
-               host_ip, srflx_ip, relay_ip, fingerprint, m_sections):
+               ip_last_quad, fingerprint, m_sections):
     self.session_id = session_id
     self.trickle = trickle
     self.bundle_policy = bundle_policy
     self.mux_policy = mux_policy
-    self.host_ip = host_ip
-    self.srflx_ip = srflx_ip
-    self.relay_ip = relay_ip
     self.fingerprint = fingerprint
     self.m_sections = m_sections
+    # IETF-approved example IPs
+    self.host_ip = '203.0.113.' + str(ip_last_quad)
+    self.srflx_ip = '198.51.100.' + str(ip_last_quad)
+    self.relay_ip = '192.0.2.' + str(ip_last_quad)
     self.version = 0
 
   def get_port(self, m_section, type):
-    # get port if it exists, otherwise get it from the first (bundle) section
+    # get port from current section, bundle section, or None if type disallowed
     if type in m_section:
       return m_section[type]
-    else:
+    elif type in self.m_sections[0]:
       return self.m_sections[0][type]
+    return None
 
   def select_default_candidates(self, m_section, bundle_only, num_components):
     if self.trickle and self.version == 1:
@@ -105,14 +105,15 @@ class PeerConnection:
       else:
         default_port = default_rtcp = 0
     else:
-      if self.relay_ip:
+      default_port = self.get_port(m_section, 'relay_port')
+      if default_port:
         default_ip = self.relay_ip
-        default_port = self.get_port(m_section, 'relay_port')
       else:
-        default_ip = self.host_ip
         default_port = self.get_port(m_section, 'host_port')
+        default_ip = self.host_ip
       # tricky way to make rtcp port be rtp + 1, only if offering non-mux
       default_rtcp = default_port + num_components - 1
+
     m_section['default_ip'] = default_ip
     m_section['default_port'] = default_port
     m_section['default_rtcp'] = default_rtcp
@@ -162,12 +163,12 @@ class PeerConnection:
             'attr': self.create_candidate_attr(component, type, addr, port,
                                                     raddr, rport) }
 
-  # if IP exists of type |type|, returns list of candidates with size |num|
+  # if port exists of type |type|, returns list of candidates with size |num|
   def maybe_create_candidates_of_type(self, m_section, index, num, type, rtype):
     candidates = []
-    addr = getattr(self, type + '_ip')
-    if addr:
-      port = m_section[type + '_port']
+    port = self.get_port(m_section, type + '_port')
+    if port:
+      addr = getattr(self, type + '_ip')
       if rtype:
         raddr = getattr(self, rtype + '_ip')
         rport = m_section[rtype + '_port']
@@ -211,10 +212,8 @@ class PeerConnection:
     if stype == 'offer':
       copy['dtls_dir'] = 'actpass'
     if copy['type'] != 'application':
-      if copy['ms'] != '-':
+      if 'direction' not in copy:
         copy['direction'] = 'sendrecv'
-      else:
-        copy['direction'] = 'recvonly'
 
     # create the right template and fill it in
     formatter = self.create_media_formatter(copy['type'],
@@ -349,7 +348,7 @@ def output_desc(name, desc, draft_lines):
   else:
     print_desc(name, desc)
 
-def example1(draft):
+def simple_example(draft):
   ms1 = [
     { 'type': 'audio', 'mid': 'a1',
       'ms': '47017fee-b6c1-4162-929c-a25110252400',
@@ -365,8 +364,7 @@ def example1(draft):
   fp1 = '19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2'
   pc1 = PeerConnection(session_id = '4962303333179871722', trickle = False,
                        bundle_policy = 'balanced', mux_policy = 'negotiate',
-                       host_ip = '203.0.113.100', srflx_ip = None, relay_ip = None,
-                       fingerprint = fp1, m_sections = ms1)
+                       ip_last_quad = 100, fingerprint = fp1, m_sections = ms1)
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
@@ -382,15 +380,14 @@ def example1(draft):
   fp2 = '6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08'
   pc2 = PeerConnection(session_id = '6729291447651054566', trickle = False,
                        bundle_policy = 'balanced', mux_policy = 'negotiate',
-                       host_ip = '203.0.113.200', srflx_ip = None, relay_ip = None,
-                       fingerprint = fp2, m_sections = ms2)
+                       ip_last_quad = 200, fingerprint = fp2, m_sections = ms2)
 
   o = pc1.create_offer()
   output_desc('offer-A1', o, draft)
   a = pc2.create_answer()
   output_desc('answer-A1', a, draft)
 
-def example2(draft):
+def complex_example(draft):
   ms1 = [
     { 'type': 'audio', 'mid': 'a1',
       'ms': '57017fee-b6c1-4162-929c-a25110252400',
@@ -403,9 +400,7 @@ def example2(draft):
   fp1 = '29:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2'
   pc1 = PeerConnection(session_id = '4962303333179871723', trickle = True,
                        bundle_policy = 'max-bundle', mux_policy = 'require',
-                       host_ip = '203.0.113.100', srflx_ip = '198.51.100.100',
-                       relay_ip = '192.0.2.100',
-                       fingerprint = fp1, m_sections = ms1)
+                       ip_last_quad = 100, fingerprint = fp1, m_sections = ms1)
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
@@ -419,9 +414,7 @@ def example2(draft):
   fp2 = '7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08'
   pc2 = PeerConnection(session_id = '7729291447651054566', trickle = True,
                        bundle_policy = 'max-bundle', mux_policy = 'require',
-                       host_ip = '203.0.113.200', srflx_ip = '198.51.100.200',
-                       relay_ip = '192.0.2.200',
-                       fingerprint = fp2, m_sections = ms2)
+                       ip_last_quad = 200, fingerprint = fp2, m_sections = ms2)
 
   o = pc1.create_offer()
   output_desc('offer-B1', o, draft)
@@ -429,8 +422,12 @@ def example2(draft):
   output_desc('answer-B1', a, draft)
 
   ms1_video = [
-    { 'type': 'video', 'mid': 'v1', 'ms': '-', 'mst': '-' },
-    { 'type': 'video', 'mid': 'v2', 'ms': '-', 'mst': '-' }
+    { 'type': 'video', 'mid': 'v1', 'ms': '-',
+      'mst': '08575c88-be1f-42d0-8717-5d7f77b57b20',
+      'direction': 'recvonly' },
+    { 'type': 'video', 'mid': 'v2', 'ms': '-',
+      'mst': '8dfffea7-c7d6-4036-86bd-98c59391f8a3',
+      'direction': 'recvonly' },
   ]
   ms2_video = [
     { 'type': 'video', 'mid': 'v1',
@@ -448,6 +445,60 @@ def example2(draft):
   a = pc1.create_answer()
   output_desc('answer-B2', a, draft)
 
+def warmup_example(draft):
+  ms1 = [
+    { 'type': 'audio', 'mid': 'a1',
+      'ms': 'bbce3ba6-abfc-ac63-d00a-e15b286f8fce',
+      'mst': 'e80098db-7159-3c06-229a-00df2a9b3dbc',
+      'host_port': 10100, 'srflx_port': 11100, 'relay_port': 12100,
+      'ice_ufrag': '4ZcD', 'ice_pwd': 'ZaaG6OG7tCn4J/lehAGz+HHD',
+      'dtls_dir': 'passive' },
+    { 'type': 'video', 'mid': 'v1',
+      'ms': 'bbce3ba6-abfc-ac63-d00a-e15b286f8fce',
+      'mst': 'ac701365-eb06-42df-cc93-7f22bc308789' }
+  ]
+  fp1  = 'C4:68:F8:77:6A:44:F1:98:6D:7C:9F:47:EB:E3:34:A4:0A:AA:2D:49:08:28:70:2E:1F:AE:18:7D:4E:3E:66:BF'
+  pc1  = PeerConnection(session_id = '1070771854436052752', trickle = True,
+                       bundle_policy = 'max-bundle', mux_policy = 'require',
+                       ip_last_quad = 100, fingerprint = fp1, m_sections = ms1)
+
+  ms2 = [
+    { 'type': 'audio', 'mid': 'a1',
+      'ms': '751f239e-4ae0-c549-aa3d-890de772998b',
+      'mst': '04b5a445-82cc-c9e8-9ffe-c24d0ef4b0ff',
+      'direction': 'sendonly',
+      'host_port': 10200, 'srflx_port': 11200, 'relay_port': 12200,
+      'ice_ufrag': 'TpaA', 'ice_pwd': 't2Ouhc67y8JcCaYZxUUTgKw/',
+      'dtls_dir': 'active' },
+    { 'type': 'video', 'mid': 'v1',
+      'ms': '751f239e-4ae0-c549-aa3d-890de772998b',
+      'mst': '39292672-c102-d075-f580-5826f31ca958',
+      'direction': 'sendonly' }
+  ]
+  fp2  = 'A2:F3:A5:6D:4C:8C:1E:B2:62:10:4A:F6:70:61:C4:FC:3C:E0:01:D6:F3:24:80:74:DA:7C:3E:50:18:7B:CE:4D'
+  pc2  = PeerConnection(session_id = '6386516489780559513', trickle = True,
+                       bundle_policy = 'max-bundle', mux_policy = 'require',
+                       ip_last_quad = 200, fingerprint = fp2, m_sections = ms2)
+
+  o = pc1.create_offer()
+  output_desc('offer-C1', o, draft)
+  a = pc2.create_answer()
+  output_desc('answer-C1', a, draft)
+
+  # change direction for reoffer
+  for m_section in pc2.m_sections:
+    m_section['direction'] = 'sendrecv'
+
+  # TODO: do an ICE restart
+  # pc2.m_sections[0].ice_ufrag = 'XXXX'
+  # pc2.m_sections[0].ice_pwd = 'XXXX'
+  # pc1.m_sections[0].ice_ufrag = 'YYYY'
+  # pc1.m_sections[0].ice_pwd = 'YYYY'
+  o = pc2.create_offer()
+  output_desc('offer-C2', o, draft)
+  a = pc1.create_answer()
+  output_desc('answer-C2', a, draft)
+
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('-r', '--replace', type=str)
@@ -458,8 +509,9 @@ def main():
     f = open(args.replace, 'r')
     draft = f.readlines()
 
-  example1(draft)
-  example2(draft)
+  simple_example(draft)
+  complex_example(draft)
+  warmup_example(draft)
 
   if args.replace:
     f = open(args.replace, 'w')
