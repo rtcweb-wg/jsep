@@ -354,35 +354,35 @@ def example1(draft):
     { 'type': 'audio', 'mid': 'a1',
       'ms': '47017fee-b6c1-4162-929c-a25110252400',
       'mst': 'f83006c5-a0ff-4e0a-9ed9-d3e6747be7d9',
-      'host_port': 56500, 'ice_ufrag': 'ETEn',
+      'host_port': 10100, 'ice_ufrag': 'ETEn',
       'ice_pwd': 'OtSK0WpNtpUjkY4+86js7ZQl', 'dtls_dir': 'passive' },
     { 'type': 'video', 'mid': 'v1',
       'ms': '47017fee-b6c1-4162-929c-a25110252400',
       'mst': 'f30bdb4a-5db8-49b5-bcdc-e0c9a23172e0',
-      'host_port': 56502, 'ice_ufrag': 'BGKk',
+      'host_port': 10102, 'ice_ufrag': 'BGKk',
       'ice_pwd': 'mqyWsAjvtKwTGnvhPztQ9mIf', 'dtls_dir': 'passive' }
   ]
   fp1 = '19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2'
   pc1 = PeerConnection(session_id = '4962303333179871722', trickle = False,
                        bundle_policy = 'balanced', mux_policy = 'negotiate',
-                       host_ip = '192.0.2.1', srflx_ip = None, relay_ip = None,
+                       host_ip = '203.0.113.100', srflx_ip = None, relay_ip = None,
                        fingerprint = fp1, m_sections = ms1)
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
       'ms': '61317484-2ed4-49d7-9eb7-1414322a7aae',
       'mst': '5a7b57b8-f043-4bd1-a45d-09d4dfa31226',
-      'host_port': 34300, 'ice_ufrag': '6sFv',
+      'host_port': 10200, 'ice_ufrag': '6sFv',
       'ice_pwd': 'cOTZKZNVlO9RSGsEGM63JXT2', 'dtls_dir': 'active' },
     { 'type': 'video', 'mid': 'v1',
       'ms': '61317484-2ed4-49d7-9eb7-1414322a7aae',
       'mst': '4ea4d4a1-2fda-4511-a9cc-1b32c2e59552',
-      'host_port': 34300 }
+      'host_port': 10200 }
   ]
   fp2 = '6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08'
   pc2 = PeerConnection(session_id = '6729291447651054566', trickle = False,
                        bundle_policy = 'balanced', mux_policy = 'negotiate',
-                       host_ip = '192.0.2.2', srflx_ip = None, relay_ip = None,
+                       host_ip = '203.0.113.200', srflx_ip = None, relay_ip = None,
                        fingerprint = fp2, m_sections = ms2)
 
   o = pc1.create_offer()
@@ -395,7 +395,7 @@ def example2(draft):
     { 'type': 'audio', 'mid': 'a1',
       'ms': '57017fee-b6c1-4162-929c-a25110252400',
       'mst': 'e83006c5-a0ff-4e0a-9ed9-d3e6747be7d9',
-      'host_port': 51556, 'srflx_port': 52546, 'relay_port': 61405,
+      'host_port': 10100, 'srflx_port': 11100, 'relay_port': 12100,
       'ice_ufrag': 'ATEn', 'ice_pwd': 'AtSK0WpNtpUjkY4+86js7ZQl',
       'dtls_dir': 'passive' },
     { 'type': 'application', 'mid': 'd1' }
@@ -403,15 +403,15 @@ def example2(draft):
   fp1 = '29:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2'
   pc1 = PeerConnection(session_id = '4962303333179871723', trickle = True,
                        bundle_policy = 'max-bundle', mux_policy = 'require',
-                       host_ip = '192.168.1.2', srflx_ip = '11.22.33.44',
-                       relay_ip = '22.33.44.55',
+                       host_ip = '203.0.113.100', srflx_ip = '198.51.100.100',
+                       relay_ip = '192.0.2.100',
                        fingerprint = fp1, m_sections = ms1)
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
       'ms': '71317484-2ed4-49d7-9eb7-1414322a7aae',
       'mst': '6a7b57b8-f043-4bd1-a45d-09d4dfa31226',
-      'host_port': 61665, 'srflx_port': 64532, 'relay_port': 50416,
+      'host_port': 10200, 'srflx_port': 11200, 'relay_port': 12200,
       'ice_ufrag': '7sFv', 'ice_pwd': 'dOTZKZNVlO9RSGsEGM63JXT2',
       'dtls_dir': 'active' },
     { 'type': 'application', 'mid': 'd1' }
@@ -419,8 +419,8 @@ def example2(draft):
   fp2 = '7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08'
   pc2 = PeerConnection(session_id = '7729291447651054566', trickle = True,
                        bundle_policy = 'max-bundle', mux_policy = 'require',
-                       host_ip = '192.168.2.3', srflx_ip = '55.66.77.88',
-                       relay_ip = '66.77.88.99',
+                       host_ip = '203.0.113.200', srflx_ip = '198.51.100.200',
+                       relay_ip = '192.0.2.200',
                        fingerprint = fp2, m_sections = ms2)
 
   o = pc1.create_offer()
