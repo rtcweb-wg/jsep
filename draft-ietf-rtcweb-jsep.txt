@@ -4258,23 +4258,23 @@ Uberti, et al.           Expires August 7, 2017                [Page 76]
 Internet-Draft                    JSEP                     February 2017
 
 
-   candidate:1 1 udp 2113929471 192.168.1.2 51556 typ host
+   ufrag ATEn
+   index 0
+   mid   a1
+   attr  candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
 
 
    The SDP for |offer-B1-candidate-2| looks like:
 
 
-candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx raddr 192.168.1.2 rport 51556
+   ufrag ATEn
+   index 0
+   mid   a1
+   attr  candidate:1 1 udp 1845494015 198.51.100.100 11100 typ srflx
+                   raddr 203.0.113.100 rport 10100
 
 
    The SDP for |answer-B1| looks like:
-
-
-
-
-
-
-
 
 
 
@@ -4357,10 +4357,10 @@ Internet-Draft                    JSEP                     February 2017
    The SDP for |answer-B1-candidate-1| looks like:
 
 
-   candidate:1 1 udp 2113929471 192.168.2.3 61665 typ host
-
-
-   The SDP for |answer-B1-candidate-2| looks like:
+   ufrag 7sFv
+   index 0
+   mid   a1
+   attr  candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
 
 
 
@@ -4370,7 +4370,14 @@ Uberti, et al.           Expires August 7, 2017                [Page 78]
 Internet-Draft                    JSEP                     February 2017
 
 
-candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx raddr 192.168.2.3 rport 61665
+   The SDP for |answer-B1-candidate-2| looks like:
+
+
+   ufrag 7sFv
+   index 0
+   mid   a1
+   attr  candidate:1 1 udp 1845494015 198.51.100.200 11200 typ srflx
+                   raddr 203.0.113.200 rport 10200
 
 
    The SDP for |offer-B2| looks like: (note the increment of the version
@@ -4411,13 +4418,6 @@ candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx raddr 192.168.2.3 rport
    a=rtcp-mux-only
    a=rtcp-rsize
    a=candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
-   a=candidate:1 1 udp 1845494015 198.51.100.200 11200 typ srflx
-                203.0.113.200 rport 10200
-   a=candidate:1 1 udp 255 192.0.2.200 12200 typ relay
-                198.51.100.200 rport 11200
-   a=end-of-candidates
-
-   m=application 12200 UDP/DTLS/SCTP webrtc-datachannel
 
 
 
@@ -4426,6 +4426,13 @@ Uberti, et al.           Expires August 7, 2017                [Page 79]
 Internet-Draft                    JSEP                     February 2017
 
 
+   a=candidate:1 1 udp 1845494015 198.51.100.200 11200 typ srflx
+               raddr 203.0.113.200 rport 10200
+   a=candidate:1 1 udp 255 192.0.2.200 12200 typ relay
+               raddr 198.51.100.200 rport 11200
+   a=end-of-candidates
+
+   m=application 12200 UDP/DTLS/SCTP webrtc-datachannel
    c=IN IP4 192.0.2.200
    a=mid:d1
    a=sctp-port:5000
@@ -4467,13 +4474,6 @@ Internet-Draft                    JSEP                     February 2017
 
    v=0
    o=- 4962303333179871723 2 IN IP4 0.0.0.0
-   s=-
-   t=0 0
-   a=ice-options:trickle
-   a=group:BUNDLE a1 d1 v1 v2
-   a=group:LS a1
-
-   m=audio 12100 UDP/TLS/RTP/SAVPF 96 0 8 97 98
 
 
 
@@ -4482,6 +4482,13 @@ Uberti, et al.           Expires August 7, 2017                [Page 80]
 Internet-Draft                    JSEP                     February 2017
 
 
+   s=-
+   t=0 0
+   a=ice-options:trickle
+   a=group:BUNDLE a1 d1 v1 v2
+   a=group:LS a1
+
+   m=audio 12100 UDP/TLS/RTP/SAVPF 96 0 8 97 98
    c=IN IP4 192.0.2.100
    a=mid:a1
    a=sendrecv
@@ -4507,9 +4514,9 @@ Internet-Draft                    JSEP                     February 2017
    a=rtcp-rsize
    a=candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
    a=candidate:1 1 udp 1845494015 198.51.100.100 11100 typ srflx
-                203.0.113.100 rport 10100
+               raddr 203.0.113.100 rport 10100
    a=candidate:1 1 udp 255 192.0.2.100 12100 typ relay
-                198.51.100.100 rport 11100
+               raddr 198.51.100.100 rport 11100
    a=end-of-candidates
 
    m=application 12100 UDP/DTLS/SCTP webrtc-datachannel
@@ -4523,13 +4530,6 @@ Internet-Draft                    JSEP                     February 2017
    a=mid:v1
    a=recvonly
    a=rtpmap:100 VP8/90000
-   a=rtpmap:101 rtx/90000
-   a=fmtp:101 apt=100
-   a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
-   a=rtcp-fb:100 ccm fir
-   a=rtcp-fb:100 nack
-   a=rtcp-fb:100 nack pli
-   a=msid:-
 
 
 
@@ -4538,7 +4538,13 @@ Uberti, et al.           Expires August 7, 2017                [Page 81]
 Internet-Draft                    JSEP                     February 2017
 
 
-          -
+   a=rtpmap:101 rtx/90000
+   a=fmtp:101 apt=100
+   a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
+   a=rtcp-fb:100 ccm fir
+   a=rtcp-fb:100 nack
+   a=rtcp-fb:100 nack pli
+   a=msid:- -
 
    m=video 12100 UDP/TLS/RTP/SAVPF 100 101
    c=IN IP4 192.0.2.100
@@ -4551,8 +4557,7 @@ Internet-Draft                    JSEP                     February 2017
    a=rtcp-fb:100 ccm fir
    a=rtcp-fb:100 nack
    a=rtcp-fb:100 nack pli
-   a=msid:-
-          -
+   a=msid:- -
 
 
 8.  Security Considerations
@@ -4581,11 +4586,6 @@ Internet-Draft                    JSEP                     February 2017
    candidates even if they are not sent to the other side.  Thus, for
    instance, it is not possible to prevent the remote peer from learning
    your public IP address by removing server reflexive candidates.
-   Applications which wish to conceal their public IP address should
-   instead configure the ICE agent to use only relay candidates.
-
-
-
 
 
 
@@ -4593,6 +4593,9 @@ Uberti, et al.           Expires August 7, 2017                [Page 82]
 
 Internet-Draft                    JSEP                     February 2017
 
+
+   Applications which wish to conceal their public IP address should
+   instead configure the ICE agent to use only relay candidates.
 
 9.  IANA Considerations
 
@@ -4636,10 +4639,7 @@ Internet-Draft                    JSEP                     February 2017
               Mechanism for DTLS", draft-ietf-mmusic-dtls-sdp-14 (work
               in progress), July 2016.
 
-   [I-D.ietf-mmusic-msid]
-              Alvestrand, H., "Cross Session Stream Identification in
-              the Session Description Protocol", draft-ietf-mmusic-
-              msid-01 (work in progress), August 2013.
+
 
 
 
@@ -4649,6 +4649,11 @@ Uberti, et al.           Expires August 7, 2017                [Page 83]
 
 Internet-Draft                    JSEP                     February 2017
 
+
+   [I-D.ietf-mmusic-msid]
+              Alvestrand, H., "Cross Session Stream Identification in
+              the Session Description Protocol", draft-ietf-mmusic-
+              msid-01 (work in progress), August 2013.
 
    [I-D.ietf-mmusic-mux-exclusive]
               Holmberg, C., "Indicating Exclusive Support of RTP/RTCP
@@ -4693,11 +4698,6 @@ Internet-Draft                    JSEP                     February 2017
               Requirements", draft-ietf-rtcweb-fec-00 (work in
               progress), February 2015.
 
-   [I-D.ietf-rtcweb-rtp-usage]
-              Perkins, C., Westerlund, M., and J. Ott, "Web Real-Time
-              Communication (WebRTC): Media Transport and Use of RTP",
-              draft-ietf-rtcweb-rtp-usage-09 (work in progress),
-              September 2013.
 
 
 
@@ -4705,6 +4705,12 @@ Uberti, et al.           Expires August 7, 2017                [Page 84]
 
 Internet-Draft                    JSEP                     February 2017
 
+
+   [I-D.ietf-rtcweb-rtp-usage]
+              Perkins, C., Westerlund, M., and J. Ott, "Web Real-Time
+              Communication (WebRTC): Media Transport and Use of RTP",
+              draft-ietf-rtcweb-rtp-usage-09 (work in progress),
+              September 2013.
 
    [I-D.ietf-rtcweb-security]
               Rescorla, E., "Security Considerations for WebRTC", draft-
@@ -4748,12 +4754,6 @@ Internet-Draft                    JSEP                     February 2017
               the Session Description Protocol (SDP)", RFC 4145,
               September 2005.
 
-   [RFC4566]  Handley, M., Jacobson, V., and C. Perkins, "SDP: Session
-              Description Protocol", RFC 4566, July 2006.
-
-   [RFC4572]  Lennox, J., "Connection-Oriented Media Transport over the
-              Transport Layer Security (TLS) Protocol in the Session
-              Description Protocol (SDP)", RFC 4572, July 2006.
 
 
 
@@ -4761,6 +4761,13 @@ Uberti, et al.           Expires August 7, 2017                [Page 85]
 
 Internet-Draft                    JSEP                     February 2017
 
+
+   [RFC4566]  Handley, M., Jacobson, V., and C. Perkins, "SDP: Session
+              Description Protocol", RFC 4566, July 2006.
+
+   [RFC4572]  Lennox, J., "Connection-Oriented Media Transport over the
+              Transport Layer Security (TLS) Protocol in the Session
+              Description Protocol (SDP)", RFC 4572, July 2006.
 
    [RFC4585]  Ott, J., Wenger, S., Sato, N., Burmeister, C., and J. Rey,
               "Extended RTP Profile for Real-time Transport Control
@@ -4799,6 +4806,18 @@ Internet-Draft                    JSEP                     February 2017
 
 11.2.  Informative References
 
+
+
+
+
+
+
+
+Uberti, et al.           Expires August 7, 2017                [Page 86]
+
+Internet-Draft                    JSEP                     February 2017
+
+
    [I-D.ietf-avtext-lrr]
               Lennox, J., Hong, D., Uberti, J., Homer, S., and M.
               Flodman, "The Layer Refresh Request (LRR) RTCP Feedback
@@ -4809,14 +4828,6 @@ Internet-Draft                    JSEP                     February 2017
               Uberti, J. and G. Shieh, "WebRTC IP Address Handling
               Recommendations", draft-ietf-rtcweb-ip-handling-01 (work
               in progress), March 2016.
-
-
-
-
-Uberti, et al.           Expires August 7, 2017                [Page 86]
-
-Internet-Draft                    JSEP                     February 2017
-
 
    [I-D.nandakumar-rtcweb-sdp]
               Nandakumar, S. and C. Jennings, "SDP for the WebRTC",
@@ -4852,6 +4863,17 @@ Internet-Draft                    JSEP                     February 2017
               DOI 10.17487/RFC4733, December 2006,
               <http://www.rfc-editor.org/info/rfc4733>.
 
+
+
+
+
+
+
+Uberti, et al.           Expires August 7, 2017                [Page 87]
+
+Internet-Draft                    JSEP                     February 2017
+
+
    [RFC5104]  Wenger, S., Chandra, U., Westerlund, M., and B. Burman,
               "Codec Control Messages in the RTP Audio-Visual Profile
               with Feedback (AVPF)", RFC 5104, DOI 10.17487/RFC5104,
@@ -4864,15 +4886,6 @@ Internet-Draft                    JSEP                     February 2017
    [RFC5576]  Lennox, J., Ott, J., and T. Schierl, "Source-Specific
               Media Attributes in the Session Description Protocol
               (SDP)", RFC 5576, June 2009.
-
-
-
-
-
-Uberti, et al.           Expires August 7, 2017                [Page 87]
-
-Internet-Draft                    JSEP                     February 2017
-
 
    [RFC5763]  Fischl, J., Tschofenig, H., and E. Rescorla, "Framework
               for Establishing a Secure Real-time Transport Protocol
@@ -4906,19 +4919,6 @@ Appendix A.  Appendix A
 
    For the syntax validation performed in Section 5.7, the following
    list of ABNF definitions is used:
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
