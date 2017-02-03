@@ -1,4 +1,3 @@
-# TODO: msid for recvonly case?
 # TODO: LS for offer-B1 (should omit?) and answer-B2 (should have v1?)
 # TODO: add relay candidates (for A1)
 import argparse
@@ -423,8 +422,12 @@ def complex_example(draft):
   output_desc('answer-B1', a, draft)
 
   ms1_video = [
-    { 'type': 'video', 'mid': 'v1', 'ms': '-', 'mst': '-' },
-    { 'type': 'video', 'mid': 'v2', 'ms': '-', 'mst': '-' }
+    { 'type': 'video', 'mid': 'v1', 'ms': '-',
+      'mst': '08575c88-be1f-42d0-8717-5d7f77b57b20',
+      'direction': 'recvonly' },
+    { 'type': 'video', 'mid': 'v2', 'ms': '-',
+      'mst': '8dfffea7-c7d6-4036-86bd-98c59391f8a3',
+      'direction': 'recvonly' },
   ]
   ms2_video = [
     { 'type': 'video', 'mid': 'v1',
