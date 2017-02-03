@@ -1,5 +1,4 @@
 import base64
-import os
 import random
 import sys
 import uuid
@@ -29,27 +28,36 @@ FORMAT_STR2 = """\
   output_desc('answer-{0}1', a, draft)
 """
 
+def random_bytes(bytes):
+  return ''.join(chr(random.getrandbits(8)) for _ in range(bytes))
+
+def random_uuid_str():
+  return uuid.UUID(bytes=random_bytes(16))
+
 def make_obj(num):
   return {
     'num':   num,
     'id':    random.getrandbits(63),
     'ip':    num * 100,
-    'fp':    ':'.join('%02x' % ord(b) for b in os.urandom(16)).upper(),
-    'ufrag': base64.b64encode(os.urandom(3)),
-    'pwd':   base64.b64encode(os.urandom(18)),
+    'fp':    ':'.join('%02x' % ord(b) for b in random_bytes(16)).upper(),
+    'ufrag': base64.b64encode(random_bytes(3)),
+    'pwd':   base64.b64encode(random_bytes(18)),
     'ddir':  ['passive', 'active'][num - 1],
-    'ms':    str(uuid.uuid4()),
-    'msta':  str(uuid.uuid4()),
-    'mstv':  str(uuid.uuid4()),
+    'ms':    random_uuid_str(),
+    'msta':  random_uuid_str(),
+    'mstv':  random_uuid_str(),
     'lp':    10000 + num * 100,
     'sp':    11000 + num * 100,
     'rp':    12000 + num * 100,
   }
 
 def main():
-  letter = 'X'
+  # Use the example name as a seed
   if len(sys.argv) > 1:
     letter = sys.argv[1]
+  else:
+    letter = 'X'
+  random.seed(ord(letter))
   print FORMAT_STR1.format(make_obj(1))
   print FORMAT_STR1.format(make_obj(2))
   print FORMAT_STR2.format(letter)
