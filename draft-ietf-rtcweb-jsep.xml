@@ -1275,38 +1275,42 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <section title="Use of Provisional Answers"
           anchor="sec.use-of-provisional-answer">
 
-            <t>Most web applications will not need to create answers
-            using the "pranswer" type. While it is good practice to
-            send an immediate response to an "offer", in order to warm
-            up the session transport and prevent media clipping, the
-            preferred handling for a web application would be to create
-            and send an "inactive" final answer immediately after
-            receiving the offer. Later, when the called user actually
-            accepts the call, the application can create a new
-            "sendrecv" offer to update the previous offer/answer pair
-            and start the media flow. While this could also be done
-            with an inactive "pranswer", followed by a sendrecv
-            "answer", the initial "pranswer" leaves the offer-answer
-            exchange open, which means that neither side can send an
-            updated offer during this time.</t>
+            <t>Most applications will not need to create answers using the
+            "pranswer" type. While it is good practice to send an immediate
+            response to an offer, in order to warm up the session transport
+            and prevent media clipping, the preferred handling for a JSEP
+            application is to create and send a "sendonly" final answer with a
+            null MediaStreamTrack immediately after receiving the offer, which
+            will prevent media from being sent by the caller, and allow media
+            to be sent immediately upon answer by the callee.
+            Later, when the callee actually accepts the call, the application
+            can plug in the real MediaStreamTrack and create a new "sendrecv"
+            offer to update the previous offer/answer pair and start
+            bidirectional media flow. While this could also be done with a
+            "sendonly" pranswer, followed by a "sendrecv" answer, the initial
+            pranswer leaves the offer-answer exchange open, which means that
+            the caller cannot send an updated offer during this time.</t>
 
-            <t>As an example, consider a typical web application that
-            will set up a data channel, an audio channel, and a video
-            channel. When an endpoint receives an offer with these
-            channels, it could send an answer accepting the data
-            channel for two-way data, and accepting the audio and video
-            tracks as inactive or receive-only. It could then ask the
-            user to accept the call, acquire the local media streams,
-            and send a new offer to the remote side moving the audio
-            and video to be two-way media. By the time the human has
-            accepted the call and triggered the new offer, it is likely
-            that the ICE and DTLS handshaking for all the channels will
-            already have finished.</t>
+            <t>As an example, consider a typical JSEP application that wants to
+            set up audio and video as quickly as possible. When the callee
+            receives an offer with audio and video MediaStreamTracks, it will
+            send an immediate answer accepting these tracks as sendonly (meaning
+            that the caller will not send the callee any media yet, and because
+            the callee has not yet added its own MediaStreamTracks, the callee
+            will not send any media either). It will then
+            ask the user to accept the call and acquire the needed local tracks.
+            Upon acceptance by the user, the application will plug in the tracks
+            it has acquired, which, because ICE and DTLS handshaking have likely
+            completed by this point, can start transmitting immediately.
+            The application will also send a new offer to the remote side
+            indicating call acceptance and moving the audio and video to be
+            two-way media. A detailed example flow along these lines is shown in
+            <xref target="sec.warmup-example"></xref>. </t>
 
             <t>Of course, some applications may not be able to perform
             this double offer-answer exchange, particularly ones that
             are attempting to gateway to legacy signaling protocols. In
-            these cases, "pranswer" can still provide the application
+            these cases, pranswer can still provide the application
             with a mechanism to warm up the transport.</t>
           </section>
           <section title="Rollback" anchor="sec.rollback">
@@ -4456,6 +4460,151 @@ a=msid:- -
         </t>
       </section>
     </section>
+    <section title="Early Transport Warmup Example" anchor="sec.warmup-example" >
+
+      <t>This example demonstrates the early warmup technique described in
+      <xref target="sec.use-of-provisional-answer"/>. Here, Alice's endpoint
+      sends an offer to Bob's endpoint to start an audio/video call. Bob
+      immediately responds with an answer that accepts the audio/video
+      m= sections, but marks them as sendonly (from its perspective), meaning
+      that Alice will not yet send media. This allows the JSEP implementation
+      to start negotiating ICE and DTLS immediately. Bob's endpoint then prompts
+      him to answer the call, and when he does, his endpoint sends a second
+      offer which enables the audio and video m= sections, and thereby
+      bidirectional media transmission. The advantage of such a
+      flow is that as soon as the first answer is received, the implementation
+      can proceed with ICE and DTLS negotiation and establish the session
+      transport. If the transport setup completes before the second offer is
+      sent, then media can be transmitted immediately by the callee immediately
+      upon answering the call, minimizing perceived post-dial-delay.
+      The second offer/answer exchange can also change the preferred codecs
+      or other information.
+      </t>
+
+      <t><figure>
+       <artwork><![CDATA[
+//                  set up local media state
+AliceJS->AliceUA:   create new PeerConnection
+AliceJS->AliceUA:   addTrack with two tracks: audio and video
+AliceJS->AliceUA:   createOffer to get offer
+AliceJS->AliceUA:   setLocalDescription with offer
+AliceUA->AliceJS:   multiple onicecandidate events with candidates
+
+//                  wait for ICE gathering to complete
+AliceUA->AliceJS:   onicecandidate event with null candidate
+AliceJS->AliceUA:   get |offer-C1| from value of localDescription
+
+//                  |offer-C1| is sent over signaling protocol to Bob
+AliceJS->WebServer: signaling with |offer-C1|
+WebServer->BobJS:   signaling with |offer-C1|
+
+//                  |offer-C1| arrives at Bob
+BobJS->BobUA:       create a PeerConnection
+BobJS->BobUA:       setRemoteDescription with |offer-C1|
+BobUA->BobJS:       onaddtrack events for audio and video
+
+//                  Bob prepares an early answer to warm up the transport
+BobJS->BobUA:       addTransceiver with null audio and video tracks
+BobJS->BobUA:       transceiver.setDirection(sendonly) for both transceivers
+BobJS->BobUA:       createAnswer
+BobJS->BobUA:       setLocalDescription with answer
+BobUA->BobJS:       multiple onicecandidate events with candidates
+
+//                  wait for ICE gathering to complete
+BobUA->BobJS:       onicecandidate event with null candidate
+BobJS->BobUA:       get |answer-C1| from value of localDescription
+
+//                  |answer-C1| is sent over signaling protocol to Alice
+BobJS->WebServer:   signaling with |answer-C1|
+WebServer->AliceJS: signaling with |answer-C1|
+
+//                  |answer-C1| (sendonly) arrives at Alice
+AliceJS->AliceUA:   setRemoteDescription with |answer-C1|
+AliceUA->AliceJS:   onaddtrack events for audio and video
+
+//                  ICE and DTLS establish while call is ringing
+
+//                  Bob accepts call, starts media, and sends a new offer
+BobJS->BobUA:       transceiver.setTrack with audio and video tracks
+BobUA->AliceUA:     media sent from Bob to Alice
+BobJS->BobUA:       transceiver.setDirection(sendrecv) for both transceivers
+BobJS->BobUA:       createOffer
+BobJS->BobUA:       setLocalDescription with offer
+
+//                  |offer-C2| is sent over signaling protocol to Alice
+BobJS->WebServer:   signaling with |offer-C2|
+WebServer->AliceJS: signaling with |offer-C2|
+
+//                  |offer-C2| (sendrecv) arrives at Alice
+AliceJS->AliceUA:   setRemoteDescription with |offer-C2|
+AliceJS->AliceUA:   createAnswer
+AliceJS->AliceUA:   setLocalDescription with |answer-C2|
+AliceUA->BobUA:     media sent from Alice to Bob
+
+//                  |answer-C2| is sent over signaling protocol to Bob
+AliceJS->WebServer: signaling with |answer-C2|
+WebServer->BobJS:   signaling with |answer-C2|
+BobJS->BobUA:       setRemoteDescription with |answer-C2|
+]]>
+         </artwork>
+       </figure>
+     </t>
+
+
+     <t>
+       The SDP for |offer-C1| looks like:
+     </t>
+     <t>
+       <figure>
+         <artwork alt="offer-C1">
+          <![CDATA[
+placeholder
+         ]]>
+         </artwork>
+       </figure>
+     </t>
+
+     <t>
+       The SDP for |answer-C1| looks like:
+     </t>
+     <t>
+       <figure>
+         <artwork alt="answer-C1">
+        <![CDATA[
+placeholder
+         ]]>
+         </artwork>
+       </figure>
+     </t>
+
+
+     <t>
+       The SDP for |offer-C2| looks like:
+     </t>
+     <t>
+       <figure>
+         <artwork alt="offer-C2">
+<![CDATA[
+placeholder
+]]>
+         </artwork>
+       </figure>
+     </t>
+
+     <t>
+       The SDP for |answer-C2| looks like:
+     </t>
+       <t>
+       <figure>
+         <artwork alt="answer-C2">
+           <![CDATA[
+placeholder
+      ]]>
+         </artwork>
+       </figure>
+     </t>
+    </section>
+
     <section title="Security Considerations"
     anchor="sec.security-considerations">
 
