@@ -1,7 +1,6 @@
 # TODO: msid for recvonly case?
 # TODO: LS for offer-B1 (should omit?) and answer-B2 (should have v1?)
-# TODO: wrap trickle candidates
-# TODO: add relay candidates
+# TODO: add relay candidates (for A1)
 import argparse
 
 class PeerConnection:
