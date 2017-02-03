@@ -1,7 +1,7 @@
-# TODO: LS groups
 # TODO: msid for recvonly case?
-# TODO: rtcp-mux-only
-# TODO: output/replace candidates
+# TODO: LS for offer-B1 (should omit?) and answer-B2 (should have v1?)
+# TODO: wrap trickle candidates
+# TODO: add relay candidates
 import argparse
 
 class PeerConnection:
@@ -12,6 +12,7 @@ class PeerConnection:
     t=0 0
     a=ice-options:trickle
     a=group:BUNDLE {1}
+    a=group:LS {2}
     """
 
   AUDIO_SDP = \
@@ -65,6 +66,7 @@ class PeerConnection:
     a=dtls-id:1
     a=rtcp:{0[default_rtcp]} IN IP4 {0[default_ip]}
     a=rtcp-mux
+    a=rtcp-mux-only
     a=rtcp-rsize
     """
 
@@ -116,7 +118,10 @@ class PeerConnection:
     m_section['default_rtcp'] = default_rtcp
 
   def remove_attribute(self, sdp, attrib):
+    # look for the whole attribute, to avoid finding a=rtcp inside of a=rtcp-mux
     start = sdp.find(attrib + ':')
+    if start == -1:
+      start = sdp.find(attrib + '\n')
     if start == -1:
       return sdp
 
@@ -124,7 +129,8 @@ class PeerConnection:
     return sdp[:start] + sdp[end + 1:]
 
   def create_media_formatter(self, type, want_transport,
-                             want_bundle_only, want_rtcp):
+                             want_bundle_only, want_rtcp,
+                             want_rtcp_mux_only):
     formatter = self.MEDIA_TABLE[type]
     if want_transport:
       formatter += self.TRANSPORT_SDP
@@ -132,6 +138,8 @@ class PeerConnection:
       formatter += self.BUNDLE_ONLY_SDP
     if not want_rtcp:
       formatter = self.remove_attribute(formatter, 'a=rtcp')
+    if not want_rtcp_mux_only:
+      formatter = self.remove_attribute(formatter, 'a=rtcp-mux-only')
     return formatter
 
   def create_candidate(self, component, type, addr, port, raddr, rport):
@@ -168,12 +176,14 @@ class PeerConnection:
                                      self.stun_ip, m_section['srflx_port'] + i)
     return sdp
 
-  def create_m_section(self, stype, m_section):
+  def add_m_section(self, desc, m_section):
+    stype = desc['type']
     bundled = not 'ice_ufrag' in m_section
     bundle_only = bundled and self.version == 1 and stype == 'offer'
     num_components = 1
     if self.mux_policy == 'negotiate' and stype == 'offer':
       num_components = 2
+    rtcp_mux_only = self.mux_policy == 'require'
 
     copy = m_section.copy()
     self.select_default_candidates(copy, bundle_only, num_components)
@@ -191,35 +201,41 @@ class PeerConnection:
     formatter = self.create_media_formatter(copy['type'],
                                             want_transport = not bundled,
                                             want_bundle_only = bundle_only,
-                                            want_rtcp = num_components == 2)
+                                            want_rtcp = num_components == 2,
+                                            want_rtcp_mux_only = rtcp_mux_only)
     sdp = formatter.format(copy)
 
-    # add candidates/eoc to SDP if we're not trickling
-    if not bundled and (not self.trickle or self.version > 1):
-      sdp += self.create_candidates(copy, num_components)
-      sdp += self.END_OF_CANDIDATES_SDP
+    # if not bundling, create candidates either in SDP or separately
+    if not bundled:
+      candidate_sdp = self.create_candidates(copy, num_components)
+      if not self.trickle or self.version > 1:
+        sdp += candidate_sdp
+        sdp += self.END_OF_CANDIDATES_SDP
+      else:
+        desc['candidates'] += candidate_sdp.replace('a=', '').split('\n')
 
-    return sdp
+    desc['sdp'] += sdp
 
-  def create_m_sections(self, stype):
-    sdp = ''
-    for m_section in self.m_sections:
-      sdp += self.create_m_section(stype, m_section)
-    return sdp
-
-  def create_sdp(self, type):
+  def create_desc(self, type):
     self.version += 1
-    bundle_sections = [m_section['mid'] for m_section in self.m_sections]
-    sdp = self.SESSION_SDP.format(self, ' '.join(bundle_sections))
-    sdp += self.create_m_sections(type)
+    bundle_list = [m_section['mid'] for m_section in self.m_sections]
+    bundle_group = ' '.join(bundle_list)
+    ls_list = [m_section['mid'] for m_section in self.m_sections if
+               'ms' in m_section and
+               m_section['ms'] == self.m_sections[0]['ms']]
+    ls_group = ' '.join(ls_list)
+
+    desc = { 'type': type, 'sdp': '', 'candidates': [] }
+    desc['sdp'] = self.SESSION_SDP.format(self, bundle_group, ls_group)
+    for m_section in self.m_sections:
+      self.add_m_section(desc, m_section)
     # clean up the leading whitespace in the constants
-    sdp = sdp.replace('    ', '')
-    cands = []
-    return { 'type': type, 'sdp': sdp, 'candidates': cands }
+    desc['sdp'] = desc['sdp'].replace('    ', '')
+    return desc
   def create_offer(self):
-    return self.create_sdp('offer')
+    return self.create_desc('offer')
   def create_answer(self):
-    return self.create_sdp('answer')
+    return self.create_desc('answer')
 
 def format_desc(desc):
   lines_pre = desc['sdp'].split('\n')[:-1]
@@ -248,31 +264,42 @@ def format_desc(desc):
 
   return lines_post
 
-def replace_desc(name, desc_lines, draft):
-  # update the samples in-place in the draft
-  draft_copy = draft[:]
-  del draft[:]
+def replace_artwork(name, artwork_lines, draft_lines):
+  draft_copy = draft_lines[:]
+  del draft_lines[:]
   found = False
   for draft_line in draft_copy:
     if found and '</artwork>' in draft_line:
-      for desc_line in desc_lines:
-        draft.append(desc_line + '\n')
-      draft.append(']]>\n')
+      for artwork_line in artwork_lines:
+        draft_lines.append(artwork_line + '\n')
+      draft_lines.append(']]>\n')
       found = False
     if not found:
-      draft.append(draft_line)
+      draft_lines.append(draft_line)
     if ('<artwork alt="' + name + '">') in draft_line:
       found = True
-      draft.append('<![CDATA[\n')
+      draft_lines.append('<![CDATA[\n')
 
-def output_desc(name, desc, draft):
+def replace_desc(name, desc_lines, candidates, draft_lines):
+  # update the samples in-place in the draft
+  replace_artwork(name, desc_lines, draft_lines)
+  for i, candidate in enumerate(candidates):
+    candidate_name = name + '-candidate-' + str(i + 1)
+    replace_artwork(candidate_name, [candidate], draft_lines)
+
+def output_desc(name, desc, draft_lines):
   formatted_lines = format_desc(desc)
-  if draft:
-    replace_desc(name, formatted_lines, draft)
+  if draft_lines:
+    replace_desc(name, formatted_lines, desc['candidates'], draft_lines)
   else:
     print '[' + name + ']'
     print '\n'.join(formatted_lines)
     print
+    if len(desc['candidates']):
+      print '[' + name + ' candidates]'
+      for candidate in desc['candidates']:
+        print candidate
+      print
 
 def example1(draft):
   ms1 = [
