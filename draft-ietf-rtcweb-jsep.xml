@@ -5844,17 +5844,29 @@ a=msid:-
       <t>
         <list>
 
-          <t>If the packet is of type SR, and the sender SSRC for the
-          packet is found in the incoming SSRC table, deliver a copy
-          of the packet to the "m=" line associated with that SSRC. In
-          addition, for each report block in the report whose SSRC is
-          found in the outgoing SSRC table, deliver a copy of the RTCP
-          packet to the "m=" line associated with that SSRC.</t>
+            <t> For all RTP streams that this endpoint is the source
+            of, it can expect to receive report blocks of several
+            types identified as relating to an outgoing stream. The
+            basic pattern for these blocks are that the RTCP packet
+            header identifies the source of the reports, as identified
+            by an SSRC, and containing one or more report blocks,
+            where each report block identifies the RTP stream, using
+            the SSRC, the report relates to. For this pattern the
+            relevant report information is provided to the higher
+            layer associated with the "m=" line the RTP Stream to "m="
+            line table identifies. The source SSRC as identifier of
+            the endpoint that the report originates are relevant for
+            interpreting the information, but not necessarily for
+            routing. Example of this is pattern are:
 
-          <t>If the packet is of type RR, for each report block in the
-          packet whose SSRC is found in the outgoing SSRC table,
-          deliver a copy of the RTCP packet to the "m=" line
-          associated with that SSRC.</t>
+            <list  style="hanging">
+              
+				  <t hangText="Sender Report (SR) and Receiver Report
+				  (RR)">The basic receiver report blocks from RFC3550
+				  start with the SSRC of the RTP stream they report
+				  on. </t>
+
+			</list></t>
 
           <t>If the packet is of type SDES, and the sender SSRC for
           the packet is found in the incoming SSRC table, deliver the
