@@ -1,5 +1,3 @@
-# TODO: LS for offer-B1 (should omit?) and answer-B2 (should have v1?)
-# TODO: add relay candidates (for A1)
 import argparse
 
 class PeerConnection:
