@@ -2568,9 +2568,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           For each group of type "LS" present in the offer, select the
           local RtpTransceivers that are referenced by the MID values in the
           specified group, and determine which of them
-          also reference a common local MediaStream
+          either reference a common local MediaStream
           (specified in the calls to addTrack/addTransceiver used to create
-          them). If at least two such RtpTransceivers exist, a
+          them), or have no MediaStream to reference because they were not
+          created by addTrack/addTransceiver.
+          implicitly by setRemoteDescription. If at least two such
+          RtpTransceivers exist, a
           group of type "LS" with the mid values of these
           RtpTransceivers MUST be added. Otherwise, this indicates a
           difference of opinion between the offerer and answerer
@@ -2584,7 +2587,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           for clarity.)
           As explained in <xref
           target="sec-create-offer"/>, a group of type "LS" has been added that
-          references each track's RtpTranceiver.</t>
+          references each track's RtpTransceiver.</t>
 
           <t>
             <figure>
@@ -2603,7 +2606,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
 
           <t>If the answerer uses a single MediaStream when it adds its tracks,
-          both of its RtpTransceivers will reference this stream, an so the
+          both of its transceivers will reference this stream, and so the
           subsequent answer will contain a "LS" group identical to that in the
           offer, as shown below:</t>
 
@@ -2624,7 +2627,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           </t>
 
           <t>However, if the answerer groups its tracks into separate
-          MediaStreams, the subsequent answer will not contain a "LS" group.
+          MediaStreams, its transceivers will reference different streams,
+          and so the subsequent answer will not contain a "LS" group.
           </t>
 
           <t>
@@ -2641,6 +2645,31 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               </artwork>
             </figure>
           </t>
+
+          <t>
+          Finally, if the answerer does not add any tracks, its transceivers
+          will not reference any MediaStreams, causing the preferences of
+          the offerer to be maintained, and so the subsequent answer will
+          contain an identical "LS" group.
+          </t>
+
+          <t>
+            <figure>
+              <artwork>
+                <![CDATA[
+          m=audio 20000 UDP/TLS/RTP/SAVPF 0
+          a=mid:a1
+          a=recvonly
+          m=video 20001 UDP/TLS/RTP/SAVPF 96
+          a=mid:v1
+          a=recvonly
+                ]]>
+              </artwork>
+            </figure>
+          </t>
+
+          <t>The <xref anchor="sec.normal-examples"/> example later in this
+          document shows a more involved case of "LS" group generation.</t>
 
           <t>The next step is to generate m= sections for each m=
           section that is present in the remote offer, as specified in
