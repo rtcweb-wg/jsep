@@ -1887,15 +1887,15 @@ Internet-Draft                    JSEP                     February 2017
    The codec preferences of an RtpTransceiver can also determine the
    order of codecs in subsequent calls to createOffer and createAnswer,
    in which case the order of the media formats in the associated m=
-   section will match.  However, the codec preferences cannot change the
-   order of the media formats after an answer containing the transceiver
-   has been applied.  At this point, codecs can only be removed, not
-   reordered.
+   section will match.
 
 5.  SDP Interaction Procedures
 
    This section describes the specific procedures to be followed when
    creating and parsing SDP objects.
+
+
+
 
 
 
@@ -2561,15 +2561,15 @@ Internet-Draft                    JSEP                     February 2017
       Section 8.  Therefore, JSEP implementations MUST be prepared to
       receive such offers.
 
-   o  The media formats on the m= line MUST be generated in the same
-      order as in the current local description.
+   o  Unless codec preferences have been set for the associated
+      transceiver, the media formats on the m= line MUST be generated in
+      the same order as in the current local description.
 
    o  The RTP header extensions MUST only include those that are present
       in the most recent answer.
 
    o  The RTCP feedback extensions MUST only include those that are
       present in the most recent answer.
-
 
 
 
@@ -2943,8 +2943,9 @@ Internet-Draft                    JSEP                     February 2017
       must instead match what was supplied in the offer, as described
       above.
 
-   o  The media formats on the m= line MUST be generated in the same
-      order as in the current local description.
+   o  Unless codec preferences have been set for the associated
+      transceiver, the media formats on the m= line MUST be generated in
+      the same order as in the current local description.
 
    o  Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless
       the m= section is restarting, in which case new ICE credentials
@@ -2961,7 +2962,6 @@ Internet-Draft                    JSEP                     February 2017
       filled in with the port and address of the default RTCP candidate.
       If no RTCP candidates have yet been gathered, dummy values MUST be
       used, as described in the initial answer section above.
-
 
 
 

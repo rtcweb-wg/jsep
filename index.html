@@ -874,7 +874,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h3 id="rfc.section.4.2.6"><a href="#rfc.section.4.2.6">4.2.6.</a> <a href="#sec.transceiver-set-codec-preferences" id="sec.transceiver-set-codec-preferences">setCodecPreferences</a></h3>
 <p id="rfc.section.4.2.6.p.1">The setCodecPreferences method sets the codec preferences of a transceiver, which in turn affect the presence and order of codecs of the associated m= section on future calls to createOffer and createAnswer. Note that setCodecPreferences does not directly affect which codec the implementation decides to send. It only affects which codecs the implementation indicates that it prefers to receive, via the offer or answer.  Even when a codec is excluded by setCodecPreferences, it still may be used to send until the next offer/answer exchange discards it.  </p>
 <p id="rfc.section.4.2.6.p.2">The codec preferences of an RtpTransceiver can cause codecs to be excluded by subsequent calls to createOffer and createAnswer, in which case the corresponding media formats in the associated m= section will be excluded. The codec preferences cannot add media formats that would otherwise not be present. This includes codecs that were not negotiated in a previous offer/answer exchange that included the transceiver.  </p>
-<p id="rfc.section.4.2.6.p.3">The codec preferences of an RtpTransceiver can also determine the order of codecs in subsequent calls to createOffer and createAnswer, in which case the order of the media formats in the associated m= section will match. However, the codec preferences cannot change the order of the media formats after an answer containing the transceiver has been applied. At this point, codecs can only be removed, not reordered.  </p>
+<p id="rfc.section.4.2.6.p.3">The codec preferences of an RtpTransceiver can also determine the order of codecs in subsequent calls to createOffer and createAnswer, in which case the order of the media formats in the associated m= section will match.  </p>
 <h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#sec.sdp-interaction-procedure" id="sec.sdp-interaction-procedure">SDP Interaction Procedures</a></h1>
 <p id="rfc.section.5.p.1">This section describes the specific procedures to be followed when creating and parsing SDP objects.</p>
 <h2 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a> <a href="#sec.requirements-overview" id="sec.requirements-overview">Requirements Overview</a></h2>
@@ -1052,7 +1052,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
   <li>The m= line and corresponding "a=rtpmap" and "a=fmtp" lines MUST only include codecs present in the most recent answer which have not been excluded by the codec preferences of the associated transceiver. Note that non-JSEP endpoints are not subject to these restrictions, and might offer media formats that were not present in the most recent answer, as specified in <a href="#RFC3264">[RFC3264]</a>, Section 8.  Therefore, JSEP implementations MUST be prepared to receive such offers.</li>
-  <li>The media formats on the m= line MUST be generated in the same order as in the current local description.</li>
+  <li>Unless codec preferences have been set for the associated transceiver, the media formats on the m= line MUST be generated in the same order as in the current local description.</li>
   <li>The RTP header extensions MUST only include those that are present in the most recent answer.</li>
   <li>The RTCP feedback extensions MUST only include those that are present in the most recent answer.</li>
   <li>The "a=rtcp" line MUST only be added if the most recent answer did not include an "a=rtcp-mux" line.</li>
@@ -1142,7 +1142,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
   <li>The "s=" and "t=" lines MUST stay the same.</li>
   <li>Each "m=" and c=" line MUST be filled in with the port and address of the default candidate for the m= section, as described in <a href="#RFC5245">[RFC5245]</a>, Section 4.3. Note, however, that the m= line protocol need not match the default candidate, because this protocol value must instead match what was supplied in the offer, as described above.</li>
-  <li>The media formats on the m= line MUST be generated in the same order as in the current local description.</li>
+  <li>Unless codec preferences have been set for the associated transceiver, the media formats on the m= line MUST be generated in the same order as in the current local description.</li>
   <li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the m= section is restarting, in which case new ICE credentials must be created as specified in <a href="#RFC5245">[RFC5245]</a>, Section 9.2.1.1. If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.</li>
   <li>Each "a=setup" line MUST use an "active" or "passive" role value consistent with the existing DTLS association, if the association is being continued by the offerer.</li>
   <li>If the m= section is not bundled into another m= section and RTCP multiplexing is not active, an "a=rtcp" attribute line MUST be filled in with the port and address of the default RTCP candidate. If no RTCP candidates have yet been gathered, dummy values MUST be used, as described in the initial answer section above.</li>
