@@ -2493,9 +2493,12 @@ Internet-Draft                    JSEP                     February 2017
       section is bundled into another m= section, it still MUST NOT
       contain any ICE credentials.
 
-   o  If the m= section is not bundled into another m= section, an
-      "a=rtcp" attribute line MUST be added with of the default RTCP
-      candidate, as indicated in [RFC5761], Section 5.1.3.
+   o  If the m= section is not bundled into another m= section, its
+      "a=rtcp" attribute line MUST be filled in with the port and
+      address of the default RTCP candidate, as indicated in [RFC5761],
+      Section 5.1.3.  If no RTCP candidates have yet been gathered,
+      dummy values MUST be used, as described in the initial offer
+      section above.
 
    o  If the m= section is not bundled into another m= section, for each
       candidate that has been gathered during the most recent gathering
@@ -2510,9 +2513,6 @@ Internet-Draft                    JSEP                     February 2017
    o  For RtpTransceivers that are still present, the "a=msid" line MUST
       stay the same.
 
-   o  For RtpTransceivers that are still present, the "a=rid" lines MUST
-      stay the same.
-
 
 
 
@@ -2521,6 +2521,9 @@ Uberti, et al.           Expires August 12, 2017               [Page 45]
 
 Internet-Draft                    JSEP                     February 2017
 
+
+   o  For RtpTransceivers that are still present, the "a=rid" lines MUST
+      stay the same.
 
    o  For RtpTransceivers that are still present, any "a=simulcast" line
       MUST stay the same.
@@ -2567,9 +2570,6 @@ Internet-Draft                    JSEP                     February 2017
    o  The RTCP feedback extensions MUST only include those that are
       present in the most recent answer.
 
-   o  The "a=rtcp" line MUST only be added if the most recent answer did
-      not include an "a=rtcp-mux" line.
-
 
 
 
@@ -2577,6 +2577,9 @@ Uberti, et al.           Expires August 12, 2017               [Page 46]
 
 Internet-Draft                    JSEP                     February 2017
 
+
+   o  The "a=rtcp" line MUST only be added if the most recent answer did
+      not include an "a=rtcp-mux" line.
 
    o  The "a=rtcp-mux" line MUST only be added if present in the most
       recent answer.
@@ -2623,9 +2626,6 @@ Internet-Draft                    JSEP                     February 2017
    except for codecs that have their own internal silence suppression
    support.  For codecs that have their own internal silence suppression
    support, the appropriate fmtp parameters for that codec MUST be
-   specified to indicate that silence suppression for received audio is
-   desired.  For example, when using the Opus codec, the "usedtx=1"
-   parameter would be specified in the offer.  This option allows the
 
 
 
@@ -2634,6 +2634,9 @@ Uberti, et al.           Expires August 12, 2017               [Page 47]
 Internet-Draft                    JSEP                     February 2017
 
 
+   specified to indicate that silence suppression for received audio is
+   desired.  For example, when using the Opus codec, the "usedtx=1"
+   parameter would be specified in the offer.  This option allows the
    endpoint to significantly reduce the amount of audio bandwidth it
    receives, at the cost of some fidelity, depending on the quality of
    the remote VAD algorithm.
@@ -2679,9 +2682,6 @@ Internet-Draft                    JSEP                     February 2017
 
    The first step in generating an initial answer is to generate
    session-level attributes.  The process here is identical to that
-   indicated in the Initial Offers section above, except that the
-   "a=ice-options" line, with the "trickle" option as specified in
-
 
 
 
@@ -2690,6 +2690,8 @@ Uberti, et al.           Expires August 12, 2017               [Page 48]
 Internet-Draft                    JSEP                     February 2017
 
 
+   indicated in the Initial Offers section above, except that the
+   "a=ice-options" line, with the "trickle" option as specified in
    [I-D.ietf-ice-trickle], Section 4, is only included if such an option
    was present in the offer.
 
@@ -2736,8 +2738,6 @@ Internet-Draft                    JSEP                     February 2017
    Otherwise, each m= section in the answer should then be generated as
    specified in [RFC3264], Section 6.1.  For the m= line itself, the
    following rules must be followed:
-
-
 
 
 
