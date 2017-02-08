@@ -2564,110 +2564,79 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           only included if such an option was present in the offer.</t>
 
           <t>The next step is to generate session-level lip sync
-          groups as defined in <xref target="RFC5888" />, Section
-          7.
-          For each group of type "LS" present in the offer,
-          determine which of the RtpTransceivers identified by
-          that group's mid values reference a common local MediaStream
-          (as specified in the addTrack and addTransceiver
-          methods). If at least two such RtpTransceivers exist, a
+          groups, as defined in <xref target="RFC5888" />, Section 7.
+          For each group of type "LS" present in the offer, select the
+          local RtpTransceivers that are referenced by the MID values in the
+          specified group, and determine which of them
+          also reference a common local MediaStream
+          (specified in the calls to addTrack/addTransceiver used to create
+          them). If at least two such RtpTransceivers exist, a
           group of type "LS" with the mid values of these
           RtpTransceivers MUST be added. Otherwise, this indicates a
           difference of opinion between the offerer and answerer
-          regarding lip sync status, and as such, the offered group
-          MUST be ignored and no corresponding "LS" group
-          generated.</t>
-
-          <t> Consider a simple case where both sides have single
-          audio and a single video MediaStreamTrack that are both
-          contained in the same MediaStream. As explained in <xref
-          target="sec-create-offer"/>, an group of type "LS" will have
-          been added to the offer that contains the mid value for the
-          RtpTransceiver associated with each of the
-          MediaStreamTracks. In the case here, when the remote o=offer is
-          applied, the two MediaStreamTracks will be created
-          and they will both point at the same MediaStream because the
-          offer will have had the same value in the "a=msid" line for
-          both of them.  When the answer is created, both the audio
-          and video RtpTransceivers will reference the common
-          MediaStream. This will cause the answer to add both of
-          theses MediaStreamTracks to the "LS" group in the answer due
-          to the rules in the paragraph above.
+          regarding lip sync status, and as such, the offered "LS" group
+          MUST be ignored and no corresponding group generated in the answer.
           </t>
 
-          <t> Complex examples where MediaStreamTrack A is
-          synchronized with B and at the same time MediaStreamTrack C,
-          D, E are also synchronized with each other but not with A
-          and B are also possible. To make these cases work, the
-          sender needs to ensure A and B are in one MediaStream while
-          C, D, and E are in a different MediaStream. This will cause
-          two groups of type "LS" to be created in the offer and as
-          long as the local
-          MediaStreams have been added,
-          then the groups of type "LS" will
-          be accepted. </t>
+          <t>As a simple example, consider the following offer of a single
+          audio and single video track contained in the same MediaStream.
+          (Note that SDP lines not relevant to this example have been removed
+          for clarity.)
+          As explained in <xref
+          target="sec-create-offer"/>, a group of type "LS" has been added that
+          references each track's RtpTranceiver.</t>
 
           <t>
-            A sketch of the offer would like:
             <figure>
               <artwork>
                 <![CDATA[
-a=group:LS A B
-a=group:LS C D E
-
-m=<the m-line for audio A>
-mid=A
-a=msid:one a1
-
-m=<the m-line for video B>
-mid=B
-a=msid:one b1
-
-m=<the m-line for audio C>
-mid=C
-a=msid:two c2
-
-m=<the m-line for video D>
-mid=D
-a=msid:two d2
-
-m=<the m-line for video E>
-mid=E
-a=msid:two e2
+          a=group:LS a1 v1
+          m=audio 10000 UDP/TLS/RTP/SAVPF 0
+          a=mid:a1
+          a=msid:ms1 mst1a
+          m=video 10001 UDP/TLS/RTP/SAVPF 96
+          a=mid:v1
+          a=msid:ms1 mst1v
                 ]]>
               </artwork>
             </figure>
           </t>
 
-              <t>
-            A sketch of the answer when A and B are in the first
-            MediaStream, C and E are in the second MediaStream, and D
-            is in a thrid MediaStream would look like:
+          <t>If the answerer uses a single MediaStream when it adds its tracks,
+          both of its RtpTransceivers will reference this stream, an so the
+          subsequent answer will contain a "LS" group identical to that in the
+          offer, as shown below:</t>
+
+          <t>
             <figure>
               <artwork>
                 <![CDATA[
-a=group:LS A B
-a=group:LS C E
+          a=group:LS a1 v1
+          m=audio 20000 UDP/TLS/RTP/SAVPF 0
+          a=mid:a1
+          a=msid:ms2 mst2a
+          m=video 20001 UDP/TLS/RTP/SAVPF 96
+          a=mid:v1
+          a=msid:ms2 mst2v
+                ]]>
+              </artwork>
+            </figure>
+          </t>
 
-m=<the m-line for audio A>
-mid=A
-a=msid:one a1
+          <t>However, if the answerer groups its tracks into separate
+          MediaStreams, the subsequent answer will not contain a "LS" group.
+          </t>
 
-m=<the m-line for video B>
-mid=B
-a=msid:one b1
-
-m=<the m-line for audio C>
-mid=C
-a=msid:two c2
-
-m=<the m-line for video D>
-mid=D
-a=msid:three d3
-
-m=<the m-line for video E>
-mid=E
-a=msid:two e2
+          <t>
+            <figure>
+              <artwork>
+                <![CDATA[
+          m=audio 20000 UDP/TLS/RTP/SAVPF 0
+          a=mid:a1
+          a=msid:ms2a mst2a
+          m=video 20001 UDP/TLS/RTP/SAVPF 96
+          a=mid:v1
+          a=msid:ms2b mst2v
                 ]]>
               </artwork>
             </figure>
