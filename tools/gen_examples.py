@@ -129,20 +129,6 @@ class PeerConnection:
     end = sdp.find('\n', start)
     return sdp[:start] + sdp[end + 1:]
 
-  def create_media_formatter(self, type, want_transport,
-                             want_bundle_only, want_rtcp,
-                             want_rtcp_mux_only):
-    formatter = self.MEDIA_TABLE[type]
-    if want_transport:
-      formatter += self.TRANSPORT_SDP
-    if want_bundle_only:
-      formatter += self.BUNDLE_ONLY_SDP
-    if not want_rtcp:
-      formatter = self.remove_attribute(formatter, 'a=rtcp')
-    if not want_rtcp_mux_only:
-      formatter = self.remove_attribute(formatter, 'a=rtcp-mux-only')
-    return formatter
-
   # creates 'candidate:1 1 udp 999999 1.1.1.1:1111 type host'
   def create_candidate_attr(self, component, type, addr, port, raddr, rport):
     TYPE_PRIORITIES = {'host': 126, 'srflx': 110, 'relay': 0}
@@ -216,11 +202,17 @@ class PeerConnection:
         copy['direction'] = 'sendrecv'
 
     # create the right template and fill it in
-    formatter = self.create_media_formatter(copy['type'],
-                                            want_transport = not bundled,
-                                            want_bundle_only = bundle_only,
-                                            want_rtcp = num_components == 2,
-                                            want_rtcp_mux_only = rtcp_mux_only)
+    formatter = self.MEDIA_TABLE[copy['type']]
+    if not bundled:
+      formatter += self.TRANSPORT_SDP
+    if bundle_only:
+      formatter += self.BUNDLE_ONLY_SDP
+    if num_components != 2:
+      formatter = self.remove_attribute(formatter, 'a=rtcp')
+    if not rtcp_mux_only:
+      formatter = self.remove_attribute(formatter, 'a=rtcp-mux-only')
+    if 'direction' in copy and 'send' not in copy['direction']:
+      formatter = self.remove_attribute(formatter, 'a=msid')
     sdp = formatter.format(copy)
 
     # if not bundling, create candidates either in SDP or separately
