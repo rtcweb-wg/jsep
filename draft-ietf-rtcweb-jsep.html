@@ -1346,7 +1346,7 @@ WebServer-&gt;BobJS:   signaling with |offer-A1|
 //                  |offer-A1| arrives at Bob
 BobJS-&gt;BobUA:       create a PeerConnection
 BobJS-&gt;BobUA:       setRemoteDescription with |offer-A1|
-BobUA-&gt;BobJS:       onaddstream event with remoteStream
+BobUA-&gt;BobJS:       ontrack events for audio and video tracks
 
 //                  Bob accepts call
 BobJS-&gt;BobUA:       addTrack with local tracks
@@ -1364,7 +1364,7 @@ WebServer-&gt;AliceJS: signaling with |answer-A1|
 
 //                  |answer-A1| arrives at Alice
 AliceJS-&gt;AliceUA:   setRemoteDescription with |answer-A1|
-AliceUA-&gt;AliceJS:   onaddstream event with remoteStream
+AliceUA-&gt;AliceJS:   ontrack events for audio and video tracks
 
 //                  media flows
 BobUA-&gt;AliceUA:     media sent from Bob to Alice
@@ -1511,18 +1511,22 @@ WebServer-&gt;BobJS:   signaling with |offer-B1|
 //                  |offer-B1| arrives at Bob
 BobJS-&gt;BobUA:       create a PeerConnection
 BobJS-&gt;BobUA:       setRemoteDescription with |offer-B1|
-BobUA-&gt;BobJS:       onaddstream with audio track from Alice
+BobUA-&gt;BobJS:       ontrack with audio track from Alice
 
 //                  candidates are sent to Bob
-AliceUA-&gt;AliceJS:   onicecandidate event with |candidate-B1| (host)
-AliceJS-&gt;WebServer: signaling with |candidate-B1|
-AliceUA-&gt;AliceJS:   onicecandidate event with |candidate-B2| (srflx)
-AliceJS-&gt;WebServer: signaling with |candidate-B2|
+AliceUA-&gt;AliceJS:   onicecandidate event with |offer-B1-candidate-1| (host)
+AliceJS-&gt;WebServer: signaling with |offer-B1-candidate-1|
+AliceUA-&gt;AliceJS:   onicecandidate event with |offer-B1-candidate-2| (srflx)
+AliceJS-&gt;WebServer: signaling with |offer-B1-candidate-2|
+AliceUA-&gt;AliceJS:   onicecandidate event with |offer-B1-candidate-3| (relay)
+AliceJS-&gt;WebServer: signaling with |offer-B1-candidate-3|
 
-WebServer-&gt;BobJS:   signaling with |candidate-B1|
-BobJS-&gt;BobUA:       addIceCandidate with |candidate-B1|
-WebServer-&gt;BobJS:   signaling with |candidate-B2|
-BobJS-&gt;BobUA:       addIceCandidate with |candidate-B2|
+WebServer-&gt;BobJS:   signaling with |offer-B1-candidate-1|
+BobJS-&gt;BobUA:       addIceCandidate with |offer-B1-candidate-1|
+WebServer-&gt;BobJS:   signaling with |offer-B1-candidate-2|
+BobJS-&gt;BobUA:       addIceCandidate with |offer-B1-candidate-2|
+WebServer-&gt;BobJS:   signaling with |offer-B1-candidate-3|
+BobJS-&gt;BobUA:       addIceCandidate with |offer-B1-candidate-3|
 
 //                  Bob accepts call
 BobJS-&gt;BobUA:       addTrack with local audio
@@ -1534,18 +1538,22 @@ BobJS-&gt;BobUA:       setLocalDescription with |answer-B1|
 BobJS-&gt;WebServer:   signaling with |answer-B1|
 WebServer-&gt;AliceJS: signaling with |answer-B1|
 AliceJS-&gt;AliceUA:   setRemoteDescription with |answer-B1|
-AliceUA-&gt;AliceJS:   onaddstream event with audio track from Bob
+AliceUA-&gt;AliceJS:   ontrack event with audio track from Bob
 
 //                  candidates are sent to Alice
-BobUA-&gt;BobJS:       onicecandidate event with |candidate-B3| (host)
-BobJS-&gt;WebServer:   signaling with |candidate-B3|
-BobUA-&gt;BobJS:       onicecandidate event with |candidate-B4| (srflx)
-BobJS-&gt;WebServer:   signaling with |candidate-B4|
+BobUA-&gt;BobJS:       onicecandidate event with |answer-B1-candidate-1| (host)
+BobJS-&gt;WebServer:   signaling with |answer-B1-candidate-1|
+BobUA-&gt;BobJS:       onicecandidate event with |answer-B1-candidate-2| (srflx)
+BobJS-&gt;WebServer:   signaling with |answer-B1-candidate-2|
+BobUA-&gt;BobJS:       onicecandidate event with |answer-B1-candidate-3| (relay)
+BobJS-&gt;WebServer:   signaling with |answer-B1-candidate-3|
 
-WebServer-&gt;AliceJS: signaling with |candidate-B3|
-AliceJS-&gt;AliceUA:   addIceCandidate with |candidate-B3|
-WebServer-&gt;AliceJS: signaling with |candidate-B4|
-AliceJS-&gt;AliceUA:   addIceCandidate with |candidate-B4|
+WebServer-&gt;AliceJS: signaling with |answer-B1-candidate-1|
+AliceJS-&gt;AliceUA:   addIceCandidate with |answer-B1-candidate-1|
+WebServer-&gt;AliceJS: signaling with |answer-B1-candidate-2|
+AliceJS-&gt;AliceUA:   addIceCandidate with |answer-B1-candidate-2|
+WebServer-&gt;AliceJS: signaling with |answer-B1-candidate-3|
+AliceJS-&gt;AliceUA:   addIceCandidate with |answer-B1-candidate-3|
 
 //                  data channel opens
 BobUA-&gt;BobJS:       ondatachannel event
@@ -1568,8 +1576,8 @@ BobJS-&gt;BobUA:       setLocalDescription with |offer-B2|
 BobJS-&gt;WebServer:   signaling with |offer-B2|
 WebServer-&gt;AliceJS: signaling with |offer-B2|
 AliceJS-&gt;AliceUA:   setRemoteDescription with |offer-B2|
-AliceUA-&gt;AliceJS:   onaddstream event with first video stream
-AliceUA-&gt;AliceJS:   onaddstream event with second video stream
+AliceUA-&gt;AliceJS:   ontrack event with first video track
+AliceUA-&gt;AliceJS:   ontrack event with second video track
 AliceJS-&gt;AliceUA:   createAnswer to get |answer-B2|
 AliceJS-&gt;AliceUA:   setLocalDescription with |answer-B2|
 
@@ -1873,13 +1881,8 @@ a=rtcp-fb:100 nack pli
 //                  set up local media state
 AliceJS-&gt;AliceUA:   create new PeerConnection
 AliceJS-&gt;AliceUA:   addTrack with two tracks: audio and video
-AliceJS-&gt;AliceUA:   createOffer to get offer
-AliceJS-&gt;AliceUA:   setLocalDescription with offer
-AliceUA-&gt;AliceJS:   multiple onicecandidate events with candidates
-
-//                  wait for ICE gathering to complete
-AliceUA-&gt;AliceJS:   onicecandidate event with null candidate
-AliceJS-&gt;AliceUA:   get |offer-C1| from value of localDescription
+AliceJS-&gt;AliceUA:   createOffer to get |offer-C1|
+AliceJS-&gt;AliceUA:   setLocalDescription with |offer-C1|
 
 //                  |offer-C1| is sent over signaling protocol to Bob
 AliceJS-&gt;WebServer: signaling with |offer-C1|
@@ -1888,18 +1891,20 @@ WebServer-&gt;BobJS:   signaling with |offer-C1|
 //                  |offer-C1| arrives at Bob
 BobJS-&gt;BobUA:       create a PeerConnection
 BobJS-&gt;BobUA:       setRemoteDescription with |offer-C1|
-BobUA-&gt;BobJS:       onaddtrack events for audio and video
+BobUA-&gt;BobJS:       ontrack events for audio and video
+
+//                  candidates are sent to Bob
+AliceUA-&gt;AliceJS:   onicecandidate event with |offer-C1-candidate-1| (relay)
+AliceJS-&gt;WebServer: signaling with |offer-C1-candidate-1|
+
+WebServer-&gt;BobJS:   signaling with |offer-C1-candidate-1|
+BobJS-&gt;BobUA:       addIceCandidate with |offer-C1-candidate-1|
 
 //                  Bob prepares an early answer to warm up the transport
 BobJS-&gt;BobUA:       addTransceiver with null audio and video tracks
 BobJS-&gt;BobUA:       transceiver.setDirection(sendonly) for both transceivers
 BobJS-&gt;BobUA:       createAnswer
 BobJS-&gt;BobUA:       setLocalDescription with answer
-BobUA-&gt;BobJS:       multiple onicecandidate events with candidates
-
-//                  wait for ICE gathering to complete
-BobUA-&gt;BobJS:       onicecandidate event with null candidate
-BobJS-&gt;BobUA:       get |answer-C1| from value of localDescription
 
 //                  |answer-C1| is sent over signaling protocol to Alice
 BobJS-&gt;WebServer:   signaling with |answer-C1|
@@ -1907,7 +1912,14 @@ WebServer-&gt;AliceJS: signaling with |answer-C1|
 
 //                  |answer-C1| (sendonly) arrives at Alice
 AliceJS-&gt;AliceUA:   setRemoteDescription with |answer-C1|
-AliceUA-&gt;AliceJS:   onaddtrack events for audio and video
+AliceUA-&gt;AliceJS:   ontrack events for audio and video
+
+//                  candidates are sent to Alice
+BobUA-&gt;BobJS:       onicecandidate event with |answer-B1-candidate-1| (relay)
+BobJS-&gt;WebServer:   signaling with |answer-B1-candidate-1|
+
+WebServer-&gt;AliceJS: signaling with |answer-B1-candidate-1|
+AliceJS-&gt;AliceUA:   addIceCandidate with |answer-B1-candidate-1|
 
 //                  ICE and DTLS establish while call is ringing
 

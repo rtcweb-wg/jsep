@@ -154,14 +154,14 @@ Internet-Draft                    JSEP                     February 2017
    7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  69
      7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  69
      7.2.  Normal Example  . . . . . . . . . . . . . . . . . . . . .  75
-   8.  Early Transport Warmup Example  . . . . . . . . . . . . . . .  83
-   9.  Security Considerations . . . . . . . . . . . . . . . . . . .  91
-   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  92
-   11. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  92
-   12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  92
-     12.1.  Normative References . . . . . . . . . . . . . . . . . .  92
-     12.2.  Informative References . . . . . . . . . . . . . . . . .  95
-   Appendix A.  Appendix A . . . . . . . . . . . . . . . . . . . . .  97
+   8.  Early Transport Warmup Example  . . . . . . . . . . . . . . .  84
+   9.  Security Considerations . . . . . . . . . . . . . . . . . . .  92
+   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  93
+   11. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  93
+   12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  93
+     12.1.  Normative References . . . . . . . . . . . . . . . . . .  93
+     12.2.  Informative References . . . . . . . . . . . . . . . . .  96
+   Appendix A.  Appendix A . . . . . . . . . . . . . . . . . . . . .  98
 
 
 
@@ -170,9 +170,9 @@ Uberti, et al.           Expires August 12, 2017                [Page 3]
 Internet-Draft                    JSEP                     February 2017
 
 
-   Appendix B.  Appendix B . . . . . . . . . . . . . . . . . . . . .  98
-   Appendix C.  Change log . . . . . . . . . . . . . . . . . . . . . 102
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 109
+   Appendix B.  Appendix B . . . . . . . . . . . . . . . . . . . . .  99
+   Appendix C.  Change log . . . . . . . . . . . . . . . . . . . . . 103
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 110
 
 1.  Introduction
 
@@ -3940,7 +3940,7 @@ WebServer->BobJS:   signaling with |offer-A1|
 //                  |offer-A1| arrives at Bob
 BobJS->BobUA:       create a PeerConnection
 BobJS->BobUA:       setRemoteDescription with |offer-A1|
-BobUA->BobJS:       onaddstream event with remoteStream
+BobUA->BobJS:       ontrack events for audio and video tracks
 
 //                  Bob accepts call
 BobJS->BobUA:       addTrack with local tracks
@@ -3958,7 +3958,7 @@ WebServer->AliceJS: signaling with |answer-A1|
 
 //                  |answer-A1| arrives at Alice
 AliceJS->AliceUA:   setRemoteDescription with |answer-A1|
-AliceUA->AliceJS:   onaddstream event with remoteStream
+AliceUA->AliceJS:   ontrack events for audio and video tracks
 
 //                  media flows
 BobUA->AliceUA:     media sent from Bob to Alice
@@ -4158,42 +4158,42 @@ Internet-Draft                    JSEP                     February 2017
    JS are assumed to flow over some signaling protocol via a web server.
 
 
-  //                  set up local media state
-  AliceJS->AliceUA:   create new PeerConnection
-  AliceJS->AliceUA:   addTrack with an audio track
-  AliceJS->AliceUA:   createDataChannel to get data channel
-  AliceJS->AliceUA:   createOffer to get |offer-B1|
-  AliceJS->AliceUA:   setLocalDescription with |offer-B1|
+//                  set up local media state
+AliceJS->AliceUA:   create new PeerConnection
+AliceJS->AliceUA:   addTrack with an audio track
+AliceJS->AliceUA:   createDataChannel to get data channel
+AliceJS->AliceUA:   createOffer to get |offer-B1|
+AliceJS->AliceUA:   setLocalDescription with |offer-B1|
 
-  //                  |offer-B1| is sent over signaling protocol to Bob
-  AliceJS->WebServer: signaling with |offer-B1|
-  WebServer->BobJS:   signaling with |offer-B1|
+//                  |offer-B1| is sent over signaling protocol to Bob
+AliceJS->WebServer: signaling with |offer-B1|
+WebServer->BobJS:   signaling with |offer-B1|
 
-  //                  |offer-B1| arrives at Bob
-  BobJS->BobUA:       create a PeerConnection
-  BobJS->BobUA:       setRemoteDescription with |offer-B1|
-  BobUA->BobJS:       onaddstream with audio track from Alice
+//                  |offer-B1| arrives at Bob
+BobJS->BobUA:       create a PeerConnection
+BobJS->BobUA:       setRemoteDescription with |offer-B1|
+BobUA->BobJS:       ontrack with audio track from Alice
 
-  //                  candidates are sent to Bob
-  AliceUA->AliceJS:   onicecandidate event with |candidate-B1| (host)
-  AliceJS->WebServer: signaling with |candidate-B1|
-  AliceUA->AliceJS:   onicecandidate event with |candidate-B2| (srflx)
-  AliceJS->WebServer: signaling with |candidate-B2|
+//                  candidates are sent to Bob
+AliceUA->AliceJS:   onicecandidate event with |offer-B1-candidate-1| (host)
+AliceJS->WebServer: signaling with |offer-B1-candidate-1|
+AliceUA->AliceJS:   onicecandidate event with |offer-B1-candidate-2| (srflx)
+AliceJS->WebServer: signaling with |offer-B1-candidate-2|
+AliceUA->AliceJS:   onicecandidate event with |offer-B1-candidate-3| (relay)
+AliceJS->WebServer: signaling with |offer-B1-candidate-3|
 
-  WebServer->BobJS:   signaling with |candidate-B1|
-  BobJS->BobUA:       addIceCandidate with |candidate-B1|
-  WebServer->BobJS:   signaling with |candidate-B2|
-  BobJS->BobUA:       addIceCandidate with |candidate-B2|
+WebServer->BobJS:   signaling with |offer-B1-candidate-1|
+BobJS->BobUA:       addIceCandidate with |offer-B1-candidate-1|
+WebServer->BobJS:   signaling with |offer-B1-candidate-2|
+BobJS->BobUA:       addIceCandidate with |offer-B1-candidate-2|
+WebServer->BobJS:   signaling with |offer-B1-candidate-3|
+BobJS->BobUA:       addIceCandidate with |offer-B1-candidate-3|
 
-  //                  Bob accepts call
-  BobJS->BobUA:       addTrack with local audio
-  BobJS->BobUA:       createDataChannel to get data channel
-  BobJS->BobUA:       createAnswer to get |answer-B1|
-  BobJS->BobUA:       setLocalDescription with |answer-B1|
-
-  //                  |answer-B1| is sent to Alice
-  BobJS->WebServer:   signaling with |answer-B1|
-  WebServer->AliceJS: signaling with |answer-B1|
+//                  Bob accepts call
+BobJS->BobUA:       addTrack with local audio
+BobJS->BobUA:       createDataChannel to get data channel
+BobJS->BobUA:       createAnswer to get |answer-B1|
+BobJS->BobUA:       setLocalDescription with |answer-B1|
 
 
 
@@ -4202,54 +4202,54 @@ Uberti, et al.           Expires August 12, 2017               [Page 75]
 Internet-Draft                    JSEP                     February 2017
 
 
-  AliceJS->AliceUA:   setRemoteDescription with |answer-B1|
-  AliceUA->AliceJS:   onaddstream event with audio track from Bob
+//                  |answer-B1| is sent to Alice
+BobJS->WebServer:   signaling with |answer-B1|
+WebServer->AliceJS: signaling with |answer-B1|
+AliceJS->AliceUA:   setRemoteDescription with |answer-B1|
+AliceUA->AliceJS:   ontrack event with audio track from Bob
 
-  //                  candidates are sent to Alice
-  BobUA->BobJS:       onicecandidate event with |candidate-B3| (host)
-  BobJS->WebServer:   signaling with |candidate-B3|
-  BobUA->BobJS:       onicecandidate event with |candidate-B4| (srflx)
-  BobJS->WebServer:   signaling with |candidate-B4|
+//                  candidates are sent to Alice
+BobUA->BobJS:       onicecandidate event with |answer-B1-candidate-1| (host)
+BobJS->WebServer:   signaling with |answer-B1-candidate-1|
+BobUA->BobJS:       onicecandidate event with |answer-B1-candidate-2| (srflx)
+BobJS->WebServer:   signaling with |answer-B1-candidate-2|
+BobUA->BobJS:       onicecandidate event with |answer-B1-candidate-3| (relay)
+BobJS->WebServer:   signaling with |answer-B1-candidate-3|
 
-  WebServer->AliceJS: signaling with |candidate-B3|
-  AliceJS->AliceUA:   addIceCandidate with |candidate-B3|
-  WebServer->AliceJS: signaling with |candidate-B4|
-  AliceJS->AliceUA:   addIceCandidate with |candidate-B4|
+WebServer->AliceJS: signaling with |answer-B1-candidate-1|
+AliceJS->AliceUA:   addIceCandidate with |answer-B1-candidate-1|
+WebServer->AliceJS: signaling with |answer-B1-candidate-2|
+AliceJS->AliceUA:   addIceCandidate with |answer-B1-candidate-2|
+WebServer->AliceJS: signaling with |answer-B1-candidate-3|
+AliceJS->AliceUA:   addIceCandidate with |answer-B1-candidate-3|
 
-  //                  data channel opens
-  BobUA->BobJS:       ondatachannel event
-  AliceUA->AliceJS:   ondatachannel event
-  BobUA->BobJS:       onopen
-  AliceUA->AliceJS:   onopen
+//                  data channel opens
+BobUA->BobJS:       ondatachannel event
+AliceUA->AliceJS:   ondatachannel event
+BobUA->BobJS:       onopen
+AliceUA->AliceJS:   onopen
 
-  //                  media is flowing between endpoints
-  BobUA->AliceUA:     audio+data sent from Bob to Alice
-  AliceUA->BobUA:     audio+data sent from Alice to Bob
+//                  media is flowing between endpoints
+BobUA->AliceUA:     audio+data sent from Bob to Alice
+AliceUA->BobUA:     audio+data sent from Alice to Bob
 
-  //                  some time later Bob adds two video streams
-  //                  note, no candidates exchanged, because of bundle
-  BobJS->BobUA:       addTrack with first video stream
-  BobJS->BobUA:       addTrack with second video stream
-  BobJS->BobUA:       createOffer to get |offer-B2|
-  BobJS->BobUA:       setLocalDescription with |offer-B2|
+//                  some time later Bob adds two video streams
+//                  note, no candidates exchanged, because of bundle
+BobJS->BobUA:       addTrack with first video stream
+BobJS->BobUA:       addTrack with second video stream
+BobJS->BobUA:       createOffer to get |offer-B2|
+BobJS->BobUA:       setLocalDescription with |offer-B2|
 
-  //                  |offer-B2| is sent to Alice
-  BobJS->WebServer:   signaling with |offer-B2|
-  WebServer->AliceJS: signaling with |offer-B2|
-  AliceJS->AliceUA:   setRemoteDescription with |offer-B2|
-  AliceUA->AliceJS:   onaddstream event with first video stream
-  AliceUA->AliceJS:   onaddstream event with second video stream
-  AliceJS->AliceUA:   createAnswer to get |answer-B2|
-  AliceJS->AliceUA:   setLocalDescription with |answer-B2|
+//                  |offer-B2| is sent to Alice
+BobJS->WebServer:   signaling with |offer-B2|
+WebServer->AliceJS: signaling with |offer-B2|
+AliceJS->AliceUA:   setRemoteDescription with |offer-B2|
+AliceUA->AliceJS:   ontrack event with first video track
+AliceUA->AliceJS:   ontrack event with second video track
+AliceJS->AliceUA:   createAnswer to get |answer-B2|
+AliceJS->AliceUA:   setLocalDescription with |answer-B2|
 
-  //                  |answer-B2| is sent over signaling protocol to Bob
-  AliceJS->WebServer: signaling with |answer-B2|
-  WebServer->BobJS:   signaling with |answer-B2|
-  BobJS->BobUA:       setRemoteDescription with |answer-B2|
-
-  //                  media is flowing between endpoints
-  BobUA->AliceUA:     audio+video+data sent from Bob to Alice
-  AliceUA->BobUA:     audio+video+data sent from Alice to Bob
+//                  |answer-B2| is sent over signaling protocol to Bob
 
 
 
@@ -4258,7 +4258,60 @@ Uberti, et al.           Expires August 12, 2017               [Page 76]
 Internet-Draft                    JSEP                     February 2017
 
 
+AliceJS->WebServer: signaling with |answer-B2|
+WebServer->BobJS:   signaling with |answer-B2|
+BobJS->BobUA:       setRemoteDescription with |answer-B2|
+
+//                  media is flowing between endpoints
+BobUA->AliceUA:     audio+video+data sent from Bob to Alice
+AliceUA->BobUA:     audio+video+data sent from Alice to Bob
+
+
    The SDP for |offer-B1| looks like:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Uberti, et al.           Expires August 12, 2017               [Page 77]
+
+Internet-Draft                    JSEP                     February 2017
 
 
    v=0
@@ -4309,7 +4362,10 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 77]
+
+
+
+Uberti, et al.           Expires August 12, 2017               [Page 78]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -4365,7 +4421,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 78]
+Uberti, et al.           Expires August 12, 2017               [Page 79]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -4421,7 +4477,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 79]
+Uberti, et al.           Expires August 12, 2017               [Page 80]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -4477,7 +4533,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 80]
+Uberti, et al.           Expires August 12, 2017               [Page 81]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -4533,7 +4589,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 81]
+Uberti, et al.           Expires August 12, 2017               [Page 82]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -4589,7 +4645,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 82]
+Uberti, et al.           Expires August 12, 2017               [Page 83]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -4637,41 +4693,38 @@ Internet-Draft                    JSEP                     February 2017
 //                  set up local media state
 AliceJS->AliceUA:   create new PeerConnection
 AliceJS->AliceUA:   addTrack with two tracks: audio and video
-AliceJS->AliceUA:   createOffer to get offer
-AliceJS->AliceUA:   setLocalDescription with offer
-AliceUA->AliceJS:   multiple onicecandidate events with candidates
+AliceJS->AliceUA:   createOffer to get |offer-C1|
+AliceJS->AliceUA:   setLocalDescription with |offer-C1|
 
-//                  wait for ICE gathering to complete
+//                  |offer-C1| is sent over signaling protocol to Bob
+AliceJS->WebServer: signaling with |offer-C1|
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 83]
+Uberti, et al.           Expires August 12, 2017               [Page 84]
 
 Internet-Draft                    JSEP                     February 2017
 
 
-AliceUA->AliceJS:   onicecandidate event with null candidate
-AliceJS->AliceUA:   get |offer-C1| from value of localDescription
-
-//                  |offer-C1| is sent over signaling protocol to Bob
-AliceJS->WebServer: signaling with |offer-C1|
 WebServer->BobJS:   signaling with |offer-C1|
 
 //                  |offer-C1| arrives at Bob
 BobJS->BobUA:       create a PeerConnection
 BobJS->BobUA:       setRemoteDescription with |offer-C1|
-BobUA->BobJS:       onaddtrack events for audio and video
+BobUA->BobJS:       ontrack events for audio and video
+
+//                  candidates are sent to Bob
+AliceUA->AliceJS:   onicecandidate event with |offer-C1-candidate-1| (relay)
+AliceJS->WebServer: signaling with |offer-C1-candidate-1|
+
+WebServer->BobJS:   signaling with |offer-C1-candidate-1|
+BobJS->BobUA:       addIceCandidate with |offer-C1-candidate-1|
 
 //                  Bob prepares an early answer to warm up the transport
 BobJS->BobUA:       addTransceiver with null audio and video tracks
 BobJS->BobUA:       transceiver.setDirection(sendonly) for both transceivers
 BobJS->BobUA:       createAnswer
 BobJS->BobUA:       setLocalDescription with answer
-BobUA->BobJS:       multiple onicecandidate events with candidates
-
-//                  wait for ICE gathering to complete
-BobUA->BobJS:       onicecandidate event with null candidate
-BobJS->BobUA:       get |answer-C1| from value of localDescription
 
 //                  |answer-C1| is sent over signaling protocol to Alice
 BobJS->WebServer:   signaling with |answer-C1|
@@ -4679,7 +4732,14 @@ WebServer->AliceJS: signaling with |answer-C1|
 
 //                  |answer-C1| (sendonly) arrives at Alice
 AliceJS->AliceUA:   setRemoteDescription with |answer-C1|
-AliceUA->AliceJS:   onaddtrack events for audio and video
+AliceUA->AliceJS:   ontrack events for audio and video
+
+//                  candidates are sent to Alice
+BobUA->BobJS:       onicecandidate event with |answer-B1-candidate-1| (relay)
+BobJS->WebServer:   signaling with |answer-B1-candidate-1|
+
+WebServer->AliceJS: signaling with |answer-B1-candidate-1|
+AliceJS->AliceUA:   addIceCandidate with |answer-B1-candidate-1|
 
 //                  ICE and DTLS establish while call is ringing
 
@@ -4694,18 +4754,18 @@ BobJS->BobUA:       setLocalDescription with offer
 BobJS->WebServer:   signaling with |offer-C2|
 WebServer->AliceJS: signaling with |offer-C2|
 
-//                  |offer-C2| (sendrecv) arrives at Alice
-AliceJS->AliceUA:   setRemoteDescription with |offer-C2|
-AliceJS->AliceUA:   createAnswer
-AliceJS->AliceUA:   setLocalDescription with |answer-C2|
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 84]
+Uberti, et al.           Expires August 12, 2017               [Page 85]
 
 Internet-Draft                    JSEP                     February 2017
 
 
+//                  |offer-C2| (sendrecv) arrives at Alice
+AliceJS->AliceUA:   setRemoteDescription with |offer-C2|
+AliceJS->AliceUA:   createAnswer
+AliceJS->AliceUA:   setLocalDescription with |answer-C2|
 AliceUA->BobUA:     media sent from Alice to Bob
 
 //                  |answer-C2| is sent over signaling protocol to Bob
@@ -4753,11 +4813,7 @@ BobJS->BobUA:       setRemoteDescription with |answer-C2|
 
 
 
-
-
-
-
-Uberti, et al.           Expires August 12, 2017               [Page 85]
+Uberti, et al.           Expires August 12, 2017               [Page 86]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -4813,7 +4869,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 86]
+Uberti, et al.           Expires August 12, 2017               [Page 87]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -4869,7 +4925,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 87]
+Uberti, et al.           Expires August 12, 2017               [Page 88]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -4925,7 +4981,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 88]
+Uberti, et al.           Expires August 12, 2017               [Page 89]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -4981,7 +5037,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 89]
+Uberti, et al.           Expires August 12, 2017               [Page 90]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5037,7 +5093,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 90]
+Uberti, et al.           Expires August 12, 2017               [Page 91]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5093,7 +5149,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 91]
+Uberti, et al.           Expires August 12, 2017               [Page 92]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5149,7 +5205,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 92]
+Uberti, et al.           Expires August 12, 2017               [Page 93]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5205,7 +5261,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 93]
+Uberti, et al.           Expires August 12, 2017               [Page 94]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5261,7 +5317,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 94]
+Uberti, et al.           Expires August 12, 2017               [Page 95]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5317,7 +5373,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 95]
+Uberti, et al.           Expires August 12, 2017               [Page 96]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5373,7 +5429,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 96]
+Uberti, et al.           Expires August 12, 2017               [Page 97]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5429,7 +5485,7 @@ Appendix A.  Appendix A
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 97]
+Uberti, et al.           Expires August 12, 2017               [Page 98]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5485,7 +5541,7 @@ Appendix B.  Appendix B
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 98]
+Uberti, et al.           Expires August 12, 2017               [Page 99]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5541,7 +5597,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017               [Page 99]
+Uberti, et al.           Expires August 12, 2017              [Page 100]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5597,7 +5653,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017              [Page 100]
+Uberti, et al.           Expires August 12, 2017              [Page 101]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5653,7 +5709,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017              [Page 101]
+Uberti, et al.           Expires August 12, 2017              [Page 102]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5709,7 +5765,7 @@ Appendix C.  Change log
 
 
 
-Uberti, et al.           Expires August 12, 2017              [Page 102]
+Uberti, et al.           Expires August 12, 2017              [Page 103]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5765,7 +5821,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017              [Page 103]
+Uberti, et al.           Expires August 12, 2017              [Page 104]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5821,7 +5877,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017              [Page 104]
+Uberti, et al.           Expires August 12, 2017              [Page 105]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5877,7 +5933,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017              [Page 105]
+Uberti, et al.           Expires August 12, 2017              [Page 106]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5933,7 +5989,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017              [Page 106]
+Uberti, et al.           Expires August 12, 2017              [Page 107]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -5989,7 +6045,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017              [Page 107]
+Uberti, et al.           Expires August 12, 2017              [Page 108]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -6045,7 +6101,7 @@ Internet-Draft                    JSEP                     February 2017
 
 
 
-Uberti, et al.           Expires August 12, 2017              [Page 108]
+Uberti, et al.           Expires August 12, 2017              [Page 109]
 
 Internet-Draft                    JSEP                     February 2017
 
@@ -6101,4 +6157,4 @@ Authors' Addresses
 
 
 
-Uberti, et al.           Expires August 12, 2017              [Page 109]
+Uberti, et al.           Expires August 12, 2017              [Page 110]
