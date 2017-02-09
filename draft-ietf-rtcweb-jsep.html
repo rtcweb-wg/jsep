@@ -1019,8 +1019,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>The "a=rtcp-mux" line MUST only be added if present in the most recent answer.</li>
   <li>The "a=rtcp-rsize" line MUST only be added if present in the most recent answer.</li>
 </ul>
-<p id="rfc.section.5.2.2.p.7">The "a=group:BUNDLE" attribute MUST include the mid identifiers specified in the bundle group in the most recent answer, minus any m= sections that have been marked as rejected, plus any newly added or re-enabled m= sections. In other words, the bundle attribute must contain all m= sections that were previously bundled, as long as they are still alive, as well as any new m= sections.</p>
-<p id="rfc.section.5.2.2.p.8">The "LS" groups are generated in the same way as with initial offers.</p>
+<p id="rfc.section.5.2.2.p.7">The "a=group:BUNDLE" attribute MUST include the MID identifiers specified in the bundle group in the most recent answer, minus any m= sections that have been marked as rejected, plus any newly added or re-enabled m= sections. In other words, the bundle attribute must contain all m= sections that were previously bundled, as long as they are still alive, as well as any new m= sections.</p>
+<p id="rfc.section.5.2.2.p.8">"a=group:LS" attributes are generated in the same way as for initial offers, with the additional stipulation that any lip sync groups that were present in the most recent answer MUST continue to exist and MUST contain any previously existing MID identifiers, as long as the identified m= sections still exist and are not rejected, and the group still contains at least two MID identifiers.  This ensures that any synchronized "recvonly" m= sections continue to be synchronized in the new offer.  </p>
 <h3 id="rfc.section.5.2.3"><a href="#rfc.section.5.2.3">5.2.3.</a> <a href="#sec.options-handling1" id="sec.options-handling1">Options Handling</a></h3>
 <p id="rfc.section.5.2.3.p.1">The createOffer method takes as a parameter an RTCOfferOptions object. Special processing is performed when generating a SDP description if the following options are present.</p>
 <h4 id="rfc.section.5.2.3.1"><a href="#rfc.section.5.2.3.1">5.2.3.1.</a> <a href="#sec.icerestart" id="sec.icerestart">IceRestart</a></h4>
@@ -1035,11 +1035,63 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h3 id="rfc.section.5.3.1"><a href="#rfc.section.5.3.1">5.3.1.</a> <a href="#sec.initial-answers" id="sec.initial-answers">Initial Answers</a></h3>
 <p id="rfc.section.5.3.1.p.1">When createAnswer is called for the first time after a remote description has been provided, the result is known as the initial answer. If no remote description has been installed, an answer cannot be generated, and an error MUST be returned.</p>
 <p id="rfc.section.5.3.1.p.2">Note that the remote description SDP may not have been created by a JSEP endpoint and may not conform to all the requirements listed in <a href="#sec-create-offer">Section 5.2</a>. For many cases, this is not a problem. However, if any mandatory SDP attributes are missing, or functionality listed as mandatory-to-use above is not present, this MUST be treated as an error, and MUST cause the affected m= sections to be marked as rejected.</p>
-<p id="rfc.section.5.3.1.p.3">The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the Initial Offers section above, except that the "a=ice-options" line, with the "trickle" option as specified in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 4, is only included if such an option was present in the offer.</p>
-<p id="rfc.section.5.3.1.p.4">The next step is to generate session-level lip sync groups as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7. For each group of type "LS" present in the offer, determine which of the local RtpTransceivers identified by that group's mid values reference a common local MediaStream (as specified in the addTrack and addTransceiver methods). If at least two such RtpTransceivers exist, a group of type "LS" with the mid values of these RtpTransceivers MUST be added. Otherwise, this indicates a difference of opinion between the offerer and answerer regarding lip sync status, and as such, the offered group MUST be ignored and no corresponding "LS" group generated.</p>
-<p id="rfc.section.5.3.1.p.5">The next step is to generate m= sections for each m= section that is present in the remote offer, as specified in <a href="#RFC3264">[RFC3264]</a>, Section 6. For the purposes of this discussion, any session-level attributes in the offer that are also valid as media-level attributes SHALL be considered to be present in each m= section.</p>
-<p id="rfc.section.5.3.1.p.6">The next step is to go through each offered m= section.  Each offered m= section will have an associated RtpTransceiver, as described in <a href="#sec.applying-a-remote-desc">Section 5.9</a>. If there are more RtpTransceivers than there are m= sections, the unmatched RtpTransceivers will need to be associated in a subsequent offer.</p>
-<p id="rfc.section.5.3.1.p.7">For each offered m= section, if any of the following conditions are true, the corresponding m= section in the answer MUST be marked as rejected by setting the port in the m= line to zero, as indicated in <a href="#RFC3264">[RFC3264]</a>, Section 6., and further processing for this m= section can be skipped: </p>
+<p id="rfc.section.5.3.1.p.3">The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the initial offers section above, except that the "a=ice-options" line, with the "trickle" option as specified in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 4, is only included if such an option was present in the offer.</p>
+<p id="rfc.section.5.3.1.p.4">The next step is to generate session-level lip sync groups, as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7.  For each group of type "LS" present in the offer, select the local RtpTransceivers that are referenced by the MID values in the specified group, and determine which of them either reference a common local MediaStream (specified in the calls to addTrack/addTransceiver used to create them), or have no MediaStream to reference because they were not created by addTrack/addTransceiver. If at least two such RtpTransceivers exist, a group of type "LS" with the mid values of these RtpTransceivers MUST be added. Otherwise the offered "LS" group MUST be ignored and no corresponding group generated in the answer.  </p>
+<p id="rfc.section.5.3.1.p.5">As a simple example, consider the following offer of a single audio and single video track contained in the same MediaStream.  SDP lines not relevant to this example have been removed for clarity.  As explained in <a href="#sec-create-offer">Section 5.2</a>, a group of type "LS" has been added that references each track's RtpTransceiver.</p>
+<pre>
+                
+          a=group:LS a1 v1
+          m=audio 10000 UDP/TLS/RTP/SAVPF 0
+          a=mid:a1
+          a=msid:ms1 mst1a
+          m=video 10001 UDP/TLS/RTP/SAVPF 96
+          a=mid:v1
+          a=msid:ms1 mst1v
+                
+              </pre>
+<p/>
+<p id="rfc.section.5.3.1.p.7">If the answerer uses a single MediaStream when it adds its tracks, both of its transceivers will reference this stream, and so the subsequent answer will contain a "LS" group identical to that in the offer, as shown below:</p>
+<pre>
+                
+          a=group:LS a1 v1
+          m=audio 20000 UDP/TLS/RTP/SAVPF 0
+          a=mid:a1
+          a=msid:ms2 mst2a
+          m=video 20001 UDP/TLS/RTP/SAVPF 96
+          a=mid:v1
+          a=msid:ms2 mst2v
+                
+              </pre>
+<p/>
+<p id="rfc.section.5.3.1.p.9">However, if the answerer groups its tracks into separate MediaStreams, its transceivers will reference different streams, and so the subsequent answer will not contain a "LS" group.  </p>
+<pre>
+                
+          m=audio 20000 UDP/TLS/RTP/SAVPF 0
+          a=mid:a1
+          a=msid:ms2a mst2a
+          m=video 20001 UDP/TLS/RTP/SAVPF 96
+          a=mid:v1
+          a=msid:ms2b mst2v
+                
+              </pre>
+<p/>
+<p id="rfc.section.5.3.1.p.11">Finally, if the answerer does not add any tracks, its transceivers will not reference any MediaStreams, causing the preferences of the offerer to be maintained, and so the subsequent answer will contain an identical "LS" group.  </p>
+<pre>
+                
+          a=group:LS a1 v1
+          m=audio 20000 UDP/TLS/RTP/SAVPF 0
+          a=mid:a1
+          a=recvonly
+          m=video 20001 UDP/TLS/RTP/SAVPF 96
+          a=mid:v1
+          a=recvonly
+                
+              </pre>
+<p/>
+<p id="rfc.section.5.3.1.p.13">The <a href="#sec.normal-example">Section 7.2</a> example later in this document shows a more involved case of "LS" group generation.</p>
+<p id="rfc.section.5.3.1.p.14">The next step is to generate m= sections for each m= section that is present in the remote offer, as specified in <a href="#RFC3264">[RFC3264]</a>, Section 6. For the purposes of this discussion, any session-level attributes in the offer that are also valid as media-level attributes are considered to be present in each m= section.</p>
+<p id="rfc.section.5.3.1.p.15">The next step is to go through each offered m= section.  Each offered m= section will have an associated RtpTransceiver, as described in <a href="#sec.applying-a-remote-desc">Section 5.9</a>. If there are more RtpTransceivers than there are m= sections, the unmatched RtpTransceivers will need to be associated in a subsequent offer.</p>
+<p id="rfc.section.5.3.1.p.16">For each offered m= section, if any of the following conditions are true, the corresponding m= section in the answer MUST be marked as rejected by setting the port in the m= line to zero, as indicated in <a href="#RFC3264">[RFC3264]</a>, Section 6., and further processing for this m= section can be skipped: </p>
 
 <ul>
   <li>The associated RtpTransceiver has been stopped.</li>
@@ -1047,7 +1099,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>The bundle policy is "max-bundle", and this is not the first m= section or in the same bundle group as the first m= section.</li>
   <li>The bundle policy is "balanced", and this is not the first m= section for this media type or in the same bundle group as the first m= section for this media type.</li>
 </ul>
-<p id="rfc.section.5.3.1.p.8">Otherwise, each m= section in the answer should then be generated as specified in <a href="#RFC3264">[RFC3264]</a>, Section 6.1. For the m= line itself, the following rules must be followed: </p>
+<p id="rfc.section.5.3.1.p.17">Otherwise, each m= section in the answer should then be generated as specified in <a href="#RFC3264">[RFC3264]</a>, Section 6.1. For the m= line itself, the following rules must be followed: </p>
 
 <ul>
   <li>The port value would normally be set to the port of the default ICE candidate for this m= section, but given that no candidates are available yet, the "dummy" port value of 9 (Discard) MUST be used, as indicated in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 5.1.</li>
@@ -1055,8 +1107,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If codec preferences have been set for the associated transceiver, media formats MUST be generated in the corresponding order, and MUST exclude any codecs not present in the codec preferences or not present in the offer. Note that non-JSEP endpoints are not subject to this restriction, and might add media formats in the answer that are not present in the offer, as specified in <a href="#RFC3264">[RFC3264]</a>, Section 6.1. Therefore, JSEP implementations MUST be prepared to receive such answers.</li>
   <li>Unless excluded by the above restrictions, the media formats MUST include the mandatory audio/video codecs as specified in <a href="#I-D.ietf-rtcweb-audio">[I-D.ietf-rtcweb-audio]</a>(see Section 3) and <a href="#I-D.ietf-rtcweb-video">[I-D.ietf-rtcweb-video]</a>(see Section 5).</li>
 </ul>
-<p id="rfc.section.5.3.1.p.9">The m= line MUST be followed immediately by a "c=" line, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.7. Again, as no candidates are available yet, the "c=" line must contain the "dummy" value "IN IP4 0.0.0.0", as defined in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 5.1.</p>
-<p id="rfc.section.5.3.1.p.10">If the offer supports bundle, all m= sections to be bundled must use the same ICE credentials and candidates; all m= sections not being bundled must use unique ICE credentials and candidates. Each m= section MUST contain the following attributes (which are of attribute types other than IDENTICAL and TRANSPORT): </p>
+<p id="rfc.section.5.3.1.p.18">The m= line MUST be followed immediately by a "c=" line, as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.7. Again, as no candidates are available yet, the "c=" line must contain the "dummy" value "IN IP4 0.0.0.0", as defined in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 5.1.</p>
+<p id="rfc.section.5.3.1.p.19">If the offer supports bundle, all m= sections to be bundled must use the same ICE credentials and candidates; all m= sections not being bundled must use unique ICE credentials and candidates. Each m= section MUST contain the following attributes (which are of attribute types other than IDENTICAL and TRANSPORT): </p>
 
 <ul>
   <li>If and only if present in the offer, an "a=mid" line, as specified in <a href="#RFC5888">[RFC5888]</a>, Section 9.1. The "mid" value MUST match that specified in the offer.</li>
@@ -1070,7 +1122,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>For each supported RTCP feedback mechanism that is present in the offer, an "a=rtcp-fb" mechanism, as specified in <a href="#RFC4585">[RFC4585]</a>, Section 4.2. The list of RTCP feedback mechanisms that SHOULD/MUST be supported is specified in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>, Section 5.1.</li>
   <li>If the RtpTransceiver has a sendrecv or sendonly direction: <ul><li>For each MediaStream that was associated with the transceiver when it was created via addTrack or addTransceiver, an "a=msid" line, as specified in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 2. If a MediaStreamTrack is attached to the transceiver's RtpSender, the "a=msid" lines MUST use that track's ID. If no MediaStreamTrack is attached, a valid ID MUST be generated, in the same way that the implementation generates IDs for local tracks.</li><li>If no MediaStream is associated with the transceiver, a single "a=msid" line with the special value "-" in place of the MediaStream ID, as specified in <a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a>, Section 3. The track ID MUST be selected as described above.</li></ul></li>
 </ul>
-<p id="rfc.section.5.3.1.p.11">Each m= section which is not bundled into another m= section, MUST contain the following attributes (which are of category IDENTICAL or TRANSPORT):</p>
+<p id="rfc.section.5.3.1.p.20">Each m= section which is not bundled into another m= section, MUST contain the following attributes (which are of category IDENTICAL or TRANSPORT):</p>
 <p/>
 
 <ul>
@@ -1083,12 +1135,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 
 <p> </p>
-<p id="rfc.section.5.3.1.p.13">If a data channel m= section has been offered, a m= section MUST also be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; and "fmt" fields MUST be set to exactly match the fields in the offer.</p>
-<p id="rfc.section.5.3.1.p.14">Within the data m= section, an "a=mid" line MUST be generated and included as described above, along with an "a=sctp-port" line referencing the SCTP port number, as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 5.1, and, if appropriate, an "a=max-message-size" line, as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 6.1.  </p>
-<p id="rfc.section.5.3.1.p.15">As discussed above, the following attributes are included only if the m= section is not bundled into another m= section: "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", "a=dtls-id", and "a=setup".  </p>
-<p id="rfc.section.5.3.1.p.16">If "a=group" attributes with semantics of "BUNDLE" are offered, corresponding session-level "a=group" attributes MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. These attributes MUST have semantics "BUNDLE", and MUST include the all mid identifiers from the offered bundle groups that have not been rejected.  Note that regardless of the presence of "a=bundle-only" in the offer, no m= sections in the answer should have an "a=bundle-only" line.</p>
-<p id="rfc.section.5.3.1.p.17">Attributes that are common between all m= sections MAY be moved to session-level, if explicitly defined to be valid at session-level.</p>
-<p id="rfc.section.5.3.1.p.18">The attributes prohibited in the creation of offers are also prohibited in the creation of answers.</p>
+<p id="rfc.section.5.3.1.p.22">If a data channel m= section has been offered, a m= section MUST also be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; and "fmt" fields MUST be set to exactly match the fields in the offer.</p>
+<p id="rfc.section.5.3.1.p.23">Within the data m= section, an "a=mid" line MUST be generated and included as described above, along with an "a=sctp-port" line referencing the SCTP port number, as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 5.1, and, if appropriate, an "a=max-message-size" line, as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 6.1.  </p>
+<p id="rfc.section.5.3.1.p.24">As discussed above, the following attributes are included only if the m= section is not bundled into another m= section: "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", "a=dtls-id", and "a=setup".  </p>
+<p id="rfc.section.5.3.1.p.25">If "a=group" attributes with semantics of "BUNDLE" are offered, corresponding session-level "a=group" attributes MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. These attributes MUST have semantics "BUNDLE", and MUST include the all mid identifiers from the offered bundle groups that have not been rejected.  Note that regardless of the presence of "a=bundle-only" in the offer, no m= sections in the answer should have an "a=bundle-only" line.</p>
+<p id="rfc.section.5.3.1.p.26">Attributes that are common between all m= sections MAY be moved to session-level, if explicitly defined to be valid at session-level.</p>
+<p id="rfc.section.5.3.1.p.27">The attributes prohibited in the creation of offers are also prohibited in the creation of answers.</p>
 <h3 id="rfc.section.5.3.2"><a href="#rfc.section.5.3.2">5.3.2.</a> <a href="#sec.subsequent-answers" id="sec.subsequent-answers">Subsequent Answers</a></h3>
 <p id="rfc.section.5.3.2.p.1">When createAnswer is called a second (or later) time, or is called after a local description has already been installed, the processing is somewhat different than for an initial answer.</p>
 <p id="rfc.section.5.3.2.p.2">If the initial answer was not applied using setLocalDescription, meaning the PeerConnection is still in the "have-remote-offer" state, the steps for generating an initial answer should be followed, subject to the following restriction: </p>
@@ -1480,7 +1532,7 @@ AliceUA-&gt;AliceJS:   onicecandidate (host) |offer-B1-candidate-1|
 AliceJS-&gt;WebServer: signaling with |offer-B1-candidate-1|
 AliceUA-&gt;AliceJS:   onicecandidate (srflx) |offer-B1-candidate-2|
 AliceJS-&gt;WebServer: signaling with |offer-B1-candidate-2|
-AliceUA-&gt;AliceJS:   onicecandidate (relay) |offer-B1-candidate-3| 
+AliceUA-&gt;AliceJS:   onicecandidate (relay) |offer-B1-candidate-3|
 AliceJS-&gt;WebServer: signaling with |offer-B1-candidate-3|
 
 WebServer-&gt;BobJS:   signaling with |offer-B1-candidate-1|
@@ -1876,7 +1928,7 @@ BobJS-&gt;BobUA:       setRemoteDescription with |offer-C1|
 BobUA-&gt;BobJS:       ontrack events for audio and video
 
 //                  candidates are sent to Bob
-AliceUA-&gt;AliceJS:   onicecandidate (relay) |offer-C1-candidate-1| 
+AliceUA-&gt;AliceJS:   onicecandidate (relay) |offer-C1-candidate-1|
 AliceJS-&gt;WebServer: signaling with |offer-C1-candidate-1|
 
 WebServer-&gt;BobJS:   signaling with |offer-C1-candidate-1|
@@ -1884,7 +1936,7 @@ BobJS-&gt;BobUA:       addIceCandidate with |offer-C1-candidate-1|
 
 //                 Bob prepares an early answer to warm up the transport
 BobJS-&gt;BobUA:       addTransceiver with null audio and video tracks
-BobJS-&gt;BobUA:       transceiver.setDirection(sendonly) for both 
+BobJS-&gt;BobUA:       transceiver.setDirection(sendonly) for both
 BobJS-&gt;BobUA:       createAnswer
 BobJS-&gt;BobUA:       setLocalDescription with answer
 
@@ -1897,7 +1949,7 @@ AliceJS-&gt;AliceUA:   setRemoteDescription with |answer-C1|
 AliceUA-&gt;AliceJS:   ontrack events for audio and video
 
 //                  candidates are sent to Alice
-BobUA-&gt;BobJS:       onicecandidate (relay) |answer-B1-candidate-1| 
+BobUA-&gt;BobJS:       onicecandidate (relay) |answer-B1-candidate-1|
 BobJS-&gt;WebServer:   signaling with |answer-B1-candidate-1|
 
 WebServer-&gt;AliceJS: signaling with |answer-B1-candidate-1|
@@ -1908,7 +1960,7 @@ AliceJS-&gt;AliceUA:   addIceCandidate with |answer-B1-candidate-1|
 //                 Bob accepts call, starts media, and sends a new offer
 BobJS-&gt;BobUA:       transceiver.setTrack with audio and video tracks
 BobUA-&gt;AliceUA:     media sent from Bob to Alice
-BobJS-&gt;BobUA:       transceiver.setDirection(sendrecv) for both 
+BobJS-&gt;BobUA:       transceiver.setDirection(sendrecv) for both
                     transceivers
 BobJS-&gt;BobUA:       createOffer
 BobJS-&gt;BobUA:       setLocalDescription with offer
