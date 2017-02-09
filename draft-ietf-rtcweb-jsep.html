@@ -323,9 +323,8 @@ li, p {
 <link href="#rfc.section.4.2.6" rel="Chapter" title="4.2.6 setCodecPreferences"/>
 <link href="#rfc.section.5" rel="Chapter" title="5 SDP Interaction Procedures"/>
 <link href="#rfc.section.5.1" rel="Chapter" title="5.1 Requirements Overview"/>
-<link href="#rfc.section.5.1.1" rel="Chapter" title="5.1.1 Implementation Requirements"/>
-<link href="#rfc.section.5.1.2" rel="Chapter" title="5.1.2 Usage Requirements"/>
-<link href="#rfc.section.5.1.3" rel="Chapter" title="5.1.3 Profile Names and Interoperability"/>
+<link href="#rfc.section.5.1.1" rel="Chapter" title="5.1.1 Usage Requirements"/>
+<link href="#rfc.section.5.1.2" rel="Chapter" title="5.1.2 Profile Names and Interoperability"/>
 <link href="#rfc.section.5.2" rel="Chapter" title="5.2 Constructing an Offer"/>
 <link href="#rfc.section.5.2.1" rel="Chapter" title="5.2.1 Initial Offers"/>
 <link href="#rfc.section.5.2.2" rel="Chapter" title="5.2.2 Subsequent Offers"/>
@@ -493,9 +492,8 @@ li, p {
 <li>4.2.6.   <a href="#rfc.section.4.2.6">setCodecPreferences</a></li>
 </ul></ul><li>5.   <a href="#rfc.section.5">SDP Interaction Procedures</a></li>
 <ul><li>5.1.   <a href="#rfc.section.5.1">Requirements Overview</a></li>
-<ul><li>5.1.1.   <a href="#rfc.section.5.1.1">Implementation Requirements</a></li>
-<li>5.1.2.   <a href="#rfc.section.5.1.2">Usage Requirements</a></li>
-<li>5.1.3.   <a href="#rfc.section.5.1.3">Profile Names and Interoperability</a></li>
+<ul><li>5.1.1.   <a href="#rfc.section.5.1.1">Usage Requirements</a></li>
+<li>5.1.2.   <a href="#rfc.section.5.1.2">Profile Names and Interoperability</a></li>
 </ul><li>5.2.   <a href="#rfc.section.5.2">Constructing an Offer</a></li>
 <ul><li>5.2.1.   <a href="#rfc.section.5.2.1">Initial Offers</a></li>
 <li>5.2.2.   <a href="#rfc.section.5.2.2">Subsequent Offers</a></li>
@@ -879,56 +877,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.p.1">This section describes the specific procedures to be followed when creating and parsing SDP objects.</p>
 <h2 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a> <a href="#sec.requirements-overview" id="sec.requirements-overview">Requirements Overview</a></h2>
 <p id="rfc.section.5.1.p.1">JSEP implementations must comply with the specifications listed below that govern the creation and processing of offers and answers.</p>
-<p id="rfc.section.5.1.p.2">The first set of specifications is the "mandatory-to-implement" set. All implementations must support these behaviors, but may not use all of them if the remote side, which may not be a JSEP endpoint, does not support them.</p>
-<p id="rfc.section.5.1.p.3">The second set of specifications is the "mandatory-to-use" set. The local JSEP endpoint and any remote endpoint must indicate support for these specifications in their session descriptions.</p>
-<h3 id="rfc.section.5.1.1"><a href="#rfc.section.5.1.1">5.1.1.</a> <a href="#sec.implementation-requirements" id="sec.implementation-requirements">Implementation Requirements</a></h3>
-<p id="rfc.section.5.1.1.p.1">Implementations of JSEP MUST conform to <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>.  This list of mandatory-to-implement specifications is derived from the requirements outlined in that document and from <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a>.</p>
-<p/>
+<h3 id="rfc.section.5.1.1"><a href="#rfc.section.5.1.1">5.1.1.</a> <a href="#sec.usage-requirements" id="sec.usage-requirements">Usage Requirements</a></h3>
+<p id="rfc.section.5.1.1.p.1">All session descriptions handled by JSEP implementations, both local and remote, MUST indicate support for the following specifications. If any of these are absent, this omission MUST be treated as an error.  </p>
 
-<dl>
-  <dt>R-1   </dt>
-  <dd><a href="#RFC4566">[RFC4566]</a> is the base SDP specification and MUST be implemented.</dd>
-  <dt>R-2   </dt>
-  <dd><a href="#RFC5764">[RFC5764]</a> MUST be supported for signaling the UDP/TLS/RTP/SAVPF <a href="#RFC5764">[RFC5764]</a>, TCP/DTLS/RTP/SAVPF <a href="#RFC7850">[RFC7850]</a>, "UDP/DTLS/SCTP" <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, and "TCP/DTLS/SCTP" <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a> RTP profiles.</dd>
-  <dt>R-3   </dt>
-  <dd><a href="#RFC5245">[RFC5245]</a> MUST be implemented for signaling the ICE credentials and candidate lines corresponding to each media stream. The ICE implementation MUST be a Full implementation, not a Lite implementation.</dd>
-  <dt>R-4   </dt>
-  <dd><a href="#RFC5763">[RFC5763]</a> MUST be implemented to signal DTLS certificate fingerprints.</dd>
-  <dt>R-5   </dt>
-  <dd><a href="#RFC5888">[RFC5888]</a> MUST be implemented for signaling grouping information, and MUST be used to identify m= lines via the a=mid attribute.</dd>
-  <dt>R-6   </dt>
-  <dd><a href="#I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</a> MUST be supported, in order to signal associations between RTP objects and W3C MediaStreams and MediaStreamTracks in a standard way.</dd>
-  <dt>R-7   </dt>
-  <dd>The bundle mechanism in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a> MUST be supported to signal the ability to multiplex RTP streams on a single UDP port, in order to avoid excessive use of port number resources.</dd>
-  <dt>R-8   </dt>
-  <dd>The SDP attributes of "sendonly", "recvonly", "inactive", and "sendrecv" from <a href="#RFC4566">[RFC4566]</a> MUST be implemented to signal information about media direction.</dd>
-  <dt>R-9   </dt>
-  <dd><a href="#RFC5576">[RFC5576]</a> MUST be implemented to signal RTP SSRC values and grouping semantics.</dd>
-  <dt>R-10  </dt>
-  <dd><a href="#RFC4585">[RFC4585]</a> MUST be implemented to signal RTCP based feedback.</dd>
-  <dt>R-11  </dt>
-  <dd><a href="#RFC5761">[RFC5761]</a> MUST be implemented to signal multiplexing of RTP and RTCP.</dd>
-  <dt>R-12  </dt>
-  <dd><a href="#RFC5506">[RFC5506]</a> MUST be implemented to signal reduced-size RTCP messages.</dd>
-  <dt>R-13  </dt>
-  <dd><a href="#RFC4588">[RFC4588]</a> MUST be implemented to signal RTX payload type associations.</dd>
-  <dt>R-14  </dt>
-  <dd><a href="#RFC3556">[RFC3556]</a> MUST be supported for control of RTCP bandwidth limits.</dd>
-</dl>
-<p id="rfc.section.5.1.1.p.3">The SDES SRTP keying mechanism from <a href="#RFC4568">[RFC4568]</a> MUST NOT be implemented, as discussed in <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a>.</p>
-<p id="rfc.section.5.1.1.p.4">As required by <a href="#RFC4566">[RFC4566]</a>, Section 5.13, JSEP implementations MUST ignore unknown attribute (a=) lines.</p>
-<h3 id="rfc.section.5.1.2"><a href="#rfc.section.5.1.2">5.1.2.</a> <a href="#sec.usage-requirements" id="sec.usage-requirements">Usage Requirements</a></h3>
-<p id="rfc.section.5.1.2.p.1">All session descriptions handled by JSEP implementations, both local and remote, MUST indicate support for the following specifications. If any of these are absent, this omission MUST be treated as an error.  </p>
-
-<dl>
-  <dt>U-1   </dt>
-  <dd>ICE, as specified in <a href="#RFC5245">[RFC5245]</a>, MUST be used. Note that the remote endpoint may use a Lite implementation; implementations MUST properly handle remote endpoints which do ICE-Lite.</dd>
-  <dt>U-2   </dt>
-  <dd>DTLS <a href="#RFC6347">[RFC6347]</a> or DTLS-SRTP <a href="#RFC5763">[RFC5763]</a>, MUST be used, as appropriate for the media type, as specified in <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a></dd>
-</dl>
-<h3 id="rfc.section.5.1.3"><a href="#rfc.section.5.1.3">5.1.3.</a> <a href="#sec.profile-names" id="sec.profile-names">Profile Names and Interoperability</a></h3>
-<p id="rfc.section.5.1.3.p.1">For media m= sections, JSEP implementations MUST support both the "UDP/TLS/ RTP/SAVPF" and "TCP/DTLS/RTP/SAVPF" profiles and MUST indicate one of these two profiles for each media m= line they produce in an offer. For data m= sections, implementations MUST support both the "UDP/DTLS/SCTP" and "TCP/DTLS/SCTP" profiles and MUST indicate one of these two profiles for each data m= line they produce in an offer.  Because ICE can select either TCP or UDP transport depending on network conditions, both advertisements are consistent with ICE eventually selecting either either UDP or TCP.</p>
-<p id="rfc.section.5.1.3.p.2">Unfortunately, in an attempt at compatibility, some endpoints generate other profile strings even when they mean to support one of these profiles. For instance, an endpoint might generate "RTP/AVP" but supply "a=fingerprint" and "a=rtcp-fb" attributes, indicating its willingness to support "(UDP,TCP)/TLS/RTP/SAVPF". In order to simplify compatibility with such endpoints, JSEP implementations MUST follow the following rules when processing the media m= sections in an offer:</p>
+<ul>
+  <li>ICE, as specified in <a href="#RFC5245">[RFC5245]</a>, MUST be used. Note that the remote endpoint may use a Lite implementation; implementations MUST properly handle remote endpoints which do ICE-Lite.</li>
+  <li>DTLS <a href="#RFC6347">[RFC6347]</a> or DTLS-SRTP <a href="#RFC5763">[RFC5763]</a>, MUST be used, as appropriate for the media type, as specified in <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a></li>
+</ul>
+<p id="rfc.section.5.1.1.p.2">The SDES SRTP keying mechanism from <a href="#RFC4568">[RFC4568]</a> MUST NOT be used, as discussed in <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a>.</p>
+<h3 id="rfc.section.5.1.2"><a href="#rfc.section.5.1.2">5.1.2.</a> <a href="#sec.profile-names" id="sec.profile-names">Profile Names and Interoperability</a></h3>
+<p id="rfc.section.5.1.2.p.1">For media m= sections, JSEP implementations MUST support the "UDP/TLS/RTP/SAVPF" profile specified in <a href="#RFC7850">[RFC7850]</a>, and MUST indicate this profile for each media m= line they produce in an offer. For data m= sections, implementations MUST support the "UDP/DTLS/SCTP" profile and MUST indicate this profile for each data m= line they produce in an offer.  Because ICE can select either TCP or UDP transport depending on network conditions, this advertisement is consistent with ICE eventually selecting either either UDP or TCP.</p>
+<p id="rfc.section.5.1.2.p.2">Unfortunately, in an attempt at compatibility, some endpoints generate other profile strings even when they mean to support one of these profiles. For instance, an endpoint might generate "RTP/AVP" but supply "a=fingerprint" and "a=rtcp-fb" attributes, indicating its willingness to support "(UDP,TCP)/TLS/RTP/SAVPF". In order to simplify compatibility with such endpoints, JSEP implementations MUST follow the following rules when processing the media m= sections in an offer:</p>
 <p/>
 
 <ul>
@@ -940,7 +899,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 
 <p> </p>
-<p id="rfc.section.5.1.3.p.4">Note that re-offers by JSEP implementations MUST use the correct profile strings even if the initial offer/answer exchange used an (incorrect) older profile string.</p>
+<p id="rfc.section.5.1.2.p.4">Note that re-offers by JSEP implementations MUST use the correct profile strings even if the initial offer/answer exchange used an (incorrect) older profile string.</p>
 <h2 id="rfc.section.5.2"><a href="#rfc.section.5.2">5.2.</a> <a href="#sec-create-offer" id="sec-create-offer">Constructing an Offer</a></h2>
 <p id="rfc.section.5.2.p.1">When createOffer is called, a new SDP description must be created that includes the functionality specified in <a href="#I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</a>. The exact details of this process are explained below.</p>
 <h3 id="rfc.section.5.2.1"><a href="#rfc.section.5.2.1">5.2.1.</a> <a href="#sec.initial-offers" id="sec.initial-offers">Initial Offers</a></h3>
@@ -1166,7 +1125,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>First, the type of the SessionDescription is checked against the current state of the PeerConnection: <ul><li>If the type is "offer", the PeerConnection state MUST be either "stable" or "have-local-offer".</li><li>If the type is "pranswer" or "answer", the PeerConnection state MUST be either "have-remote-offer" or "have-local-pranswer".</li></ul></li>
   <li>If the type is not correct for the current state, processing MUST stop and an error MUST be returned.</li>
   <li>The SessionDescription is then checked to ensure that its contents are identical to those generated in the last call to createOffer/createAnswer, and thus have not been altered, as discussed in <a href="#sec.modifying-sdp">Section 5.4</a>; otherwise, processing MUST stop and an error MUST be returned.</li>
-  <li>Next, the SessionDescription is parsed into a data structure, as described in the <a href="#sec.parsing-a-desc">Section 5.7</a> section below. If parsing fails for any reason, processing MUST stop and an error MUST be returned.</li>
+  <li>Next, the SessionDescription is parsed into a data structure, as described in the <a href="#sec.parsing-a-desc">Section 5.7</a> section below.  If parsing fails for any reason, processing MUST stop and an error MUST be returned.</li>
   <li>Finally, the parsed SessionDescription is applied as described in the <a href="#sec.applying-a-local-desc">Section 5.8</a> section below.</li>
 </ul>
 <h2 id="rfc.section.5.6"><a href="#rfc.section.5.6">5.6.</a> <a href="#sec.processing-a-remote-desc" id="sec.processing-a-remote-desc">Processing a Remote Description</a></h2>
@@ -1210,7 +1169,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If present, a single "a=dtls-id" line is parsed as specified in <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5, and the dtls-id value is stored.</li>
   <li>Any "a=extmap" lines are parsed as specified in <a href="#RFC5285">[RFC5285]</a>, Section 5, and their values are stored.</li>
 </ul>
-<p id="rfc.section.5.7.1.p.5">Once all the session-level lines have been parsed, processing continues with the lines in m= sections.</p>
+<p id="rfc.section.5.7.1.p.5">As required by <a href="#RFC4566">[RFC4566]</a>, Section 5.13, unknown attribute lines MUST be ignored.</p>
+<p id="rfc.section.5.7.1.p.6">Once all the session-level lines have been parsed, processing continues with the lines in m= sections.</p>
 <h3 id="rfc.section.5.7.2"><a href="#rfc.section.5.7.2">5.7.2.</a> <a href="#sec.media-level-parse" id="sec.media-level-parse">Media Section Parsing</a></h3>
 <p id="rfc.section.5.7.2.p.1">Like the session-level lines, the media section lines MUST occur in the specific order and with the specific syntax defined in <a href="#RFC4566">[RFC4566]</a>, Section 5.</p>
 <p id="rfc.section.5.7.2.p.2">The "m=" line itself MUST be parsed as described in <a href="#RFC4566">[RFC4566]</a>, Section 5.14, and the media, port, proto, and fmt values stored.</p>
@@ -1231,7 +1191,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If present, a single "a=end-of-candidates" attribute MUST be parsed as specified in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a>, Section 8.2, and its presence or absence flagged and stored.</li>
   <li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC4572">[RFC4572]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
 </ul>
-<p id="rfc.section.5.7.2.p.5">If the "m=" proto value indicates use of RTP, as described in the <a href="#sec.profile-names">Section 5.1.3</a> section above, the following attribute lines MUST be processed: </p>
+<p id="rfc.section.5.7.2.p.5">If the "m=" proto value indicates use of RTP, as described in the <a href="#sec.profile-names">Section 5.1.2</a> section above, the following attribute lines MUST be processed: </p>
 
 <ul>
   <li>The "m=" fmt value MUST be parsed as specified in <a href="#RFC4566">[RFC4566]</a>, Section 5.14, and the individual values stored.</li>
@@ -1258,11 +1218,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>An "a=sctp-port" attribute MUST be present, and it MUST be parsed as specified in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 5.2, and the value stored.</li>
   <li>If present, a single "a=max-message-size" attribute MUST be parsed as specified in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 6, and the value stored. Otherwise, use the specified default.</li>
 </ul>
+<p id="rfc.section.5.7.2.p.7">As required by <a href="#RFC4566">[RFC4566]</a>, Section 5.13, unknown attribute lines MUST be ignored.</p>
 <h3 id="rfc.section.5.7.3"><a href="#rfc.section.5.7.3">5.7.3.</a> Semantics Verification</h3>
 <p id="rfc.section.5.7.3.p.1">Assuming parsing completes successfully, the parsed description is then evaluated to ensure internal consistency as well as proper support for mandatory features.  Specifically, the following checks are performed: </p>
 
 <ul>
-  <li>For each m= section, valid values for each of the mandatory-to-use features enumerated in <a href="#sec.usage-requirements">Section 5.1.2</a> MUST be present.  These values MAY either be present at the media level, or inherited from the session level.  <ul><li>ICE ufrag and password values, which MUST comply with the size limits specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li><li>dtls-id value, which MUST be set according to <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.  If this is a re-offer and the dtls-id value is different from that presently in use, the DTLS connection is not being continued and the remote description MUST be part of an ICE restart, together with new ufrag and password values. If this is an answer, the dtls-id value, if present, MUST be the same as in the offer.</li><li>DTLS setup value, which MUST be set according to the rules specified in <a href="#RFC5763">[RFC5763]</a>, Section 5 and MUST be consistent with the selected role of the current DTLS connection, if one exists and is being continued.</li><li>DTLS fingerprint values, where at least one fingerprint MUST be present.</li></ul></li>
+  <li>For each m= section, valid values for each of the mandatory-to-use features enumerated in <a href="#sec.usage-requirements">Section 5.1.1</a> MUST be present.  These values MAY either be present at the media level, or inherited from the session level.  <ul><li>ICE ufrag and password values, which MUST comply with the size limits specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li><li>dtls-id value, which MUST be set according to <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.  If this is a re-offer and the dtls-id value is different from that presently in use, the DTLS connection is not being continued and the remote description MUST be part of an ICE restart, together with new ufrag and password values. If this is an answer, the dtls-id value, if present, MUST be the same as in the offer.</li><li>DTLS setup value, which MUST be set according to the rules specified in <a href="#RFC5763">[RFC5763]</a>, Section 5 and MUST be consistent with the selected role of the current DTLS connection, if one exists and is being continued.</li><li>DTLS fingerprint values, where at least one fingerprint MUST be present.</li></ul></li>
   <li>All RID values referenced in an "a=simulcast" line MUST exist as "a=rid" lines.</li>
   <li>Each m= section is also checked to ensure prohibited features are not used. If this is a local description, the "ice-lite" attribute MUST NOT be specified.</li>
   <li>If the RTP/RTCP multiplexing policy is "require", each m= section MUST contain an "a=rtcp-mux" attribute. If an "m=" section contains an "a=rtcp-mux-only" attribute then that section MUST also contain an "a=rtcp-mux" attribute.  </li>
