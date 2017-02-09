@@ -2359,7 +2359,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the most recent answer.</t>
           </list></t>
 
-          <t>The "a=group:BUNDLE" attribute MUST include the mid
+          <t>The "a=group:BUNDLE" attribute MUST include the MID
           identifiers specified in the bundle group in the most recent
           answer, minus any m= sections that have been marked as
           rejected, plus any newly added or re-enabled m= sections. In
@@ -2367,8 +2367,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           sections that were previously bundled, as long as they are
           still alive, as well as any new m= sections.</t>
 
-          <t>The "LS" groups are generated in the same way as with
-          initial offers.</t>
+          <t>"a=group:LS" attributes are generated in the same way as for
+          initial offers, with the additional stipulation that any lip sync
+          groups that were present in the most recent answer MUST continue to
+          exist and MUST contain any previously existing MID identifiers, as
+          long as the identified m= sections are not rejected, and the
+          group still contains at least two MID identifiers.
+          This ensures that any synchronized "recvonly" m= sections continue to
+          be synchronized in the new offer.
+          </t>
         </section>
         <section title="Options Handling"
         anchor="sec.options-handling1">
