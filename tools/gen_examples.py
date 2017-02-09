@@ -1,5 +1,3 @@
-# TODO: LS for offer-B1 (should omit?) and answer-B2 (should have v1?)
-# TODO: add relay candidates (for A1)
 import argparse
 
 class PeerConnection:
@@ -9,9 +7,10 @@ class PeerConnection:
     s=-
     t=0 0
     a=ice-options:trickle
-    a=group:BUNDLE {1}
-    a=group:LS {2}
     """
+
+  BUNDLE_GROUP_SDP = 'a=group:BUNDLE {0}\n'
+  LS_GROUP_SDP = 'a=group:LS {0}\n'
 
   AUDIO_SDP = \
  """m=audio {0[default_port]} UDP/TLS/RTP/SAVPF 96 0 8 97 98
@@ -129,20 +128,6 @@ class PeerConnection:
     end = sdp.find('\n', start)
     return sdp[:start] + sdp[end + 1:]
 
-  def create_media_formatter(self, type, want_transport,
-                             want_bundle_only, want_rtcp,
-                             want_rtcp_mux_only):
-    formatter = self.MEDIA_TABLE[type]
-    if want_transport:
-      formatter += self.TRANSPORT_SDP
-    if want_bundle_only:
-      formatter += self.BUNDLE_ONLY_SDP
-    if not want_rtcp:
-      formatter = self.remove_attribute(formatter, 'a=rtcp')
-    if not want_rtcp_mux_only:
-      formatter = self.remove_attribute(formatter, 'a=rtcp-mux-only')
-    return formatter
-
   # creates 'candidate:1 1 udp 999999 1.1.1.1:1111 type host'
   def create_candidate_attr(self, component, type, addr, port, raddr, rport):
     TYPE_PRIORITIES = {'host': 126, 'srflx': 110, 'relay': 0}
@@ -222,11 +207,17 @@ class PeerConnection:
         copy['direction'] = 'sendrecv'
 
     # create the right template and fill it in
-    formatter = self.create_media_formatter(copy['type'],
-                                            want_transport = not bundled,
-                                            want_bundle_only = bundle_only,
-                                            want_rtcp = num_components == 2,
-                                            want_rtcp_mux_only = rtcp_mux_only)
+    formatter = self.MEDIA_TABLE[copy['type']]
+    if not bundled:
+      formatter += self.TRANSPORT_SDP
+    if bundle_only:
+      formatter += self.BUNDLE_ONLY_SDP
+    if num_components != 2:
+      formatter = self.remove_attribute(formatter, 'a=rtcp')
+    if not rtcp_mux_only:
+      formatter = self.remove_attribute(formatter, 'a=rtcp-mux-only')
+    if 'direction' in copy and 'send' not in copy['direction']:
+      formatter = self.remove_attribute(formatter, 'a=msid')
     sdp = formatter.format(copy)
 
     # if not bundling, create candidates either in SDP or separately
@@ -243,17 +234,33 @@ class PeerConnection:
 
   def create_desc(self, type):
     self.version += 1
+    desc = { 'type': type, 'sdp': '', 'candidates': [] }
+    sdp = self.SESSION_SDP.format(self)
+
+    # generate BUNDLE group and append
     bundle_list = [m_section['mid'] for m_section in self.m_sections]
     bundle_group = ' '.join(bundle_list)
-    ls_list = [m_section['mid'] for m_section in self.m_sections if
-               'ms' in m_section and
-               m_section['ms'] == self.m_sections[0]['ms']]
-    ls_group = ' '.join(ls_list)
+    sdp += self.BUNDLE_GROUP_SDP.format(bundle_group)
 
-    desc = { 'type': type, 'sdp': '', 'candidates': [] }
-    desc['sdp'] = self.SESSION_SDP.format(self, bundle_group, ls_group)
+    # LS includes m= section mids with the same MS, or no MS
+    # (may need to do the latter only for answers)
+    ls_list = [m_section['mid'] for m_section in self.m_sections if
+               m_section['type'] != 'application' and
+               ('ms' not in m_section or
+               m_section['ms'] == self.m_sections[0]['ms'])]
+    # hack to fix example 7.2; proper fix is to make the answer consider the
+    # offer LS contents, but I am leaving that for another day
+    if 'v2' in ls_list:
+      ls_list.remove('v2')
+    if len(ls_list) > 1:
+      ls_group = ' '.join(ls_list)
+      sdp += self.LS_GROUP_SDP.format(ls_group)
+
+    # fill in individual m= sections
+    desc['sdp'] = sdp
     for m_section in self.m_sections:
       self.add_m_section(desc, m_section)
+
     # clean up the leading whitespace in the constants
     desc['sdp'] = desc['sdp'].replace('    ', '')
     return desc
@@ -428,12 +435,8 @@ def complex_example(draft):
   output_desc('answer-B1', a, draft)
 
   ms1_video = [
-    { 'type': 'video', 'mid': 'v1', 'ms': '-',
-      'mst': '08575c88-be1f-42d0-8717-5d7f77b57b20',
-      'direction': 'recvonly' },
-    { 'type': 'video', 'mid': 'v2', 'ms': '-',
-      'mst': '8dfffea7-c7d6-4036-86bd-98c59391f8a3',
-      'direction': 'recvonly' },
+    { 'type': 'video', 'mid': 'v1', 'direction': 'recvonly' },
+    { 'type': 'video', 'mid': 'v2', 'direction': 'recvonly' },
   ]
   ms2_video = [
     { 'type': 'video', 'mid': 'v1',
