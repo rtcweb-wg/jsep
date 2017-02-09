@@ -2018,9 +2018,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               direction:
               <list style="symbols">
 
-                <t>An "a=msid" line, as specified in
-                <xref target="I-D.ietf-mmusic-msid"></xref>, Section
-                2.</t>
+                <t>For each MediaStream that was associated with the
+                transceiver when it was created via addTrack or addTransceiver,
+                an "a=msid" line, as specified in
+                <xref target="I-D.ietf-mmusic-msid"></xref>, Section 2. If a
+                MediaStreamTrack is attached to the transceiver's RtpSender,
+                the "a=msid" lines MUST use that track's ID. If no
+                MediaStreamTrack is attached, a valid ID MUST be generated,
+                in the same way that the implementation generates IDs for
+                local tracks.</t>
+
+                <t>If no MediaStream is associated with the transceiver, a
+                single "a=msid" line with the special value "-" in place of
+                the MediaStream ID, as specified in <xref
+                target="I-D.ietf-mmusic-msid"></xref>, Section 3. The track
+                ID MUST be selected as described above.</t>
               </list></t>
 
               <t>If the RtpTransceiver has a sendrecv or sendonly
@@ -2239,12 +2251,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If an RtpTransceiver has been stopped and is associated
             with an m= section, and the m= section is not being
             recycled as described above, an m= section MUST be
-            generated for it with the port set to zero and the
-            "a=msid" line removed.</t>
+            generated for it with the port set to zero and all
+            "a=msid" lines removed.</t>
 
             <t>For RtpTransceivers that are not stopped, the "a=msid"
-            lines MUST stay the same if
-            they are present in the current description.</t>
+            line(s) MUST stay the same if
+            they are present in the current description, regardless of
+            changes to the transceiver's direction or track. If no
+            "a=msid" line is present in the current description,
+            "a=msid" line(s) MUST be generated according to the same
+            rules as for an initial offer.</t>
 
             <t>Each "m=" and c=" line MUST be filled in with the port,
             protocol, and address of the default candidate for the m=
@@ -2291,9 +2307,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             "a=candidate" and "a=end-of-candidates" MUST be
             omitted.</t>
 
-            <t>For RtpTransceivers that are still present, the
-            "a=msid" line MUST stay the same.</t>
-
             <t>For RtpTransceivers that are still present, the "a=rid"
             lines MUST stay the same.</t>
 
@@ -2301,8 +2314,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             "a=simulcast" line MUST stay the same.</t>
 
             <t>If any RtpTransceiver has been stopped, the port MUST be
-            set to zero and the "a=msid"
-            line MUST be removed.</t>
+            set to zero and all "a=msid"
+            lines MUST be removed.</t>
 
             <t>If any RtpTransceiver has been added, and there exists a
             m= section with a zero port in the current local
@@ -2738,9 +2751,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the RtpTransceiver has a sendrecv or sendonly direction:
             <list style="symbols">
 
-              <t>An "a=msid" line, as specified in
-              <xref target="I-D.ietf-mmusic-msid"></xref>, Section
-              2.</t>
+              <t>For each MediaStream that was associated with the
+              transceiver when it was created via addTrack or addTransceiver,
+              an "a=msid" line, as specified in
+              <xref target="I-D.ietf-mmusic-msid"></xref>, Section 2. If a
+              MediaStreamTrack is attached to the transceiver's RtpSender,
+              the "a=msid" lines MUST use that track's ID. If no
+              MediaStreamTrack is attached, a valid ID MUST be generated,
+              in the same way that the implementation generates IDs for
+              local tracks.</t>
+
+              <t>If no MediaStream is associated with the transceiver, a
+              single "a=msid" line with the special value "-" in place of
+              the MediaStream ID, as specified in <xref
+              target="I-D.ietf-mmusic-msid"></xref>, Section 3. The track
+              ID MUST be selected as described above.</t>
             </list></t>
           </list></t>
 
@@ -2894,7 +2919,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             omitted.</t>
 
             <t>For RtpTransceivers that are not stopped, the "a=msid"
-            line MUST stay the same.</t>
+            line(s) MUST stay the same, regardless of
+            changes to the transceiver's direction or track. If no
+            "a=msid" line is present in the current description,
+            "a=msid" line(s) MUST be generated according to the same
+            rules as for an initial answer.</t>
           </list></t>
         </section>
         <section title="Options Handling"
@@ -3294,10 +3323,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             ignored, as this information is superfluous when using
             ICE.</t>
 
-            <t>If present, a single "a=msid" attribute MUST be parsed
+            <t>If present, "a=msid" attributes MUST be parsed
             as specified in
             <xref target="I-D.ietf-mmusic-msid" />, Section 3.2, and
-            its value stored.</t>
+            their values stored.</t>
 
             <t>Any "a=imageattr" attributes MUST be parsed as specified
             in
@@ -4093,11 +4122,11 @@ BobJS->BobUA:       setRemoteDescription with |offer-B1|
 BobUA->BobJS:       ontrack with audio track from Alice
 
 //                  candidates are sent to Bob
-AliceUA->AliceJS:   onicecandidate event with |offer-B1-candidate-1| (host)
+AliceUA->AliceJS:   onicecandidate (host) |offer-B1-candidate-1|
 AliceJS->WebServer: signaling with |offer-B1-candidate-1|
-AliceUA->AliceJS:   onicecandidate event with |offer-B1-candidate-2| (srflx)
+AliceUA->AliceJS:   onicecandidate (srflx) |offer-B1-candidate-2|
 AliceJS->WebServer: signaling with |offer-B1-candidate-2|
-AliceUA->AliceJS:   onicecandidate event with |offer-B1-candidate-3| (relay)
+AliceUA->AliceJS:   onicecandidate (relay) |offer-B1-candidate-3| 
 AliceJS->WebServer: signaling with |offer-B1-candidate-3|
 
 WebServer->BobJS:   signaling with |offer-B1-candidate-1|
@@ -4120,11 +4149,11 @@ AliceJS->AliceUA:   setRemoteDescription with |answer-B1|
 AliceUA->AliceJS:   ontrack event with audio track from Bob
 
 //                  candidates are sent to Alice
-BobUA->BobJS:       onicecandidate event with |answer-B1-candidate-1| (host)
+BobUA->BobJS:       onicecandidate (host) |answer-B1-candidate-1|
 BobJS->WebServer:   signaling with |answer-B1-candidate-1|
-BobUA->BobJS:       onicecandidate event with |answer-B1-candidate-2| (srflx)
+BobUA->BobJS:       onicecandidate (srflx) |answer-B1-candidate-2|
 BobJS->WebServer:   signaling with |answer-B1-candidate-2|
-BobUA->BobJS:       onicecandidate event with |answer-B1-candidate-3| (relay)
+BobUA->BobJS:       onicecandidate (relay) |answer-B1-candidate-3|
 BobJS->WebServer:   signaling with |answer-B1-candidate-3|
 
 WebServer->AliceJS: signaling with |answer-B1-candidate-1|
@@ -4571,15 +4600,15 @@ BobJS->BobUA:       setRemoteDescription with |offer-C1|
 BobUA->BobJS:       ontrack events for audio and video
 
 //                  candidates are sent to Bob
-AliceUA->AliceJS:   onicecandidate event with |offer-C1-candidate-1| (relay)
+AliceUA->AliceJS:   onicecandidate (relay) |offer-C1-candidate-1| 
 AliceJS->WebServer: signaling with |offer-C1-candidate-1|
 
 WebServer->BobJS:   signaling with |offer-C1-candidate-1|
 BobJS->BobUA:       addIceCandidate with |offer-C1-candidate-1|
 
-//                  Bob prepares an early answer to warm up the transport
+//                 Bob prepares an early answer to warm up the transport
 BobJS->BobUA:       addTransceiver with null audio and video tracks
-BobJS->BobUA:       transceiver.setDirection(sendonly) for both transceivers
+BobJS->BobUA:       transceiver.setDirection(sendonly) for both 
 BobJS->BobUA:       createAnswer
 BobJS->BobUA:       setLocalDescription with answer
 
@@ -4592,7 +4621,7 @@ AliceJS->AliceUA:   setRemoteDescription with |answer-C1|
 AliceUA->AliceJS:   ontrack events for audio and video
 
 //                  candidates are sent to Alice
-BobUA->BobJS:       onicecandidate event with |answer-B1-candidate-1| (relay)
+BobUA->BobJS:       onicecandidate (relay) |answer-B1-candidate-1| 
 BobJS->WebServer:   signaling with |answer-B1-candidate-1|
 
 WebServer->AliceJS: signaling with |answer-B1-candidate-1|
@@ -4600,10 +4629,11 @@ AliceJS->AliceUA:   addIceCandidate with |answer-B1-candidate-1|
 
 //                  ICE and DTLS establish while call is ringing
 
-//                  Bob accepts call, starts media, and sends a new offer
+//                 Bob accepts call, starts media, and sends a new offer
 BobJS->BobUA:       transceiver.setTrack with audio and video tracks
 BobUA->AliceUA:     media sent from Bob to Alice
-BobJS->BobUA:       transceiver.setDirection(sendrecv) for both transceivers
+BobJS->BobUA:       transceiver.setDirection(sendrecv) for both 
+                    transceivers
 BobJS->BobUA:       createOffer
 BobJS->BobUA:       setLocalDescription with offer
 
