@@ -765,7 +765,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <dt>negotiate:</dt>
   <dd style="margin-left: 8">The JSEP implementation will gather both RTP and RTCP candidates but also will offer "a=rtcp-mux", thus allowing for compatibility with either multiplexing or non-multiplexing endpoints.</dd>
   <dt>require:</dt>
-  <dd style="margin-left: 8">The JSEP implementation will only gather RTP candidates. This halves the number of candidates that the offerer needs to gather. Applying a description with an m= section that does not contain an "a=rtcp-mux" attribute will cause an error to be returned.</dd>
+  <dd style="margin-left: 8">The JSEP implementation will only gather RTP candidates and will insert an "a=rtcp-mux-only" indication into any offers it generates.  This halves the number of candidates that the offerer needs to gather. Applying a description with an m= section that does not contain an "a=rtcp-mux" attribute will cause an error to be returned.</dd>
 </dl>
 <p id="rfc.section.4.1.1.p.9">The default multiplexing policy MUST be set to "require".  Implementations MAY choose to reject attempts by the application to set the multiplexing policy to "negotiate".</p>
 <h3 id="rfc.section.4.1.2"><a href="#rfc.section.4.1.2">4.1.2.</a> <a href="#sec.addTrack" id="sec.addTrack">addTrack</a></h3>
@@ -1001,6 +1001,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>An "a=dtls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.2.</li>
   <li>An "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because no candidates have yet been gathered.</li>
   <li>An "a=rtcp-mux" line, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.3. </li>
+  <li>If the RTP/RTCP multiplexing policy is "require", an "a=rtcp-mux-only" line, as specified in <a href="#I-D.ietf-mmusic-mux-exclusive">[I-D.ietf-mmusic-mux-exclusive]</a>, Section 4.</li>
   <li>An "a=rtcp-rsize" line, as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5.</li>
 </ul>
 
@@ -1057,7 +1058,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>The RTCP feedback extensions MUST only include those that are present in the most recent answer.</li>
   <li>The "a=rtcp" line MUST only be added if the most recent answer did not include an "a=rtcp-mux" line.</li>
   <li>The "a=rtcp-mux" line MUST only be added if present in the most recent answer.</li>
-  <li>The "a=rtcp-mux-only" line MUST only be added if present in the most recent answer.</li>
   <li>The "a=rtcp-rsize" line MUST only be added if present in the most recent answer.</li>
 </ul>
 <p id="rfc.section.5.2.2.p.7">The "a=group:BUNDLE" attribute MUST include the mid identifiers specified in the bundle group in the most recent answer, minus any m= sections that have been marked as rejected, plus any newly added or re-enabled m= sections. In other words, the bundle attribute must contain all m= sections that were previously bundled, as long as they are still alive, as well as any new m= sections.</p>
@@ -1265,7 +1265,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>For each m= section, valid values for each of the mandatory-to-use features enumerated in <a href="#sec.usage-requirements">Section 5.1.2</a> MUST be present.  These values MAY either be present at the media level, or inherited from the session level.  <ul><li>ICE ufrag and password values, which MUST comply with the size limits specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li><li>dtls-id value, which MUST be set according to <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.  If this is a re-offer and the dtls-id value is different from that presently in use, the DTLS connection is not being continued and the remote description MUST be part of an ICE restart, together with new ufrag and password values. If this is an answer, the dtls-id value, if present, MUST be the same as in the offer.</li><li>DTLS setup value, which MUST be set according to the rules specified in <a href="#RFC5763">[RFC5763]</a>, Section 5 and MUST be consistent with the selected role of the current DTLS connection, if one exists and is being continued.</li><li>DTLS fingerprint values, where at least one fingerprint MUST be present.</li></ul></li>
   <li>All RID values referenced in an "a=simulcast" line MUST exist as "a=rid" lines.</li>
   <li>Each m= section is also checked to ensure prohibited features are not used. If this is a local description, the "ice-lite" attribute MUST NOT be specified.</li>
-  <li>If the RTP/RTCP multiplexing policy is "require", each m= section MUST contain an "a=rtcp-mux" attribute.</li>
+  <li>If the RTP/RTCP multiplexing policy is "require", each m= section MUST contain an "a=rtcp-mux" attribute. If an "m=" section contains an "a=rtcp-mux-only" attribute then that section MUST also contain an "a=rtcp-mux" attribute.  </li>
 </ul>
 <p id="rfc.section.5.7.3.p.2">If this session description is of type "pranswer" or "answer", the following additional checks are applied: </p>
 
