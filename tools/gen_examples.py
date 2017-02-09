@@ -37,11 +37,16 @@ class PeerConnection:
     a=rtpmap:100 VP8/90000
     a=rtpmap:101 rtx/90000
     a=fmtp:101 apt=100
+    a=imageattr:100 recv [x=[48:1920],y=[48:1080],q=1.0]
     a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
     a=rtcp-fb:100 ccm fir
     a=rtcp-fb:100 nack
     a=rtcp-fb:100 nack pli
     a=msid:{0[ms]} {0[mst]}
+    a=rid:1 send
+    a=rid:2 send
+    a=rid:3 send
+    a=simulcast:send 1;2;3
     """
 
   DATA_SDP = \
@@ -170,11 +175,17 @@ class PeerConnection:
     if port:
       addr = getattr(self, type + '_ip')
       if rtype:
-        raddr = getattr(self, rtype + '_ip')
-        rport = m_section[rtype + '_port']
+        # srflx/relay candidates; 0.0.0.0 if no related candidate
+        rport = self.get_port(m_section, rtype + '_port')
+        if rport:
+          raddr = getattr(self, rtype + '_ip')
+        else:
+          rport = 0
+          raddr = '0.0.0.0'
       else:
-        raddr = None
+        # host candidates
         rport = 0
+        raddr = None
 
       for i in range(0, num):
         candidates.append(self.create_candidate_obj(
@@ -450,7 +461,7 @@ def warmup_example(draft):
     { 'type': 'audio', 'mid': 'a1',
       'ms': 'bbce3ba6-abfc-ac63-d00a-e15b286f8fce',
       'mst': 'e80098db-7159-3c06-229a-00df2a9b3dbc',
-      'host_port': 10100, 'srflx_port': 11100, 'relay_port': 12100,
+      'relay_port': 12100,
       'ice_ufrag': '4ZcD', 'ice_pwd': 'ZaaG6OG7tCn4J/lehAGz+HHD',
       'dtls_dir': 'passive' },
     { 'type': 'video', 'mid': 'v1',
@@ -467,7 +478,7 @@ def warmup_example(draft):
       'ms': '751f239e-4ae0-c549-aa3d-890de772998b',
       'mst': '04b5a445-82cc-c9e8-9ffe-c24d0ef4b0ff',
       'direction': 'sendonly',
-      'host_port': 10200, 'srflx_port': 11200, 'relay_port': 12200,
+      'relay_port': 12200,
       'ice_ufrag': 'TpaA', 'ice_pwd': 't2Ouhc67y8JcCaYZxUUTgKw/',
       'dtls_dir': 'active' },
     { 'type': 'video', 'mid': 'v1',
