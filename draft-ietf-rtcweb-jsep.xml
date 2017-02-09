@@ -4026,7 +4026,7 @@ AliceUA->AliceJS:   onicecandidate (host) |offer-B1-candidate-1|
 AliceJS->WebServer: signaling with |offer-B1-candidate-1|
 AliceUA->AliceJS:   onicecandidate (srflx) |offer-B1-candidate-2|
 AliceJS->WebServer: signaling with |offer-B1-candidate-2|
-AliceUA->AliceJS:   onicecandidate (relay) |offer-B1-candidate-3| 
+AliceUA->AliceJS:   onicecandidate (relay) |offer-B1-candidate-3|
 AliceJS->WebServer: signaling with |offer-B1-candidate-3|
 
 WebServer->BobJS:   signaling with |offer-B1-candidate-1|
@@ -4482,10 +4482,14 @@ a=rtcp-fb:100 nack pli
       or other information.
       </t>
 
+      <t>This example also makes use of the "relay" ICE candidate policy
+      described in <xref target="sec.ice-candidate-policy"/> to minimize the
+      ICE gathering and checking needed.</t>
+
       <t><figure>
        <artwork><![CDATA[
 //                  set up local media state
-AliceJS->AliceUA:   create new PeerConnection
+AliceJS->AliceUA:   create new PeerConnection with "relay" ICE policy
 AliceJS->AliceUA:   addTrack with two tracks: audio and video
 AliceJS->AliceUA:   createOffer to get |offer-C1|
 AliceJS->AliceUA:   setLocalDescription with |offer-C1|
@@ -4495,20 +4499,20 @@ AliceJS->WebServer: signaling with |offer-C1|
 WebServer->BobJS:   signaling with |offer-C1|
 
 //                  |offer-C1| arrives at Bob
-BobJS->BobUA:       create a PeerConnection
+BobJS->BobUA:       create new PeerConnection with "relay" ICE policy
 BobJS->BobUA:       setRemoteDescription with |offer-C1|
 BobUA->BobJS:       ontrack events for audio and video
 
-//                  candidates are sent to Bob
-AliceUA->AliceJS:   onicecandidate (relay) |offer-C1-candidate-1| 
+//                  a relay candidate is sent to Bob
+AliceUA->AliceJS:   onicecandidate (relay) |offer-C1-candidate-1|
 AliceJS->WebServer: signaling with |offer-C1-candidate-1|
 
 WebServer->BobJS:   signaling with |offer-C1-candidate-1|
 BobJS->BobUA:       addIceCandidate with |offer-C1-candidate-1|
 
-//                 Bob prepares an early answer to warm up the transport
+//                  Bob prepares an early answer to warm up the transport
 BobJS->BobUA:       addTransceiver with null audio and video tracks
-BobJS->BobUA:       transceiver.setDirection(sendonly) for both 
+BobJS->BobUA:       transceiver.setDirection(sendonly) for both
 BobJS->BobUA:       createAnswer
 BobJS->BobUA:       setLocalDescription with answer
 
@@ -4520,8 +4524,8 @@ WebServer->AliceJS: signaling with |answer-C1|
 AliceJS->AliceUA:   setRemoteDescription with |answer-C1|
 AliceUA->AliceJS:   ontrack events for audio and video
 
-//                  candidates are sent to Alice
-BobUA->BobJS:       onicecandidate (relay) |answer-B1-candidate-1| 
+//                  a relay candidate is sent to Alice
+BobUA->BobJS:       onicecandidate (relay) |answer-B1-candidate-1|
 BobJS->WebServer:   signaling with |answer-B1-candidate-1|
 
 WebServer->AliceJS: signaling with |answer-B1-candidate-1|
@@ -4532,7 +4536,7 @@ AliceJS->AliceUA:   addIceCandidate with |answer-B1-candidate-1|
 //                 Bob accepts call, starts media, and sends a new offer
 BobJS->BobUA:       transceiver.setTrack with audio and video tracks
 BobUA->AliceUA:     media sent from Bob to Alice
-BobJS->BobUA:       transceiver.setDirection(sendrecv) for both 
+BobJS->BobUA:       transceiver.setDirection(sendrecv) for both
                     transceivers
 BobJS->BobUA:       createOffer
 BobJS->BobUA:       setLocalDescription with offer
@@ -4625,7 +4629,8 @@ a=bundle-only
 ufrag 4ZcD
 index 0
 mid   a1
-attr  candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
+attr  candidate:1 1 udp 255 192.0.2.100 12100 typ relay
+                raddr 0.0.0.0 rport 0
 ]]>
          </artwork>
        </figure>
@@ -4698,7 +4703,8 @@ a=msid:751f239e-4ae0-c549-aa3d-890de772998b
 ufrag TpaA
 index 0
 mid   a1
-attr  candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
+attr  candidate:1 1 udp 255 192.0.2.200 12200 typ relay
+                raddr 0.0.0.0 rport 0
 ]]>
          </artwork>
        </figure>
@@ -4743,11 +4749,8 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
-a=candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
-a=candidate:1 1 udp 1845494015 198.51.100.200 11200 typ srflx
-            raddr 203.0.113.200 rport 10200
 a=candidate:1 1 udp 255 192.0.2.200 12200 typ relay
-            raddr 198.51.100.200 rport 11200
+            raddr 0.0.0.0 rport 0
 a=end-of-candidates
 
 m=video 12200 UDP/TLS/RTP/SAVPF 100 101
@@ -4807,11 +4810,8 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
-a=candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
-a=candidate:1 1 udp 1845494015 198.51.100.100 11100 typ srflx
-            raddr 203.0.113.100 rport 10100
 a=candidate:1 1 udp 255 192.0.2.100 12100 typ relay
-            raddr 198.51.100.100 rport 11100
+            raddr 0.0.0.0 rport 0
 a=end-of-candidates
 
 m=video 12100 UDP/TLS/RTP/SAVPF 100 101
