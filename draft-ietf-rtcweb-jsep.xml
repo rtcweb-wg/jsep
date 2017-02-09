@@ -1713,108 +1713,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         listed below that govern the creation and processing of offers
         and answers.</t>
 
-        <t>The first set of specifications is the
-        "mandatory-to-implement" set. All implementations must support
-        these behaviors, but may not use all of them if the remote
-        side, which may not be a JSEP endpoint, does not support
-        them.</t>
-
-        <t>The second set of specifications is the "mandatory-to-use"
-        set. The local JSEP endpoint and any remote endpoint must
-        indicate support for these specifications in their session
-        descriptions.</t>
-        <section title="Implementation Requirements"
-        anchor="sec.implementation-requirements">
-
-          <t> Implementations of JSEP MUST conform to
-          <xref target="I-D.ietf-rtcweb-rtp-usage"/>.
-          This list of mandatory-to-implement specifications is
-          derived from the requirements outlined in that document
-          and from <xref target="I-D.ietf-rtcweb-security-arch"/>.</t>
-          <t>
-          <list style="format R-%d">
-
-            <t>
-            <xref target="RFC4566"></xref> is the base SDP specification
-            and MUST be implemented.</t>
-
-            <t>
-            <xref target="RFC5764"></xref> MUST be supported for
-            signaling the UDP/TLS/RTP/SAVPF
-            <xref target="RFC5764" />, TCP/DTLS/RTP/SAVPF
-            <xref target="RFC7850" />,
-            "UDP/DTLS/SCTP"
-            <xref target="I-D.ietf-mmusic-sctp-sdp" />, and
-            "TCP/DTLS/SCTP"
-            <xref target="I-D.ietf-mmusic-sctp-sdp" /> RTP profiles.</t>
-
-            <t>
-            <xref target="RFC5245"></xref> MUST be implemented for
-            signaling the ICE credentials and candidate lines
-            corresponding to each media stream. The ICE implementation
-            MUST be a Full implementation, not a Lite
-            implementation.</t>
-
-            <t>
-            <xref target="RFC5763"></xref> MUST be implemented to signal
-            DTLS certificate fingerprints.</t>
-
-            <t>
-            <xref target="RFC5888"></xref> MUST be
-            implemented for signaling grouping information, and MUST be
-            used to identify m= lines via the a=mid attribute.</t>
-
-            <t>
-            <xref target="I-D.ietf-mmusic-msid"></xref> MUST be
-            supported, in order to signal associations between RTP
-            objects and W3C MediaStreams and MediaStreamTracks in a
-            standard way.</t>
-
-            <t>The bundle mechanism in
-            <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation">
-            </xref> MUST be supported to signal the ability to multiplex
-            RTP streams on a single UDP port, in order to avoid
-            excessive use of port number resources.</t>
-
-            <t>The SDP attributes of "sendonly", "recvonly",
-            "inactive", and "sendrecv" from
-            <xref target="RFC4566"></xref> MUST be implemented to signal
-            information about media direction.</t>
-
-            <t>
-            <xref target="RFC5576"></xref> MUST be implemented to signal
-            RTP SSRC values and grouping semantics.</t>
-
-            <t>
-            <xref target="RFC4585"></xref> MUST be implemented to signal
-            RTCP based feedback.</t>
-
-            <t>
-            <xref target="RFC5761"></xref> MUST be implemented to signal
-            multiplexing of RTP and RTCP.</t>
-
-            <t>
-            <xref target="RFC5506"></xref> MUST be implemented to signal
-            reduced-size RTCP messages.</t>
-
-            <t>
-            <xref target="RFC4588"></xref> MUST be implemented to signal
-            RTX payload type associations.</t>
-
-            <t>
-            <xref target="RFC3556"></xref> MUST be supported for control
-            of RTCP bandwidth limits.</t>
-
-          </list></t>
-
-          <t>The SDES SRTP keying mechanism from
-          <xref target="RFC4568"/> MUST NOT be implemented, as discussed in
-          <xref target="I-D.ietf-rtcweb-security-arch"/>.</t>
-
-          <t>As required by
-          <xref target="RFC4566"></xref>, Section 5.13, JSEP
-          implementations MUST ignore unknown attribute (a=) lines.</t>
-        </section>
         <section title="Usage Requirements"
         anchor="sec.usage-requirements">
 
@@ -1822,7 +1720,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           local and remote, MUST indicate support for the following
           specifications. If any of these are absent, this omission
           MUST be treated as an error.
-          <list style="format U-%d">
+          <list style="symbols">
 
             <t>ICE, as specified in
             <xref target="RFC5245"></xref>, MUST be used. Note that the
@@ -1836,19 +1734,25 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             appropriate for the media type, as specified in
             <xref target="I-D.ietf-rtcweb-security-arch" /></t>
           </list></t>
+
+          <t>The SDES SRTP keying mechanism from <xref
+          target="RFC4568"/> MUST NOT be used, as discussed in
+          <xref target="I-D.ietf-rtcweb-security-arch"/>.</t>
+
         </section>
         <section title="Profile Names and Interoperability"
         anchor="sec.profile-names">
 
-          <t>For media m= sections, JSEP implementations MUST support both
-          the "UDP/TLS/ RTP/SAVPF" and "TCP/DTLS/RTP/SAVPF" profiles
-          and MUST indicate one of these two profiles for each media m=
+          <t>For media m= sections, JSEP implementations MUST support
+          the "UDP/TLS/RTP/SAVPF" profile
+          specified in <xref target="RFC7850"></xref>,
+          and MUST indicate this profile for each media m=
           line they produce in an offer. For data m= sections,
-          implementations MUST support both the "UDP/DTLS/SCTP" and
-          "TCP/DTLS/SCTP" profiles and MUST indicate one of these two
-          profiles for each data m= line they produce in an offer.
+          implementations MUST support the "UDP/DTLS/SCTP"
+          profile and MUST indicate this
+          profile for each data m= line they produce in an offer.
           Because ICE can select either TCP or UDP transport depending
-          on network conditions, both advertisements are consistent
+          on network conditions, this advertisement is consistent
           with ICE eventually selecting either either UDP or TCP.</t>
 
           <t>Unfortunately, in an attempt at compatibility, some
@@ -2977,7 +2881,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>Next, the SessionDescription is parsed into a data
           structure, as described in the
-          <xref target="sec.parsing-a-desc" /> section below. If parsing
+          <xref target="sec.parsing-a-desc" /> section below.
+          If parsing
           fails for any reason, processing MUST stop and an error MUST
           be returned.</t>
 
@@ -3138,6 +3043,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC5285" />, Section 5, and their values are
             stored.</t>
           </list></t>
+
+          <t>As required by <xref target="RFC4566"></xref>, Section
+          5.13, unknown attribute lines MUST be ignored.</t>
 
           <t>Once all the session-level lines have been parsed,
           processing continues with the lines in m= sections.</t>
@@ -3312,6 +3220,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="I-D.ietf-mmusic-sctp-sdp" />, Section 6, and
             the value stored. Otherwise, use the specified default.</t>
           </list></t>
+
+          <t>As required by <xref target="RFC4566"></xref>, Section
+          5.13, unknown attribute lines MUST be ignored.</t>
         </section>
         <section title="Semantics Verification">
 
