@@ -170,8 +170,8 @@ Uberti, et al.           Expires August 13, 2017                [Page 3]
 Internet-Draft                    JSEP                     February 2017
 
 
-   Appendix C.  Change log . . . . . . . . . . . . . . . . . . . . . 102
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 109
+   Appendix C.  Change log . . . . . . . . . . . . . . . . . . . . . 103
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 110
 
 1.  Introduction
 
@@ -1936,9 +1936,10 @@ Internet-Draft                    JSEP                     February 2017
    this profile for each media m= line they produce in an offer.  For
    data m= sections, implementations MUST support the "UDP/DTLS/SCTP"
    profile and MUST indicate this profile for each data m= line they
-   produce in an offer.  Because ICE can select either TCP or UDP
-   transport depending on network conditions, this advertisement is
-   consistent with ICE eventually selecting either either UDP or TCP.
+   produce in an offer.  Because ICE can select either UDP [RFC5245] or
+   TCP [RFC6544] transport depending on network conditions, this
+   advertisement is consistent with ICE eventually selecting either
+   either UDP or TCP.
 
    Unfortunately, in an attempt at compatibility, some endpoints
    generate other profile strings even when they mean to support one of
@@ -1952,8 +1953,7 @@ Internet-Draft                    JSEP                     February 2017
    o  The profile in any "m=" line in any answer MUST exactly match the
       profile provided in the offer.
 
-   o  Any profile matching the following patterns MUST be accepted:
-      "RTP/[S]AVP[F]" and "(UDP/TCP)/TLS/RTP/SAVP[F]"
+
 
 
 
@@ -1961,6 +1961,9 @@ Uberti, et al.           Expires August 13, 2017               [Page 35]
 
 Internet-Draft                    JSEP                     February 2017
 
+
+   o  Any profile matching the following patterns MUST be accepted:
+      "RTP/[S]AVP[F]" and "(UDP/TCP)/TLS/RTP/SAVP[F]"
 
    o  Because DTLS-SRTP is REQUIRED, the choice of SAVP or AVP has no
       effect; support for DTLS-SRTP is determined by the presence of one
@@ -2007,9 +2010,6 @@ Internet-Draft                    JSEP                     February 2017
       generated as a 64-bit quantity with the high bit being sent to
       zero and the remaining 63 bits being cryptographically random.
       The value of the <nettype> <addrtype> <unicast-address> tuple
-      SHOULD be set to a non-meaningful address, such as IN IP4 0.0.0.0,
-      to prevent leaking the local address in this field.  As mentioned
-
 
 
 
@@ -2018,6 +2018,8 @@ Uberti, et al.           Expires August 13, 2017               [Page 36]
 Internet-Draft                    JSEP                     February 2017
 
 
+      SHOULD be set to a non-meaningful address, such as IN IP4 0.0.0.0,
+      to prevent leaking the local address in this field.  As mentioned
       in [RFC4566], the entire o= line needs to be unique, but selecting
       a random number for <sess-id> is sufficient to accomplish this.
 
@@ -2064,8 +2066,6 @@ Internet-Draft                    JSEP                     February 2017
    been specified for the PeerConnection; as a result, they MUST all
    have the same [I-D.ietf-mmusic-4572-update] fingerprint value(s), or
    these value(s) MUST be session-level attributes.
-
-
 
 
 
@@ -5411,18 +5411,18 @@ Internet-Draft                    JSEP                     February 2017
               DOI 10.17487/RFC6464, December 2011,
               <http://www.rfc-editor.org/info/rfc6464>.
 
+   [RFC6544]  Rosenberg, J., Keranen, A., Lowekamp, B., and A. Roach,
+              "TCP Candidates with Interactive Connectivity
+              Establishment (ICE)", RFC 6544, DOI 10.17487/RFC6544,
+              March 2012, <http://www.rfc-editor.org/info/rfc6544>.
+
    [RFC7656]  Lennox, J., Gross, K., Nandakumar, S., Salgueiro, G., and
               B. Burman, Ed., "A Taxonomy of Semantics and Mechanisms
               for Real-Time Transport Protocol (RTP) Sources", RFC 7656,
               DOI 10.17487/RFC7656, November 2015,
               <http://www.rfc-editor.org/info/rfc7656>.
 
-   [W3C.WD-webrtc-20140617]
-              Bergkvist, A., Burnett, D., Narayanan, A., and C.
-              Jennings, "WebRTC 1.0: Real-time Communication Between
-              Browsers", World Wide Web Consortium WD WD-webrtc-
-              20140617, June 2014,
-              <http://www.w3.org/TR/2011/WD-webrtc-20140617>.
+
 
 
 
@@ -5434,10 +5434,61 @@ Uberti, et al.           Expires August 13, 2017               [Page 97]
 Internet-Draft                    JSEP                     February 2017
 
 
+   [W3C.WD-webrtc-20140617]
+              Bergkvist, A., Burnett, D., Narayanan, A., and C.
+              Jennings, "WebRTC 1.0: Real-time Communication Between
+              Browsers", World Wide Web Consortium WD WD-webrtc-
+              20140617, June 2014,
+              <http://www.w3.org/TR/2011/WD-webrtc-20140617>.
+
 Appendix A.  Appendix A
 
    For the syntax validation performed in Section 5.7, the following
    list of ABNF definitions is used:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Uberti, et al.           Expires August 13, 2017               [Page 98]
+
+Internet-Draft                    JSEP                     February 2017
+
 
    +-----------------------+-------------------------------------------+
    | Attribute             | Reference                                 |
@@ -5478,18 +5529,6 @@ Appendix A.  Appendix A
 
                        Table 1: SDP ABNF References
 
-
-
-
-
-
-
-
-Uberti, et al.           Expires August 13, 2017               [Page 98]
-
-Internet-Draft                    JSEP                     February 2017
-
-
 Appendix B.  Appendix B
 
    The following text is meant to completely replace section
@@ -5499,6 +5538,14 @@ Appendix B.  Appendix B
    As described in [RFC3550], RTP/RTCP packets are associated with RTP
    streams as defined in [RFC7656].  Each RTP stream is identified by an
    SSRC value, and each RTP/RTCP packet carries an SSRC value that is
+
+
+
+Uberti, et al.           Expires August 13, 2017               [Page 99]
+
+Internet-Draft                    JSEP                     February 2017
+
+
    used to associate the packet with the correct RTP stream.  An RTCP
    packet can carry multiple SSRC values, and might therefore be
    associated with multiple RTP streams.
@@ -5538,14 +5585,6 @@ Appendix B.  Appendix B
    [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 14).  Since a
    compound RTCP packet can contain multiple RTCP SDES packets, and each
    RTCP SDES packet can contain multiple chunks, an RTCP packet can
-
-
-
-Uberti, et al.           Expires August 13, 2017               [Page 99]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    contain several SSRC to identification-tag mappings.  The offerer and
    answerer maintain tables used for routing that are updated each time
    an RTP/RTCP packet contains new information that affects how packets
@@ -5553,6 +5592,15 @@ Internet-Draft                    JSEP                     February 2017
 
    To prepare for demultiplexing RTP packets to the correct "m=" line,
    the following steps MUST be followed for each BUNDLE group.
+
+
+
+
+
+Uberti, et al.           Expires August 13, 2017              [Page 100]
+
+Internet-Draft                    JSEP                     February 2017
+
 
       Construct a table mapping MID to "m=" line for each "m=" line in
       this BUNDLE group.  Note that an "m=" line may only have one MID.
@@ -5594,14 +5642,6 @@ Internet-Draft                    JSEP                     February 2017
       to "m=" line, update the incoming SSRC mapping table to include an
       entry that maps the packet's SSRC to the "m=" line for that MID.
 
-
-
-
-Uberti, et al.           Expires August 13, 2017              [Page 100]
-
-Internet-Draft                    JSEP                     February 2017
-
-
       If the packet's SSRC is in the incoming SSRC mapping table, check
       that the packet's PT matches a PT included on the associated "m="
       line.  If so, route the packet to that associated "m=" line and
@@ -5609,6 +5649,15 @@ Internet-Draft                    JSEP                     February 2017
 
       If the packet's payload type is in the payload type table, update
       the the incoming SSRC mapping table to include an entry that maps
+
+
+
+
+Uberti, et al.           Expires August 13, 2017              [Page 101]
+
+Internet-Draft                    JSEP                     February 2017
+
+
       the packet's SSRC to the "m=" line for that payload type.  In
       addition, route the packet to the associated "m=" line and stop.
 
@@ -5649,15 +5698,6 @@ Internet-Draft                    JSEP                     February 2017
       table, deliver a copy of the RTCP packet to the "m=" line
       associated with that SSRC.
 
-
-
-
-
-Uberti, et al.           Expires August 13, 2017              [Page 101]
-
-Internet-Draft                    JSEP                     February 2017
-
-
       If the packet is of type RTPFB or type PSFB, as defined in
       [RFC4585], but not previously handled, and the media source SSRC
       for the packet is found in the outgoing SSRC table, deliver the
@@ -5665,6 +5705,14 @@ Internet-Draft                    JSEP                     February 2017
 
       If the packet is of type APP, deliver a copy of the packet to each
       "m=" line.
+
+
+
+
+Uberti, et al.           Expires August 13, 2017              [Page 102]
+
+Internet-Draft                    JSEP                     February 2017
+
 
 Appendix C.  Change log
 
@@ -5706,14 +5754,6 @@ Appendix C.  Change log
 
    o  Require a privacy-preserving MID/RID construction.
 
-
-
-
-Uberti, et al.           Expires August 13, 2017              [Page 102]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    o  Require support for RFC 3556 bandwidth modifiers.
 
    o  Update maxptime description.
@@ -5722,6 +5762,13 @@ Internet-Draft                    JSEP                     February 2017
       subsequent offers from non-JSEP peers.
 
    o  Update references.
+
+
+
+Uberti, et al.           Expires August 13, 2017              [Page 103]
+
+Internet-Draft                    JSEP                     February 2017
+
 
    Changes in draft-17:
 
@@ -5763,19 +5810,21 @@ Internet-Draft                    JSEP                     February 2017
    o  Update addIceCandidate to indicate ICE generation and allow per-m=
       section end-of-candidates.
 
-
-
-Uberti, et al.           Expires August 13, 2017              [Page 103]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    o  Update fingerprint handling to use draft-ietf-mmusic-4572-update.
 
    o  Update text around SDP processing of RTP header extensions and
       payload formats.
 
    o  Add sections on simulcast, addTransceiver, and createDataChannel.
+
+
+
+
+
+Uberti, et al.           Expires August 13, 2017              [Page 104]
+
+Internet-Draft                    JSEP                     February 2017
+
 
    o  Clarify text to ensure that the session ID is a positive 63 bit
       integer.
@@ -5819,19 +5868,19 @@ Internet-Draft                    JSEP                     February 2017
 
    o  Clean up references.
 
-
-
-Uberti, et al.           Expires August 13, 2017              [Page 104]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    Changes in draft-14:
 
    o  Added discussion of RtpTransceivers + RtpSenders + RtpReceivers,
       and how they interact with createOffer/createAnswer.
 
    o  Removed obsolete OfferToReceiveX options.
+
+
+
+Uberti, et al.           Expires August 13, 2017              [Page 105]
+
+Internet-Draft                    JSEP                     February 2017
+
 
    o  Explained how addIceCandidate can be used for end-of-candidates.
 
@@ -5874,20 +5923,20 @@ Internet-Draft                    JSEP                     February 2017
 
    Changes in draft-12:
 
-
-
-
-Uberti, et al.           Expires August 13, 2017              [Page 105]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    o  Filled in sections on applying local and remote descriptions.
 
    o  Discussed downscaling and upscaling to fulfill imageattr
       requirements.
 
    o  Updated what SDP can be modified by the application.
+
+
+
+
+Uberti, et al.           Expires August 13, 2017              [Page 106]
+
+Internet-Draft                    JSEP                     February 2017
+
 
    o  Updated to latest datachannel SDP.
 
@@ -5931,18 +5980,19 @@ Internet-Draft                    JSEP                     February 2017
 
    Changes in draft-08:
 
-
-
-Uberti, et al.           Expires August 13, 2017              [Page 106]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    o  Added new example section and removed old examples in appendix.
 
    o  Fixed <proto> field handling.
 
    o  Added text describing a=rtcp attribute.
+
+
+
+
+Uberti, et al.           Expires August 13, 2017              [Page 107]
+
+Internet-Draft                    JSEP                     February 2017
+
 
    o  Reworked handling of OfferToReceiveAudio and OfferToReceiveVideo
       per discussion at IETF 90.
@@ -5986,19 +6036,19 @@ Internet-Draft                    JSEP                     February 2017
 
    o  Defined a canonical order for assignment of MSTs to m= lines.
 
-
-
-
-Uberti, et al.           Expires August 13, 2017              [Page 107]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    o  Removed discussion of rehydration.
 
    o  Added Eric Rescorla as a draft editor.
 
    o  Cleaned up references.
+
+
+
+
+Uberti, et al.           Expires August 13, 2017              [Page 108]
+
+Internet-Draft                    JSEP                     February 2017
+
 
    o  Editorial cleanup
 
@@ -6042,19 +6092,19 @@ Internet-Draft                    JSEP                     February 2017
 
    o  Removed stuff that has moved to W3C specification
 
-
-
-
-Uberti, et al.           Expires August 13, 2017              [Page 108]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    o  Align SDP handling with W3C draft
 
    o  Clarified section on forking.
 
    Changes in draft-01:
+
+
+
+
+Uberti, et al.           Expires August 13, 2017              [Page 109]
+
+Internet-Draft                    JSEP                     February 2017
+
 
    o  Added diagrams for architecture and state machine.
 
@@ -6094,18 +6144,6 @@ Authors' Addresses
    Email: fluffy@iii.ca
 
 
-
-
-
-
-
-
-
-Uberti, et al.           Expires August 13, 2017              [Page 109]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    Eric Rescorla (editor)
    Mozilla
    331 Evelyn Ave
@@ -6113,44 +6151,6 @@ Internet-Draft                    JSEP                     February 2017
    USA
 
    Email: ekr@rtfm.com
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
