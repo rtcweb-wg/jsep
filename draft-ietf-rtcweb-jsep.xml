@@ -4597,10 +4597,14 @@ a=rtcp-fb:100 nack pli
       or other session parameters.
       </t>
 
+      <t>This example also makes use of the "relay" ICE candidate policy
+      described in <xref target="sec.ice-candidate-policy"/> to minimize the
+      ICE gathering and checking needed.</t>
+
       <t><figure>
        <artwork><![CDATA[
 //                  set up local media state
-AliceJS->AliceUA:   create new PeerConnection
+AliceJS->AliceUA:   create new PeerConnection with "relay" ICE policy
 AliceJS->AliceUA:   addTrack with two tracks: audio and video
 AliceJS->AliceUA:   createOffer to get |offer-C1|
 AliceJS->AliceUA:   setLocalDescription with |offer-C1|
@@ -4610,18 +4614,18 @@ AliceJS->WebServer: signaling with |offer-C1|
 WebServer->BobJS:   signaling with |offer-C1|
 
 //                  |offer-C1| arrives at Bob
-BobJS->BobUA:       create a PeerConnection
+BobJS->BobUA:       create new PeerConnection with "relay" ICE policy
 BobJS->BobUA:       setRemoteDescription with |offer-C1|
 BobUA->BobJS:       ontrack events for audio and video
 
-//                  candidates are sent to Bob
+//                  a relay candidate is sent to Bob
 AliceUA->AliceJS:   onicecandidate (relay) |offer-C1-candidate-1|
 AliceJS->WebServer: signaling with |offer-C1-candidate-1|
 
 WebServer->BobJS:   signaling with |offer-C1-candidate-1|
 BobJS->BobUA:       addIceCandidate with |offer-C1-candidate-1|
 
-//                 Bob prepares an early answer to warm up the transport
+//                  Bob prepares an early answer to warm up the transport
 BobJS->BobUA:       addTransceiver with null audio and video tracks
 BobJS->BobUA:       transceiver.setDirection(sendonly) for both
 BobJS->BobUA:       createAnswer
@@ -4635,7 +4639,7 @@ WebServer->AliceJS: signaling with |answer-C1|
 AliceJS->AliceUA:   setRemoteDescription with |answer-C1|
 AliceUA->AliceJS:   ontrack events for audio and video
 
-//                  candidates are sent to Alice
+//                  a relay candidate is sent to Alice
 BobUA->BobJS:       onicecandidate (relay) |answer-B1-candidate-1|
 BobJS->WebServer:   signaling with |answer-B1-candidate-1|
 
