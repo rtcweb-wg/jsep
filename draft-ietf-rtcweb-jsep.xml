@@ -4446,27 +4446,33 @@ a=mid:d1
 a=sctp-port:5000
 a=max-message-size:65536
 
-m=video 12200 UDP/TLS/RTP/SAVPF 100 101
+m=video 12200 UDP/TLS/RTP/SAVPF 100 101 102
 c=IN IP4 192.0.2.200
 a=mid:v1
 a=sendrecv
 a=rtpmap:100 VP8/90000
 a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
+a=rtpmap:102 flexfec/90000
 a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
 a=rtcp-fb:100 ccm fir
 a=rtcp-fb:100 nack
 a=rtcp-fb:100 nack pli
 a=msid:71317484-2ed4-49d7-9eb7-1414322a7aae
        5ea4d4a1-2fda-4511-a9cc-1b32c2e59552
+a=rid:1 send
+a=rid:2 send
+a=rid:3 send
+a=simulcast:send 1;2;3
 
-m=video 12200 UDP/TLS/RTP/SAVPF 100 101
+m=video 12200 UDP/TLS/RTP/SAVPF 100 101 102
 c=IN IP4 192.0.2.200
 a=mid:v2
 a=sendrecv
 a=rtpmap:100 VP8/90000
 a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
+a=rtpmap:102 flexfec/90000
 a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
 a=rtcp-fb:100 ccm fir
 a=rtcp-fb:100 nack
@@ -4539,6 +4545,7 @@ a=recvonly
 a=rtpmap:100 VP8/90000
 a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
+a=imageattr:100 recv [x=[48:1920],y=[48:1080],q=1.0]
 a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
 a=rtcp-fb:100 ccm fir
 a=rtcp-fb:100 nack
@@ -4551,6 +4558,7 @@ a=recvonly
 a=rtpmap:100 VP8/90000
 a=rtpmap:101 rtx/90000
 a=fmtp:101 apt=100
+a=imageattr:100 recv [x=[48:1920],y=[48:1080],q=1.0]
 a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
 a=rtcp-fb:100 ccm fir
 a=rtcp-fb:100 nack
@@ -4725,7 +4733,8 @@ a=bundle-only
 ufrag 4ZcD
 index 0
 mid   a1
-attr  candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
+attr  candidate:1 1 udp 255 192.0.2.100 12100 typ relay
+                raddr 0.0.0.0 rport 0
 ]]>
          </artwork>
        </figure>
@@ -4798,7 +4807,8 @@ a=msid:751f239e-4ae0-c549-aa3d-890de772998b
 ufrag TpaA
 index 0
 mid   a1
-attr  candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
+attr  candidate:1 1 udp 255 192.0.2.200 12200 typ relay
+                raddr 0.0.0.0 rport 0
 ]]>
          </artwork>
        </figure>
@@ -4843,11 +4853,8 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
-a=candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
-a=candidate:1 1 udp 1845494015 198.51.100.200 11200 typ srflx
-            raddr 203.0.113.200 rport 10200
 a=candidate:1 1 udp 255 192.0.2.200 12200 typ relay
-            raddr 198.51.100.200 rport 11200
+            raddr 0.0.0.0 rport 0
 a=end-of-candidates
 
 m=video 12200 UDP/TLS/RTP/SAVPF 100 101
@@ -4907,11 +4914,8 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
-a=candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
-a=candidate:1 1 udp 1845494015 198.51.100.100 11100 typ srflx
-            raddr 203.0.113.100 rport 10100
 a=candidate:1 1 udp 255 192.0.2.100 12100 typ relay
-            raddr 198.51.100.100 rport 11100
+            raddr 0.0.0.0 rport 0
 a=end-of-candidates
 
 m=video 12100 UDP/TLS/RTP/SAVPF 100 101
