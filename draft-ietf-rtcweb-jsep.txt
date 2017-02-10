@@ -152,7 +152,7 @@ Internet-Draft                    JSEP                     February 2017
    6.  Processing RTP/RTCP . . . . . . . . . . . . . . . . . . . . .  70
    7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  70
      7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  70
-     7.2.  Normal Example  . . . . . . . . . . . . . . . . . . . . .  75
+     7.2.  Detailed Example  . . . . . . . . . . . . . . . . . . . .  75
    8.  Early Transport Warmup Example  . . . . . . . . . . . . . . .  84
    9.  Security Considerations . . . . . . . . . . . . . . . . . . .  92
    10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  93
@@ -3899,18 +3899,18 @@ Internet-Draft                    JSEP                     February 2017
 7.1.  Simple Example
 
    This section shows a very simple example that sets up a minimal audio
-   / video call between two JSEP endpoints and does not use trickle ICE.
-   The example in the following section provides a more realistic
-   example of what would happen in a normal browser to browser
-   connection.
+   / video call between two JSEP endpoints without using trickle ICE.
+   The example in the following section provides a more detailed example
+   of what could happen in a JSEP session.
 
-   The flow shows Alice's endpoint initiating the session to Bob's
-   endpoint.  The messages from Alice's JS to Bob's JS are assumed to
-   flow over some signaling protocol via a web server.  The JS on both
-   Alice's side and Bob's side waits for all candidates before sending
-   the offer or answer, so the offers and answers are complete.  Trickle
-   ICE is not used.  Both Alice and Bob are using the default policy of
-   balanced.
+   The code flow below shows Alice's endpoint initiating the session to
+   Bob's endpoint.  The messages from Alice's JS to Bob's JS are assumed
+   to flow over some signaling protocol via a web server.  The JS on
+   both Alice's side and Bob's side waits for all candidates before
+   sending the offer or answer, so the offers and answers are complete;
+   trickle ICE is not used.  Both Alice and Bob are using the default
+   bundle policy of "balanced", and the default RTCP mux policy of
+   "require".
 
 
 
@@ -4146,16 +4146,18 @@ Uberti, et al.           Expires August 14, 2017               [Page 74]
 Internet-Draft                    JSEP                     February 2017
 
 
-7.2.  Normal Example
+7.2.  Detailed Example
 
-   This section shows a typical example of a session between two JSEP
-   endpoints setting up an audio channel and a data channel.  Trickle
-   ICE is used in full trickle mode with a bundle policy of max-bundle,
-   an RTCP mux policy of require, and a single TURN server.  Later, two
-   video flows, one for the presenter and one for screen sharing, are
-   added to the session.  This example shows Alice's endpoint initiating
-   the session to Bob's endpoint.  The messages from Alice's JS to Bob's
-   JS are assumed to flow over some signaling protocol via a web server.
+   This section shows a more involved example of a session between two
+   JSEP endpoints.  Trickle ICE is used in full trickle mode, with a
+   bundle policy of "max-bundle", an RTCP mux policy of "require", and a
+   single TURN server.  Initially, both Alice and Bob establish an audio
+   channel and a data channel.  Later, Bob adds two video flows, one for
+   his video feed, and one for screensharing, both supporting FEC, and
+   with the video feed configured for simulcast.  Alice accepts these
+   video flows, but does not add video flows of her own, so they are
+   handled as recvonly.  Alice also specifies a maximum video decoder
+   resolution.
 
 
   //                  set up local media state
@@ -4192,8 +4194,6 @@ Internet-Draft                    JSEP                     February 2017
   //                  Bob accepts call
   BobJS->BobUA:       addTrack with local audio
   BobJS->BobUA:       createDataChannel to get data channel
-  BobJS->BobUA:       createAnswer to get |answer-B1|
-  BobJS->BobUA:       setLocalDescription with |answer-B1|
 
 
 
@@ -4201,6 +4201,9 @@ Uberti, et al.           Expires August 14, 2017               [Page 75]
 
 Internet-Draft                    JSEP                     February 2017
 
+
+  BobJS->BobUA:       createAnswer to get |answer-B1|
+  BobJS->BobUA:       setLocalDescription with |answer-B1|
 
   //                  |answer-B1| is sent to Alice
   BobJS->WebServer:   signaling with |answer-B1|
@@ -4247,9 +4250,6 @@ Internet-Draft                    JSEP                     February 2017
   AliceUA->AliceJS:   ontrack event with first video track
   AliceUA->AliceJS:   ontrack event with second video track
   AliceJS->AliceUA:   createAnswer to get |answer-B2|
-  AliceJS->AliceUA:   setLocalDescription with |answer-B2|
-
-  //                  |answer-B2| is sent over signaling protocol to Bob
 
 
 
@@ -4258,6 +4258,9 @@ Uberti, et al.           Expires August 14, 2017               [Page 76]
 Internet-Draft                    JSEP                     February 2017
 
 
+  AliceJS->AliceUA:   setLocalDescription with |answer-B2|
+
+  //                  |answer-B2| is sent over signaling protocol to Bob
   AliceJS->WebServer: signaling with |answer-B2|
   WebServer->BobJS:   signaling with |answer-B2|
   BobJS->BobUA:       setRemoteDescription with |answer-B2|
@@ -4268,9 +4271,6 @@ Internet-Draft                    JSEP                     February 2017
 
 
    The SDP for |offer-B1| looks like:
-
-
-
 
 
 
@@ -4354,7 +4354,7 @@ Internet-Draft                    JSEP                     February 2017
    a=bundle-only
 
 
-   The SDP for |offer-B1-candidate-1| looks like:
+   |offer-B1-candidate-1| looks like:
 
 
    ufrag ATEn
@@ -4370,7 +4370,7 @@ Uberti, et al.           Expires August 14, 2017               [Page 78]
 Internet-Draft                    JSEP                     February 2017
 
 
-   The SDP for |offer-B1-candidate-2| looks like:
+   |offer-B1-candidate-2| looks like:
 
 
    ufrag ATEn
@@ -4380,7 +4380,7 @@ Internet-Draft                    JSEP                     February 2017
                    raddr 203.0.113.100 rport 10100
 
 
-   The SDP for |offer-B1-candidate-3| looks like:
+   |offer-B1-candidate-3| looks like:
 
 
    ufrag ATEn
@@ -4465,7 +4465,7 @@ Internet-Draft                    JSEP                     February 2017
    a=max-message-size:65536
 
 
-   The SDP for |answer-B1-candidate-1| looks like:
+   |answer-B1-candidate-1| looks like:
 
 
    ufrag 7sFv
@@ -4482,7 +4482,7 @@ Uberti, et al.           Expires August 14, 2017               [Page 80]
 Internet-Draft                    JSEP                     February 2017
 
 
-   The SDP for |answer-B1-candidate-2| looks like:
+   |answer-B1-candidate-2| looks like:
 
 
    ufrag 7sFv
@@ -4492,7 +4492,7 @@ Internet-Draft                    JSEP                     February 2017
                    raddr 203.0.113.200 rport 10200
 
 
-   The SDP for |answer-B1-candidate-3| looks like:
+   |answer-B1-candidate-3| looks like:
 
 
    ufrag 7sFv
@@ -4502,9 +4502,12 @@ Internet-Draft                    JSEP                     February 2017
                    raddr 198.51.100.200 rport 11200
 
 
-   The SDP for |offer-B2| looks like: (note the increment of the version
-   number in the o= line, and the c= and a=rtcp lines, which indicate
-   the local candidate that was selected)
+   The SDP for |offer-B2| is shown below.  In addition to the new m=
+   sections for video, both of which are offering FEC, and one of which
+   is offering simulcast, note the increment of the version number in
+   the o= line, changes to the c= line, indicating the local candidate
+   that was selected, and the inclusion of gathered candidates as
+   a=candidate lines.
 
 
    v=0
@@ -4527,9 +4530,6 @@ Internet-Draft                    JSEP                     February 2017
    a=maxptime:120
    a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
    a=extmap:2 urn:ietf:params:rtp-hdrext:ssrc-audio-level
-   a=msid:71317484-2ed4-49d7-9eb7-1414322a7aae
-          6a7b57b8-f043-4bd1-a45d-09d4dfa31226
-   a=ice-ufrag:7sFv
 
 
 
@@ -4538,6 +4538,9 @@ Uberti, et al.           Expires August 14, 2017               [Page 81]
 Internet-Draft                    JSEP                     February 2017
 
 
+   a=msid:71317484-2ed4-49d7-9eb7-1414322a7aae
+          6a7b57b8-f043-4bd1-a45d-09d4dfa31226
+   a=ice-ufrag:7sFv
    a=ice-pwd:dOTZKZNVlO9RSGsEGM63JXT2
    a=fingerprint:sha-256
                  7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
@@ -4560,32 +4563,29 @@ Internet-Draft                    JSEP                     February 2017
    a=sctp-port:5000
    a=max-message-size:65536
 
-   m=video 12200 UDP/TLS/RTP/SAVPF 100 101
+   m=video 12200 UDP/TLS/RTP/SAVPF 100 101 102
    c=IN IP4 192.0.2.200
    a=mid:v1
    a=sendrecv
    a=rtpmap:100 VP8/90000
    a=rtpmap:101 rtx/90000
    a=fmtp:101 apt=100
+   a=rtpmap:102 flexfec/90000
    a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
    a=rtcp-fb:100 ccm fir
    a=rtcp-fb:100 nack
    a=rtcp-fb:100 nack pli
    a=msid:71317484-2ed4-49d7-9eb7-1414322a7aae
           5ea4d4a1-2fda-4511-a9cc-1b32c2e59552
+   a=rid:1 send
+   a=rid:2 send
+   a=rid:3 send
+   a=simulcast:send 1;2;3
 
-   m=video 12200 UDP/TLS/RTP/SAVPF 100 101
+   m=video 12200 UDP/TLS/RTP/SAVPF 100 101 102
    c=IN IP4 192.0.2.200
    a=mid:v2
    a=sendrecv
-   a=rtpmap:100 VP8/90000
-   a=rtpmap:101 rtx/90000
-   a=fmtp:101 apt=100
-   a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
-   a=rtcp-fb:100 ccm fir
-   a=rtcp-fb:100 nack
-   a=rtcp-fb:100 nack pli
-   a=msid:81317484-2ed4-49d7-9eb7-1414322a7aae
 
 
 
@@ -4594,12 +4594,23 @@ Uberti, et al.           Expires August 14, 2017               [Page 82]
 Internet-Draft                    JSEP                     February 2017
 
 
+   a=rtpmap:100 VP8/90000
+   a=rtpmap:101 rtx/90000
+   a=fmtp:101 apt=100
+   a=rtpmap:102 flexfec/90000
+   a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
+   a=rtcp-fb:100 ccm fir
+   a=rtcp-fb:100 nack
+   a=rtcp-fb:100 nack pli
+   a=msid:81317484-2ed4-49d7-9eb7-1414322a7aae
           6ea4d4a1-2fda-4511-a9cc-1b32c2e59552
 
 
-   The SDP for |answer-B2| looks like: (note the use of setup:passive to
-   maintain the existing DTLS roles, and the use of a=recvonly to
-   indicate that the video streams are one-way)
+   The SDP for |answer-B2| is shown below.  In addition to the
+   acceptance of the video m= sections, the use of a=recvonly to
+   indicate one-way video, and the use of a=imageattr to limit the
+   received resolution, note the use of setup:passive to maintain the
+   existing DTLS roles.
 
 
    v=0
@@ -4631,6 +4642,14 @@ Internet-Draft                    JSEP                     February 2017
                  BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
    a=setup:passive
    a=dtls-id:1
+
+
+
+Uberti, et al.           Expires August 14, 2017               [Page 83]
+
+Internet-Draft                    JSEP                     February 2017
+
+
    a=rtcp-mux
    a=rtcp-mux-only
    a=rtcp-rsize
@@ -4642,14 +4661,6 @@ Internet-Draft                    JSEP                     February 2017
    a=end-of-candidates
 
    m=application 12100 UDP/DTLS/SCTP webrtc-datachannel
-
-
-
-Uberti, et al.           Expires August 14, 2017               [Page 83]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    c=IN IP4 192.0.2.100
    a=mid:d1
    a=sctp-port:5000
@@ -4662,6 +4673,7 @@ Internet-Draft                    JSEP                     February 2017
    a=rtpmap:100 VP8/90000
    a=rtpmap:101 rtx/90000
    a=fmtp:101 apt=100
+   a=imageattr:100 recv [x=[48:1920],y=[48:1080],q=1.0]
    a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
    a=rtcp-fb:100 ccm fir
    a=rtcp-fb:100 nack
@@ -4674,6 +4686,7 @@ Internet-Draft                    JSEP                     February 2017
    a=rtpmap:100 VP8/90000
    a=rtpmap:101 rtx/90000
    a=fmtp:101 apt=100
+   a=imageattr:100 recv [x=[48:1920],y=[48:1080],q=1.0]
    a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
    a=rtcp-fb:100 ccm fir
    a=rtcp-fb:100 nack
@@ -4685,8 +4698,16 @@ Internet-Draft                    JSEP                     February 2017
    This example demonstrates the early warmup technique described in
    Section 4.1.8.1.  Here, Alice's endpoint sends an offer to Bob's
    endpoint to start an audio/video call.  Bob immediately responds with
+
+
+
+Uberti, et al.           Expires August 14, 2017               [Page 84]
+
+Internet-Draft                    JSEP                     February 2017
+
+
    an answer that accepts the audio/video m= sections, but marks them as
-   sendonly (from its perspective), meaning that Alice will not yet send
+   sendonly (from his perspective), meaning that Alice will not yet send
    media.  This allows the JSEP implementation to start negotiating ICE
    and DTLS immediately.  Bob's endpoint then prompts him to answer the
    call, and when he does, his endpoint sends a second offer which
@@ -4697,17 +4718,8 @@ Internet-Draft                    JSEP                     February 2017
    transport setup completes before the second offer is sent, then media
    can be transmitted immediately by the callee immediately upon
    answering the call, minimizing perceived post-dial-delay.  The second
-
-
-
-
-Uberti, et al.           Expires August 14, 2017               [Page 84]
-
-Internet-Draft                    JSEP                     February 2017
-
-
    offer/answer exchange can also change the preferred codecs or other
-   information.
+   session parameters.
 
    This example also makes use of the "relay" ICE candidate policy
    described in Section 3.5.3 to minimize the ICE gathering and checking
@@ -4742,6 +4754,14 @@ BobJS->BobUA:       createAnswer
 BobJS->BobUA:       setLocalDescription with answer
 
 //                  |answer-C1| is sent over signaling protocol to Alice
+
+
+
+Uberti, et al.           Expires August 14, 2017               [Page 85]
+
+Internet-Draft                    JSEP                     February 2017
+
+
 BobJS->WebServer:   signaling with |answer-C1|
 WebServer->AliceJS: signaling with |answer-C1|
 
@@ -4754,14 +4774,6 @@ BobUA->BobJS:       onicecandidate (relay) |answer-B1-candidate-1|
 BobJS->WebServer:   signaling with |answer-B1-candidate-1|
 
 WebServer->AliceJS: signaling with |answer-B1-candidate-1|
-
-
-
-Uberti, et al.           Expires August 14, 2017               [Page 85]
-
-Internet-Draft                    JSEP                     February 2017
-
-
 AliceJS->AliceUA:   addIceCandidate with |answer-B1-candidate-1|
 
 //                  ICE and DTLS establish while call is ringing
@@ -4791,18 +4803,6 @@ BobJS->BobUA:       setRemoteDescription with |answer-C2|
 
 
    The SDP for |offer-C1| looks like:
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4874,7 +4874,7 @@ Uberti, et al.           Expires August 14, 2017               [Page 87]
 Internet-Draft                    JSEP                     February 2017
 
 
-   The SDP for |offer-C1-candidate-1| looks like:
+   |offer-C1-candidate-1| looks like:
 
 
    ufrag 4ZcD
@@ -4986,7 +4986,7 @@ Uberti, et al.           Expires August 14, 2017               [Page 89]
 Internet-Draft                    JSEP                     February 2017
 
 
-   The SDP for |answer-C1-candidate-1| looks like:
+   |answer-C1-candidate-1| looks like:
 
 
    ufrag TpaA
