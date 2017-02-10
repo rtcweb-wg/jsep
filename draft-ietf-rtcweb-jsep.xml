@@ -2595,7 +2595,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </figure>
           </t>
 
-          <t>The <xref target="sec.normal-example"/> example later in this
+          <t>The <xref target="sec.detailed-example"/> example later in this
           document shows a more involved case of "LS" group generation.</t>
 
           <t>The next step is to generate m= sections for each m=
@@ -3895,18 +3895,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       <section title="Simple Example" anchor="sec.simple-examples">
 
         <t>This section shows a very simple example that sets up a
-        minimal audio / video call between two JSEP endpoints and does not
-        use trickle ICE. The example in the following section provides
-        a more realistic example of what would happen in a normal
-        browser to browser connection.</t>
+        minimal audio / video call between two JSEP endpoints without
+        using trickle ICE. The example in the following section provides
+        a more detailed example of what could happen in a JSEP session.</t>
 
-        <t>The flow shows Alice's endpoint initiating the session to
+        <t>The code flow below shows Alice's endpoint initiating the session to
         Bob's endpoint. The messages from Alice's JS to Bob's JS are
         assumed to flow over some signaling protocol via a web server.
         The JS on both Alice's side and Bob's side waits for all
         candidates before sending the offer or answer, so the offers
-        and answers are complete. Trickle ICE is not used. Both Alice
-        and Bob are using the default policy of balanced.</t>
+        and answers are complete; trickle ICE is not used. Both Alice
+        and Bob are using the default bundle policy of "balanced", and
+        the default RTCP mux policy of "require".</t>
 
         <t>
           <figure>
@@ -4089,17 +4089,19 @@ a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae
           </figure>
         </t>
       </section>
-      <section title="Normal Example" anchor="sec.normal-example">
+      <section title="Detailed Example" anchor="sec.detailed-example">
 
-        <t>This section shows a typical example of a session between
-        two JSEP endpoints setting up an audio channel and a data channel.
-        Trickle ICE is used in full trickle mode with a bundle policy
-        of max-bundle, an RTCP mux policy of require, and a single TURN
-        server. Later, two video flows, one for the presenter and one
-        for screen sharing, are added to the session. This example
-        shows Alice's endpoint initiating the session to Bob's endpoint.
-        The messages from Alice's JS to Bob's JS are assumed to flow
-        over some signaling protocol via a web server.</t>
+        <t>This section shows a more involved example of a session between
+        two JSEP endpoints. Trickle ICE is used in full trickle mode,
+        with a bundle policy of "max-bundle", an RTCP mux policy of "require",
+        and a single TURN server. Initially, both Alice and Bob establish an
+        audio channel and a data channel. Later, Bob adds two video flows,
+        one for his video feed, and one for screensharing, both supporting
+        FEC, and with the video feed configured for simulcast. Alice accepts
+        these video flows, but does not add video flows of her own, so they
+        are handled as recvonly. Alice also specifies a maximum video decoder
+        resolution.
+        </t>
 
         <t>
           <figure>
@@ -4251,7 +4253,7 @@ a=bundle-only
           </figure>
         </t>
 
-        <t>The SDP for |offer-B1-candidate-1| looks like:</t>
+        <t>|offer-B1-candidate-1| looks like:</t>
 
         <t>
           <figure>
@@ -4266,7 +4268,7 @@ attr  candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
           </figure>
         </t>
 
-        <t>The SDP for |offer-B1-candidate-2| looks like:</t>
+        <t>|offer-B1-candidate-2| looks like:</t>
 
         <t>
           <figure>
@@ -4282,7 +4284,7 @@ attr  candidate:1 1 udp 1845494015 198.51.100.100 11100 typ srflx
           </figure>
         </t>
 
-        <t>The SDP for |offer-B1-candidate-3| looks like:</t>
+        <t>|offer-B1-candidate-3| looks like:</t>
 
         <t>
           <figure>
@@ -4346,7 +4348,7 @@ a=max-message-size:65536
           </figure>
         </t>
 
-        <t>The SDP for |answer-B1-candidate-1| looks like:</t>
+        <t>|answer-B1-candidate-1| looks like:</t>
 
         <t>
           <figure>
@@ -4361,7 +4363,7 @@ attr  candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
           </figure>
         </t>
 
-        <t>The SDP for |answer-B1-candidate-2| looks like:</t>
+        <t>|answer-B1-candidate-2| looks like:</t>
 
         <t>
           <figure>
@@ -4377,7 +4379,7 @@ attr  candidate:1 1 udp 1845494015 198.51.100.200 11200 typ srflx
           </figure>
         </t>
 
-        <t>The SDP for |answer-B1-candidate-3| looks like:</t>
+        <t>|answer-B1-candidate-3| looks like:</t>
 
         <t>
           <figure>
@@ -4393,9 +4395,12 @@ attr  candidate:1 1 udp 255 192.0.2.200 12200 typ relay
           </figure>
         </t>
 
-        <t>The SDP for |offer-B2| looks like: (note the increment of
-        the version number in the o= line, and the c= and a=rtcp lines,
-        which indicate the local candidate that was selected)</t>
+        <t>The SDP for |offer-B2| is shown below. In addition to
+        the new m= sections for video, both of which are offering FEC, and one
+        of which is offering simulcast, note the increment of
+        the version number in the o= line, changes to the c= line,
+        indicating the local candidate that was selected, and
+        the inclusion of gathered candidates as a=candidate lines.</t>
 
         <t>
           <figure>
@@ -4484,10 +4489,12 @@ a=msid:81317484-2ed4-49d7-9eb7-1414322a7aae
           </figure>
         </t>
 
-        <t>The SDP for |answer-B2| looks like: (note the use of
-        setup:passive to maintain the existing DTLS roles, and the use
-        of a=recvonly to indicate that the video streams are
-        one-way)</t>
+        <t>The SDP for |answer-B2| is shown below. In addition to the
+        acceptance of the video m= sections, the use of a=recvonly to
+        indicate one-way video, and the use of a=imageattr
+        to limit the received resolution, note the use of
+        setup:passive to maintain the existing DTLS roles.
+        </t>
 
         <t>
           <figure>
@@ -4575,7 +4582,7 @@ a=rtcp-fb:100 nack pli
       <xref target="sec.use-of-provisional-answer"/>. Here, Alice's endpoint
       sends an offer to Bob's endpoint to start an audio/video call. Bob
       immediately responds with an answer that accepts the audio/video
-      m= sections, but marks them as sendonly (from its perspective), meaning
+      m= sections, but marks them as sendonly (from his perspective), meaning
       that Alice will not yet send media. This allows the JSEP implementation
       to start negotiating ICE and DTLS immediately. Bob's endpoint then prompts
       him to answer the call, and when he does, his endpoint sends a second
@@ -4587,7 +4594,7 @@ a=rtcp-fb:100 nack pli
       sent, then media can be transmitted immediately by the callee immediately
       upon answering the call, minimizing perceived post-dial-delay.
       The second offer/answer exchange can also change the preferred codecs
-      or other information.
+      or other session parameters.
       </t>
 
       <t><figure>
@@ -4724,7 +4731,7 @@ a=bundle-only
        </figure>
      </t>
 
-     <t>The SDP for |offer-C1-candidate-1| looks like:</t>
+     <t>|offer-C1-candidate-1| looks like:</t>
 
      <t>
        <figure>
@@ -4798,7 +4805,7 @@ a=msid:751f239e-4ae0-c549-aa3d-890de772998b
        </figure>
      </t>
 
-     <t>The SDP for |answer-C1-candidate-1| looks like:</t>
+     <t>|answer-C1-candidate-1| looks like:</t>
 
      <t>
        <figure>
