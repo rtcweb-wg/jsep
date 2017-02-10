@@ -368,7 +368,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-2-9" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-2-10" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -392,7 +392,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: August 13, 2017</td>
+  <td class="left">Expires: August 14, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">February 9, 2017</td>
+  <td class="right">February 10, 2017</td>
 </tr>
 
     	
@@ -425,7 +425,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 13, 2017.</p>
+<p>This Internet-Draft will expire on August 14, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -1911,9 +1911,10 @@ a=rtcp-fb:100 nack pli
 <p/>
 <h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#sec.warmup-example" id="sec.warmup-example">Early Transport Warmup Example</a></h1>
 <p id="rfc.section.8.p.1">This example demonstrates the early warmup technique described in <a href="#sec.use-of-provisional-answer">Section 4.1.8.1</a>. Here, Alice's endpoint sends an offer to Bob's endpoint to start an audio/video call. Bob immediately responds with an answer that accepts the audio/video m= sections, but marks them as sendonly (from its perspective), meaning that Alice will not yet send media. This allows the JSEP implementation to start negotiating ICE and DTLS immediately. Bob's endpoint then prompts him to answer the call, and when he does, his endpoint sends a second offer which enables the audio and video m= sections, and thereby bidirectional media transmission. The advantage of such a flow is that as soon as the first answer is received, the implementation can proceed with ICE and DTLS negotiation and establish the session transport. If the transport setup completes before the second offer is sent, then media can be transmitted immediately by the callee immediately upon answering the call, minimizing perceived post-dial-delay.  The second offer/answer exchange can also change the preferred codecs or other information.  </p>
+<p id="rfc.section.8.p.2">This example also makes use of the "relay" ICE candidate policy described in <a href="#sec.ice-candidate-policy">Section 3.5.3</a> to minimize the ICE gathering and checking needed.</p>
 <pre>
 //                  set up local media state
-AliceJS-&gt;AliceUA:   create new PeerConnection
+AliceJS-&gt;AliceUA:   create new PeerConnection with "relay" ICE policy
 AliceJS-&gt;AliceUA:   addTrack with two tracks: audio and video
 AliceJS-&gt;AliceUA:   createOffer to get |offer-C1|
 AliceJS-&gt;AliceUA:   setLocalDescription with |offer-C1|
@@ -1923,18 +1924,18 @@ AliceJS-&gt;WebServer: signaling with |offer-C1|
 WebServer-&gt;BobJS:   signaling with |offer-C1|
 
 //                  |offer-C1| arrives at Bob
-BobJS-&gt;BobUA:       create a PeerConnection
+BobJS-&gt;BobUA:       create new PeerConnection with "relay" ICE policy
 BobJS-&gt;BobUA:       setRemoteDescription with |offer-C1|
 BobUA-&gt;BobJS:       ontrack events for audio and video
 
-//                  candidates are sent to Bob
+//                  a relay candidate is sent to Bob
 AliceUA-&gt;AliceJS:   onicecandidate (relay) |offer-C1-candidate-1|
 AliceJS-&gt;WebServer: signaling with |offer-C1-candidate-1|
 
 WebServer-&gt;BobJS:   signaling with |offer-C1-candidate-1|
 BobJS-&gt;BobUA:       addIceCandidate with |offer-C1-candidate-1|
 
-//                 Bob prepares an early answer to warm up the transport
+//                  Bob prepares an early answer to warm up the transport
 BobJS-&gt;BobUA:       addTransceiver with null audio and video tracks
 BobJS-&gt;BobUA:       transceiver.setDirection(sendonly) for both
 BobJS-&gt;BobUA:       createAnswer
@@ -1948,7 +1949,7 @@ WebServer-&gt;AliceJS: signaling with |answer-C1|
 AliceJS-&gt;AliceUA:   setRemoteDescription with |answer-C1|
 AliceUA-&gt;AliceJS:   ontrack events for audio and video
 
-//                  candidates are sent to Alice
+//                  a relay candidate is sent to Alice
 BobUA-&gt;BobJS:       onicecandidate (relay) |answer-B1-candidate-1|
 BobJS-&gt;WebServer:   signaling with |answer-B1-candidate-1|
 
@@ -1982,7 +1983,7 @@ BobJS-&gt;BobUA:       setRemoteDescription with |answer-C2|
 
          </pre>
 <p/>
-<p id="rfc.section.8.p.3">The SDP for |offer-C1| looks like: </p>
+<p id="rfc.section.8.p.4">The SDP for |offer-C1| looks like: </p>
 <pre>
 
 v=0
@@ -2035,17 +2036,18 @@ a=bundle-only
 
          </pre>
 <p/>
-<p id="rfc.section.8.p.5">The SDP for |offer-C1-candidate-1| looks like:</p>
+<p id="rfc.section.8.p.6">The SDP for |offer-C1-candidate-1| looks like:</p>
 <pre>
 
 ufrag 4ZcD
 index 0
 mid   a1
-attr  candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
+attr  candidate:1 1 udp 255 192.0.2.100 12100 typ relay
+                raddr 0.0.0.0 rport 0
 
          </pre>
 <p/>
-<p id="rfc.section.8.p.7">The SDP for |answer-C1| looks like: </p>
+<p id="rfc.section.8.p.8">The SDP for |answer-C1| looks like: </p>
 <pre>
 
 v=0
@@ -2097,17 +2099,18 @@ a=msid:751f239e-4ae0-c549-aa3d-890de772998b
 
          </pre>
 <p/>
-<p id="rfc.section.8.p.9">The SDP for |answer-C1-candidate-1| looks like:</p>
+<p id="rfc.section.8.p.10">The SDP for |answer-C1-candidate-1| looks like:</p>
 <pre>
 
 ufrag TpaA
 index 0
 mid   a1
-attr  candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
+attr  candidate:1 1 udp 255 192.0.2.200 12200 typ relay
+                raddr 0.0.0.0 rport 0
 
          </pre>
 <p/>
-<p id="rfc.section.8.p.11">The SDP for |offer-C2| looks like: </p>
+<p id="rfc.section.8.p.12">The SDP for |offer-C2| looks like: </p>
 <pre>
 
 v=0
@@ -2142,11 +2145,8 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
-a=candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
-a=candidate:1 1 udp 1845494015 198.51.100.200 11200 typ srflx
-            raddr 203.0.113.200 rport 10200
 a=candidate:1 1 udp 255 192.0.2.200 12200 typ relay
-            raddr 198.51.100.200 rport 11200
+            raddr 0.0.0.0 rport 0
 a=end-of-candidates
 
 m=video 12200 UDP/TLS/RTP/SAVPF 100 101
@@ -2165,7 +2165,7 @@ a=msid:751f239e-4ae0-c549-aa3d-890de772998b
 
          </pre>
 <p/>
-<p id="rfc.section.8.p.13">The SDP for |answer-C2| looks like: </p>
+<p id="rfc.section.8.p.14">The SDP for |answer-C2| looks like: </p>
 <pre>
 
 v=0
@@ -2200,11 +2200,8 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
-a=candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
-a=candidate:1 1 udp 1845494015 198.51.100.100 11100 typ srflx
-            raddr 203.0.113.100 rport 10100
 a=candidate:1 1 udp 255 192.0.2.100 12100 typ relay
-            raddr 198.51.100.100 rport 11100
+            raddr 0.0.0.0 rport 0
 a=end-of-candidates
 
 m=video 12100 UDP/TLS/RTP/SAVPF 100 101
