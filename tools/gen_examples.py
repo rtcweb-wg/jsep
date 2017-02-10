@@ -29,18 +29,24 @@ class PeerConnection:
     """
 
   VIDEO_SDP = \
- """m=video {0[default_port]} UDP/TLS/RTP/SAVPF 100 101
+ """m=video {0[default_port]} UDP/TLS/RTP/SAVPF 100 101 102
     c=IN IP4 {0[default_ip]}
     a=mid:{0[mid]}
     a={0[direction]}
     a=rtpmap:100 VP8/90000
     a=rtpmap:101 rtx/90000
     a=fmtp:101 apt=100
+    a=rtpmap:102 flexfec/90000
+    a=imageattr:100 recv [x=[48:1920],y=[48:1080],q=1.0]
     a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
     a=rtcp-fb:100 ccm fir
     a=rtcp-fb:100 nack
     a=rtcp-fb:100 nack pli
     a=msid:{0[ms]} {0[mst]}
+    a=rid:1 send
+    a=rid:2 send
+    a=rid:3 send
+    a=simulcast:send 1;2;3
     """
 
   DATA_SDP = \
@@ -117,9 +123,11 @@ class PeerConnection:
     m_section['default_port'] = default_port
     m_section['default_rtcp'] = default_rtcp
 
+  # removes the first attr of the form a=foo or a=foo:bar and returns new SDP
   def remove_attribute(self, sdp, attrib):
     # look for the whole attribute, to avoid finding a=rtcp inside of a=rtcp-mux
-    start = sdp.find(attrib + ':')
+    suffix = ':' if ':' not in attrib else ' '
+    start = sdp.find(attrib + suffix)
     if start == -1:
       start = sdp.find(attrib + '\n')
     if start == -1:
@@ -127,6 +135,15 @@ class PeerConnection:
 
     end = sdp.find('\n', start)
     return sdp[:start] + sdp[end + 1:]
+
+  # removes multiple instance of an attribute at once
+  def remove_attributes(self, sdp, attrib):
+    in_sdp = sdp
+    out_sdp = self.remove_attribute(in_sdp, attrib)
+    while out_sdp != in_sdp:
+      in_sdp = out_sdp
+      out_sdp = self.remove_attribute(in_sdp, attrib)
+    return out_sdp
 
   # creates 'candidate:1 1 udp 999999 1.1.1.1:1111 type host'
   def create_candidate_attr(self, component, type, addr, port, raddr, rport):
@@ -218,6 +235,19 @@ class PeerConnection:
       formatter = self.remove_attribute(formatter, 'a=rtcp-mux-only')
     if 'direction' in copy and 'send' not in copy['direction']:
       formatter = self.remove_attribute(formatter, 'a=msid')
+
+    # apply options as needed
+    options = copy['options'] if 'options' in copy else []
+    if 'fec' not in options:
+      formatter = formatter.replace('100 101 102', '100 101')
+      formatter = self.remove_attribute(formatter, 'a=rtpmap:102')
+      formatter = self.remove_attribute(formatter, 'a=fmtp:102')
+    if 'imageattr' not in options:
+      formatter = self.remove_attribute(formatter, 'a=imageattr')
+    if 'simulcast' not in options:
+      formatter = self.remove_attributes(formatter, 'a=rid')
+      formatter = self.remove_attribute(formatter, 'a=simulcast')
+
     sdp = formatter.format(copy)
 
     # if not bundling, create candidates either in SDP or separately
@@ -435,16 +465,20 @@ def complex_example(draft):
   output_desc('answer-B1', a, draft)
 
   ms1_video = [
-    { 'type': 'video', 'mid': 'v1', 'direction': 'recvonly' },
-    { 'type': 'video', 'mid': 'v2', 'direction': 'recvonly' },
+    { 'type': 'video', 'mid': 'v1', 'direction': 'recvonly',
+      'options': ['imageattr'] },
+    { 'type': 'video', 'mid': 'v2', 'direction': 'recvonly',
+      'options': ['imageattr'] },
   ]
   ms2_video = [
     { 'type': 'video', 'mid': 'v1',
       'ms': '71317484-2ed4-49d7-9eb7-1414322a7aae',
-      'mst': '5ea4d4a1-2fda-4511-a9cc-1b32c2e59552' },
+      'mst': '5ea4d4a1-2fda-4511-a9cc-1b32c2e59552',
+      'options': ['fec', 'simulcast'] },
     { 'type': 'video', 'mid': 'v2',
       'ms': '81317484-2ed4-49d7-9eb7-1414322a7aae',
-      'mst': '6ea4d4a1-2fda-4511-a9cc-1b32c2e59552' }
+      'mst': '6ea4d4a1-2fda-4511-a9cc-1b32c2e59552',
+      'options': ['fec'] }
   ]
 
   pc1.m_sections.extend(ms1_video)
