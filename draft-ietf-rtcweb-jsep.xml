@@ -4586,34 +4586,34 @@ a=rtcp-fb:100 nack pli
           </figure>
         </t>
       </section>
-    </section>
-    <section title="Early Transport Warmup Example" anchor="sec.warmup-example" >
+      <section title="Early Transport Warmup Example" anchor="sec.warmup-example" >
 
-      <t>This example demonstrates the early warmup technique described in
-      <xref target="sec.use-of-provisional-answer"/>. Here, Alice's endpoint
-      sends an offer to Bob's endpoint to start an audio/video call. Bob
-      immediately responds with an answer that accepts the audio/video
-      m= sections, but marks them as sendonly (from his perspective), meaning
-      that Alice will not yet send media. This allows the JSEP implementation
-      to start negotiating ICE and DTLS immediately. Bob's endpoint then prompts
-      him to answer the call, and when he does, his endpoint sends a second
-      offer which enables the audio and video m= sections, and thereby
-      bidirectional media transmission. The advantage of such a
-      flow is that as soon as the first answer is received, the implementation
-      can proceed with ICE and DTLS negotiation and establish the session
-      transport. If the transport setup completes before the second offer is
-      sent, then media can be transmitted immediately by the callee immediately
-      upon answering the call, minimizing perceived post-dial-delay.
-      The second offer/answer exchange can also change the preferred codecs
-      or other session parameters.
-      </t>
+        <t>This example demonstrates the early warmup technique described in
+        <xref target="sec.use-of-provisional-answer"/>. Here, Alice's endpoint
+        sends an offer to Bob's endpoint to start an audio/video call. Bob
+        immediately responds with an answer that accepts the audio/video
+        m= sections, but marks them as sendonly (from his perspective), meaning
+        that Alice will not yet send media. This allows the JSEP implementation
+        to start negotiating ICE and DTLS immediately. Bob's endpoint then prompts
+        him to answer the call, and when he does, his endpoint sends a second
+        offer which enables the audio and video m= sections, and thereby
+        bidirectional media transmission. The advantage of such a
+        flow is that as soon as the first answer is received, the implementation
+        can proceed with ICE and DTLS negotiation and establish the session
+        transport. If the transport setup completes before the second offer is
+        sent, then media can be transmitted immediately by the callee immediately
+        upon answering the call, minimizing perceived post-dial-delay.
+        The second offer/answer exchange can also change the preferred codecs
+        or other session parameters.
+        </t>
 
-      <t>This example also makes use of the "relay" ICE candidate policy
-      described in <xref target="sec.ice-candidate-policy"/> to minimize the
-      ICE gathering and checking needed.</t>
+        <t>This example also makes use of the "relay" ICE candidate policy
+        described in <xref target="sec.ice-candidate-policy"/> to minimize the
+        ICE gathering and checking needed.</t>
 
-      <t><figure>
-       <artwork><![CDATA[
+        <t>
+          <figure>
+            <artwork><![CDATA[
 //                  set up local media state
 AliceJS->AliceUA:   create new PeerConnection with "relay" ICE policy
 AliceJS->AliceUA:   addTrack with two tracks: audio and video
@@ -4682,17 +4682,17 @@ AliceJS->WebServer: signaling with |answer-C2|
 WebServer->BobJS:   signaling with |answer-C2|
 BobJS->BobUA:       setRemoteDescription with |answer-C2|
 ]]>
-         </artwork>
-       </figure>
-     </t>
 
+            </artwork>
+          </figure>
+        </t>
 
-     <t>
-       The SDP for |offer-C1| looks like:
-     </t>
-     <t>
-       <figure>
-         <artwork alt="offer-C1">
+        <t>
+         The SDP for |offer-C1| looks like:
+        </t>
+        <t>
+          <figure>
+            <artwork alt="offer-C1">
 <![CDATA[
 v=0
 o=- 1070771854436052752 1 IN IP4 0.0.0.0
@@ -4742,15 +4742,15 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
        ac701365-eb06-42df-cc93-7f22bc308789
 a=bundle-only
 ]]>
-         </artwork>
-       </figure>
-     </t>
+            </artwork>
+          </figure>
+        </t>
 
-     <t>|offer-C1-candidate-1| looks like:</t>
+        <t>|offer-C1-candidate-1| looks like:</t>
 
-     <t>
-       <figure>
-         <artwork alt="offer-C1-candidate-1">
+        <t>
+          <figure>
+            <artwork alt="offer-C1-candidate-1">
 <![CDATA[
 ufrag 4ZcD
 index 0
@@ -4758,16 +4758,16 @@ mid   a1
 attr  candidate:1 1 udp 255 192.0.2.100 12100 typ relay
                 raddr 0.0.0.0 rport 0
 ]]>
-         </artwork>
-       </figure>
-     </t>
+            </artwork>
+          </figure>
+        </t>
 
-     <t>
-       The SDP for |answer-C1| looks like:
-     </t>
-     <t>
-       <figure>
-         <artwork alt="answer-C1">
+        <t>
+          The SDP for |answer-C1| looks like:
+        </t>
+        <t>
+          <figure>
+            <artwork alt="answer-C1">
 <![CDATA[
 v=0
 o=- 6386516489780559513 1 IN IP4 0.0.0.0
@@ -4816,15 +4816,15 @@ a=rtcp-fb:100 nack pli
 a=msid:751f239e-4ae0-c549-aa3d-890de772998b
        39292672-c102-d075-f580-5826f31ca958
 ]]>
-         </artwork>
-       </figure>
-     </t>
+            </artwork>
+          </figure>
+        </t>
 
-     <t>|answer-C1-candidate-1| looks like:</t>
+        <t>|answer-C1-candidate-1| looks like:</t>
 
-     <t>
-       <figure>
-         <artwork alt="answer-C1-candidate-1">
+        <t>
+          <figure>
+            <artwork alt="answer-C1-candidate-1">
 <![CDATA[
 ufrag TpaA
 index 0
@@ -4832,16 +4832,16 @@ mid   a1
 attr  candidate:1 1 udp 255 192.0.2.200 12200 typ relay
                 raddr 0.0.0.0 rport 0
 ]]>
-         </artwork>
-       </figure>
-     </t>
+            </artwork>
+          </figure>
+        </t>
 
-     <t>
-       The SDP for |offer-C2| looks like:
-     </t>
-     <t>
-       <figure>
-         <artwork alt="offer-C2">
+        <t>
+          The SDP for |offer-C2| looks like:
+        </t>
+        <t>
+          <figure>
+            <artwork alt="offer-C2">
 <![CDATA[
 v=0
 o=- 6386516489780559513 2 IN IP4 0.0.0.0
@@ -4893,16 +4893,16 @@ a=rtcp-fb:100 nack pli
 a=msid:751f239e-4ae0-c549-aa3d-890de772998b
        39292672-c102-d075-f580-5826f31ca958
 ]]>
-         </artwork>
-       </figure>
-     </t>
+            </artwork>
+          </figure>
+        </t>
 
-     <t>
-       The SDP for |answer-C2| looks like:
-     </t>
-       <t>
-       <figure>
-         <artwork alt="answer-C2">
+        <t>
+          The SDP for |answer-C2| looks like:
+        </t>
+        <t>
+          <figure>
+            <artwork alt="answer-C2">
 <![CDATA[
 v=0
 o=- 1070771854436052752 2 IN IP4 0.0.0.0
@@ -4954,9 +4954,10 @@ a=rtcp-fb:100 nack pli
 a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
        ac701365-eb06-42df-cc93-7f22bc308789
 ]]>
-         </artwork>
-       </figure>
-     </t>
+            </artwork>
+          </figure>
+        </t>
+      </section>
     </section>
 
     <section title="Security Considerations"
