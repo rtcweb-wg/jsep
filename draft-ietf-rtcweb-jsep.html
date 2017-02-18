@@ -368,7 +368,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-2-16" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-2-18" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -392,7 +392,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: August 20, 2017</td>
+  <td class="left">Expires: August 22, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">February 16, 2017</td>
+  <td class="right">February 18, 2017</td>
 </tr>
 
     	
@@ -425,7 +425,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 20, 2017.</p>
+<p>This Internet-Draft will expire on August 22, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -2741,7 +2741,8 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <p id="rfc.section.B.p.5">An offerer and answerer can inform each other which SSRC values they will use for an RTP stream by using the SDP 'ssrc' attribute <a href="#RFC5576">[RFC5576]</a>.  However, an offerer will not know which SSRC values the answerer will use until the offerer has received the answer providing that information. Due to this, before the offerer has received the answer, the offerer will not be able to associate an RTP stream with the correct "m=" line using the SSRC value associated with the RTP stream. In addition, the offerer and answerer may start using new SSRC values mid-session, without informing each other using the SDP 'ssrc' attribute.</p>
 <p id="rfc.section.B.p.6">In order for an offerer and answerer to always be able to associate an RTP stream with the correct "m=" line, the offerer and answerer using the BUNDLE extension MUST support the mechanism defined in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 14. where the offerer and answerer insert the identification-tag associated with an "m=" line (provided by the remote peer) into RTP and RTCP packets associated with a BUNDLE group.</p>
 <p id="rfc.section.B.p.7">The mapping from an SSRC to an identification-tag is carried in RTCP SDES packets or in RTP header extensions ( <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 14). Since a compound RTCP packet can contain multiple RTCP SDES packets, and each RTCP SDES packet can contain multiple chunks, an RTCP packet can contain several SSRC to identification-tag mappings. The offerer and answerer maintain tables used for routing that are updated each time an RTP/RTCP packet contains new information that affects how packets should be routed.</p>
-<p id="rfc.section.B.p.8">To prepare for demultiplexing RTP packets to the correct "m=" line, the following steps MUST be followed for each BUNDLE group.</p>
+<p id="rfc.section.B.p.8">Applications can implement RTP stacks in many different ways. The algorithm below details one way that demultiplexing can be accomplished, but is not meant to be prescriptive about exactly how an RTP stack needs to be implemented.  Applications MAY use any algorithm that achieves equivalent results to those described in the algorithm below.</p>
+<p id="rfc.section.B.p.9">To prepare for demultiplexing RTP packets to the correct "m=" line, the following steps MUST be followed for each BUNDLE group.</p>
 <p/>
 
 <ul class="empty">
@@ -2753,8 +2754,8 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.10">As "m=" lines are added or removed from the BUNDLE groups, or their configurations are changed, the tables above MUST also be updated.</p>
-<p id="rfc.section.B.p.11">For each RTP packet received, the following steps MUST be followed to route the packet to the correct "m=" section within a BUNDLE group. Note that the phrase 'deliver a packet to the "m=" line' means to further process the packet as would normally happen with RTP/RTCP, if it were received on a transport associated with that "m=" line outside of a BUNDLE group (i.e., if the "m=" line were not BUNDLEd), including dropping an RTP packet if the packet's PT does not match any PT in the "m=" line.</p>
+<p id="rfc.section.B.p.11">As "m=" lines are added or removed from the BUNDLE groups, or their configurations are changed, the tables above MUST also be updated.</p>
+<p id="rfc.section.B.p.12">For each RTP packet received, the following steps MUST be followed to route the packet to the correct "m=" section within a BUNDLE group. Note that the phrase 'deliver a packet to the "m=" line' means to further process the packet as would normally happen with RTP/RTCP, if it were received on a transport associated with that "m=" line outside of a BUNDLE group (i.e., if the "m=" line were not BUNDLEd), including dropping an RTP packet if the packet's PT does not match any PT in the "m=" line.</p>
 <p/>
 
 <ul class="empty">
@@ -2766,7 +2767,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.13">For each RTCP packet received (including each RTCP packet that is part of a compound RTCP packet), the packet MUST be routed to the appropriate handler for the SSRCs it contains information about. Some examples of such handling are given below.</p>
+<p id="rfc.section.B.p.14">For each RTCP packet received (including each RTCP packet that is part of a compound RTCP packet), the packet MUST be routed to the appropriate handler for the SSRCs it contains information about. Some examples of such handling are given below.</p>
 <p/>
 
 <ul class="empty">
