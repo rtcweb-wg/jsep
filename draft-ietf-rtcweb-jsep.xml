@@ -2387,6 +2387,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             for bundled m= sections, as
             described in <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation"/>,
             Section 8.1.
+            </t>
+            <t>
+            Note that if media m= sections are bundled into a
+            data m= section, then certain TRANSPORT and IDENTICAL attributes
+            may appear in the data m= section even if they would otherwise
+            only be appropriate for a media m= section (e.g., "a=rtcp-mux").
+            This cannot happen in initial offers because in the initial
+            offer JSEP implementations always list media m= sections (if any)
+            before the data m= section (if any), and at least one of those
+            media m= sections will not have the "a=bundle-only" attribute.
+            Therefore, in initial offers, any "a=bundle-only" m= sections
+            will be bundled into a preceding non-bundle-only media m= section.
           </t>
           </list></t>
 
@@ -2852,6 +2864,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>"a=setup"</t>
               <t>"a=dtls-id"</t>
             </list>
+          </t>
+
+          <T>Note that if media m=
+          sections are bundled into a data m= section, then certain attributes
+          may appear in the data m= section even if they would otherwise
+          only be appropriate for a media m= section (e.g., "a=rtcp-mux").
           </t>
 
           <t>If "a=group" attributes with semantics of "BUNDLE" are
@@ -6351,6 +6369,13 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       routing that are updated each time an RTP/RTCP packet contains
       new information that affects how packets should be routed.</t>
 
+      <t>Applications can implement RTP stacks in many different
+      ways. The algorithm below details one way that demultiplexing
+      can be accomplished, but is not meant to be prescriptive
+      about exactly how an RTP stack needs to be implemented.
+      Applications MAY use any algorithm that achieves equivalent results to
+      those described in the algorithm below.</t>
+
       <t>To prepare for demultiplexing RTP packets to the correct "m="
       line, the following steps MUST be followed for each BUNDLE
       group.</t>
@@ -6484,7 +6509,40 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 
       <t>Note: This section will be removed by RFC Editor before
       publication.</t>
+      <t>Changes in draft-19:</t>
+      <t>
+        <list style="symbols">
+          <t>Add new machine-generated examples.</t>
 
+          <t>Only send "a=rtcp-mux-only" and "a=bundle-only"
+          on new m= sections.</t>
+
+          <t>Update references.</t>
+
+          <t>Add coverage of a=identity.</t>
+
+          <t>Add lip sync example.</t>
+
+          <t>Remove unnecessary list of MTI specs.</t>
+
+          <t>Allow codecs which weren't offered to appear in
+          answers and which weren't selected to appear in
+          subsequent offers.</t>
+
+          <t>Clarify a=msid handling for recvonly m= sections.</t>
+
+          <t>Clarify behavior of attributes for bundle-only data channels.</t>
+
+          <t>Allow media attributes to appear in data m= sections when
+          all the media m= sections are bundle-only.</t>
+
+          <t>Use consistent terminology for JSEP implementations.</t>
+
+          <t>Describe how to handle failed API calls.</t>
+
+          <t>Some cleanup on routing rules.</t>
+        </list>
+      </t>
       <t>Changes in draft-18:</t>
       <t>
         <list style="symbols">
