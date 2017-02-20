@@ -368,7 +368,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-2-19" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-2-20" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -392,7 +392,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: August 23, 2017</td>
+  <td class="left">Expires: August 24, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">February 19, 2017</td>
+  <td class="right">February 20, 2017</td>
 </tr>
 
     	
@@ -425,7 +425,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 23, 2017.</p>
+<p>This Internet-Draft will expire on August 24, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -968,7 +968,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p> </p>
 <p id="rfc.section.5.2.1.p.14">Lastly, if a data channel has been created, a m= section MUST be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; field MUST be set to "UDP/DTLS/SCTP" <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>. The "fmt" value MUST be set to "webrtc-datachannel" as specified in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.1.</p>
 <p id="rfc.section.5.2.1.p.15">Within the data m= section, an "a=mid" line MUST be generated and included as described above, along with an "a=sctp-port" line referencing the SCTP port number, as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 5.1, and, if appropriate, an "a=max-message-size" line, as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 6.1.  </p>
-<p id="rfc.section.5.2.1.p.16">As discussed above, the following attributes are included only if the m= section either has a unique address or is associated with the bundle-tag: "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", "a=dtls-id", and "a=setup".  </p>
+<p id="rfc.section.5.2.1.p.16">As discussed above, the following attributes of category IDENTICAL or TRANSPORT are included only if the data m= section either has a unique address or is associated with the bundle-tag (e.g., if it is the only m= section): </p>
+
+<ul>
+  <li>"a=ice-ufrag"</li>
+  <li>"a=ice-pwd"</li>
+  <li>"a=fingerprint"</li>
+  <li>"a=setup"</li>
+  <li>"a=dtls-id"</li>
+</ul>
+
+<p> </p>
 <p id="rfc.section.5.2.1.p.17">Once all m= sections have been generated, a session-level "a=group" attribute MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. This attribute MUST have semantics "BUNDLE", and MUST include the mid identifiers of each m= section. The effect of this is that the JSEP implementation offers all m= sections as one bundle group. However, whether the m= sections are bundle-only or not depends on the bundle policy.</p>
 <p id="rfc.section.5.2.1.p.18">The next step is to generate session-level lip sync groups as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7. For each MediaStream referenced by more than one RtpTransceiver (by passing those MediaStreams as arguments to the addTrack and addTransceiver methods), a group of type "LS" MUST be added that contains the mid values for each RtpTransceiver.</p>
 <p id="rfc.section.5.2.1.p.19">Attributes which SDP permits to either be at the session level or the media level SHOULD generally be at the media level even if they are identical. This promotes readability, especially if one of a set of initially identical attributes is subsequently changed.</p>
@@ -1138,12 +1148,23 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 
 <p> </p>
-<p id="rfc.section.5.3.1.p.22">If a data channel m= section has been offered, a m= section MUST also be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; and "fmt" fields MUST be set to exactly match the fields in the offer. Note that if media m= sections are bundled into a data m= section, then certain TRANSPORT and IDENTICAL attributes may appear in the data m= section even if they would otherwise only be appropriate for a media m= section (e.g., "a=rtcp-mux").</p>
+<p id="rfc.section.5.3.1.p.22">If a data channel m= section has been offered, a m= section MUST also be generated for data. The &lt;media&gt; field MUST be set to "application" and the &lt;proto&gt; and &lt;fmt&gt; fields MUST be set to exactly match the fields in the offer.</p>
 <p id="rfc.section.5.3.1.p.23">Within the data m= section, an "a=mid" line MUST be generated and included as described above, along with an "a=sctp-port" line referencing the SCTP port number, as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 5.1, and, if appropriate, an "a=max-message-size" line, as defined in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 6.1.  </p>
-<p id="rfc.section.5.3.1.p.24">As discussed above, the following attributes are included only if the m= section is not bundled into another m= section: "a=ice-ufrag", "a=ice-pwd", "a=fingerprint", "a=dtls-id", and "a=setup".  </p>
-<p id="rfc.section.5.3.1.p.25">If "a=group" attributes with semantics of "BUNDLE" are offered, corresponding session-level "a=group" attributes MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. These attributes MUST have semantics "BUNDLE", and MUST include the all mid identifiers from the offered bundle groups that have not been rejected.  Note that regardless of the presence of "a=bundle-only" in the offer, no m= sections in the answer should have an "a=bundle-only" line.</p>
-<p id="rfc.section.5.3.1.p.26">Attributes that are common between all m= sections MAY be moved to session-level, if explicitly defined to be valid at session-level.</p>
-<p id="rfc.section.5.3.1.p.27">The attributes prohibited in the creation of offers are also prohibited in the creation of answers.</p>
+<p id="rfc.section.5.3.1.p.24">As discussed above, the following attributes of category IDENTICAL or TRANSPORT are included only if the data m= section is not bundled into another m= section: </p>
+
+<ul>
+  <li>"a=ice-ufrag"</li>
+  <li>"a=ice-pwd"</li>
+  <li>"a=fingerprint"</li>
+  <li>"a=setup"</li>
+  <li>"a=dtls-id"</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.5.3.1.p.25">Note that if media m= sections are bundled into a data m= section, then certain TRANSPORT and IDENTICAL attributes may also appear in the data m= section even if they would otherwise only be appropriate for a media m= section (e.g., "a=rtcp-mux").  </p>
+<p id="rfc.section.5.3.1.p.26">If "a=group" attributes with semantics of "BUNDLE" are offered, corresponding session-level "a=group" attributes MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. These attributes MUST have semantics "BUNDLE", and MUST include the all mid identifiers from the offered bundle groups that have not been rejected.  Note that regardless of the presence of "a=bundle-only" in the offer, no m= sections in the answer should have an "a=bundle-only" line.</p>
+<p id="rfc.section.5.3.1.p.27">Attributes that are common between all m= sections MAY be moved to session-level, if explicitly defined to be valid at session-level.</p>
+<p id="rfc.section.5.3.1.p.28">The attributes prohibited in the creation of offers are also prohibited in the creation of answers.</p>
 <h3 id="rfc.section.5.3.2"><a href="#rfc.section.5.3.2">5.3.2.</a> <a href="#sec.subsequent-answers" id="sec.subsequent-answers">Subsequent Answers</a></h3>
 <p id="rfc.section.5.3.2.p.1">When createAnswer is called a second (or later) time, or is called after a local description has already been installed, the processing is somewhat different than for an initial answer.</p>
 <p id="rfc.section.5.3.2.p.2">If the initial answer was not applied using setLocalDescription, meaning the PeerConnection is still in the "have-remote-offer" state, the steps for generating an initial answer should be followed, subject to the following restriction: </p>
