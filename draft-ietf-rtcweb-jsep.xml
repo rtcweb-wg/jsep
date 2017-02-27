@@ -3610,18 +3610,26 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         applied, processing MUST stop and an error MUST be returned.
         <list style="symbols">
 
-          <t>If the ICE ufrag or password changed from the previous
-          remote description, then an ICE restart is needed, as
-          described in Section 9.1.1.1 of
-          <xref target="RFC5245" />. If the description is of type
-          "offer", mark that an ICE restart is needed. If the
-          description is of type "answer" and the current local
-          description is also an ICE restart, then signal the ICE agent
-          to begin checks as described in Section 9.3.1.1 of
-          <xref target="RFC5245" />. An answer MUST change the ufrag
-          and password in an answer if and only if ICE is restarting,
-          as described in Section 9.2.1.1 of
-          <xref target="RFC5245" />.</t>
+          <t>If the PeerConnection state is "have-local-offer", and the
+          ICE ufrag or password changed from the previous remote
+          description, then an ICE restart is needed, as described in
+          Section 9.1.1.1 of <xref target="RFC5245" />. If the
+          description is of type "offer", note that an ICE restart is
+          needed. If the description is of type "answer" or "pranswer"
+          and the current local description is also an ICE restart, then
+          signal the ICE agent to begin checks as described in Section
+          9.3.1.1 of <xref target="RFC5245" />. An answerer MUST change
+          the ufrag and password in an answer if and only if ICE is
+          restarting, as described in Section 9.2.1.1 of <xref
+          target="RFC5245" />.</t>
+
+          <t>If the PeerConnection state is "have-remote-pranswer", and
+          the ICE ufrag or password changed from the previous
+          provisional answer, then signal the ICE agent to discard any
+          previous ICE check list state for the m= section and begin
+          checks as if this were the first answer. However, such an
+          answer MAY only change the ICE ufrag or password if the local
+          offer is starting or restarting ICE for the m= section.</t>
 
           <t>Configure the ICE components associated with this media
           section to use the supplied ICE remote ufrag and password for
@@ -3785,11 +3793,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>If the remote DTLS fingerprint has been changed or
           the dtls-id has changed, tear down the DTLS connection.
-          If a DTLS connection needs to be torn down but the answer
-          does not indicate an ICE restart, an error MUST be generated.
-          If an ICE restart is performed without a change in dtls-id
-          or fingerprint, then the same DTLS connection is continued over
-          the new ICE channel.</t>
+          This includes the case when the PeerConnection state is
+          "have-remote-pranswer". If a DTLS connection needs to be torn
+          down but the answer does not indicate an ICE restart or,
+          in the case of "have-remote-pranswer", new ICE credentials, an
+          error MUST be generated. If an ICE restart is performed
+          without a change in dtls-id or fingerprint, then the same DTLS
+          connection is continued over the new ICE channel.</t>
 
           <t>If no valid DTLS connection exists, prepare to start a
           DTLS connection, using the specified roles and fingerprints,
@@ -3882,8 +3892,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>If the m= section proto value indicates use of SCTP:
           <list style="symbols">
+            <t>If an SCTP association exists, and the remote SCTP port
+            has changed, discard the existing SCTP association. This
+            includes the case when the PeerConnection state is
+            "have-remote-pranswer".</t>
 
-            <t>If no SCTP association yet exists, prepare to initiate a
+            <t>If no valid SCTP association exists, prepare to initiate a
             SCTP association over the associated ICE component and DTLS
             connection, using the local SCTP port value from the local
             description, and the remote SCTP port value from the remote
