@@ -368,7 +368,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-2-26" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-2-27" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -392,7 +392,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: August 30, 2017</td>
+  <td class="left">Expires: August 31, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">February 26, 2017</td>
+  <td class="right">February 27, 2017</td>
 </tr>
 
     	
@@ -425,7 +425,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 30, 2017.</p>
+<p>This Internet-Draft will expire on August 31, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -1335,7 +1335,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.9.p.4">For each m= section, the following steps MUST be performed; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
 
 <ul>
-  <li>If the ICE ufrag or password changed from the previous remote description, then an ICE restart is needed, as described in Section 9.1.1.1 of <a href="#RFC5245">[RFC5245]</a>. If the description is of type "offer", mark that an ICE restart is needed. If the description is of type "answer" and the current local description is also an ICE restart, then signal the ICE agent to begin checks as described in Section 9.3.1.1 of <a href="#RFC5245">[RFC5245]</a>. An answer MUST change the ufrag and password in an answer if and only if ICE is restarting, as described in Section 9.2.1.1 of <a href="#RFC5245">[RFC5245]</a>.</li>
+  <li>If the PeerConnection state is "have-local-offer", and the ICE ufrag or password changed from the previous remote description, then an ICE restart is needed, as described in Section 9.1.1.1 of <a href="#RFC5245">[RFC5245]</a>. If the description is of type "offer", note that an ICE restart is needed. If the description is of type "answer" or "pranswer" and the current local description is also an ICE restart, then signal the ICE agent to begin checks as described in Section 9.3.1.1 of <a href="#RFC5245">[RFC5245]</a>. An answerer MUST change the ufrag and password in an answer if and only if ICE is restarting, as described in Section 9.2.1.1 of <a href="#RFC5245">[RFC5245]</a>.</li>
+  <li>If the PeerConnection state is "have-remote-pranswer", and the ICE ufrag or password changed from the previous provisional answer, then signal the ICE agent to discard any previous ICE check list state for the m= section and begin checks as if this were the first answer. However, such an answer MAY only change the ICE ufrag or password if the local offer is starting or restarting ICE for the m= section.</li>
   <li>Configure the ICE components associated with this media section to use the supplied ICE remote ufrag and password for their connectivity checks.</li>
   <li>Pair any supplied ICE candidates with any gathered local candidates, as described in Section 5.7 of <a href="#RFC5245">[RFC5245]</a> and start connectivity checks with the appropriate credentials.</li>
   <li>If an "a=end-of-candidates" attribute is present, process the end-of-candidates indication as described in <a href="#I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</a> Section 11.</li>
@@ -1348,10 +1349,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
   <li>If the m= section has been rejected (i.e. port is set to zero in the answer), stop any reception or transmission of media for this section, and, unless a non-rejected m= section is bundled with this m= section, discard any associated ICE components, as described in Section 9.2.1.3 of <a href="#RFC5245">[RFC5245]</a>.</li>
-  <li>If the remote DTLS fingerprint has been changed or the dtls-id has changed, tear down the DTLS connection.  If a DTLS connection needs to be torn down but the answer does not indicate an ICE restart, an error MUST be generated.  If an ICE restart is performed without a change in dtls-id or fingerprint, then the same DTLS connection is continued over the new ICE channel.</li>
+  <li>If the remote DTLS fingerprint has been changed or the dtls-id has changed, tear down the DTLS connection.  This includes the case when the PeerConnection state is "have-remote-pranswer". If a DTLS connection needs to be torn down but the answer does not indicate an ICE restart or, in the case of "have-remote-pranswer", new ICE credentials, an error MUST be generated. If an ICE restart is performed without a change in dtls-id or fingerprint, then the same DTLS connection is continued over the new ICE channel.</li>
   <li>If no valid DTLS connection exists, prepare to start a DTLS connection, using the specified roles and fingerprints, on any underlying ICE components, once they are active.</li>
   <li>If the m= section proto value indicates use of RTP: <ul><li>If the m= section references any media formats, RTP header extensions, or RTCP feedback mechanisms that were not present in the corresponding m= section in the offer, this indicates a negotiation problem and MUST result in an error.</li><li>If the m= section has RTCP mux enabled, discard the RTCP ICE component, if one exists, and begin or continue muxing RTCP over the RTP ICE component, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.3. Otherwise, prepare to transmit RTCP over the RTCP ICE component; if no RTCP ICE component exists, because RTCP mux was previously enabled, this MUST result in an error.</li><li>If the m= section has reduced-size RTCP enabled, configure the RTCP transmission for this m= section to use reduced-size RTCP, as specified in <a href="#RFC5506">[RFC5506]</a>.</li><li>If the directional attribute in the answer is of type "sendrecv" or "sendonly", choose the media format to send as the most preferred media format from the remote description that is also present in the answer, as described in <a href="#RFC3264">[RFC3264]</a>, Sections 6.1 and 7, and start transmitting RTP media once the underlying transport layers have been established.  If an SSRC has not already been chosen for this outgoing RTP stream, choose a random one. If media is already being transmitted, the same SSRC SHOULD be used unless the clockrate of the new codec is different, in which case a new SSRC MUST be chosen, as specified in <a href="#RFC7160">[RFC7160]</a>, Section 3.1.</li><li>The payload type mapping from the remote description is used to determine payload types for the outgoing RTP streams, including the payload type for the send media format chosen above. Any RTP header extensions that were negotiated should be included in the outgoing RTP streams, using the extension mapping from the remote description; if the RID header extension has been negotiated, and RID values are specified, include the RID header extension in the outgoing RTP streams, as indicated in <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a>, Section 4.</li><li>If simulcast has been negotiated, send the number of Source RTP Streams as specified in <a href="#I-D.ietf-mmusic-sdp-simulcast">[I-D.ietf-mmusic-sdp-simulcast]</a>, Section 6.2.2.</li><li>If the send media format chosen above has a corresponding "rtx" media format, or a FEC mechanism has been negotiated, establish a Redundancy RTP Stream with a random SSRC for each Source RTP Stream, and start or continue transmitting RTX/FEC packets as needed.  </li><li>If the send media format chosen above has a corresponding "red" media format of the same clockrate, allow redundant encoding using the specified format for resiliency purposes, as discussed in <a href="#I-D.ietf-rtcweb-fec">[I-D.ietf-rtcweb-fec]</a>, Section 3.2. Note that unlike RTX or FEC media formats, the "red" format is transmitted on the Source RTP Stream, not the Redundancy RTP Stream.</li><li>Enable the RTCP feedback mechanisms referenced in the media section for all Source RTP Streams using the specified media formats. Specifically, begin or continue sending the requested feedback types and reacting to received feedback, as specified in <a href="#RFC4585">[RFC4585]</a>, Section 4.2.  When sending RTCP feedback, follow the rules and recommendations from <a href="#I-D.ietf-avtcore-rtp-multi-stream">[I-D.ietf-avtcore-rtp-multi-stream]</a>, Section 5.4.1 to select which SSRC to use.  </li><li>If the directional attribute is of type "recvonly" or "inactive", stop transmitting all RTP media, but continue sending RTCP, as described in <a href="#RFC3264">[RFC3264]</a>, Section 5.1.</li></ul></li>
-  <li>If the m= section proto value indicates use of SCTP: <ul><li>If no SCTP association yet exists, prepare to initiate a SCTP association over the associated ICE component and DTLS connection, using the local SCTP port value from the local description, and the remote SCTP port value from the remote description, as described in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 10.2.</li></ul></li>
+  <li>If the m= section proto value indicates use of SCTP: <ul><li>If an SCTP association exists, and the remote SCTP port has changed, discard the existing SCTP association. This includes the case when the PeerConnection state is "have-remote-pranswer".</li><li>If no valid SCTP association exists, prepare to initiate a SCTP association over the associated ICE component and DTLS connection, using the local SCTP port value from the local description, and the remote SCTP port value from the remote description, as described in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 10.2.</li></ul></li>
 </ul>
 <p id="rfc.section.5.10.p.3">If the answer contains valid bundle groups, discard any ICE components for the m= sections that will be bundled onto the primary ICE components in each bundle, and begin muxing these m= sections accordingly, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 8.2.</p>
 <p id="rfc.section.5.10.p.4">If the description is of type "answer", and there are still remaining candidates in the ICE candidate pool, discard them.</p>
