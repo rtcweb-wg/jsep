@@ -6453,44 +6453,70 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       their configurations are changed, the tables above MUST also be
       updated.</t>
 
-      <t>For each RTP packet received, the following steps MUST be
-      followed to route the packet to the correct "m=" section within
-      a BUNDLE group. Note that the phrase 'deliver a packet to the
-      "m=" line' means to further process the packet as would normally
-      happen with RTP/RTCP, if it were received on a transport
-      associated with that "m=" line outside of a BUNDLE group (i.e.,
-      if the "m=" line were not BUNDLEd), including dropping an RTP
-      packet if the packet's PT does not match any PT in the "m="
-      line.</t>
+      <t>After this processing they need to be routed to the higher
+      layer context associated with the "m=" line within the BUNDLE
+      group. Somewhere in the process where an received RTP packet is
+      processed to be delivered to the higher layer by RTP the
+      matching steps below MUST be performed:
 
-      <t>
-        <list>
+          <list style="numbers">
+            
+			  <t>Reception of an RTP packet for an RTP stream that has
+			  an existing mapping in the RTP stream to m= line
+			  table. Before proceeding in delivering the packet to the
+			  higher layer context according to the RTP stream to "m="
+			  line mapping table the following checks MUST be
+			  performed:
 
-          <t>If the packet has a MID and that MID is not in the table
-          mapping MID to "m=" line, drop the packet and stop.</t>
+              <list style="letters">
+                
+				  <t>If the packet carries an RTP header extension
+				  with a SDES MID value that is not in the table
+				  mapping MID to "m=" line, then do not deliver the
+				  RTP packet to higher layers.</t>
 
-          <t>If the packet has a MID and that MID is in the table
-          mapping MID to "m=" line, update the incoming SSRC mapping
-          table to include an entry that maps the packet's SSRC to the
-          "m=" line for that MID.</t>
+				  <t>If the packet carries an RTP header extension
+				  with a SDES MID value that is in the table mapping
+				  MID to "m=" line, and the value indicates a
+				  different "m=" line than the current RTP stream to
+				  "m=" line mapping table, then update the RTP stream
+				  to "m=" line mapping.</t>
+                  
+			  </list>
 
-          <t>If the packet's SSRC is in the incoming SSRC mapping
-          table, check that the packet's PT matches a PT included on
-          the associated "m=" line. If so, route the packet to that
-          associated "m=" line and stop; otherwise drop the
-          packet.</t>
+              </t>
 
-          <t>If the packet's payload type is in the payload type
-          table, update the the incoming SSRC mapping table to include
-          an entry that maps the packet's SSRC to the "m=" line for
-          that payload type. In addition, route the packet to the
-          associated "m=" line and stop.</t>
+			  <t>Reception of an RTP packet for an RTP stream that has
+			  no existing mapping to an m= line. In this case the
+			  following actions MUST be performed:
 
-          <t>Otherwise, drop the packet.</t>
+              <list style="letters">
+              
+				  <t>If the packet carries an RTP header extension
+				  with a SDES MID value that is in the table mapping
+				  MID to "m=" line, then create an entry in the RTP
+				  stream to "m=" line mapping table for this RTP
+				  stream (SSRC). Then deliver the RTP packet to the
+				  "m=" line context of the created mapping and
+				  stop.</t>
 
-        </list>
+				  <t>If the packet carries a Payload Type that is in
+				  the payload type table, then create an entry in the
+				  RTP stream to "m=" line mapping table for this RTP
+				  stream (SSRC). Then deliver the RTP packet to the
+				  "m=" line context of the created mapping and
+				  stop.</t>
+
+				  <t>Otherwise do not deliver the RTP packet to higher
+				  layers.  Note, this includes unknown MID values.</t>
+                  
+			  </list>
+              
+              </t>
+              
+		  </list>
       </t>
-
+          
       <t>For each RTCP packet received (including each RTCP packet
       that is part of a compound RTCP packet), the packet MUST be
       routed to the appropriate handler for the SSRCs it contains
