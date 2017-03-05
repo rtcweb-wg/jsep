@@ -87,3 +87,13 @@ process, as documented in Best Current Practices RFCs and IESG Statements.
 
 A participant in any IETF activity acknowledges that written, audio and video
 records of meetings may be made and may be available to the public.
+
+Build Information
+-------------
+
+Examples are generated with
+
+```
+python tools/gen_examples.py --replace draft-ietf-rtcweb-jsep.xml
+```
+
