@@ -5843,6 +5843,11 @@ Internet-Draft                    JSEP                        March 2017
    appropriate handler for the SSRCs it contains information about.
    Some examples of such handling are given below.
 
+   RTCP packets for which no appropriate handler can be identified
+   (e.g., for unknown SSRCs) are not relevant in the context of this
+   algorithm and MAY be dropped.  Packets of this sort may be received
+   in certain multiparty RTP topologies.
+
       If the packet is of type SR, and the sender SSRC for the packet is
       found in the incoming SSRC table, deliver a copy of the packet to
       the "m=" line associated with that SSRC.  In addition, for each
@@ -5869,11 +5874,6 @@ Internet-Draft                    JSEP                        March 2017
       the packet that contains a MID that is in the table mapping MID to
       "m=" line, update the incoming SSRC mapping table to include an
       entry that maps the SSRC for that chunk to the "m=" line
-      associated with that MID.  (This case can occur when RTCP for a
-      source is received before any RTP packets.)
-
-
-
 
 
 
@@ -5881,6 +5881,9 @@ Uberti, et al.          Expires September 6, 2017             [Page 105]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+      associated with that MID.  (This case can occur when RTCP for a
+      source is received before any RTP packets.)
 
       If the packet is of type BYE, for each SSRC indicated in the
       packet that is found in the incoming SSRC table, deliver a copy of
@@ -5928,15 +5931,15 @@ Appendix C.  Change log
    o  Allow codecs which weren't offered to appear in answers and which
       weren't selected to appear in subsequent offers.
 
-   o  Codec preferences now are applied on both initial and subsequent
-      offers and answers.
-
 
 
 Uberti, et al.          Expires September 6, 2017             [Page 106]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Codec preferences now are applied on both initial and subsequent
+      offers and answers.
 
    o  Clarify a=msid handling for recvonly m= sections.
 
@@ -5982,10 +5985,7 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Add RtpTransceiver.currentDirection and document setDirection.
 
-   o  Require imageattr x=0, y=0 to indicate that there are no valid
-      resolutions.
 
-   o  Require a privacy-preserving MID/RID construction.
 
 
 
@@ -5993,6 +5993,11 @@ Uberti, et al.          Expires September 6, 2017             [Page 107]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Require imageattr x=0, y=0 to indicate that there are no valid
+      resolutions.
+
+   o  Require a privacy-preserving MID/RID construction.
 
    o  Require support for RFC 3556 bandwidth modifiers.
 
@@ -6038,17 +6043,17 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Add missing references to ABNF table.
 
-   Changes in draft-16:
-
-   o  Update addIceCandidate to indicate ICE generation and allow per-m=
-      section end-of-candidates.
-
 
 
 Uberti, et al.          Expires September 6, 2017             [Page 108]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   Changes in draft-16:
+
+   o  Update addIceCandidate to indicate ICE generation and allow per-m=
+      section end-of-candidates.
 
    o  Update fingerprint handling to use draft-ietf-mmusic-4572-update.
 
@@ -6093,11 +6098,6 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Enforce max-bundle on offer processing.
 
-   o  Fix TIAS formula to handle bits vs. kilobits.
-
-   o  Describe addTrack algorithm.
-
-   o  Clean up references.
 
 
 
@@ -6105,6 +6105,12 @@ Uberti, et al.          Expires September 6, 2017             [Page 109]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Fix TIAS formula to handle bits vs. kilobits.
+
+   o  Describe addTrack algorithm.
+
+   o  Clean up references.
 
    Changes in draft-14:
 
@@ -6148,12 +6154,6 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Remove MSID semantics.
 
-   o  ice-options are now at session level.
-
-   o  Default RTCP mux policy is now 'require'.
-
-   Changes in draft-12:
-
 
 
 
@@ -6161,6 +6161,12 @@ Uberti, et al.          Expires September 6, 2017             [Page 110]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  ice-options are now at session level.
+
+   o  Default RTCP mux policy is now 'require'.
+
+   Changes in draft-12:
 
    o  Filled in sections on applying local and remote descriptions.
 
@@ -6205,18 +6211,18 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Added canTrickle mechanism.
 
-   o  Added section on subsequent answers and, answer options.
-
-   o  Added text defining set{Local,Remote}Description behavior.
-
-   Changes in draft-08:
-
 
 
 Uberti, et al.          Expires September 6, 2017             [Page 111]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Added section on subsequent answers and, answer options.
+
+   o  Added text defining set{Local,Remote}Description behavior.
+
+   Changes in draft-08:
 
    o  Added new example section and removed old examples in appendix.
 
@@ -6260,12 +6266,6 @@ Internet-Draft                    JSEP                        March 2017
    o  Guidance on whether attributes should be defined at the media
       level or the session level.
 
-   o  Renamed "default" bundle policy to "balanced".
-
-   o  Removed default ICE candidate pool size and clarify how it works.
-
-   o  Defined a canonical order for assignment of MSTs to m= lines.
-
 
 
 
@@ -6273,6 +6273,12 @@ Uberti, et al.          Expires September 6, 2017             [Page 112]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Renamed "default" bundle policy to "balanced".
+
+   o  Removed default ICE candidate pool size and clarify how it works.
+
+   o  Defined a canonical order for assignment of MSTs to m= lines.
 
    o  Removed discussion of rehydration.
 
@@ -6317,18 +6323,17 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Converted from nroff
 
-   o  Removed comparisons to old approaches abandoned by the working
-      group
-
-   o  Removed stuff that has moved to W3C specification
-
-
 
 
 Uberti, et al.          Expires September 6, 2017             [Page 113]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Removed comparisons to old approaches abandoned by the working
+      group
+
+   o  Removed stuff that has moved to W3C specification
 
    o  Align SDP handling with W3C draft
 
@@ -6372,11 +6377,6 @@ Authors' Addresses
    Canada
 
    Email: fluffy@iii.ca
-
-
-
-
-
 
 
 
