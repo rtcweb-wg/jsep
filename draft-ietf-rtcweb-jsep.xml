@@ -744,7 +744,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           that when considering a MediaStreamTrack that is producing
           rotated video, the unrotated resolution MUST be used. This is
           required regardless of whether the receiver supports
-          performing receive-side rotation (e.g., through CVO), as it
+          performing receive-side rotation (e.g., through CVO
+          <xref target="TS26.114" />), as it
           significantly simplifies the matching logic.</t>
 
           <t>For the purposes of resolution negotiation, only size limits are
@@ -5066,6 +5067,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
   </middle>
   <back>
     <references title="Normative References">
+
       <!-- NORM 1 -->
       <reference anchor="RFC5245">
         <front>
@@ -6232,6 +6234,19 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 	<seriesInfo name='RFC' value='7656'/>
 	<seriesInfo name='DOI' value='10.17487/RFC7656'/>
       </reference>
+
+      <reference anchor="TS26.114" target="http://www.3gpp.org/DynaReport/26114.htm">
+        <front>
+          <title>3rd Generation Partnership Project; Technical
+          Specification Group Services and System Aspects; IP
+          Multimedia Subsystem (IMS); Multimedia Telephony; Media
+          handling and interaction (Release 12)</title>
+          <author >
+            <organization>3GPP TS 26.114 V12.8.0</organization>
+          </author>
+          <date year="2014" month="December"/>
+        </front>
+      </reference>
     </references>
     <section title="Appendix A" anchor="sec.appendix-a">
 
@@ -6341,17 +6356,19 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       Description" of <xref
       target="I-D.ietf-mmusic-sdp-bundle-negotiation" />.</t>
 
-      <t>As described in <xref format="default" pageno="false"
-      target="RFC3550" />, RTP/RTCP packets are associated with RTP
-      streams as defined in <xref format="default" pageno="false"
+      <t>As described in <xref
+      target="RFC3550" />, RTP packets are associated with RTP
+      streams <xref
       target="RFC7656" />. Each RTP stream is identified by an SSRC
-      value, and each RTP/RTCP packet carries an SSRC value that is
-      used to associate the packet with the correct RTP stream. An
-      RTCP packet can carry multiple SSRC values, and might therefore
-      be associated with multiple RTP streams.</t>
+      value, and each RTP packet includes an SSRC field that is
+      used to associate the packet with the correct RTP stream.
+      RTCP packets also use SSRCs to identify which RTP streams the
+      packet relates to. However, a RTCP packet can contain multiple SSRC
+      fields, in the course of providing feedback or reports on different RTP
+      streams, and therefore can be associated with multiple such streams.</t>
 
       <t>In order to be able to process received RTP/RTCP packets
-      correctly it must be possible to associate an RTP stream with
+      correctly, it must be possible to associate an RTP stream with
       the correct "m=" line, as the "m=" line and SDP attributes
       associated with the "m=" line contain information needed to
       process the packets.</t>
@@ -6494,6 +6511,14 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
           packet whose SSRC is found in the outgoing SSRC table,
           deliver a copy of the RTCP packet to the "m=" line
           associated with that SSRC.</t>
+          
+          <t>If the implementation supports RTCP XR and the packet is of type XR,
+          as defined in <xref target="RFC3611" />,
+	        and the sender SSRC for the packet is found in the incoming SSRC table,
+          deliver a copy of the packet to the "m=" line associated with that SSRC.
+          In addition, for each report block in the report whose "SSRC of source" is
+          is found in the outgoing SSRC table, deliver a copy of the RTCP packet to
+          the "m=" line associated with that SSRC.</t>
 
           <t>If the packet is of type SDES,
           for each chunk in the packet, as defined in Section 6.5 of
@@ -6519,17 +6544,11 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
           the media source SSRC for the packet is found in the outgoing
           SSRC table, deliver the packet to the "m=" line associated
           with that SSRC.</t>
-
-          <t>If the implementation supports RTCP XR and the packet is of type XR,
-          as defined in <xref target="RFC3611" />,
-	        and the sender SSRC for the packet is found in the incoming SSRC table,
-          deliver a copy of the packet to the "m=" line associated with that SSRC.
-          In addition, for each report block in the report whose "SSRC of source" is
-          is found in the outgoing SSRC table, deliver a copy of the RTCP packet to
-          the "m=" line associated with that SSRC.</t>
-
-          <t>If the packet is of type APP, deliver a copy of the packet
-          to each "m=" line.</t>
+          
+          <t>If the packet is of type APP, the only routing information
+          included is the source of the packet, and therefore the
+          packet could be related to any existing "m=" line. Accordingly,
+          deliver a copy of the packet to each "m=" line.</t>
 
           <t>If the packet is of type BYE, it indicates that the RTP streams
           referenced in the packet are ending. Therefore, for each SSRC
