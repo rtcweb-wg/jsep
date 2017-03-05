@@ -4307,9 +4307,9 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.2.3 61665 typ host
-a=candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx 
+a=candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx
              192.168.2.3 rport 61665
-a=candidate:1 1 udp 255 66.77.88.99 50416 typ relay 
+a=candidate:1 1 udp 255 66.77.88.99 50416 typ relay
              55.66.77.88 rport 64532
 a=end-of-candidates
 
@@ -4391,9 +4391,9 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.1.2 51556 typ host
-a=candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx 
+a=candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx
              192.168.1.2 rport 51556
-a=candidate:1 1 udp 255 22.33.44.55 61405 typ relay 
+a=candidate:1 1 udp 255 22.33.44.55 61405 typ relay
              11.22.33.44 rport 52546
 a=end-of-candidates
 
@@ -5248,7 +5248,7 @@ a=msid:-
 		<seriesInfo name='RFC' value='7941'/>
 		<seriesInfo name='DOI' value='10.17487/RFC7941'/>
 	  </reference>
-	  
+
     </references>
     <references title="Informative References">
       <!-- INFORM 1 -->
@@ -5851,16 +5851,28 @@ a=msid:-
       <t>For each RTCP packet received (including each RTCP packet
       that is part of a compound RTCP packet), the packet MUST be
       routed to the appropriate handler for the SSRCs it contains
-      information about. Some examples of such handling are given
-      below.</t>
+      information about. Examples of how this routing is performed for
+      different RTCP packet types are given below.</t>
+      <t>Note that if a compound RTCP packet contains a RTCP
+      SDES packet, any SDES MID entries contained within may affect the
+      routing of other RTCP packets within the compound packet, and as such
+      the SDES packet MUST be processed first.</t>
 
       <t>
         <list>
+          <t>If the packet is of type SDES, and the sender SSRC for
+          the packet is found in the incoming SSRC table, deliver the
+          packet to the "m=" line associated with that SSRC.
+          In addition, if the SDES packet contains SDES MID entries,
+          each of the SDES MID items is processed. For each such item, if
+          the MID is in the table mapping MID to "m=" line,
+          update the incoming SSRC mapping table to include an entry that
+          maps the [SDES] packet's SSRC to the "m=" line for that MID.
+          [juberti TODO] Note,
+          that in the process of updating the table entries, update
+          flap suppression as discussed in Section 4.2.6 of <xref
+          target="RFC7941"/> needs to be considereds.</t>
 
-           <t>On reception of any compound RTCP packet, if there is an
-           RTCP SDES packet included that SHOULD be processed
-           first.</t>
-           
           <t>If the packet is of type SR, and the sender SSRC for the
           packet is found in the incoming SSRC table, deliver a copy
           of the packet to the "m=" line associated with that SSRC. In
@@ -5872,21 +5884,6 @@ a=msid:-
           packet whose SSRC is found in the outgoing SSRC table,
           deliver a copy of the RTCP packet to the "m=" line
           associated with that SSRC.</t>
-
-          <t>If the packet is of type SDES, and the sender SSRC for
-          the packet is found in the incoming SSRC table, deliver the
-          packet to the "m=" line associated with that SSRC.
-          In addition, If that SDES packet contains SDES MID entries,
-          this can results in updates and additions to the incoming SSRC
-          to "m=" line mapping table. Thus each of the SDES MID items
-          are processed and the current table entries are checked if
-          the corresponding MID value matches the current SSRC
-          to "m=" line mapping, else the entry is updated. If there is
-          no RTP stream to "m=" line table mapping entry for the
-          received SDES item's SSRC, such an entry is created. Note,
-          that in the process of updating the table entries, update
-          flap suppression as discussed in Section 4.2.6 of <xref
-          target="RFC7941"/> needs to be considereds.</t>
 
           <t>If the packet is of type BYE, for each SSRC indicated in
           the packet that is found in the incoming SSRC table, deliver
