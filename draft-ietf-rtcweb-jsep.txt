@@ -5852,6 +5852,14 @@ Internet-Draft                    JSEP                        March 2017
       whose SSRC is found in the outgoing SSRC table, deliver a copy of
       the RTCP packet to the "m=" line associated with that SSRC.
 
+      If the implementation supports RTCP XR and the packet is of type
+      XR, as defined in [RFC3611], and the sender SSRC for the packet is
+      found in the incoming SSRC table, deliver a copy of the packet to
+      the "m=" line associated with that SSRC.  In addition, for each
+      report block in the report whose "SSRC of source" is is found in
+      the outgoing SSRC table, deliver a copy of the RTCP packet to the
+      "m=" line associated with that SSRC.
+
       If the packet is of type SDES, for each chunk in the packet, as
       defined in Section 6.5 of RFC3350, if the SSRC for that chunk is
       found in the incoming SSRC table, deliver the packet to the "m="
@@ -5866,14 +5874,6 @@ Internet-Draft                    JSEP                        March 2017
       packet that is found in the incoming SSRC table, deliver a copy of
       the packet to the "m=" line associated with that SSRC.
 
-      If the packet is an FIR (PT=PSFB, FMT=4), as defined in [RFC5104],
-      or an LRR (PT=PSFB, FMT=TBD), as defined in [I-D.ietf-avtext-lrr],
-      for each FCI entry where the SSRC is found in the outgoing SSRC
-      table, deliver a copy of the RTCP packet to the "m=" line
-      associated with that SSRC.
-
-      If the packet is of type RTPFB or type PSFB, as defined in
-      [RFC4585], but not previously handled, and the media source SSRC
 
 
 
@@ -5882,19 +5882,21 @@ Uberti, et al.          Expires September 6, 2017             [Page 105]
 Internet-Draft                    JSEP                        March 2017
 
 
+      If the packet is an FIR (PT=PSFB, FMT=4), as defined in [RFC5104],
+      or an LRR (PT=PSFB, FMT=TBD), as defined in [I-D.ietf-avtext-lrr],
+      for each FCI entry where the SSRC is found in the outgoing SSRC
+      table, deliver a copy of the RTCP packet to the "m=" line
+      associated with that SSRC.
+
+      If the packet is of type RTPFB or type PSFB, as defined in
+      [RFC4585], but not previously handled, and the media source SSRC
       for the packet is found in the outgoing SSRC table, deliver the
       packet to the "m=" line associated with that SSRC.
 
-      If the implementation supports RTCP XR and the packet is of type
-      XR, as defined in [RFC3611], and the sender SSRC for the packet is
-      found in the incoming SSRC table, deliver a copy of the packet to
-      the "m=" line associated with that SSRC.  In addition, for each
-      report block in the report whose "SSRC of source" is is found in
-      the outgoing SSRC table, deliver a copy of the RTCP packet to the
-      "m=" line associated with that SSRC.
-
-      If the packet is of type APP, deliver a copy of the packet to each
-      "m=" line.
+      If the packet is of type APP, the only routing information
+      included is the source of the packet, and therefore the packet
+      could be related to any existing "m=" line.  Accordingly, deliver
+      a copy of the packet to each "m=" line.
 
 Appendix C.  Change log
 
@@ -5928,8 +5930,6 @@ Appendix C.  Change log
    o  Clarify a=msid handling for recvonly m= sections.
 
    o  Clarify behavior of attributes for bundle-only data channels.
-
-
 
 
 
