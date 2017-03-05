@@ -4307,9 +4307,9 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.2.3 61665 typ host
-a=candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx 
+a=candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx
              192.168.2.3 rport 61665
-a=candidate:1 1 udp 255 66.77.88.99 50416 typ relay 
+a=candidate:1 1 udp 255 66.77.88.99 50416 typ relay
              55.66.77.88 rport 64532
 a=end-of-candidates
 
@@ -4391,9 +4391,9 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.1.2 51556 typ host
-a=candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx 
+a=candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx
              192.168.1.2 rport 51556
-a=candidate:1 1 udp 255 22.33.44.55 61405 typ relay 
+a=candidate:1 1 udp 255 22.33.44.55 61405 typ relay
              11.22.33.44 rport 52546
 a=end-of-candidates
 
@@ -5871,34 +5871,34 @@ a=msid:-
           a copy of the packet to the "m=" line associated with that
           SSRC.</t>
 
-          <t> Other feedback messages include the target SSRC in the
-          Feedback Control Information (FCI). Here, each FCI needs to
-          be processed and the SSRC field identified. Also, the
-          individual FCI, combined with the RTCP packet header context,
-          needs to be forwarded to the "m=" line associated with
-          that SSRC. Examples of this pattern are:
+          <t><xref target="RFC4585" /> defines payload-specific feedback
+          messages (PSFB) which [often?] include the target SSRC in a section called
+          Feedback Control Information (FCI). For such messages,
+          if the target SSRC is found in the outgoing SSRC
+          table, deliver a copy of the RTCP packet to the "m=" line
+          associated with that SSRC. PSFB types that are handled this way
+          include:
 
-          <list  style="hanging">
+            <list style="hanging">
+              <t hangText="Full Intra Request (FIR):"><xref
+              target="RFC5104"/> (PT=PSFB, FMT=4).</t>
 
-		    <t hangText="Full Intra Request (FIR):"><xref
-		    target="RFC5104"/> (PT=PSFB, FMT=4).</t>
+              <t hangText="Temporal-Spatial Trade-off Request (TSTR):"><xref
+              target="RFC5104"/> (PT=PSFB, FMT=5).</t>
 
-			<t hangText="Temporal-Spatial Trade-off Request (TSTR):"><xref
-			target="RFC5104"/> (PT=PSFB, FMT=5).</t>
+              <t hangText="Temporal-Spatial Trade-off Notification
+              (TSTN):">This <xref target="RFC5104"/> defined message
+              (PT=PSFB, FMT=5) is a notification in response to
+              a TSTR this endpoint previously sent using the SSRC the FCI
+              identifies as the source.</t>
 
-			<t hangText="Temporal-Spatial Trade-off Notification
-			(TSTN):">This <xref target="RFC5104"/> defined message
-			(PT=PSFB, FMT=5) is actually a notification in response to
-			a TSTR this endpoint sent using the SSRC the FCI
-			identifies as source. </t>
+              <t hangText="H.271 Video Back Channel Message
+              (VBCM):"><xref target="RFC5104"/> (PT=PSFB, FMT=7).</t>
 
-			<t hangText="H.271 Video Back Channel Message
-			(VBCM):"><xref target="RFC5104"/> (PT=PSFB, FMT=7).</t>
-
-			<t hangText="Layer Refresh Request (LRR):"><xref
-			target="I-D.ietf-avtext-lrr"/> (PT=PSFB, FMT=TBD). </t>
-
-          </list></t>
+              <t hangText="Layer Refresh Request (LRR):"><xref
+              target="I-D.ietf-avtext-lrr"/> (PT=PSFB, FMT=TBD).</t>
+            </list>
+          </t>
 
           <t>If the packet is of type RTPFB or type PSFB, as defined in
           <xref target="RFC4585" />, but not previously handled, and
