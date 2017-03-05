@@ -4307,9 +4307,9 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.2.3 61665 typ host
-a=candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx 
+a=candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx
              192.168.2.3 rport 61665
-a=candidate:1 1 udp 255 66.77.88.99 50416 typ relay 
+a=candidate:1 1 udp 255 66.77.88.99 50416 typ relay
              55.66.77.88 rport 64532
 a=end-of-candidates
 
@@ -4391,9 +4391,9 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.1.2 51556 typ host
-a=candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx 
+a=candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx
              192.168.1.2 rport 51556
-a=candidate:1 1 udp 255 22.33.44.55 61405 typ relay 
+a=candidate:1 1 udp 255 22.33.44.55 61405 typ relay
              11.22.33.44 rport 52546
 a=end-of-candidates
 
@@ -5841,6 +5841,11 @@ a=msid:-
       information about. Some examples of such handling are given
       below.</t>
 
+      <t>Packets for which no appropriate handler can be identified
+      (e.g., for unknown SSRCs) are not relevant in the context of
+      this algorithm and MAY be dropped.
+      </t>
+
       <t>
         <list>
 
@@ -5886,23 +5891,6 @@ a=msid:-
 
           <t>If the packet is of type APP, deliver a copy of the packet
           to each "m=" line.</t>
-
-          <t>There exist some multiparty RTP Topologies that
-          results in that an endpoint receives third party reports
-          (<xref target="RFC3550">SR</xref>, <xref
-          target="RFC3550">RR</xref> or <xref
-          target="RFC3611">XR</xref>) as well as <xref
-          target="RFC4585">Feedback Messages</xref> that relates to or
-          targets an SSRC that originates from another endpoint, and
-          where the source of the RTCP packet is also another
-          endpoint. This type of packets should be forwarded to the
-          higher layer function dealing with the third party
-          reporting. And if none exist then they can be suppressed. As
-          the third party handler can be focused on determining the
-          conditions for the source of the reports and feedback, or
-          focused on how the RTP stream source progresses, or both
-          recommendations can't be made. </t>
-              
         </list>
       </t>
 
