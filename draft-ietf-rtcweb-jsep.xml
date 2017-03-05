@@ -4307,9 +4307,9 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.2.3 61665 typ host
-a=candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx 
+a=candidate:1 1 udp 1845494015 55.66.77.88 64532 typ srflx
              192.168.2.3 rport 61665
-a=candidate:1 1 udp 255 66.77.88.99 50416 typ relay 
+a=candidate:1 1 udp 255 66.77.88.99 50416 typ relay
              55.66.77.88 rport 64532
 a=end-of-candidates
 
@@ -4391,9 +4391,9 @@ a=dtls-id:1
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 192.168.1.2 51556 typ host
-a=candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx 
+a=candidate:1 1 udp 1845494015 11.22.33.44 52546 typ srflx
              192.168.1.2 rport 51556
-a=candidate:1 1 udp 255 22.33.44.55 61405 typ relay 
+a=candidate:1 1 udp 255 22.33.44.55 61405 typ relay
              11.22.33.44 rport 52546
 a=end-of-candidates
 
@@ -5866,26 +5866,6 @@ a=msid:-
           that MID. (This case can occur when RTCP for a source is
           received before any RTP packets.)</t>
 
-          <t>There exist some RTCP packet types that provides
-          additional information or notifies about events related to
-          the RTP stream identified. In these cases the RTP stream is
-          identified using the SSRC field value, and the information
-          is provided to the higher layer associated with the "m="
-          line for the incoming RTP stream as identified by the
-          current RTP stream to "m=" line table. For this type of
-          pattern it is common that the RTCP packets and information
-          is repeated, either periodically (e.g. SDES items), or for a
-          duration (e.g. BYE), thus suppression of repetitions can be
-          considered. Examples of these are:<list style="hanging">
-
-		  <t hangText="Goodbye (BYE) RTCP Packet:">This <xref
-		  target="RFC3550">RTP/RTCP protocol</xref> mechanism
-		  indicates that a particular RTP stream is leaving the RTP
-		  session. Thus, a most relevant event to inform the handler
-		  for this RTP steam of. </t>
-
-          </list></t>
-                  
           <t>If the packet is an FIR (PT=PSFB, FMT=4), as defined in
           <xref target="RFC5104" />, or an LRR (PT=PSFB, FMT=TBD), as
           defined in <xref target="I-D.ietf-avtext-lrr" />, for each
@@ -5901,6 +5881,13 @@ a=msid:-
 
           <t>If the packet is of type APP, deliver a copy of the packet
           to each "m=" line.</t>
+
+          <t>If the packet is of type BYE, it indicates that the RTP streams
+          referenced in the packet are ending. Therefore, for each SSRC
+          indicated in the packet that is found in the incoming SSRC table,
+          first deliver a copy of the packet to the "m=" line associated
+          with that SSRC, but then remove the entry for that SSRC from the
+          incoming SSRC table.</t>
         </list>
       </t>
 
