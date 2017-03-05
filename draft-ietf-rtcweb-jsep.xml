@@ -5872,39 +5872,65 @@ a=msid:-
           SSRC.</t>
 
           <t><xref target="RFC4585" /> defines payload-specific feedback
-          messages (PSFB) which [often?] include the target SSRC in a section called
+          messages (PSFB) which may include target SSRC(s) in a section called
           Feedback Control Information (FCI). For such messages,
-          if the target SSRC is found in the outgoing SSRC
+          if a target SSRC is found in the outgoing SSRC
           table, deliver a copy of the RTCP packet to the "m=" line
-          associated with that SSRC. PSFB types that are handled this way
+          associated with that SSRC. PSFB types that are handled in this way
           include:
 
             <list style="hanging">
-              <t hangText="Full Intra Request (FIR):"><xref
-              target="RFC5104"/> (PT=PSFB, FMT=4).</t>
+              <t hangText="Full Intra Request (FIR):">
+                <xref target="RFC5104"/> (PT=PSFB, FMT=4).
+              </t>
 
-              <t hangText="Temporal-Spatial Trade-off Request (TSTR):"><xref
-              target="RFC5104"/> (PT=PSFB, FMT=5).</t>
+              <t hangText="Temporal-Spatial Trade-off Request (TSTR):">
+                <xref target="RFC5104"/> (PT=PSFB, FMT=5).
+              </t>
 
               <t hangText="Temporal-Spatial Trade-off Notification
-              (TSTN):">This <xref target="RFC5104"/> defined message
-              (PT=PSFB, FMT=5) is a notification in response to
-              a TSTR this endpoint previously sent using the SSRC the FCI
-              identifies as the source.</t>
+              (TSTN):">
+                This <xref target="RFC5104"/> defined message
+                (PT=PSFB, FMT=6) is a notification in response to
+                a TSTR this endpoint previously sent; accordingly, the target
+                SSRC will be looked up in the incoming SSRC table.
+              </t>
 
               <t hangText="H.271 Video Back Channel Message
-              (VBCM):"><xref target="RFC5104"/> (PT=PSFB, FMT=7).</t>
+              (VBCM):">
+                <xref target="RFC5104"/> (PT=PSFB, FMT=7).
+              </t>
 
-              <t hangText="Layer Refresh Request (LRR):"><xref
-              target="I-D.ietf-avtext-lrr"/> (PT=PSFB, FMT=TBD).</t>
+              <t hangText="Layer Refresh Request (LRR):">
+                <xref target="I-D.ietf-avtext-lrr"/>(PT=PSFB, FMT=TBD).
+              </t>
             </list>
           </t>
 
-          <t>If the packet is of type RTPFB or type PSFB, as defined in
-          <xref target="RFC4585" />, but not previously handled, and
-          the media source SSRC for the packet is found in the outgoing
-          SSRC table, deliver the packet to the "m=" line associated
-          with that SSRC.</t>
+          <t><xref target="RFC4585" /> PSFB and RTPFB messages also contain
+          a media source SSRC, and for messages that do not include a target
+          SSRC in their FCI section, this media source SSRC is used for routing.
+          For such messages, if the media source SSRC for the packet is
+          found in the outgoing SSRC table, deliver the packet to the "m=" line
+          associated with that SSRC. PSFB and RTPFB types that are handled in
+          this way include:
+            <list style="hanging">
+              <t hangText="Picture Loss Indication (PLI):">
+                <xref target="RFC4585"/>(PT=PSFB, FMT=1).
+              </t>
+
+              <t hangText="Slice Loss Indication (SLI):">
+                <xref target="RFC4585"/>(PT=PSFB, FMT=2).
+              </t>
+
+              <t hangText="Reference Picture Selection Indication (RPSI):">
+                <xref target="RFC4585"/>(PT=PSFB, FMT=3).</t>
+
+              <t hangText="Generic NACK:">
+                <xref target="RFC4585"/>(PT=RTPFB, FMT=1).
+              </t>
+            </list>
+          </t>
 
           <t>If the packet is of type APP, deliver a copy of the packet
           to each "m=" line.</t>
