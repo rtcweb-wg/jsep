@@ -5703,9 +5703,9 @@ Appendix B.  Appendix B
    "Associating RTP/RTCP Streams With Correct SDP Media Description" of
    [I-D.ietf-mmusic-sdp-bundle-negotiation].
 
-   As described in [RFC3550], RTP/RTCP packets are associated with RTP
-   streams as defined in [RFC7656].  Each RTP stream is identified by an
-   SSRC value, and each RTP/RTCP packet carries an SSRC value that is
+   As described in [RFC3550], RTP packets are associated with RTP
+   streams [RFC7656].  Each RTP stream is identified by an SSRC value,
+   and each RTP packet includes an SSRC field that is used to associate
 
 
 
@@ -5714,12 +5714,14 @@ Uberti, et al.          Expires September 6, 2017             [Page 102]
 Internet-Draft                    JSEP                        March 2017
 
 
-   used to associate the packet with the correct RTP stream.  An RTCP
-   packet can carry multiple SSRC values, and might therefore be
-   associated with multiple RTP streams.
+   the packet with the correct RTP stream.  RTCP packets also use SSRCs
+   to identify which RTP streams the packet relates to.  However, a RTCP
+   packet can contain multiple SSRC fields, in the course of providing
+   feedback or reports on different RTP streams, and therefore can be
+   associated with multiple such streams.
 
-   In order to be able to process received RTP/RTCP packets correctly it
-   must be possible to associate an RTP stream with the correct "m="
+   In order to be able to process received RTP/RTCP packets correctly,
+   it must be possible to associate an RTP stream with the correct "m="
    line, as the "m=" line and SDP attributes associated with the "m="
    line contain information needed to process the packets.
 
@@ -5760,8 +5762,6 @@ Internet-Draft                    JSEP                        March 2017
 
    Applications can implement RTP stacks in many different ways.  The
    algorithm below details one way that demultiplexing can be
-   accomplished, but is not meant to be prescriptive about exactly how
-   an RTP stack needs to be implemented.  Applications MAY use any
 
 
 
@@ -5770,6 +5770,8 @@ Uberti, et al.          Expires September 6, 2017             [Page 103]
 Internet-Draft                    JSEP                        March 2017
 
 
+   accomplished, but is not meant to be prescriptive about exactly how
+   an RTP stack needs to be implemented.  Applications MAY use any
    algorithm that achieves equivalent results to those described in the
    algorithm below.
 
@@ -5816,8 +5818,6 @@ Internet-Draft                    JSEP                        March 2017
       to "m=" line, update the incoming SSRC mapping table to include an
       entry that maps the packet's SSRC to the "m=" line for that MID.
 
-      If the packet's SSRC is in the incoming SSRC mapping table, check
-      that the packet's PT matches a PT included on the associated "m="
 
 
 
@@ -5826,6 +5826,8 @@ Uberti, et al.          Expires September 6, 2017             [Page 104]
 Internet-Draft                    JSEP                        March 2017
 
 
+      If the packet's SSRC is in the incoming SSRC mapping table, check
+      that the packet's PT matches a PT included on the associated "m="
       line.  If so, route the packet to that associated "m=" line and
       stop; otherwise drop the packet.
 
@@ -5870,9 +5872,7 @@ Internet-Draft                    JSEP                        March 2017
       associated with that MID.  (This case can occur when RTCP for a
       source is received before any RTP packets.)
 
-      If the packet is of type BYE, for each SSRC indicated in the
-      packet that is found in the incoming SSRC table, deliver a copy of
-      the packet to the "m=" line associated with that SSRC.
+
 
 
 
@@ -5881,6 +5881,10 @@ Uberti, et al.          Expires September 6, 2017             [Page 105]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+      If the packet is of type BYE, for each SSRC indicated in the
+      packet that is found in the incoming SSRC table, deliver a copy of
+      the packet to the "m=" line associated with that SSRC.
 
       If the packet is an FIR (PT=PSFB, FMT=4), as defined in [RFC5104],
       or an LRR (PT=PSFB, FMT=TBD), as defined in [I-D.ietf-avtext-lrr],
@@ -5927,16 +5931,16 @@ Appendix C.  Change log
    o  Codec preferences now are applied on both initial and subsequent
       offers and answers.
 
-   o  Clarify a=msid handling for recvonly m= sections.
-
-   o  Clarify behavior of attributes for bundle-only data channels.
-
 
 
 Uberti, et al.          Expires September 6, 2017             [Page 106]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Clarify a=msid handling for recvonly m= sections.
+
+   o  Clarify behavior of attributes for bundle-only data channels.
 
    o  Allow media attributes to appear in data m= sections when all the
       media m= sections are bundle-only.
@@ -5983,16 +5987,16 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Require a privacy-preserving MID/RID construction.
 
-   o  Require support for RFC 3556 bandwidth modifiers.
-
-   o  Update maxptime description.
-
 
 
 Uberti, et al.          Expires September 6, 2017             [Page 107]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Require support for RFC 3556 bandwidth modifiers.
+
+   o  Update maxptime description.
 
    o  Note that endpoints may encounter extra codecs in answers and
       subsequent offers from non-JSEP peers.
@@ -6039,16 +6043,14 @@ Internet-Draft                    JSEP                        March 2017
    o  Update addIceCandidate to indicate ICE generation and allow per-m=
       section end-of-candidates.
 
-   o  Update fingerprint handling to use draft-ietf-mmusic-4572-update.
-
-
-
 
 
 Uberti, et al.          Expires September 6, 2017             [Page 108]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Update fingerprint handling to use draft-ietf-mmusic-4572-update.
 
    o  Update text around SDP processing of RTP header extensions and
       payload formats.
@@ -6097,14 +6099,14 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Clean up references.
 
-   Changes in draft-14:
-
 
 
 Uberti, et al.          Expires September 6, 2017             [Page 109]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   Changes in draft-14:
 
    o  Added discussion of RtpTransceivers + RtpSenders + RtpReceivers,
       and how they interact with createOffer/createAnswer.
@@ -6152,8 +6154,6 @@ Internet-Draft                    JSEP                        March 2017
 
    Changes in draft-12:
 
-   o  Filled in sections on applying local and remote descriptions.
-
 
 
 
@@ -6161,6 +6161,8 @@ Uberti, et al.          Expires September 6, 2017             [Page 110]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Filled in sections on applying local and remote descriptions.
 
    o  Discussed downscaling and upscaling to fulfill imageattr
       requirements.
@@ -6209,14 +6211,14 @@ Internet-Draft                    JSEP                        March 2017
 
    Changes in draft-08:
 
-   o  Added new example section and removed old examples in appendix.
-
 
 
 Uberti, et al.          Expires September 6, 2017             [Page 111]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Added new example section and removed old examples in appendix.
 
    o  Fixed <proto> field handling.
 
@@ -6264,8 +6266,6 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Defined a canonical order for assignment of MSTs to m= lines.
 
-   o  Removed discussion of rehydration.
-
 
 
 
@@ -6273,6 +6273,8 @@ Uberti, et al.          Expires September 6, 2017             [Page 112]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Removed discussion of rehydration.
 
    o  Added Eric Rescorla as a draft editor.
 
@@ -6320,8 +6322,6 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Removed stuff that has moved to W3C specification
 
-   o  Align SDP handling with W3C draft
-
 
 
 
@@ -6329,6 +6329,8 @@ Uberti, et al.          Expires September 6, 2017             [Page 113]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Align SDP handling with W3C draft
 
    o  Clarified section on forking.
 
@@ -6370,8 +6372,6 @@ Authors' Addresses
    Canada
 
    Email: fluffy@iii.ca
-
-
 
 
 
