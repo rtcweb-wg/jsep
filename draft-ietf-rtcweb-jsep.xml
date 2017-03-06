@@ -5775,7 +5775,7 @@ a=msid:-
       routing that are updated each time an RTP/RTCP packet contains
       new information that affects how packets should be routed.</t>
 
-      <t>To prepare for demultiplexing RTP packets to the correct "m="
+      <t>To prepare for demultiplexing RTP/RTCP packets to the correct "m="
       line, the following steps MUST be followed for each BUNDLE
       group.</t>
 
@@ -5823,19 +5823,20 @@ a=msid:-
       <t>
         <list>
 
-          <t>If the packet has a MID and that MID is not in the table
+          <t>If the packet has a MID, and that MID is not in the table
           mapping MID to "m=" line, drop the packet and stop.</t>
 
-          <t>If the packet has a MID and that MID is in the table
-          mapping MID to "m=" line, update the incoming SSRC mapping
-          table to include an entry that maps the packet's SSRC to the
-          "m=" line for that MID.</t>
+          <t>If the packet has a MID, and the packet's extended sequence number
+          is greater than that of the last MID update, as mentioned in
+          <xref target="RFC7941" />, Section 4.2.6, update the incoming
+          SSRC mapping table to include an entry that maps the packet's
+          SSRC to the "m=" line for that MID.</t>
 
           <t>If the packet's SSRC is in the incoming SSRC mapping
           table, check that the packet's PT matches a PT included on
           the associated "m=" line. If so, route the packet to that
           associated "m=" line and stop; otherwise drop the
-          packet.</t>
+          packet and stop.</t>
 
           <t>If the packet's payload type is in the payload type
           table, update the the incoming SSRC mapping table to include
@@ -5850,25 +5851,29 @@ a=msid:-
 
       <t>For each RTCP packet received (including each RTCP packet
       that is part of a compound RTCP packet), the packet MUST be
-      routed to the appropriate handler for the SSRCs it contains
-      information about. Examples of how this routing is performed for
-      different RTCP packet types are given below.</t>
+      routed to the appropriate handler for the RTP streams it contains
+      information about.</t>
+      <t>Routing for RTCP packets can be classified into several
+      different categories, each of which has its own mechanism for
+      determining the relevant RTP streams and handing off the received
+      packet.</t>
       <t>Note that if a compound RTCP packet contains a RTCP
       SDES packet, any SDES MID entries contained within may affect the
       routing of other RTCP packets within the compound packet, and as such
       the SDES packet MUST be processed first.</t>
+      <t>The various categories of RTCP packets are enumerated below.</t>
 
       <t>
         <list>
           <t>If the packet is of type SDES, and the sender SSRC for
           the packet is found in the incoming SSRC table, deliver the
           packet to the "m=" line associated with that SSRC.
-          In addition, if the SDES packet contains SDES MID entries,
-          each of the SDES MID items is processed. For each such item, if
-          the MID is in the table mapping MID to "m=" line,
+          In addition, if the SDES packet includes chunks that contain
+          SDES MID items, each of these items is processed. For each such
+          item, if the MID is in the table mapping MID to "m=" line,
           update the incoming SSRC mapping table to include an entry that
-          maps the [SDES] packet's SSRC to the "m=" line for that MID.
-          [juberti TODO] Note,
+          maps the chunk's SSRC to the "m=" line for that MID.
+
           that in the process of updating the table entries, update
           flap suppression as discussed in Section 4.2.6 of <xref
           target="RFC7941"/> needs to be considereds.</t>
