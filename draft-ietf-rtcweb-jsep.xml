@@ -6538,11 +6538,6 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
           that MID. (This case can occur when RTCP for a source is
           received before any RTP packets.)</t>
 
-          <t>If the packet is of type BYE, for each SSRC indicated in
-          the packet that is found in the incoming SSRC table, deliver
-          a copy of the packet to the "m=" line associated with that
-          SSRC.</t>
-
           <t><xref target="RFC4585" /> defines payload-specific feedback
           messages (PSFB) which may include target SSRC(s) in a section called
           Feedback Control Information (FCI). For such messages,
@@ -6608,6 +6603,13 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
           included is the source of the packet, and therefore the
           packet could be related to any existing "m=" line. Accordingly,
           deliver a copy of the packet to each "m=" line.</t>
+
+          <t>If the packet is of type BYE, it indicates that the RTP streams
+          referenced in the packet are ending. Therefore, for each SSRC
+          indicated in the packet that is found in the incoming SSRC table,
+          first deliver a copy of the packet to the "m=" line associated
+          with that SSRC, but then remove the entry for that SSRC from the
+          incoming SSRC table.</t>
         </list>
       </t>
 
