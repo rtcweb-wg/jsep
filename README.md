@@ -97,3 +97,9 @@ Examples are generated with
 python tools/gen_examples.py --replace draft-ietf-rtcweb-jsep.xml
 ```
 
+The document can be reflowed with
+
+```
+tools/reflow.sh
+```
+
