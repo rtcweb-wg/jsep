@@ -5048,21 +5048,34 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
     </section>
     <section title="Acknowledgements" anchor="sec.acknowledgements">
 
-      <t>Significant text incorporated in the draft as well and review
-      was provided by Peter Thatcher, Taylor Brandstetter, Harald
-      Alvestrand and Suhas Nandakumar.
-      <!-- ACK 1 -->Dan Burnett, Neil Stratford, Anant Narayanan,
-      Andrew Hutton, Richard Ejzak,
-      <!-- ACK 2 -->
-      <!-- ACK 3 -->
-      <!-- ACK 4 -->Adam Bergkvist and Matthew Kaufman all provided
-      valuable feedback on this proposal.
-      <!-- ACK 5 -->
-      <!-- ACK 5a -->
-      <!-- ACK 5b -->
-      <!-- ACK 5c -->
-      <!-- ACK 6 -->
-      <!-- ACK 7 --></t>
+      <t>
+      Harald Alvestrand,
+      Taylor Brandstetter,
+      Suhas Nandakumar, and
+      Peter Thatcher
+      provided significant text for this draft.
+
+      Bernard Aboba,
+      Adam Bergkvist,
+      Dan Burnett,
+      Ben Campbell,
+      Alissa Cooper,
+      Richard Ejzak,
+      Stefan Hakansson,
+      Ted Hardie,
+      Christer Holmberg
+      Andrew Hutton,
+      Randell Jesup,
+      Matthew Kaufman,
+      Anant Narayanan,
+      Adam Roach,
+      Neil Stratford,
+      Martin Thomson,
+      Sean Turner, and
+      Magnus Westerlund
+      all provided valuable feedback on this proposal.
+
+      </t>
     </section>
   </middle>
   <back>
@@ -6535,7 +6548,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
           of the packet to the "m=" line associated with that SSRC.
           In addition, for any SDES MID items contained in these chunks,
           if the MID is found in the table mapping MID to "m=" line,
-          update the incoming SSRC mapping table to include an entry that
+          update the incoming SSRC table to include an entry that
           maps the chunk's SSRC to the "m=" line associated with that MID,
           unless the packet is older than the packet that most recently
           updated the mapping for this SSRC, as discussed in
@@ -6548,7 +6561,12 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
           processing a compound packet, any contained SDES packet MUST
           be handled first.</t>
 
-          <t>BYE</t>
+          <t>If the packet is of type BYE, it indicates that the RTP streams
+          referenced in the packet are ending. Therefore, for each SSRC
+          indicated in the packet that is found in the incoming SSRC table,
+          first deliver a copy of the packet to the "m=" line associated
+          with that SSRC, but then remove the entry for that SSRC from the
+          incoming SSRC table.</t>
 
           <t>If the packet is of type SR or RR, for each report block in
           the report whose "SSRC of source" is found in the outgoing
@@ -6571,13 +6589,13 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
           as defined in <xref target="RFC4585" />, it will contain a
           media source SSRC, and this SSRC is used for routing certain
           subtypes of feedback messages. However,
-          several PSFB messdages include target SSRC(s) in a section called
-          Feedback Control Information (FCI). For these messages,
-          the target SSRC(s) are used for routing.
+          several subtypes of PSFB messages include target SSRC(s) in a
+          section called Feedback Control Information (FCI). For these messages,
+          the target SSRC(s) are used for routing.</t>
 
-          <t>For feedback messages that do not include target SSRCs in their
-          FCI section, if the media source SSRC is found in the
-          outgoing SSRC table, deliver the
+          <t>If the packet is a feedback message that does not include
+          target SSRCs in its FCI section, and the media source SSRC is
+          found in the outgoing SSRC table, deliver the
           packet to the "m=" line associated with that SSRC.
           RTPFB and PSFB types that are handled in this way include:
             <list style="hanging">
@@ -6599,14 +6617,14 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
             </list>
           </t>
 
-          <t>For feedback messages that do include target SSRC(s) in
-          their FCI section, they can either be requests or notifications.
-          Requests reference a RTP stream that is being sent by the message
-          recipient, whereas notifications are responses to an earlier
-          request, and therefore reference a RTP stream that is being received
-          by the message recipient.</t>
+          <t>If the packet is a feedback message that does include target
+          SSRC(s) in its FCI section, it can either be a request or a
+          notification. Requests reference a RTP stream that is being
+          sent by the message recipient, whereas notifications are responses
+          to an earlier request, and therefore reference a RTP stream that
+          is being received by the message recipient.</t>
 
-          <t>For feedback requests that include target SSRC(s),
+          <t>If the packet is a feedback request that includes target SSRC(s),
           for each target SSRC that is found in the outgoing SSRC table,
           deliver a copy of the RTCP packet to the "m=" line associated with
           that SSRC. PSFB types that are handled in this way include:
@@ -6631,7 +6649,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
             </list>
           </t>
 
-          <t>For feedback requests that include target SSRC(s),
+          <t>If the packet is a feedback notification that include target SSRC(s),
           for each target SSRC that is found in the incoming SSRC table,
           deliver a copy of the RTCP packet to the "m=" line associated with
           that SSRC. PSFB types that are handled in this way include:
