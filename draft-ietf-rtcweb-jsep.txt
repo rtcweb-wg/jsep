@@ -171,7 +171,7 @@ Internet-Draft                    JSEP                        March 2017
 
 
    Appendix C.  Change log . . . . . . . . . . . . . . . . . . . . . 107
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 115
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 116
 
 1.  Introduction
 
@@ -5750,18 +5750,18 @@ Internet-Draft                    JSEP                        March 2017
    "m=" line (provided by the remote peer) into RTP and RTCP packets
    associated with a BUNDLE group.
 
-   The mapping from an SSRC to an identification-tag is carried in RTCP
-   SDES packets or in RTP header extensions (
-   [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 14).  Since a
-   compound RTCP packet can contain multiple RTCP SDES packets, and each
-   RTCP SDES packet can contain multiple chunks, an RTCP packet can
-   contain several SSRC to identification-tag mappings.  The offerer and
-   answerer maintain tables used for routing that are updated each time
-   an RTP/RTCP packet contains new information that affects how packets
-   should be routed.
+   When using this mechanism, the mapping from an SSRC to an
+   identification-tag is carried in RTP header extensions or RTCP SDES
+   packets, as specified in [I-D.ietf-mmusic-sdp-bundle-negotiation],
+   Section 14).  Since a compound RTCP packet can contain multiple RTCP
+   SDES packets, and each RTCP SDES packet can contain multiple chunks,
+   a single RTCP packet can contain several SSRC to identification-tag
+   mappings.  The offerer and answerer maintain tables used for routing
+   that are updated each time an RTP/RTCP packet contains new
+   information that affects how packets should be routed.
 
-   Applications can implement RTP stacks in many different ways.  The
-   algorithm below details one way that demultiplexing can be
+   However, some implementations of
+   [I-D.ietf-mmusic-sdp-bundle-negotiation] may not include this
 
 
 
@@ -5770,6 +5770,14 @@ Uberti, et al.         Expires September 11, 2017             [Page 103]
 Internet-Draft                    JSEP                        March 2017
 
 
+   identification-tag in their RTP and RTCP traffic when using BUNDLE,
+   and instead use a payload type based mechanism for demuxing.  In this
+   situation, each "m=" line MUST use unique payload type values, in
+   order for the payload type to be a reliable indicator of the relevant
+   "m=" line for the RTP stream.
+
+   Applications can implement RTP stacks in many different ways.  The
+   algorithm below details one way that demultiplexing can be
    accomplished, but is not meant to be prescriptive about exactly how
    an RTP stack needs to be implemented.  Applications MAY use any
    algorithm that achieves equivalent results to those described in the
@@ -5809,6 +5817,15 @@ Internet-Draft                    JSEP                        March 2017
    further process the packet as would normally happen with RTP/RTCP, if
    it were received on a transport associated with that "m=" line
    outside of a BUNDLE group (i.e., if the "m=" line were not BUNDLEd),
+
+
+
+
+Uberti, et al.         Expires September 11, 2017             [Page 104]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    including dropping an RTP packet if the packet's PT does not match
    any PT in the "m=" line.
 
@@ -5818,14 +5835,6 @@ Internet-Draft                    JSEP                        March 2017
       If the packet has a MID, and the packet's extended sequence number
       is greater than that of the last MID update, as discussed in
       [RFC7941], Section 4.2.6, update the incoming SSRC mapping table
-
-
-
-Uberti, et al.         Expires September 11, 2017             [Page 104]
-
-Internet-Draft                    JSEP                        March 2017
-
-
       to include an entry that maps the packet's SSRC to the "m=" line
       for that MID.
 
@@ -5865,6 +5874,14 @@ Internet-Draft                    JSEP                        March 2017
       than the packet that most recently updated the mapping for this
       SSRC, as discussed in [RFC7941], Section 4.2.6.
 
+
+
+
+Uberti, et al.         Expires September 11, 2017             [Page 105]
+
+Internet-Draft                    JSEP                        March 2017
+
+
       Note that if an SDES packet is received as part of a compound RTCP
       packet, the SSRC to "m=" line mapping may not exist until the SDES
       packet is handled (e.g., in the case where RTCP for a source is
@@ -5874,14 +5891,6 @@ Internet-Draft                    JSEP                        March 2017
       If the packet is of type BYE, it indicates that the RTP streams
       referenced in the packet are ending.  Therefore, for each SSRC
       indicated in the packet that is found in the incoming SSRC table,
-
-
-
-Uberti, et al.         Expires September 11, 2017             [Page 105]
-
-Internet-Draft                    JSEP                        March 2017
-
-
       first deliver a copy of the packet to the "m=" line associated
       with that SSRC, but then remove the entry for that SSRC from the
       incoming SSRC table.
@@ -5922,15 +5931,6 @@ Internet-Draft                    JSEP                        March 2017
 
       Slice Loss Indication (SLI):  [RFC4585] (PT=PSFB, FMT=2).
 
-      Reference Picture Selection Indication (RPSI):  [RFC4585]
-         (PT=PSFB, FMT=3).
-
-      If the packet is a feedback message that does include target
-      SSRC(s) in its FCI section, it can either be a request or a
-      notification.  Requests reference a RTP stream that is being sent
-      by the message recipient, whereas notifications are responses to
-
-
 
 
 Uberti, et al.         Expires September 11, 2017             [Page 106]
@@ -5938,6 +5938,13 @@ Uberti, et al.         Expires September 11, 2017             [Page 106]
 Internet-Draft                    JSEP                        March 2017
 
 
+      Reference Picture Selection Indication (RPSI):  [RFC4585]
+         (PT=PSFB, FMT=3).
+
+      If the packet is a feedback message that does include target
+      SSRC(s) in its FCI section, it can either be a request or a
+      notification.  Requests reference a RTP stream that is being sent
+      by the message recipient, whereas notifications are responses to
       an earlier request, and therefore reference a RTP stream that is
       being received by the message recipient.
 
@@ -5978,6 +5985,15 @@ Appendix C.  Change log
 
    Changes in draft-19:
 
+
+
+
+
+Uberti, et al.         Expires September 11, 2017             [Page 107]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    o  Examples are now machine-generated for correctness, and use IETF-
       approved example IP addresses.
 
@@ -5986,13 +6002,6 @@ Appendix C.  Change log
 
    o  Only send "a=rtcp-mux-only" and "a=bundle-only" on new m=
       sections.
-
-
-
-Uberti, et al.         Expires September 11, 2017             [Page 107]
-
-Internet-Draft                    JSEP                        March 2017
-
 
    o  Update references.
 
@@ -6034,6 +6043,13 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Document removeTrack.
 
+
+
+Uberti, et al.         Expires September 11, 2017             [Page 108]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    o  Update requirements to only accept the last generated offer/answer
       as an argument to setLocalDescription.
 
@@ -6042,13 +6058,6 @@ Internet-Draft                    JSEP                        March 2017
    o  Fix code around default timing when AVPF is not specified.
 
    o  Clean up terminology around m= line and m=section.
-
-
-
-Uberti, et al.         Expires September 11, 2017             [Page 108]
-
-Internet-Draft                    JSEP                        March 2017
-
 
    o  Provide a more realistic example for minimum decoder capabilities.
 
@@ -6089,6 +6098,14 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Update RTP demux algorithm.  Include RTCP.
 
+
+
+
+Uberti, et al.         Expires September 11, 2017             [Page 109]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    o  Update requirements for when a=rtcp is included, limiting to cases
       where it is needed for backward compatibility.
 
@@ -6097,14 +6114,6 @@ Internet-Draft                    JSEP                        March 2017
    o  Updated addTrack matching algorithm.
 
    o  Remove a=ssrc requirements.
-
-
-
-
-Uberti, et al.         Expires September 11, 2017             [Page 109]
-
-Internet-Draft                    JSEP                        March 2017
-
 
    o  Handle a=setup in reoffers.
 
@@ -6146,21 +6155,19 @@ Internet-Draft                    JSEP                        March 2017
    o  Remove support for changing SDP before calling
       setLocalDescription.
 
-   o  Specify algorithm for demuxing RTP based on MID, PT, and SSRC.
-
-   o  Clarify rules for rejecting m= lines when bundle policy is
-      balanced or max-bundle.
-
-   Changes in draft-15:
-
-
-
 
 
 Uberti, et al.         Expires September 11, 2017             [Page 110]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Specify algorithm for demuxing RTP based on MID, PT, and SSRC.
+
+   o  Clarify rules for rejecting m= lines when bundle policy is
+      balanced or max-bundle.
+
+   Changes in draft-15:
 
    o  Clarify text around codecs offered in subsequent transactions to
       refer to what's been negotiated.
@@ -6203,13 +6210,6 @@ Internet-Draft                    JSEP                        March 2017
    o  Trigger an ICE restart even if the ICE candidate policy is being
       made more strict.
 
-   o  Remove the 'public' ICE candidate policy.
-
-   o  Move open issues into GitHub issues.
-
-   o  Split local/remote description accessors into current/pending.
-
-   o  Clarify a=imageattr handling.
 
 
 
@@ -6217,6 +6217,14 @@ Uberti, et al.         Expires September 11, 2017             [Page 111]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Remove the 'public' ICE candidate policy.
+
+   o  Move open issues into GitHub issues.
+
+   o  Split local/remote description accessors into current/pending.
+
+   o  Clarify a=imageattr handling.
 
    o  Add more detail on VoiceActivityDetection handling.
 
@@ -6259,6 +6267,13 @@ Internet-Draft                    JSEP                        March 2017
 
    Changes in draft-10:
 
+
+
+Uberti, et al.         Expires September 11, 2017             [Page 112]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    o  Described video size negotiation with imageattr.
 
    o  Clarified rejection of sections that do not have mux-only.
@@ -6266,13 +6281,6 @@ Internet-Draft                    JSEP                        March 2017
    o  Add handling of LS groups
 
    Changes in draft-09:
-
-
-
-Uberti, et al.         Expires September 11, 2017             [Page 112]
-
-Internet-Draft                    JSEP                        March 2017
-
 
    o  Don't return null for {local,remote}Description after close().
 
@@ -6315,6 +6323,13 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Some reference updates.
 
+
+
+Uberti, et al.         Expires September 11, 2017             [Page 113]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    o  Editorial clarification.
 
    Changes in draft-07:
@@ -6322,13 +6337,6 @@ Internet-Draft                    JSEP                        March 2017
    o  Expanded discussion of VAD and Opus DTX.
 
    o  Added a security considerations section.
-
-
-
-Uberti, et al.         Expires September 11, 2017             [Page 113]
-
-Internet-Draft                    JSEP                        March 2017
-
 
    o  Rewrote the section on modifying SDP to require implementations to
       clearly indicate whether any given modification is allowed.
@@ -6370,14 +6378,6 @@ Internet-Draft                    JSEP                        March 2017
    o  Fixed several issues identified in the createOffer/Answer sections
       during document review.
 
-   o  Updated references.
-
-   Changes in draft-04:
-
-   o  Filled in sections on createOffer and createAnswer.
-
-   o  Added SDP examples.
-
 
 
 
@@ -6385,6 +6385,14 @@ Uberti, et al.         Expires September 11, 2017             [Page 114]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Updated references.
+
+   Changes in draft-04:
+
+   o  Filled in sections on createOffer and createAnswer.
+
+   o  Added SDP examples.
 
    o  Fixed references.
 
@@ -6425,6 +6433,15 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Migrated from draft-uberti-rtcweb-jsep-02.
 
+
+
+
+
+Uberti, et al.         Expires September 11, 2017             [Page 115]
+
+Internet-Draft                    JSEP                        March 2017
+
+
 Authors' Addresses
 
    Justin Uberti
@@ -6434,12 +6451,6 @@ Authors' Addresses
    USA
 
    Email: justin@uberti.name
-
-
-
-Uberti, et al.         Expires September 11, 2017             [Page 115]
-
-Internet-Draft                    JSEP                        March 2017
 
 
    Cullen Jennings
@@ -6458,17 +6469,6 @@ Internet-Draft                    JSEP                        March 2017
    USA
 
    Email: ekr@rtfm.com
-
-
-
-
-
-
-
-
-
-
-
 
 
 

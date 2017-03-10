@@ -2781,9 +2781,10 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <p id="rfc.section.B.p.4">As all RTP streams associated with a BUNDLE group use the same address:port combination for sending and receiving RTP/RTCP packets, the local address:port combination cannot be used to associate an RTP stream with the correct "m=" line. In addition, multiple RTP streams might be associated with the same "m=" line.</p>
 <p id="rfc.section.B.p.5">An offerer and answerer can inform each other which SSRC values they will use for an RTP stream by using the SDP 'ssrc' attribute <a href="#RFC5576">[RFC5576]</a>.  However, an offerer will not know which SSRC values the answerer will use until the offerer has received the answer providing that information. Due to this, before the offerer has received the answer, the offerer will not be able to associate an RTP stream with the correct "m=" line using the SSRC value associated with the RTP stream. In addition, the offerer and answerer may start using new SSRC values mid-session, without informing each other using the SDP 'ssrc' attribute.</p>
 <p id="rfc.section.B.p.6">In order for an offerer and answerer to always be able to associate an RTP stream with the correct "m=" line, the offerer and answerer using the BUNDLE extension MUST support the mechanism defined in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 14, where the offerer and answerer insert the identification-tag associated with an "m=" line (provided by the remote peer) into RTP and RTCP packets associated with a BUNDLE group.</p>
-<p id="rfc.section.B.p.7">The mapping from an SSRC to an identification-tag is carried in RTCP SDES packets or in RTP header extensions ( <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 14). Since a compound RTCP packet can contain multiple RTCP SDES packets, and each RTCP SDES packet can contain multiple chunks, an RTCP packet can contain several SSRC to identification-tag mappings. The offerer and answerer maintain tables used for routing that are updated each time an RTP/RTCP packet contains new information that affects how packets should be routed.</p>
-<p id="rfc.section.B.p.8">Applications can implement RTP stacks in many different ways. The algorithm below details one way that demultiplexing can be accomplished, but is not meant to be prescriptive about exactly how an RTP stack needs to be implemented.  Applications MAY use any algorithm that achieves equivalent results to those described in the algorithm below.</p>
-<p id="rfc.section.B.p.9">To prepare for demultiplexing RTP/RTCP packets to the correct "m=" line, the following steps MUST be followed for each BUNDLE group.</p>
+<p id="rfc.section.B.p.7">When using this mechanism, the mapping from an SSRC to an identification-tag is carried in RTP header extensions or RTCP SDES packets, as specified in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 14). Since a compound RTCP packet can contain multiple RTCP SDES packets, and each RTCP SDES packet can contain multiple chunks, a single RTCP packet can contain several SSRC to identification-tag mappings. The offerer and answerer maintain tables used for routing that are updated each time an RTP/RTCP packet contains new information that affects how packets should be routed.</p>
+<p id="rfc.section.B.p.8">However, some implementations of <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a> may not include this identification-tag in their RTP and RTCP traffic when using BUNDLE, and instead use a payload type based mechanism for demuxing.  In this situation, each "m=" line MUST use unique payload type values, in order for the payload type to be a reliable indicator of the relevant "m=" line for the RTP stream.</p>
+<p id="rfc.section.B.p.9">Applications can implement RTP stacks in many different ways. The algorithm below details one way that demultiplexing can be accomplished, but is not meant to be prescriptive about exactly how an RTP stack needs to be implemented.  Applications MAY use any algorithm that achieves equivalent results to those described in the algorithm below.</p>
+<p id="rfc.section.B.p.10">To prepare for demultiplexing RTP/RTCP packets to the correct "m=" line, the following steps MUST be followed for each BUNDLE group.</p>
 <p/>
 
 <ul class="empty">
@@ -2795,8 +2796,8 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.11">As "m=" lines are added or removed from the BUNDLE groups, or their configurations are changed, the tables above MUST also be updated.</p>
-<p id="rfc.section.B.p.12">For each RTP packet received, the following steps MUST be followed to route the packet to the correct "m=" section within a BUNDLE group. Note that the phrase 'deliver a packet to the "m=" line' means to further process the packet as would normally happen with RTP/RTCP, if it were received on a transport associated with that "m=" line outside of a BUNDLE group (i.e., if the "m=" line were not BUNDLEd), including dropping an RTP packet if the packet's PT does not match any PT in the "m=" line.</p>
+<p id="rfc.section.B.p.12">As "m=" lines are added or removed from the BUNDLE groups, or their configurations are changed, the tables above MUST also be updated.</p>
+<p id="rfc.section.B.p.13">For each RTP packet received, the following steps MUST be followed to route the packet to the correct "m=" section within a BUNDLE group. Note that the phrase 'deliver a packet to the "m=" line' means to further process the packet as would normally happen with RTP/RTCP, if it were received on a transport associated with that "m=" line outside of a BUNDLE group (i.e., if the "m=" line were not BUNDLEd), including dropping an RTP packet if the packet's PT does not match any PT in the "m=" line.</p>
 <p/>
 
 <ul class="empty">
@@ -2808,9 +2809,9 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 </ul>
 
 <p> </p>
-<p id="rfc.section.B.p.14">For each RTCP packet received (including each RTCP packet that is part of a compound RTCP packet), the packet MUST be routed to the "m=" line for the RTP streams it contains information about. This routing is type-dependent, as each kind of RTCP packet has its own mechanism for associating it with the relevant RTP streams.</p>
-<p id="rfc.section.B.p.15">Packets for which no appropriate "m=" line can be identified (i.e., for unknown RTP streams) are not relevant in the context of this algorithm and MAY be dropped. This situation may occur with certain multiparty RTP topologies.</p>
-<p id="rfc.section.B.p.16">Rules for handling the various types of RTCP packets are explained below.</p>
+<p id="rfc.section.B.p.15">For each RTCP packet received (including each RTCP packet that is part of a compound RTCP packet), the packet MUST be routed to the "m=" line for the RTP streams it contains information about. This routing is type-dependent, as each kind of RTCP packet has its own mechanism for associating it with the relevant RTP streams.</p>
+<p id="rfc.section.B.p.16">Packets for which no appropriate "m=" line can be identified (i.e., for unknown RTP streams) are not relevant in the context of this algorithm and MAY be dropped. This situation may occur with certain multiparty RTP topologies.</p>
+<p id="rfc.section.B.p.17">Rules for handling the various types of RTCP packets are explained below.</p>
 <p/>
 
 <ul class="empty">
