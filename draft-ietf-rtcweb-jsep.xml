@@ -6410,7 +6410,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       and answerer using the BUNDLE extension MUST support the
       mechanism defined in <xref
       target="I-D.ietf-mmusic-sdp-bundle-negotiation" />, Section
-      14. where the offerer and answerer insert the identification-tag
+      14, where the offerer and answerer insert the identification-tag
       associated with an "m=" line (provided by the remote peer) into
       RTP and RTCP packets associated with a BUNDLE group.</t>
 
@@ -6423,6 +6423,14 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       mappings. The offerer and answerer maintain tables used for
       routing that are updated each time an RTP/RTCP packet contains
       new information that affects how packets should be routed.</t>
+
+      <!-- As described in <xref
+      target="I-D.ietf-mmusic-sdp-bundle-negotiation" />, Section 10.1.1,
+      some endpoints may not include the identification-tag when using
+      BUNDLE, but prefer to use the legacy payload type mechanism for
+      demuxing. In this situation, each "m=" line MUST use unique
+      payload type values, in order for the payload type to serve as
+      a reliable indicator of the relevant "m=" line for the RTP stream.-->
 
       <t>Applications can implement RTP stacks in many different
       ways. The algorithm below details one way that demultiplexing
@@ -6437,7 +6445,6 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 
       <t>
         <list>
-
           <t>Construct a table mapping MID to "m=" line for each "m="
           line in this BUNDLE group. Note that an "m=" line may only
           have one MID.</t>
@@ -6454,7 +6461,8 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
           each "m=" line in the BUNDLE group and for each payload type
           configured for receiving in that "m=" line. If any payload
           type is configured for receiving in more than one "m=" line
-          in the BUNDLE group, do not it include it in the table.</t>
+          in the BUNDLE group, do not it include it in the table, as it
+          cannot be used to uniquely identify a "m=" line.</t>
 
           <t>Note that for each of these tables, there can only be one
           mapping for any given key (MID, SSRC, or PT). In other
@@ -6483,7 +6491,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
           mapping MID to "m=" line, drop the packet and stop.</t>
 
           <t>If the packet has a MID, and the packet's extended sequence number
-          is greater than that of the last MID update, as mentioned in
+          is greater than that of the last MID update, as discussed in
           <xref target="RFC7941" />, Section 4.2.6, update the incoming
           SSRC mapping table to include an entry that maps the packet's
           SSRC to the "m=" line for that MID.</t>
@@ -6507,83 +6515,101 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 
       <t>For each RTCP packet received (including each RTCP packet
       that is part of a compound RTCP packet), the packet MUST be
-      routed to the appropriate handler for the RTP streams it contains
-      information about.</t>
-      <t>Routing for RTCP packets can be classified into several
-      different categories, each of which has its own mechanism for
-      determining the relevant RTP streams and handing off the received
-      packet.</t>
-      <t>Note that if a compound RTCP packet contains a RTCP
-      SDES packet, any SDES MID entries contained within may affect the
-      routing of other RTCP packets within the compound packet, and as such
-      the SDES packet MUST be processed first.</t>
-      <t>The various categories of RTCP packets are enumerated below.</t>
+      routed to the "m=" line for the RTP streams it contains
+      information about. This routing is type-dependent, as each kind of RTCP
+      packet has its own mechanism for associating it with the relevant
+      RTP streams.</t>
 
-      <t>RTCP packets for which no appropriate handler can be identified
-      (e.g., for unknown SSRCs) are not relevant in the context of
-      this algorithm and MAY be dropped. Packets of this sort may be
-      received in certain multiparty RTP topologies.
-      </t>
+      <t>Packets for which no appropriate "m=" line can be identified
+      (i.e., for unknown RTP streams) are not relevant in the context of
+      this algorithm and MAY be dropped. This situation may occur
+      with certain multiparty RTP topologies.</t>
+
+      <t>Rules for handling the various types of RTCP packets are
+      explained below.</t>
 
       <t>
         <list>
-          <t>If the packet is of type SDES, and the sender SSRC for
-          the packet is found in the incoming SSRC table, deliver the
-          packet to the "m=" line associated with that SSRC.
-          In addition, if the SDES packet includes chunks that contain
-          SDES MID items, each of these items is processed. For each such
-          item, if the MID is in the table mapping MID to "m=" line,
+          <t> If the packet is of type SDES, for each chunk in the packet
+          whose SSRC is found in the incoming SSRC table, deliver a copy
+          of the packet to the "m=" line associated with that SSRC.
+          In addition, for any SDES MID items contained in these chunks,
+          if the MID is found in the table mapping MID to "m=" line,
           update the incoming SSRC mapping table to include an entry that
-          maps the chunk's SSRC to the "m=" line for that MID.
+          maps the chunk's SSRC to the "m=" line associated with that MID,
+          unless the packet is older than the packet that most recently
+          updated the mapping for this SSRC, as discussed in
+          <xref target="RFC7941"/>, Section 4.2.6.</t>
 
-          !!!If the packet is of type SDES,
-          for each chunk in the packet, as defined in Section 6.5 of
-          RFC3350, if the SSRC for that chunk is found
-          in the incoming SSRC table, deliver the
-          packet to the "m=" line associated with that SSRC. In
-          addition, for each chunk in the packet that contains a MID
-          that is in the table mapping MID to "m=" line, update the
-          incoming SSRC mapping table to include an entry that maps
-          the SSRC for that chunk to the "m=" line associated with
-          that MID. (This case can occur when RTCP for a source is
-          received before any RTP packets.)</t>
+          <t>Note that if an SDES packet is received as part of a compound
+          RTCP packet, the SSRC to "m=" line mapping may not exist until
+          the SDES packet is handled (e.g., in the case where RTCP for a
+          source is received before any RTP packets). Therefore, when
+          processing a compound packet, any contained SDES packet MUST
+          be handled first.</t>
 
-          that in the process of updating the table entries, update
-          flap suppression as discussed in Section 4.2.6 of <xref
-          target="RFC7941"/> needs to be considereds.</t>
+          <t>BYE</t>
 
-          <t>If the packet is of type SR, and the sender SSRC for the
-          packet is found in the incoming SSRC table, deliver a copy
-          of the packet to the "m=" line associated with that SSRC. In
-          addition, for each report block in the report whose SSRC is
-          found in the outgoing SSRC table, deliver a copy of the RTCP
-          packet to the "m=" line associated with that SSRC.</t>
-
-          <t>If the packet is of type RR, for each report block in the
-          packet whose SSRC is found in the outgoing SSRC table,
-          deliver a copy of the RTCP packet to the "m=" line
+          <t>If the packet is of type SR or RR, for each report block in
+          the report whose "SSRC of source" is found in the outgoing
+          SSRC table, deliver a copy of the RTCP packet to the "m=" line
+          associated with that SSRC. In addition, if the packet is of type
+          SR, and the sender SSRC for the packet is found in the
+          incoming SSRC table, deliver a copy of the packet to the "m=" line
           associated with that SSRC.</t>
 
-          <t>If the implementation supports RTCP XR and the packet is of type XR,
-          as defined in <xref target="RFC3611" />,
-	        and the sender SSRC for the packet is found in the incoming SSRC table,
-          deliver a copy of the packet to the "m=" line associated with that SSRC.
-          In addition, for each report block in the report whose "SSRC of source" is
-          is found in the outgoing SSRC table, deliver a copy of the RTCP packet to
-          the "m=" line associated with that SSRC.</t>
+          <t>If the implementation supports RTCP XR and the packet is of
+          type XR, as defined in <xref target="RFC3611" />,
+          for each report block in the report whose "SSRC of source" is
+          is found in the outgoing SSRC table, deliver a copy of the
+          RTCP packet to the "m=" line associated with that SSRC.
+          In addition, if the sender SSRC for the packet is found in the
+          incoming SSRC table, deliver a copy of the packet to the "m=" line
+          associated with that SSRC.</t>
 
-          <t>If the packet is of type BYE, for each SSRC indicated in
-          the packet that is found in the incoming SSRC table, deliver
-          a copy of the packet to the "m=" line associated with that
-          SSRC.</t>
+          <t>If the packet is a feedback message of type RTPFB or PSFB,
+          as defined in <xref target="RFC4585" />, it will contain a
+          media source SSRC, and this SSRC is used for routing certain
+          subtypes of feedback messages. However,
+          several PSFB messdages include target SSRC(s) in a section called
+          Feedback Control Information (FCI). For these messages,
+          the target SSRC(s) are used for routing.
 
-          <t><xref target="RFC4585" /> defines payload-specific feedback
-          messages (PSFB) which may include target SSRC(s) in a section called
-          Feedback Control Information (FCI). For such messages,
-          if a target SSRC is found in the outgoing SSRC
-          table, deliver a copy of the RTCP packet to the "m=" line
-          associated with that SSRC. PSFB types that are handled in this way
-          include:
+          <t>For feedback messages that do not include target SSRCs in their
+          FCI section, if the media source SSRC is found in the
+          outgoing SSRC table, deliver the
+          packet to the "m=" line associated with that SSRC.
+          RTPFB and PSFB types that are handled in this way include:
+            <list style="hanging">
+              <t hangText="Generic NACK:">
+                <xref target="RFC4585"/> (PT=RTPFB, FMT=1).
+              </t>
+
+              <t hangText="Picture Loss Indication (PLI):">
+                <xref target="RFC4585"/> (PT=PSFB, FMT=1).
+              </t>
+
+              <t hangText="Slice Loss Indication (SLI):">
+                <xref target="RFC4585"/> (PT=PSFB, FMT=2).
+              </t>
+
+              <t hangText="Reference Picture Selection Indication (RPSI):">
+                <xref target="RFC4585"/> (PT=PSFB, FMT=3).
+              </t>
+            </list>
+          </t>
+
+          <t>For feedback messages that do include target SSRC(s) in
+          their FCI section, they can either be requests or notifications.
+          Requests reference a RTP stream that is being sent by the message
+          recipient, whereas notifications are responses to an earlier
+          request, and therefore reference a RTP stream that is being received
+          by the message recipient.</t>
+
+          <t>For feedback requests that include target SSRC(s),
+          for each target SSRC that is found in the outgoing SSRC table,
+          deliver a copy of the RTCP packet to the "m=" line associated with
+          that SSRC. PSFB types that are handled in this way include:
 
             <list style="hanging">
               <t hangText="Full Intra Request (FIR):">
@@ -6594,46 +6620,27 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
                 <xref target="RFC5104"/> (PT=PSFB, FMT=5).
               </t>
 
-              <t hangText="Temporal-Spatial Trade-off Notification
-              (TSTN):">
-                This <xref target="RFC5104"/> defined message
-                (PT=PSFB, FMT=6) is a notification in response to
-                a TSTR this endpoint previously sent; accordingly, the target
-                SSRC will be looked up in the incoming SSRC table.
-              </t>
-
               <t hangText="H.271 Video Back Channel Message
               (VBCM):">
                 <xref target="RFC5104"/> (PT=PSFB, FMT=7).
               </t>
 
               <t hangText="Layer Refresh Request (LRR):">
-                <xref target="I-D.ietf-avtext-lrr"/>(PT=PSFB, FMT=TBD).
+                <xref target="I-D.ietf-avtext-lrr"/> (PT=PSFB, FMT=TBD).
               </t>
             </list>
           </t>
 
-          <t><xref target="RFC4585" /> PSFB and RTPFB messages also contain
-          a media source SSRC, and for messages that do not include a target
-          SSRC in their FCI section, this media source SSRC is used for routing.
-          For such messages, if the media source SSRC for the packet is
-          found in the outgoing SSRC table, deliver the packet to the "m=" line
-          associated with that SSRC. PSFB and RTPFB types that are handled in
-          this way include:
+          <t>For feedback requests that include target SSRC(s),
+          for each target SSRC that is found in the incoming SSRC table,
+          deliver a copy of the RTCP packet to the "m=" line associated with
+          that SSRC. PSFB types that are handled in this way include:
+
             <list style="hanging">
-              <t hangText="Picture Loss Indication (PLI):">
-                <xref target="RFC4585"/>(PT=PSFB, FMT=1).
-              </t>
-
-              <t hangText="Slice Loss Indication (SLI):">
-                <xref target="RFC4585"/>(PT=PSFB, FMT=2).
-              </t>
-
-              <t hangText="Reference Picture Selection Indication (RPSI):">
-                <xref target="RFC4585"/>(PT=PSFB, FMT=3).</t>
-
-              <t hangText="Generic NACK:">
-                <xref target="RFC4585"/>(PT=RTPFB, FMT=1).
+              <t hangText="Temporal-Spatial Trade-off Notification
+              (TSTN):">
+                <xref target="RFC5104"/> (PT=PSFB, FMT=6). This message
+                is a notification in response to a prior TSTR.
               </t>
             </list>
           </t>
