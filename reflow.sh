@@ -10,4 +10,3 @@ tidy -config tidy.config < draft-ietf-rtcweb-jsep.xml \
                          | sed -e "s/ *$//" \
                          > foo.xml
 mv foo.xml draft-ietf-rtcweb-jsep.xml
-
