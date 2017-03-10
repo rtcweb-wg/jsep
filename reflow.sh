@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # HTMLTidy cleans up the XML according to tidy.config, but also strips
 # newlines between <t> tags, spaces after <xref> tags, and adds trailing
 # whitespace. So, we postprocess accordingly.
