@@ -368,7 +368,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-3-11" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-3-29" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -392,7 +392,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: September 12, 2017</td>
+  <td class="left">Expires: September 30, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">March 11, 2017</td>
+  <td class="right">March 29, 2017</td>
 </tr>
 
     	
@@ -425,7 +425,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on September 12, 2017.</p>
+<p>This Internet-Draft will expire on September 30, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -2813,7 +2813,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <ul class="empty">
   <li>If the packet is of type SDES, for each chunk in the packet whose SSRC is found in the incoming SSRC table, deliver a copy of the packet to the "m=" line associated with that SSRC. In addition, for any SDES MID items contained in these chunks, if the MID is found in the table mapping MID to "m=" line, update the incoming SSRC table to include an entry that maps the chunk's SSRC to the "m=" line associated with that MID, unless the packet is older than the packet that most recently updated the mapping for this SSRC, as discussed in <a href="#RFC7941">[RFC7941]</a>, Section 4.2.6.</li>
   <li>Note that if an SDES packet is received as part of a compound RTCP packet, the SSRC to "m=" line mapping may not exist until the SDES packet is handled (e.g., in the case where RTCP for a source is received before any RTP packets).  Therefore, when processing a compound packet, any contained SDES packet MUST be handled first.</li>
-  <li>If the packet is of type BYE, it indicates that the RTP streams referenced in the packet are ending. Therefore, for each SSRC indicated in the packet that is found in the incoming SSRC table, first deliver a copy of the packet to the "m=" line associated with that SSRC, but then remove the entry for that SSRC from the incoming SSRC table.</li>
+  <li>If the packet is of type BYE, it indicates that the RTP streams referenced in the packet are ending. Therefore, for each SSRC indicated in the packet that is found in the incoming SSRC table, first deliver a copy of the packet to the "m=" line associated with that SSRC, but then remove the entry for that SSRC from the incoming SSRC table after an appropriate delay to account for "straggler packets", as specified in <a href="#RFC3550">[RFC3550]</a>, Section 6.2.1.  </li>
   <li>If the packet is of type SR or RR, for each report block in the report whose "SSRC of source" is found in the outgoing SSRC table, deliver a copy of the RTCP packet to the "m=" line associated with that SSRC. In addition, if the packet is of type SR, and the sender SSRC for the packet is found in the incoming SSRC table, deliver a copy of the packet to the "m=" line associated with that SSRC.</li>
   <li>If the implementation supports RTCP XR and the packet is of type XR, as defined in <a href="#RFC3611">[RFC3611]</a>, for each report block in the report whose "SSRC of source" is is found in the outgoing SSRC table, deliver a copy of the RTCP packet to the "m=" line associated with that SSRC. In addition, if the sender SSRC for the packet is found in the incoming SSRC table, deliver a copy of the packet to the "m=" line associated with that SSRC.</li>
   <li>If the packet is a feedback message of type RTPFB or PSFB, as defined in <a href="#RFC4585">[RFC4585]</a>, it will contain a media source SSRC, and this SSRC is used for routing certain subtypes of feedback messages. However, several subtypes of PSFB messages include target SSRC(s) in a section called Feedback Control Information (FCI). For these messages, the target SSRC(s) are used for routing.</li>
