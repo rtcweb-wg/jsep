@@ -170,7 +170,7 @@ Uberti, et al.         Expires September 30, 2017               [Page 3]
 Internet-Draft                    JSEP                        March 2017
 
 
-   Appendix C.  Change log . . . . . . . . . . . . . . . . . . . . . 107
+   Appendix C.  Change log . . . . . . . . . . . . . . . . . . . . . 108
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 116
 
 1.  Introduction
@@ -5774,7 +5774,12 @@ Internet-Draft                    JSEP                        March 2017
    and instead use a payload type based mechanism for demuxing.  In this
    situation, each "m=" line MUST use unique payload type values, in
    order for the payload type to be a reliable indicator of the relevant
-   "m=" line for the RTP stream.
+   "m=" line for the RTP stream.  Note that when using payload type
+   based demuxing, an SSRC will be mapped to an "m=" line by the first
+   packet with that SSRC, and the mapping will not be changed even if
+   the same SSRC is received with a different payload type.  In other
+   words, the SSRC cannot to "move" to a different "m=" line simply by
+   changing the payload type.
 
    Applications can implement RTP stacks in many different ways.  The
    algorithm below details one way that demultiplexing can be
@@ -5813,11 +5818,6 @@ Internet-Draft                    JSEP                        March 2017
 
    For each RTP packet received, the following steps MUST be followed to
    route the packet to the correct "m=" section within a BUNDLE group.
-   Note that the phrase 'deliver a packet to the "m=" line' means to
-   further process the packet as would normally happen with RTP/RTCP, if
-   it were received on a transport associated with that "m=" line
-   outside of a BUNDLE group (i.e., if the "m=" line were not BUNDLEd),
-
 
 
 
@@ -5826,6 +5826,10 @@ Uberti, et al.         Expires September 30, 2017             [Page 104]
 Internet-Draft                    JSEP                        March 2017
 
 
+   Note that the phrase 'deliver a packet to the "m=" line' means to
+   further process the packet as would normally happen with RTP/RTCP, if
+   it were received on a transport associated with that "m=" line
+   outside of a BUNDLE group (i.e., if the "m=" line were not BUNDLEd),
    including dropping an RTP packet if the packet's PT does not match
    any PT in the "m=" line.
 
@@ -5870,10 +5874,6 @@ Internet-Draft                    JSEP                        March 2017
       for any SDES MID items contained in these chunks, if the MID is
       found in the table mapping MID to "m=" line, update the incoming
       SSRC table to include an entry that maps the chunk's SSRC to the
-      "m=" line associated with that MID, unless the packet is older
-      than the packet that most recently updated the mapping for this
-      SSRC, as discussed in [RFC7941], Section 4.2.6.
-
 
 
 
@@ -5881,6 +5881,10 @@ Uberti, et al.         Expires September 30, 2017             [Page 105]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+      "m=" line associated with that MID, unless the packet is older
+      than the packet that most recently updated the mapping for this
+      SSRC, as discussed in [RFC7941], Section 4.2.6.
 
       Note that if an SDES packet is received as part of a compound RTCP
       packet, the SSRC to "m=" line mapping may not exist until the SDES
@@ -5926,10 +5930,6 @@ Internet-Draft                    JSEP                        March 2017
       associated with that SSRC.  RTPFB and PSFB types that are handled
       in this way include:
 
-      Generic NACK:  [RFC4585] (PT=RTPFB, FMT=1).
-
-      Picture Loss Indication (PLI):  [RFC4585] (PT=PSFB, FMT=1).
-
 
 
 
@@ -5937,6 +5937,10 @@ Uberti, et al.         Expires September 30, 2017             [Page 106]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+      Generic NACK:  [RFC4585] (PT=RTPFB, FMT=1).
+
+      Picture Loss Indication (PLI):  [RFC4585] (PT=PSFB, FMT=1).
 
       Slice Loss Indication (SLI):  [RFC4585] (PT=PSFB, FMT=2).
 
@@ -5981,11 +5985,7 @@ Internet-Draft                    JSEP                        March 2017
       could be related to any existing "m=" line.  Accordingly, deliver
       a copy of the packet to each "m=" line.
 
-Appendix C.  Change log
 
-   Note: This section will be removed by RFC Editor before publication.
-
-   Changes in draft-19:
 
 
 
@@ -5993,6 +5993,12 @@ Uberti, et al.         Expires September 30, 2017             [Page 107]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+Appendix C.  Change log
+
+   Note: This section will be removed by RFC Editor before publication.
+
+   Changes in draft-19:
 
    o  Examples are now machine-generated for correctness, and use IETF-
       approved example IP addresses.
@@ -6037,18 +6043,18 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Clarify why we can't handle an incoming offer to send simulcast.
 
-   o  Expand IceCandidate object text.
-
-   o  Further document use of ICE candidate pool.
-
-   o  Document removeTrack.
-
 
 
 Uberti, et al.         Expires September 30, 2017             [Page 108]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Expand IceCandidate object text.
+
+   o  Further document use of ICE candidate pool.
+
+   o  Document removeTrack.
 
    o  Update requirements to only accept the last generated offer/answer
       as an argument to setLocalDescription.
@@ -6092,12 +6098,6 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Describe how to process RTCP feedback attributes.
 
-   o  Clarify transceiver directions and their interaction with 3264.
-
-   o  Describe setCodecPreferences.
-
-   o  Update RTP demux algorithm.  Include RTCP.
-
 
 
 
@@ -6105,6 +6105,12 @@ Uberti, et al.         Expires September 30, 2017             [Page 109]
 
 Internet-Draft                    JSEP                        March 2017
 
+
+   o  Clarify transceiver directions and their interaction with 3264.
+
+   o  Describe setCodecPreferences.
+
+   o  Update RTP demux algorithm.  Include RTCP.
 
    o  Update requirements for when a=rtcp is included, limiting to cases
       where it is needed for backward compatibility.
@@ -6146,6 +6152,16 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Specify how SDP session version in o= line.
 
+
+
+
+
+
+Uberti, et al.         Expires September 30, 2017             [Page 110]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    o  Require that when doing an re-offer, the capabilities of the new
       session are mostly required to be a subset of the previously
       negotiated session.
@@ -6154,13 +6170,6 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Remove support for changing SDP before calling
       setLocalDescription.
-
-
-
-Uberti, et al.         Expires September 30, 2017             [Page 110]
-
-Internet-Draft                    JSEP                        March 2017
-
 
    o  Specify algorithm for demuxing RTP based on MID, PT, and SSRC.
 
@@ -6201,6 +6210,14 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Clarified how to handle various received attributes.
 
+
+
+
+Uberti, et al.         Expires September 30, 2017             [Page 111]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    o  Revised how attributes should be generated for bundled m= lines.
 
    o  Remove unused references.
@@ -6209,14 +6226,6 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Trigger an ICE restart even if the ICE candidate policy is being
       made more strict.
-
-
-
-
-Uberti, et al.         Expires September 30, 2017             [Page 111]
-
-Internet-Draft                    JSEP                        March 2017
-
 
    o  Remove the 'public' ICE candidate policy.
 
@@ -6257,6 +6266,14 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Added additional clarity on ICE default candidates.
 
+
+
+
+Uberti, et al.         Expires September 30, 2017             [Page 112]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    Changes in draft-11:
 
    o  Clarified handling of RTP CNAMEs.
@@ -6266,13 +6283,6 @@ Internet-Draft                    JSEP                        March 2017
    o  Specified how a=imageattr should be used.
 
    Changes in draft-10:
-
-
-
-Uberti, et al.         Expires September 30, 2017             [Page 112]
-
-Internet-Draft                    JSEP                        March 2017
-
 
    o  Described video size negotiation with imageattr.
 
@@ -6312,6 +6322,14 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Added max-bundle-and-rtcp-mux policy.
 
+
+
+
+Uberti, et al.         Expires September 30, 2017             [Page 113]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    o  Added description of maxptime handling.
 
    o  Updated ICE candidate pool default to 0.
@@ -6322,13 +6340,6 @@ Internet-Draft                    JSEP                        March 2017
       handled.
 
    o  Some reference updates.
-
-
-
-Uberti, et al.         Expires September 30, 2017             [Page 113]
-
-Internet-Draft                    JSEP                        March 2017
-
 
    o  Editorial clarification.
 
@@ -6367,6 +6378,14 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Added handling of BUNDLE and bundle-only.
 
+
+
+
+Uberti, et al.         Expires September 30, 2017             [Page 114]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    o  Clarified handling of rollback.
 
    o  Added text describing the ICE Candidate Pool and its behavior.
@@ -6377,14 +6396,6 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Fixed several issues identified in the createOffer/Answer sections
       during document review.
-
-
-
-
-Uberti, et al.         Expires September 30, 2017             [Page 114]
-
-Internet-Draft                    JSEP                        March 2017
-
 
    o  Updated references.
 
@@ -6423,6 +6434,14 @@ Internet-Draft                    JSEP                        March 2017
 
    o  Reworked how ICE restarts and media directions are controlled.
 
+
+
+
+Uberti, et al.         Expires September 30, 2017             [Page 115]
+
+Internet-Draft                    JSEP                        March 2017
+
+
    o  Added list of parameters that can be changed in a description.
 
    o  Updated suggested API and examples to match latest thinking.
@@ -6432,15 +6451,6 @@ Internet-Draft                    JSEP                        March 2017
    Changes in draft -00:
 
    o  Migrated from draft-uberti-rtcweb-jsep-02.
-
-
-
-
-
-Uberti, et al.         Expires September 30, 2017             [Page 115]
-
-Internet-Draft                    JSEP                        March 2017
-
 
 Authors' Addresses
 
@@ -6469,16 +6479,6 @@ Authors' Addresses
    USA
 
    Email: ekr@rtfm.com
-
-
-
-
-
-
-
-
-
-
 
 
 
