@@ -66,7 +66,7 @@ class PeerConnection:
     a=ice-pwd:{0[ice_pwd]}
     a=fingerprint:sha-256 {0[dtls_fingerprint]}
     a=setup:{0[dtls_dir]}
-    a=dtls-id:1
+    a=tls-id:1
     a=rtcp:{0[default_rtcp]} IN IP4 {0[default_ip]}
     a=rtcp-mux
     a=rtcp-mux-only
