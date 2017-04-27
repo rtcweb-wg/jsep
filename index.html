@@ -367,7 +367,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-3-30" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-4-27" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a Javascript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -391,7 +391,7 @@ li, p {
   <td class="right">C. Jennings</td>
 </tr>
 <tr>
-  <td class="left">Expires: October 1, 2017</td>
+  <td class="left">Expires: October 29, 2017</td>
   <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -404,7 +404,7 @@ li, p {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">March 30, 2017</td>
+  <td class="right">April 27, 2017</td>
 </tr>
 
     	
@@ -424,7 +424,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on October 1, 2017.</p>
+<p>This Internet-Draft will expire on October 29, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -885,12 +885,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.1.1.p.2">The SDES SRTP keying mechanism from <a href="#RFC4568">[RFC4568]</a> MUST NOT be used, as discussed in <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a>.</p>
 <h3 id="rfc.section.5.1.2"><a href="#rfc.section.5.1.2">5.1.2.</a> <a href="#sec.profile-names" id="sec.profile-names">Profile Names and Interoperability</a></h3>
 <p id="rfc.section.5.1.2.p.1">For media m= sections, JSEP implementations MUST support the "UDP/TLS/RTP/SAVPF" profile specified in <a href="#RFC7850">[RFC7850]</a>, and MUST indicate this profile for each media m= line they produce in an offer. For data m= sections, implementations MUST support the "UDP/DTLS/SCTP" profile and MUST indicate this profile for each data m= line they produce in an offer. Because ICE can select either UDP <a href="#RFC5245">[RFC5245]</a> or TCP <a href="#RFC6544">[RFC6544]</a> transport depending on network conditions, this advertisement is consistent with ICE eventually selecting either either UDP or TCP.</p>
-<p id="rfc.section.5.1.2.p.2">Unfortunately, in an attempt at compatibility, some endpoints generate other profile strings even when they mean to support one of these profiles. For instance, an endpoint might generate "RTP/AVP" but supply "a=fingerprint" and "a=rtcp-fb" attributes, indicating its willingness to support "(UDP,TCP)/TLS/RTP/SAVPF". In order to simplify compatibility with such endpoints, JSEP implementations MUST follow the following rules when processing the media m= sections in an offer:</p>
+<p id="rfc.section.5.1.2.p.2">Unfortunately, in an attempt at compatibility, some endpoints generate other profile strings even when they mean to support one of these profiles. For instance, an endpoint might generate "RTP/AVP" but supply "a=fingerprint" and "a=rtcp-fb" attributes, indicating its willingness to support "(UDP,TCP)/TLS/RTP/SAVPF". In order to simplify compatibility with such endpoints, JSEP implementations MUST follow the following rules when processing the media m= sections in a received offer:</p>
 <p/>
 
 <ul>
-  <li>The profile in any "m=" line in any answer MUST exactly match the profile provided in the offer.</li>
-  <li>Any profile matching the following patterns MUST be accepted: "RTP/[S]AVP[F]" and "(UDP/TCP)/TLS/RTP/SAVP[F]"</li>
+  <li>Any profile in the offer matching the following patterns MUST be accepted: "RTP/[S]AVP[F]" and "(UDP|TCP)/TLS/RTP/SAVP[F]".  </li>
+  <li>The profile in any "m=" line in any generated answer MUST exactly match the profile provided in the offer.  </li>
   <li>Because DTLS-SRTP is REQUIRED, the choice of SAVP or AVP has no effect; support for DTLS-SRTP is determined by the presence of one or more "a=fingerprint" attribute.  Note that lack of an "a=fingerprint" attribute will lead to negotiation failure.</li>
   <li>The use of AVPF or AVP simply controls the timing rules used for RTCP feedback. If AVPF is provided, or an "a=rtcp-fb" attribute is present, assume AVPF timing, i.e., a default value of "trr-int=0". Otherwise, assume that AVPF is being used in an AVP compatible mode and use a value of "trr-int=4000".</li>
   <li>For data m= sections, implementations MUST support receiving the "UDP/DTLS/SCTP", "TCP/DTLS/SCTP", or "DTLS/SCTP" (for backwards compatibility) profiles.</li>
@@ -956,7 +956,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li>
   <li>An "a=fingerprint" line for each of the endpoint's certificates, as specified in <a href="#RFC4572">[RFC4572]</a>, Section 5; the digest algorithm used for the fingerprint MUST match that used in the certificate signature.</li>
   <li>An "a=setup" line, as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763">[RFC5763]</a>, Section 5. The role value in the offer MUST be "actpass".</li>
-  <li>An "a=dtls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.2.</li>
+  <li>An "a=tls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.2.</li>
   <li>An "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because no candidates have yet been gathered.</li>
   <li>An "a=rtcp-mux" line, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.3.</li>
   <li>If the RTP/RTCP multiplexing policy is "require", an "a=rtcp-mux-only" line, as specified in <a href="#I-D.ietf-mmusic-mux-exclusive">[I-D.ietf-mmusic-mux-exclusive]</a>, Section 4.</li>
@@ -973,7 +973,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>"a=ice-pwd"</li>
   <li>"a=fingerprint"</li>
   <li>"a=setup"</li>
-  <li>"a=dtls-id"</li>
+  <li>"a=tls-id"</li>
 </ul>
 <p id="rfc.section.5.2.1.p.17">Once all m= sections have been generated, a session-level "a=group" attribute MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. This attribute MUST have semantics "BUNDLE", and MUST include the mid identifiers of each m= section. The effect of this is that the JSEP implementation offers all m= sections as one bundle group.  However, whether the m= sections are bundle-only or not depends on the bundle policy.</p>
 <p id="rfc.section.5.2.1.p.18">The next step is to generate session-level lip sync groups as defined in <a href="#RFC5888">[RFC5888]</a>, Section 7. For each MediaStream referenced by more than one RtpTransceiver (by passing those MediaStreams as arguments to the addTrack and addTransceiver methods), a group of type "LS" MUST be added that contains the mid values for each RtpTransceiver.</p>
@@ -1138,7 +1138,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li>
   <li>An "a=fingerprint" line for each of the endpoint's certificates, as specified in <a href="#RFC4572">[RFC4572]</a>, Section 5; the digest algorithm used for the fingerprint MUST match that used in the certificate signature.</li>
   <li>An "a=setup" line, as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763">[RFC5763]</a>, Section 5. The role value in the answer MUST be "active" or "passive"; the "active" role is RECOMMENDED.</li>
-  <li>An "a=dtls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.3.</li>
+  <li>An "a=tls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.3.</li>
   <li>If present in the offer, an "a=rtcp-mux" line, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.3. Otherwise, an "a=rtcp" line, as specified in <a href="#RFC3605">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0" (because no candidates have yet been gathered).</li>
   <li>If present in the offer, an "a=rtcp-rsize" line, as specified in <a href="#RFC5506">[RFC5506]</a>, Section 5.</li>
 </ul>
@@ -1153,7 +1153,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>"a=ice-pwd"</li>
   <li>"a=fingerprint"</li>
   <li>"a=setup"</li>
-  <li>"a=dtls-id"</li>
+  <li>"a=tls-id"</li>
 </ul>
 <p id="rfc.section.5.3.1.p.25">Note that if media m= sections are bundled into a data m= section, then certain TRANSPORT and IDENTICAL attributes may also appear in the data m= section even if they would otherwise only be appropriate for a media m= section (e.g., "a=rtcp-mux").</p>
 <p id="rfc.section.5.3.1.p.26">If "a=group" attributes with semantics of "BUNDLE" are offered, corresponding session-level "a=group" attributes MUST be added as specified in <a href="#RFC5888">[RFC5888]</a>. These attributes MUST have semantics "BUNDLE", and MUST include the all mid identifiers from the offered bundle groups that have not been rejected.  Note that regardless of the presence of "a=bundle-only" in the offer, no m= sections in the answer should have an "a=bundle-only" line.</p>
@@ -1236,7 +1236,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
   <li>If present, a single "a=ice-options" line is parsed as specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.5, and the set of specified options is stored.</li>
   <li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC4572">[RFC4572]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
   <li>If present, a single "a=setup" line is parsed as specified in <a href="#RFC4145">[RFC4145]</a>, Section 4, and the setup value is stored.</li>
-  <li>If present, a single "a=dtls-id" line is parsed as specified in <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5, and the dtls-id value is stored.</li>
+  <li>If present, a single "a=tls-id" line is parsed as specified in <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5, and the tls-id value is stored.</li>
   <li>Any "a=identity" lines are parsed and the identity values stored for subsequent verification, as specified <a href="#I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</a>, Section 5.</li>
   <li>Any "a=extmap" lines are parsed as specified in <a href="#RFC5285">[RFC5285]</a>, Section 5, and their values are stored.</li>
 </ul>
@@ -1294,7 +1294,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.7.3.p.1">Assuming parsing completes successfully, the parsed description is then evaluated to ensure internal consistency as well as proper support for mandatory features.  Specifically, the following checks are performed: </p>
 
 <ul>
-  <li>For each m= section, valid values for each of the mandatory-to-use features enumerated in <a href="#sec.usage-requirements">Section 5.1.1</a> MUST be present.  These values MAY either be present at the media level, or inherited from the session level.  <ul><li>ICE ufrag and password values, which MUST comply with the size limits specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li><li>dtls-id value, which MUST be set according to <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5. If this is a re-offer and the dtls-id value is different from that presently in use, the DTLS connection is not being continued and the remote description MUST be part of an ICE restart, together with new ufrag and password values. If this is an answer, the dtls-id value, if present, MUST be the same as in the offer.</li><li>DTLS setup value, which MUST be set according to the rules specified in <a href="#RFC5763">[RFC5763]</a>, Section 5 and MUST be consistent with the selected role of the current DTLS connection, if one exists and is being continued.</li><li>DTLS fingerprint values, where at least one fingerprint MUST be present.</li></ul></li>
+  <li>For each m= section, valid values for each of the mandatory-to-use features enumerated in <a href="#sec.usage-requirements">Section 5.1.1</a> MUST be present.  These values MAY either be present at the media level, or inherited from the session level.  <ul><li>ICE ufrag and password values, which MUST comply with the size limits specified in <a href="#RFC5245">[RFC5245]</a>, Section 15.4.</li><li>tls-id value, which MUST be set according to <a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5. If this is a re-offer and the tls-id value is different from that presently in use, the DTLS connection is not being continued and the remote description MUST be part of an ICE restart, together with new ufrag and password values. If this is an answer, the tls-id value, if present, MUST be the same as in the offer.</li><li>DTLS setup value, which MUST be set according to the rules specified in <a href="#RFC5763">[RFC5763]</a>, Section 5 and MUST be consistent with the selected role of the current DTLS connection, if one exists and is being continued.</li><li>DTLS fingerprint values, where at least one fingerprint MUST be present.</li></ul></li>
   <li>All RID values referenced in an "a=simulcast" line MUST exist as "a=rid" lines.</li>
   <li>Each m= section is also checked to ensure prohibited features are not used. If this is a local description, the "ice-lite" attribute MUST NOT be specified.</li>
   <li>If the RTP/RTCP multiplexing policy is "require", each m= section MUST contain an "a=rtcp-mux" attribute. If an "m=" section contains an "a=rtcp-mux-only" attribute then that section MUST also contain an "a=rtcp-mux" attribute.</li>
@@ -1343,7 +1343,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
   <li>If the m= section has been rejected (i.e. port is set to zero in the answer), stop any reception or transmission of media for this section, and, unless a non-rejected m= section is bundled with this m= section, discard any associated ICE components, as described in Section 9.2.1.3 of <a href="#RFC5245">[RFC5245]</a>.</li>
-  <li>If the remote DTLS fingerprint has been changed or the dtls-id has changed, tear down the DTLS connection. This includes the case when the PeerConnection state is "have-remote-pranswer". If a DTLS connection needs to be torn down but the answer does not indicate an ICE restart or, in the case of "have-remote-pranswer", new ICE credentials, an error MUST be generated. If an ICE restart is performed without a change in dtls-id or fingerprint, then the same DTLS connection is continued over the new ICE channel.</li>
+  <li>If the remote DTLS fingerprint has been changed or the tls-id has changed, tear down the DTLS connection. This includes the case when the PeerConnection state is "have-remote-pranswer". If a DTLS connection needs to be torn down but the answer does not indicate an ICE restart or, in the case of "have-remote-pranswer", new ICE credentials, an error MUST be generated. If an ICE restart is performed without a change in tls-id or fingerprint, then the same DTLS connection is continued over the new ICE channel.</li>
   <li>If no valid DTLS connection exists, prepare to start a DTLS connection, using the specified roles and fingerprints, on any underlying ICE components, once they are active.</li>
   <li>If the m= section proto value indicates use of RTP: <ul><li>If the m= section references any media formats, RTP header extensions, or RTCP feedback mechanisms that were not present in the corresponding m= section in the offer, this indicates a negotiation problem and MUST result in an error.</li><li>If the m= section has RTCP mux enabled, discard the RTCP ICE component, if one exists, and begin or continue muxing RTCP over the RTP ICE component, as specified in <a href="#RFC5761">[RFC5761]</a>, Section 5.1.3. Otherwise, prepare to transmit RTCP over the RTCP ICE component; if no RTCP ICE component exists, because RTCP mux was previously enabled, this MUST result in an error.</li><li>If the m= section has reduced-size RTCP enabled, configure the RTCP transmission for this m= section to use reduced-size RTCP, as specified in <a href="#RFC5506">[RFC5506]</a>.</li><li>If the directional attribute in the answer is of type "sendrecv" or "sendonly", choose the media format to send as the most preferred media format from the remote description that is also present in the answer, as described in <a href="#RFC3264">[RFC3264]</a>, Sections 6.1 and 7, and start transmitting RTP media once the underlying transport layers have been established. If an SSRC has not already been chosen for this outgoing RTP stream, choose a random one.  If media is already being transmitted, the same SSRC SHOULD be used unless the clockrate of the new codec is different, in which case a new SSRC MUST be chosen, as specified in <a href="#RFC7160">[RFC7160]</a>, Section 3.1.</li><li>The payload type mapping from the remote description is used to determine payload types for the outgoing RTP streams, including the payload type for the send media format chosen above. Any RTP header extensions that were negotiated should be included in the outgoing RTP streams, using the extension mapping from the remote description; if the RID header extension has been negotiated, and RID values are specified, include the RID header extension in the outgoing RTP streams, as indicated in <a href="#I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</a>, Section 4.</li><li>If simulcast has been negotiated, send the number of Source RTP Streams as specified in <a href="#I-D.ietf-mmusic-sdp-simulcast">[I-D.ietf-mmusic-sdp-simulcast]</a>, Section 6.2.2.</li><li>If the send media format chosen above has a corresponding "rtx" media format, or a FEC mechanism has been negotiated, establish a Redundancy RTP Stream with a random SSRC for each Source RTP Stream, and start or continue transmitting RTX/FEC packets as needed.</li><li>If the send media format chosen above has a corresponding "red" media format of the same clockrate, allow redundant encoding using the specified format for resiliency purposes, as discussed in <a href="#I-D.ietf-rtcweb-fec">[I-D.ietf-rtcweb-fec]</a>, Section 3.2. Note that unlike RTX or FEC media formats, the "red" format is transmitted on the Source RTP Stream, not the Redundancy RTP Stream.</li><li>Enable the RTCP feedback mechanisms referenced in the media section for all Source RTP Streams using the specified media formats. Specifically, begin or continue sending the requested feedback types and reacting to received feedback, as specified in <a href="#RFC4585">[RFC4585]</a>, Section 4.2. When sending RTCP feedback, follow the rules and recommendations from <a href="#I-D.ietf-avtcore-rtp-multi-stream">[I-D.ietf-avtcore-rtp-multi-stream]</a>, Section 5.4.1 to select which SSRC to use.</li><li>If the directional attribute is of type "recvonly" or "inactive", stop transmitting all RTP media, but continue sending RTCP, as described in <a href="#RFC3264">[RFC3264]</a>, Section 5.1.</li></ul></li>
   <li>If the m= section proto value indicates use of SCTP: <ul><li>If an SCTP association exists, and the remote SCTP port has changed, discard the existing SCTP association. This includes the case when the PeerConnection state is "have-remote-pranswer".</li><li>If no valid SCTP association exists, prepare to initiate a SCTP association over the associated ICE component and DTLS connection, using the local SCTP port value from the local description, and the remote SCTP port value from the remote description, as described in <a href="#I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 10.2.</li></ul></li>
@@ -1407,7 +1407,7 @@ AliceUA-&gt;BobUA:     media sent from Alice to Bob
 <p/>
 <p id="rfc.section.7.1.p.4">The SDP for |offer-A1| looks like:</p>
 <pre>
-              
+
 v=0
 o=- 4962303333179871722 1 IN IP4 0.0.0.0
 s=-
@@ -1436,7 +1436,7 @@ a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-a=dtls-id:1
+a=tls-id:1
 a=rtcp:10101 IN IP4 203.0.113.100
 a=rtcp-mux
 a=rtcp-rsize
@@ -1463,7 +1463,7 @@ a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-a=dtls-id:1
+a=tls-id:1
 a=rtcp:10103 IN IP4 203.0.113.100
 a=rtcp-mux
 a=rtcp-rsize
@@ -1475,7 +1475,7 @@ a=end-of-candidates
 <p/>
 <p id="rfc.section.7.1.p.6">The SDP for |answer-A1| looks like:</p>
 <pre>
-              
+
 v=0
 o=- 6729291447651054566 1 IN IP4 0.0.0.0
 s=-
@@ -1504,7 +1504,7 @@ a=fingerprint:sha-256
               6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
               DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
-a=dtls-id:1
+a=tls-id:1
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
@@ -1627,7 +1627,7 @@ AliceUA-&gt;BobUA:     audio+video+data sent from Alice to Bob
 <p/>
 <p id="rfc.section.7.2.p.3">The SDP for |offer-B1| looks like:</p>
 <pre>
-              
+
 v=0
 o=- 4962303333179871723 1 IN IP4 0.0.0.0
 s=-
@@ -1655,7 +1655,7 @@ a=fingerprint:sha-256
               29:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-a=dtls-id:1
+a=tls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -1671,7 +1671,7 @@ a=bundle-only
 <p/>
 <p id="rfc.section.7.2.p.5">|offer-B1-candidate-1| looks like:</p>
 <pre>
-              
+
 ufrag ATEn
 index 0
 mid   a1
@@ -1681,7 +1681,7 @@ attr  candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
 <p/>
 <p id="rfc.section.7.2.p.7">|offer-B1-candidate-2| looks like:</p>
 <pre>
-              
+
 ufrag ATEn
 index 0
 mid   a1
@@ -1692,7 +1692,7 @@ attr  candidate:1 1 udp 1845494015 198.51.100.100 11100 typ srflx
 <p/>
 <p id="rfc.section.7.2.p.9">|offer-B1-candidate-3| looks like:</p>
 <pre>
-              
+
 ufrag ATEn
 index 0
 mid   a1
@@ -1703,7 +1703,7 @@ attr  candidate:1 1 udp 255 192.0.2.100 12100 typ relay
 <p/>
 <p id="rfc.section.7.2.p.11">The SDP for |answer-B1| looks like:</p>
 <pre>
-              
+
 v=0
 o=- 7729291447651054566 1 IN IP4 0.0.0.0
 s=-
@@ -1731,7 +1731,7 @@ a=fingerprint:sha-256
               7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
               DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
-a=dtls-id:1
+a=tls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -1746,7 +1746,7 @@ a=max-message-size:65536
 <p/>
 <p id="rfc.section.7.2.p.13">|answer-B1-candidate-1| looks like:</p>
 <pre>
-              
+
 ufrag 7sFv
 index 0
 mid   a1
@@ -1756,7 +1756,7 @@ attr  candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
 <p/>
 <p id="rfc.section.7.2.p.15">|answer-B1-candidate-2| looks like:</p>
 <pre>
-              
+
 ufrag 7sFv
 index 0
 mid   a1
@@ -1767,7 +1767,7 @@ attr  candidate:1 1 udp 1845494015 198.51.100.200 11200 typ srflx
 <p/>
 <p id="rfc.section.7.2.p.17">|answer-B1-candidate-3| looks like:</p>
 <pre>
-              
+
 ufrag 7sFv
 index 0
 mid   a1
@@ -1778,7 +1778,7 @@ attr  candidate:1 1 udp 255 192.0.2.200 12200 typ relay
 <p/>
 <p id="rfc.section.7.2.p.19">The SDP for |offer-B2| is shown below. In addition to the new m= sections for video, both of which are offering FEC, and one of which is offering simulcast, note the increment of the version number in the o= line, changes to the c= line, indicating the local candidate that was selected, and the inclusion of gathered candidates as a=candidate lines.</p>
 <pre>
-              
+
 v=0
 o=- 7729291447651054566 2 IN IP4 0.0.0.0
 s=-
@@ -1807,7 +1807,7 @@ a=fingerprint:sha-256
               7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
               DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:actpass
-a=dtls-id:1
+a=tls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -1862,7 +1862,7 @@ a=msid:81317484-2ed4-49d7-9eb7-1414322a7aae
 <p/>
 <p id="rfc.section.7.2.p.21">The SDP for |answer-B2| is shown below. In addition to the acceptance of the video m= sections, the use of a=recvonly to indicate one-way video, and the use of a=imageattr to limit the received resolution, note the use of setup:passive to maintain the existing DTLS roles.</p>
 <pre>
-              
+
 v=0
 o=- 4962303333179871723 2 IN IP4 0.0.0.0
 s=-
@@ -1891,7 +1891,7 @@ a=fingerprint:sha-256
               29:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:passive
-a=dtls-id:1
+a=tls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2013,7 +2013,7 @@ BobJS-&gt;BobUA:       setRemoteDescription with |answer-C2|
 <p/>
 <p id="rfc.section.7.3.p.4">The SDP for |offer-C1| looks like:</p>
 <pre>
-              
+
 v=0
 o=- 1070771854436052752 1 IN IP4 0.0.0.0
 s=-
@@ -2042,7 +2042,7 @@ a=fingerprint:sha-256
               C4:68:F8:77:6A:44:F1:98:6D:7C:9F:47:EB:E3:34:A4:
               0A:AA:2D:49:08:28:70:2E:1F:AE:18:7D:4E:3E:66:BF
 a=setup:actpass
-a=dtls-id:1
+a=tls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2066,7 +2066,7 @@ a=bundle-only
 <p/>
 <p id="rfc.section.7.3.p.6">|offer-C1-candidate-1| looks like:</p>
 <pre>
-              
+
 ufrag 4ZcD
 index 0
 mid   a1
@@ -2077,7 +2077,7 @@ attr  candidate:1 1 udp 255 192.0.2.100 12100 typ relay
 <p/>
 <p id="rfc.section.7.3.p.8">The SDP for |answer-C1| looks like:</p>
 <pre>
-              
+
 v=0
 o=- 6386516489780559513 1 IN IP4 0.0.0.0
 s=-
@@ -2106,7 +2106,7 @@ a=fingerprint:sha-256
               A2:F3:A5:6D:4C:8C:1E:B2:62:10:4A:F6:70:61:C4:FC:
               3C:E0:01:D6:F3:24:80:74:DA:7C:3E:50:18:7B:CE:4D
 a=setup:active
-a=dtls-id:1
+a=tls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2129,7 +2129,7 @@ a=msid:751f239e-4ae0-c549-aa3d-890de772998b
 <p/>
 <p id="rfc.section.7.3.p.10">|answer-C1-candidate-1| looks like:</p>
 <pre>
-              
+
 ufrag TpaA
 index 0
 mid   a1
@@ -2140,7 +2140,7 @@ attr  candidate:1 1 udp 255 192.0.2.200 12200 typ relay
 <p/>
 <p id="rfc.section.7.3.p.12">The SDP for |offer-C2| looks like:</p>
 <pre>
-              
+
 v=0
 o=- 6386516489780559513 2 IN IP4 0.0.0.0
 s=-
@@ -2169,7 +2169,7 @@ a=fingerprint:sha-256
               A2:F3:A5:6D:4C:8C:1E:B2:62:10:4A:F6:70:61:C4:FC:
               3C:E0:01:D6:F3:24:80:74:DA:7C:3E:50:18:7B:CE:4D
 a=setup:actpass
-a=dtls-id:1
+a=tls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2195,7 +2195,7 @@ a=msid:751f239e-4ae0-c549-aa3d-890de772998b
 <p/>
 <p id="rfc.section.7.3.p.14">The SDP for |answer-C2| looks like:</p>
 <pre>
-              
+
 v=0
 o=- 1070771854436052752 2 IN IP4 0.0.0.0
 s=-
@@ -2224,7 +2224,7 @@ a=fingerprint:sha-256
               C4:68:F8:77:6A:44:F1:98:6D:7C:9F:47:EB:E3:34:A4:
               0A:AA:2D:49:08:28:70:2E:1F:AE:18:7D:4E:3E:66:BF
 a=setup:passive
-a=dtls-id:1
+a=tls-id:1
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2763,7 +2763,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       <td class="left"><a href="#I-D.ietf-mmusic-sdp-simulcast">[I-D.ietf-mmusic-sdp-simulcast]</a> Section 6.1</td>
     </tr>
     <tr>
-      <td class="left">dtls-id</td>
+      <td class="left">tls-id</td>
       <td class="left"><a href="#I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</a> Section 4</td>
     </tr>
   </tbody>
