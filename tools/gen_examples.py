@@ -252,7 +252,6 @@ class PeerConnection:
     if 'imageattr' not in options:
       formatter = self.remove_attribute(formatter, 'a=imageattr')
     if 'simulcast' not in options:
-      formatter = self.remove_attributes(formatter, 'a=extmap:3')
       formatter = self.remove_attributes(formatter, 'a=rid')
       formatter = self.remove_attribute(formatter, 'a=simulcast')
 
