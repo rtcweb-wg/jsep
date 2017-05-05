@@ -145,12 +145,12 @@ Internet-Draft                    JSEP                          May 2017
      5.7.  Parsing a Session Description . . . . . . . . . . . . . .  57
        5.7.1.  Session-Level Parsing . . . . . . . . . . . . . . . .  57
        5.7.2.  Media Section Parsing . . . . . . . . . . . . . . . .  59
-       5.7.3.  Semantics Verification  . . . . . . . . . . . . . . .  62
+       5.7.3.  Semantics Verification  . . . . . . . . . . . . . . .  61
      5.8.  Applying a Local Description  . . . . . . . . . . . . . .  63
      5.9.  Applying a Remote Description . . . . . . . . . . . . . .  64
      5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  68
    6.  Processing RTP/RTCP . . . . . . . . . . . . . . . . . . . . .  70
-   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  71
+   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  70
      7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  71
      7.2.  Detailed Example  . . . . . . . . . . . . . . . . . . . .  75
      7.3.  Early Transport Warmup Example  . . . . . . . . . . . . .  85
@@ -3147,11 +3147,6 @@ Internet-Draft                    JSEP                          May 2017
 
 5.7.  Parsing a Session Description
 
-   When a SessionDescription of any type is supplied to setLocal/
-   RemoteDescription, the implementation must parse it and reject it if
-   it is invalid.  The exact details of this process are explained
-   below.
-
    The SDP contained in the session description object consists of a
    sequence of text lines, each containing a key-value expression, as
    described in [RFC4566], Section 5.  The SDP is read, line-by-line,
@@ -3186,6 +3181,11 @@ Internet-Draft                    JSEP                          May 2017
       candidate lines; because JSEP always uses ICE, "ice-mismatch" is
       not useful in this context.
 
+      The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are
+      not used by this specification; they MUST be checked for syntax
+      but their values are not used.
+
+   The remaining non-attribute lines are processed as follows:
 
 
 
@@ -3193,12 +3193,6 @@ Uberti, et al.          Expires November 6, 2017               [Page 57]
 
 Internet-Draft                    JSEP                          May 2017
 
-
-      The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are
-      not used by this specification; they MUST be checked for syntax
-      but their values are not used.
-
-   The remaining non-attribute lines are processed as follows:
 
       The "v=" line MUST have a version of 0, as specified in [RFC4566],
       Section 5.1.
@@ -3241,6 +3235,12 @@ Internet-Draft                    JSEP                          May 2017
       [I-D.ietf-mmusic-dtls-sdp] Section 5, and the tls-id value is
       stored.
 
+   o  Any "a=identity" lines are parsed and the identity values stored
+      for subsequent verification, as specified
+      [I-D.ietf-rtcweb-security-arch], Section 5.
+
+   o  Any "a=extmap" lines are parsed as specified in [RFC5285],
+      Section 5, and their values are stored.
 
 
 
@@ -3249,13 +3249,6 @@ Uberti, et al.          Expires November 6, 2017               [Page 58]
 
 Internet-Draft                    JSEP                          May 2017
 
-
-   o  Any "a=identity" lines are parsed and the identity values stored
-      for subsequent verification, as specified
-      [I-D.ietf-rtcweb-security-arch], Section 5.
-
-   o  Any "a=extmap" lines are parsed as specified in [RFC5285],
-      Section 5, and their values are stored.
 
    Other attributes that are not relevant to JSEP may also be present,
    and implementations SHOULD process any that they recognize.  As
@@ -3298,6 +3291,13 @@ Internet-Draft                    JSEP                          May 2017
       in [RFC5245], Section 15.5, and the set of specified options is
       stored.
 
+   o  Any "a=candidate" attributes MUST be parsed as specified in
+      [RFC5245], Section 15.1, and their values stored.
+
+   o  Any "a=remote-candidates" attributes MUST be parsed as specified
+      in [RFC5245], Section 15.2, but their values are ignored.
+
+
 
 
 
@@ -3305,12 +3305,6 @@ Uberti, et al.          Expires November 6, 2017               [Page 59]
 
 Internet-Draft                    JSEP                          May 2017
 
-
-   o  Any "a=candidate" attributes MUST be parsed as specified in
-      [RFC5245], Section 15.1, and their values stored.
-
-   o  Any "a=remote-candidates" attributes MUST be parsed as specified
-      in [RFC5245], Section 15.2, but their values are ignored.
 
    o  If present, a single "a=end-of-candidates" attribute MUST be
       parsed as specified in [I-D.ietf-ice-trickle], Section 8.2, and
@@ -3353,15 +3347,6 @@ Internet-Draft                    JSEP                          May 2017
       specified in [RFC5761], Section 5.1.3, and its presence or absence
       flagged and stored.
 
-
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 60]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    o  If present, a single "a=rtcp-mux-only" attribute MUST be parsed as
       specified in [I-D.ietf-mmusic-mux-exclusive], Section 3, and its
       presence or absence flagged and stored.
@@ -3369,6 +3354,13 @@ Internet-Draft                    JSEP                          May 2017
    o  If present, a single "a=rtcp-rsize" attribute MUST be parsed as
       specified in [RFC5506], Section 5, and its presence or absence
       flagged and stored.
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 60]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    o  If present, a single "a=rtcp" attribute MUST be parsed as
       specified in [RFC3605], Section 2.1, but its value is ignored, as
@@ -3407,17 +3399,6 @@ Internet-Draft                    JSEP                          May 2017
    required by [RFC4566], Section 5.13, unknown attribute lines MUST be
    ignored.
 
-
-
-
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 61]
-
-Internet-Draft                    JSEP                          May 2017
-
-
 5.7.3.  Semantics Verification
 
    Assuming parsing completes successfully, the parsed description is
@@ -3429,6 +3410,13 @@ Internet-Draft                    JSEP                          May 2017
       features enumerated in Section 5.1.1 MUST be present.  These
       values MAY either be present at the media level, or inherited from
       the session level.
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 61]
+
+Internet-Draft                    JSEP                          May 2017
+
 
       *  ICE ufrag and password values, which MUST comply with the size
          limits specified in [RFC5245], Section 15.4.
@@ -3465,15 +3453,6 @@ Internet-Draft                    JSEP                          May 2017
 
    o  The session description must follow the rules defined in
       [RFC3264], Section 6, including the requirement that the number of
-
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 62]
-
-Internet-Draft                    JSEP                          May 2017
-
-
       m= sections MUST exactly match the number of m= sections in the
       associated offer.
 
@@ -3483,6 +3462,17 @@ Internet-Draft                    JSEP                          May 2017
 
    If any of the preceding checks failed, processing MUST stop and an
    error MUST be returned.
+
+
+
+
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 62]
+
+Internet-Draft                    JSEP                          May 2017
+
 
 5.8.  Applying a Local Description
 
@@ -3522,14 +3512,6 @@ Internet-Draft                    JSEP                          May 2017
 
       *  If RTCP mux is indicated, prepare to demux RTP and RTCP from
          the RTP ICE component, as specified in [RFC5761],
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 63]
-
-Internet-Draft                    JSEP                          May 2017
-
-
          Section 5.1.3.  If RTCP mux is not indicated, but was
          previously negotiated, i.e., the RTCP ICE component no longer
          exists, this MUST result in an error.
@@ -3538,6 +3520,15 @@ Internet-Draft                    JSEP                          May 2017
          between the extension ID and URI, as described in section 6 of
          [RFC5285].  If any indicated RTP header extension is not
          supported, this MUST result in an error.
+
+
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 63]
+
+Internet-Draft                    JSEP                          May 2017
+
 
       *  If the MID header extension is supported, prepare to demux RTP
          streams intended for this m= section based on the MID header
@@ -3578,14 +3569,6 @@ Internet-Draft                    JSEP                          May 2017
    o  For any specified "CT" bandwidth value, set this as the limit for
       the maximum total bitrate for all m= sections, as specified in
       Section 5.8 of [RFC4566].  Within this overall limit, the
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 64]
-
-Internet-Draft                    JSEP                          May 2017
-
-
       implementation can dynamically decide how to best allocate the
       available bandwidth between m= sections, respecting any specific
       limits that have been specified for individual m= sections.
@@ -3595,6 +3578,13 @@ Internet-Draft                    JSEP                          May 2017
 
    o  Any "AS" bandwidth value MUST be ignored, as the meaning of this
       construct at the session level is not well defined.
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 64]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    For each m= section, the following steps MUST be performed; if any
    parameters are out of bounds, or cannot be applied, processing MUST
@@ -3633,15 +3623,6 @@ Internet-Draft                    JSEP                          May 2017
 
    o  If the m= section proto value indicates use of RTP:
 
-
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 65]
-
-Internet-Draft                    JSEP                          May 2017
-
-
       *  If the m= section is being recycled (see Section 5.2.2),
          dissociate the currently associated RtpTransceiver by setting
          its mid property to null, and discard the mapping between the
@@ -3651,6 +3632,15 @@ Internet-Draft                    JSEP                          May 2017
          (possibly because it was dissociated in the previous step),
          either find an RtpTransceiver or create one according to the
          following steps:
+
+
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 65]
+
+Internet-Draft                    JSEP                          May 2017
+
 
          +  If the m= section is sendrecv or recvonly, and there are
             RtpTransceivers of the same type that were added to the
@@ -3688,16 +3678,6 @@ Internet-Draft                    JSEP                          May 2017
          primary payload types are not present, this MUST result in an
          error.
 
-
-
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 66]
-
-Internet-Draft                    JSEP                          May 2017
-
-
       *  For each specified fmtp parameter that is supported by the
          local implementation, enable them on the associated media
          formats.
@@ -3710,6 +3690,13 @@ Internet-Draft                    JSEP                          May 2017
          each specified header extension.  If any indicated RTP header
          extension is not supported by the local implementation, it MUST
          be ignored.
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 66]
+
+Internet-Draft                    JSEP                          May 2017
+
 
       *  For each specified RTCP feedback mechanism that is supported by
          the local implementation, enable them on the associated media
@@ -3745,15 +3732,6 @@ Internet-Draft                    JSEP                          May 2017
             formats (e.g., Opus) is controlled via fmtp parameters, as
             discussed in Section 5.2.3.2.
 
-
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 67]
-
-Internet-Draft                    JSEP                          May 2017
-
-
          +  For each specified "telephone-event" media format, enable
             DTMF transmission for all supported media formats with the
             same clockrate, as described in [RFC4733], Section 2.5.1.2.
@@ -3768,6 +3746,13 @@ Internet-Draft                    JSEP                          May 2017
 
    Finally, if this description is of type "pranswer" or "answer",
    follow the processing defined in the Section 5.10 section below.
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 67]
+
+Internet-Draft                    JSEP                          May 2017
+
 
 5.10.  Applying an Answer
 
@@ -3801,15 +3786,6 @@ Internet-Draft                    JSEP                          May 2017
 
       *  If the m= section references any media formats, RTP header
          extensions, or RTCP feedback mechanisms that were not present
-
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 68]
-
-Internet-Draft                    JSEP                          May 2017
-
-
          in the corresponding m= section in the offer, this indicates a
          negotiation problem and MUST result in an error.
 
@@ -3826,6 +3802,14 @@ Internet-Draft                    JSEP                          May 2017
 
       *  If the directional attribute in the answer is of type
          "sendrecv" or "sendonly", choose the media format to send as
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 68]
+
+Internet-Draft                    JSEP                          May 2017
+
+
          the most preferred media format from the remote description
          that is also present in the answer, as described in [RFC3264],
          Sections 6.1 and 7, and start transmitting RTP media once the
@@ -3858,14 +3842,6 @@ Internet-Draft                    JSEP                          May 2017
 
       *  If the send media format chosen above has a corresponding "red"
          media format of the same clockrate, allow redundant encoding
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 69]
-
-Internet-Draft                    JSEP                          May 2017
-
-
          using the specified format for resiliency purposes, as
          discussed in [I-D.ietf-rtcweb-fec], Section 3.2.  Note that
          unlike RTX or FEC media formats, the "red" format is
@@ -3880,6 +3856,15 @@ Internet-Draft                    JSEP                          May 2017
          the rules and recommendations from
          [I-D.ietf-avtcore-rtp-multi-stream], Section 5.4.1 to select
          which SSRC to use.
+
+
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 69]
+
+Internet-Draft                    JSEP                          May 2017
+
 
       *  If the directional attribute is of type "recvonly" or
          "inactive", stop transmitting all RTP media, but continue
@@ -3915,13 +3900,6 @@ Internet-Draft                    JSEP                          May 2017
    Section 10.2.  When not bundling, the proper m= section is clear from
    the ICE component over which the RTP/RTCP is received.
 
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 70]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    Once the proper m= section(s) are known, RTP/RTCP is delivered to the
    RtpTransceiver(s) associated with the m= section(s) and further
    processing of the RTP/RTCP is done at the RtpTransceiver level.  This
@@ -3936,6 +3914,13 @@ Internet-Draft                    JSEP                          May 2017
    multiple lines, where leading whitespace indicates that a line is a
    continuation of the previous line.  In addition, some blank lines
    have been added to improve readability but are not valid in SDP.
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 70]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    More examples of SDP for WebRTC call flows, including examples with
    IPv6 addresses, can be found in [I-D.nandakumar-rtcweb-sdp].
@@ -3955,6 +3940,21 @@ Internet-Draft                    JSEP                          May 2017
    trickle ICE is not used.  Both Alice and Bob are using the default
    bundle policy of "balanced", and the default RTCP mux policy of
    "require".
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
