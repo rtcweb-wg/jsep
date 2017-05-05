@@ -3676,7 +3676,10 @@ Internet-Draft                    JSEP                          May 2017
          between the RTX payload type and its associated primary payload
          type, as described in [RFC4588], Section 4.  If any referenced
          primary payload types are not present, this MUST result in an
-         error.
+         error.  Note that RTX payload types may refer to primary
+         payload types which are not supported by the local media
+         implementation, in which case, the RTX payload type MUST also
+         be ignored.
 
       *  For each specified fmtp parameter that is supported by the
          local implementation, enable them on the associated media
@@ -3687,9 +3690,6 @@ Internet-Draft                    JSEP                          May 2017
          extension ID and URI, as described in [RFC5285], Section 5.
          Specifically, this means that the implementation records the
          extension ID to be used in outgoing RTP packets when sending
-         each specified header extension.  If any indicated RTP header
-         extension is not supported by the local implementation, it MUST
-         be ignored.
 
 
 
@@ -3697,6 +3697,10 @@ Uberti, et al.          Expires November 6, 2017               [Page 66]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+         each specified header extension.  If any indicated RTP header
+         extension is not supported by the local implementation, it MUST
+         be ignored.
 
       *  For each specified RTCP feedback mechanism that is supported by
          the local implementation, enable them on the associated media
@@ -3742,10 +3746,6 @@ Internet-Draft                    JSEP                          May 2017
 
          +  For any specified "ptime" value, configure the available
             media formats to use the specified packet size.  If the
-            specified size is not supported for a media format, use the
-            next closest value instead.
-
-
 
 
 
@@ -3753,6 +3753,9 @@ Uberti, et al.          Expires November 6, 2017               [Page 67]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+            specified size is not supported for a media format, use the
+            next closest value instead.
 
    Finally, if this description is of type "pranswer" or "answer",
    follow the processing defined in the Section 5.10 section below.
@@ -3799,9 +3802,6 @@ Internet-Draft                    JSEP                          May 2017
          RTCP ICE component; if no RTCP ICE component exists, because
          RTCP mux was previously enabled, this MUST result in an error.
 
-      *  If the m= section has reduced-size RTCP enabled, configure the
-         RTCP transmission for this m= section to use reduced-size RTCP,
-         as specified in [RFC5506].
 
 
 
@@ -3809,6 +3809,10 @@ Uberti, et al.          Expires November 6, 2017               [Page 68]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+      *  If the m= section has reduced-size RTCP enabled, configure the
+         RTCP transmission for this m= section to use reduced-size RTCP,
+         as specified in [RFC5506].
 
       *  If the directional attribute in the answer indicates that the
          JSEP implementation should be sending media ("sendonly" for
@@ -3854,10 +3858,6 @@ Internet-Draft                    JSEP                          May 2017
 
       *  Enable the RTCP feedback mechanisms referenced in the media
          section for all Source RTP Streams using the specified media
-         formats.  Specifically, begin or continue sending the requested
-         feedback types and reacting to received feedback, as specified
-         in [RFC4585], Section 4.2.  When sending RTCP feedback, follow
-         the rules and recommendations from
 
 
 
@@ -3866,6 +3866,10 @@ Uberti, et al.          Expires November 6, 2017               [Page 69]
 Internet-Draft                    JSEP                          May 2017
 
 
+         formats.  Specifically, begin or continue sending the requested
+         feedback types and reacting to received feedback, as specified
+         in [RFC4585], Section 4.2.  When sending RTCP feedback, follow
+         the rules and recommendations from
          [I-D.ietf-avtcore-rtp-multi-stream], Section 5.4.1 to select
          which SSRC to use.
 
@@ -3909,10 +3913,6 @@ Internet-Draft                    JSEP                          May 2017
    includes using RID [I-D.ietf-mmusic-rid] to distinguish between
    multiple Encoded Streams, as well as determine which Source RTP
    stream should be repaired by a given Redundancy RTP stream.
-
-
-
-
 
 
 
