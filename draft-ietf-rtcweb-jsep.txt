@@ -682,7 +682,8 @@ Internet-Draft                    JSEP                          May 2017
 
    The candidate details are specified in an IceCandidate field, using
    the same SDP syntax as the "candidate-attribute" field defined in
-   [RFC5245], Section 15.1.  For example:
+   [RFC5245], Section 15.1.  Note that this field does not contain an
+   "a=" prefix, as indicated in the following example:
 
 
    candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
@@ -721,7 +722,6 @@ Internet-Draft                    JSEP                          May 2017
    want to have more specific control over the gathering process, due to
    privacy or related concerns.  For example, one may want to only use
    relay candidates, to leak as little location information as possible
-   (keeping in mind that this choice comes with corresponding
 
 
 
@@ -730,6 +730,7 @@ Uberti, et al.          Expires November 6, 2017               [Page 13]
 Internet-Draft                    JSEP                          May 2017
 
 
+   (keeping in mind that this choice comes with corresponding
    operational costs).  To accomplish this, JSEP allows the application
    to restrict which ICE candidates are used in a session.  Note that
    this filtering is applied on top of any restrictions the
@@ -776,8 +777,7 @@ Internet-Draft                    JSEP                          May 2017
    becomes depleted, either because a larger-than-expected number of ICE
    components is used, or because the pool has not had enough time to
    gather candidates, the remaining candidates are gathered as usual.
-   This only occurs for the first offer/answer exchange, after which the
-   candidate pool is emptied and no longer used.
+
 
 
 
@@ -785,6 +785,9 @@ Uberti, et al.          Expires November 6, 2017               [Page 14]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+   This only occurs for the first offer/answer exchange, after which the
+   candidate pool is emptied and no longer used.
 
    One example of where this concept is useful is an application that
    expects an incoming call at some point in the future, and wants to
@@ -830,10 +833,7 @@ Internet-Draft                    JSEP                          May 2017
    the "a=imageattr" q= value is not important.  It SHOULD be set to
    1.0.
 
-   The "a=imageattr" field is payload type specific.  When all video
-   codecs supported have the same capabilities, use of a single
-   attribute, with the wildcard payload type (*), is RECOMMENDED.
-   However, when the supported video codecs have different limitations,
+
 
 
 
@@ -842,6 +842,10 @@ Uberti, et al.          Expires November 6, 2017               [Page 15]
 Internet-Draft                    JSEP                          May 2017
 
 
+   The "a=imageattr" field is payload type specific.  When all video
+   codecs supported have the same capabilities, use of a single
+   attribute, with the wildcard payload type (*), is RECOMMENDED.
+   However, when the supported video codecs have different limitations,
    specific "a=imageattr" attributes MUST be inserted for each payload
    type.
 
@@ -886,10 +890,6 @@ Internet-Draft                    JSEP                          May 2017
    payload type than what has been selected for sending the
    MediaStreamTrack, it MUST be ignored.
 
-   If the original resolution matches the size limits in the attribute,
-   the track MUST be transmitted untouched.
-
-
 
 
 
@@ -897,6 +897,9 @@ Uberti, et al.          Expires November 6, 2017               [Page 16]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+   If the original resolution matches the size limits in the attribute,
+   the track MUST be transmitted untouched.
 
    If the original resolution exceeds the size limits in the attribute,
    the sender SHOULD apply downscaling to the output of the
@@ -944,9 +947,6 @@ Internet-Draft                    JSEP                          May 2017
    simulcast support is not negotiated, the RtpSender will only use the
    first configured encoding.
 
-   Note that the exact simulcast parameters are up to the sending
-   application.  While the aforementioned SDP markings are provided to
-
 
 
 Uberti, et al.          Expires November 6, 2017               [Page 17]
@@ -954,6 +954,8 @@ Uberti, et al.          Expires November 6, 2017               [Page 17]
 Internet-Draft                    JSEP                          May 2017
 
 
+   Note that the exact simulcast parameters are up to the sending
+   application.  While the aforementioned SDP markings are provided to
    ensure the remote side can receive and demux multiple simulcast
    encodings, the specific resolutions and bitrates to be used for each
    encoding are purely a send-side decision in JSEP.
@@ -1000,8 +1002,6 @@ Internet-Draft                    JSEP                          May 2017
    can make the RTP and media perform as required by the application.
    The basic operations that the applications can have the media engine
    do are:
-
-
 
 
 
