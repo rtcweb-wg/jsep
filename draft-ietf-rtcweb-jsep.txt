@@ -150,7 +150,7 @@ Internet-Draft                    JSEP                          May 2017
      5.9.  Applying a Remote Description . . . . . . . . . . . . . .  64
      5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  68
    6.  Processing RTP/RTCP . . . . . . . . . . . . . . . . . . . . .  70
-   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  70
+   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  71
      7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  71
      7.2.  Detailed Example  . . . . . . . . . . . . . . . . . . . .  75
      7.3.  Early Transport Warmup Example  . . . . . . . . . . . . .  85
@@ -3810,16 +3810,18 @@ Uberti, et al.          Expires November 6, 2017               [Page 68]
 Internet-Draft                    JSEP                          May 2017
 
 
-      *  If the directional attribute in the answer is of type
-         "sendrecv" or "sendonly", choose the media format to send as
-         the most preferred media format from the remote description
-         that is also present in the answer, as described in [RFC3264],
-         Sections 6.1 and 7, and start transmitting RTP media once the
-         underlying transport layers have been established.  If an SSRC
-         has not already been chosen for this outgoing RTP stream,
-         choose a random one.  If media is already being transmitted,
-         the same SSRC SHOULD be used unless the clockrate of the new
-         codec is different, in which case a new SSRC MUST be chosen, as
+      *  If the directional attribute in the answer indicates that the
+         JSEP implementation should be sending media ("sendonly" for
+         local answers, "recvonly" for remote answers, or "sendrecv" for
+         either type of answer), choose the media format to send as the
+         most preferred media format from the remote description that is
+         also present in the answer, as described in [RFC3264], Sections
+         6.1 and 7, and start transmitting RTP media once the underlying
+         transport layers have been established.  If an SSRC has not
+         already been chosen for this outgoing RTP stream, choose a
+         random one.  If media is already being transmitted, the same
+         SSRC SHOULD be used unless the clockrate of the new codec is
+         different, in which case a new SSRC MUST be chosen, as
          specified in [RFC7160], Section 3.1.
 
       *  The payload type mapping from the remote description is used to
@@ -3856,8 +3858,6 @@ Internet-Draft                    JSEP                          May 2017
          feedback types and reacting to received feedback, as specified
          in [RFC4585], Section 4.2.  When sending RTCP feedback, follow
          the rules and recommendations from
-         [I-D.ietf-avtcore-rtp-multi-stream], Section 5.4.1 to select
-         which SSRC to use.
 
 
 
@@ -3865,6 +3865,9 @@ Uberti, et al.          Expires November 6, 2017               [Page 69]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+         [I-D.ietf-avtcore-rtp-multi-stream], Section 5.4.1 to select
+         which SSRC to use.
 
       *  If the directional attribute is of type "recvonly" or
          "inactive", stop transmitting all RTP media, but continue
@@ -3907,13 +3910,10 @@ Internet-Draft                    JSEP                          May 2017
    multiple Encoded Streams, as well as determine which Source RTP
    stream should be repaired by a given Redundancy RTP stream.
 
-7.  Examples
 
-   Note that this example section shows several SDP fragments.  To
-   format in 72 columns, some of the lines in SDP have been split into
-   multiple lines, where leading whitespace indicates that a line is a
-   continuation of the previous line.  In addition, some blank lines
-   have been added to improve readability but are not valid in SDP.
+
+
+
 
 
 
@@ -3921,6 +3921,14 @@ Uberti, et al.          Expires November 6, 2017               [Page 70]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+7.  Examples
+
+   Note that this example section shows several SDP fragments.  To
+   format in 72 columns, some of the lines in SDP have been split into
+   multiple lines, where leading whitespace indicates that a line is a
+   continuation of the previous line.  In addition, some blank lines
+   have been added to improve readability but are not valid in SDP.
 
    More examples of SDP for WebRTC call flows, including examples with
    IPv6 addresses, can be found in [I-D.nandakumar-rtcweb-sdp].
@@ -3940,14 +3948,6 @@ Internet-Draft                    JSEP                          May 2017
    trickle ICE is not used.  Both Alice and Bob are using the default
    bundle policy of "balanced", and the default RTCP mux policy of
    "require".
-
-
-
-
-
-
-
-
 
 
 
