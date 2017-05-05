@@ -2465,9 +2465,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <section title="VoiceActivityDetection"
           anchor="sec.voiceactivitydetection1">
 
-            <t>If the "VoiceActivityDetection" option is specified,
-            with a value of "true", the offer MUST indicate support for
-            silence suppression in the audio it receives by including
+            <t>Silence suppression, also known as discontinuous transmission
+            ("DTX"), can reduce the bandwidth used for audio by switching to
+            a special encoding when voice activity is not detected, at the cost
+            of some fidelity.</t>
+
+            <t>If the "VoiceActivityDetection" option is
+            specified, with a value of "true", the offer MUST indicate support
+            for silence suppression in the audio it receives by including
             comfort noise ("CN") codecs for each offered audio codec,
             as specified in
             <xref target="RFC3389"></xref>, Section 5.1, except for
@@ -2479,11 +2484,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             when using the Opus codec
             <xref target="RFC6716" />, the "usedtx=1" parameter,
             specified in
-            <xref target="RFC7587" />, would be used in the offer. This
-            option allows the endpoint to significantly reduce the
-            amount of audio bandwidth it receives, at the cost of some
-            fidelity, depending on the quality of the remote VAD
-            algorithm.</t>
+            <xref target="RFC7587" />, would be used in the offer.</t>
 
             <t>If the "VoiceActivityDetection" option is specified,
             with a value of "false", the JSEP implementation MUST NOT
@@ -3771,11 +3772,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the m= section is of type audio:
             <list style="symbols">
 
-              <t>For each specified "CN" media format, enable DTX for
+              <t>For each specified "CN" media format, enable silence
+              suppression for
               all supported media formats with the same clockrate, as
               described in
               <xref target="RFC3389" />, Section 5, except for formats
-              that have their own internal DTX mechanisms. DTX for such
+              that have their own internal silence suppression mechanisms.
+              Silence suppression for such
               formats (e.g., Opus) is controlled via fmtp parameters,
               as discussed in
               <xref target="sec.voiceactivitydetection1" />.</t>
