@@ -22,6 +22,8 @@ class PeerConnection:
     a=rtpmap:8 PCMA/8000
     a=rtpmap:97 telephone-event/8000
     a=rtpmap:98 telephone-event/48000
+    a=fmtp:97 0-15
+    a=fmtp:98 0-15
     a=maxptime:120
     a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
     a=extmap:2 urn:ietf:params:rtp-hdrext:ssrc-audio-level
@@ -29,16 +31,21 @@ class PeerConnection:
     """
 
   VIDEO_SDP = \
- """m=video {0[default_port]} UDP/TLS/RTP/SAVPF 100 101 102
+ """m=video {0[default_port]} UDP/TLS/RTP/SAVPF 100 101 102 103 104
     c=IN IP4 {0[default_ip]}
     a=mid:{0[mid]}
     a={0[direction]}
     a=rtpmap:100 VP8/90000
-    a=rtpmap:101 rtx/90000
-    a=fmtp:101 apt=100
-    a=rtpmap:102 flexfec/90000
+    a=rtpmap:101 H264/90000
+    a=fmtp:101 packetization-mode=1;profile-level-id=42e01f
+    a=rtpmap:102 rtx/90000
+    a=fmtp:102 apt=100
+    =rtpmap:103 rtx/90000
+    a=fmtp:103 apt=101
+    a=rtpmap:104 flexfec/90000
     a=imageattr:100 recv [x=[48:1920],y=[48:1080],q=1.0]
     a=extmap:1 urn:ietf:params:rtp-hdrext:sdes:mid
+    a=extmap:3 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id
     a=rtcp-fb:100 ccm fir
     a=rtcp-fb:100 nack
     a=rtcp-fb:100 nack pli
@@ -239,9 +246,9 @@ class PeerConnection:
     # apply options as needed
     options = copy['options'] if 'options' in copy else []
     if 'fec' not in options:
-      formatter = formatter.replace('100 101 102', '100 101')
-      formatter = self.remove_attribute(formatter, 'a=rtpmap:102')
-      formatter = self.remove_attribute(formatter, 'a=fmtp:102')
+      formatter = formatter.replace('100 101 102 103 104', '100 101 102 103')
+      formatter = self.remove_attribute(formatter, 'a=rtpmap:104')
+      formatter = self.remove_attribute(formatter, 'a=fmtp:104')
     if 'imageattr' not in options:
       formatter = self.remove_attribute(formatter, 'a=imageattr')
     if 'simulcast' not in options:
