@@ -131,7 +131,7 @@ Internet-Draft                    JSEP                          May 2017
      5.2.  Constructing an Offer . . . . . . . . . . . . . . . . . .  35
        5.2.1.  Initial Offers  . . . . . . . . . . . . . . . . . . .  35
        5.2.2.  Subsequent Offers . . . . . . . . . . . . . . . . . .  42
-       5.2.3.  Options Handling  . . . . . . . . . . . . . . . . . .  46
+       5.2.3.  Options Handling  . . . . . . . . . . . . . . . . . .  45
          5.2.3.1.  IceRestart  . . . . . . . . . . . . . . . . . . .  46
          5.2.3.2.  VoiceActivityDetection  . . . . . . . . . . . . .  46
      5.3.  Generating an Answer  . . . . . . . . . . . . . . . . . .  47
@@ -2342,9 +2342,9 @@ Internet-Draft                    JSEP                          May 2017
       section with a zero port in the current local description or the
       current remote description, that m= section MUST be recycled by
       generating an m= section for the added RtpTransceiver as if the m=
-      section were being added to the session description, placed at the
-      same index as the m= section with a zero port.
-
+      section were being added to the session description (including a
+      new MID value), and placing it at the same index as the m= section
+      with a zero port.
 
 
 
@@ -2422,18 +2422,6 @@ Internet-Draft                    JSEP                          May 2017
    o  For RtpTransceivers that are still present, any "a=simulcast" line
       MUST stay the same.
 
-   o  If any RtpTransceiver has been stopped, the port MUST be set to
-      zero and all "a=msid" lines MUST be removed.
-
-   o  If any RtpTransceiver has been added, and there exists a m=
-      section with a zero port in the current local description or the
-      current remote description, that m= section MUST be recycled by
-      generating a m= section for the added RtpTransceiver as if the m=
-      section were being added to session description, except that
-      instead of adding it, the generated m= section replaces the m=
-      section with a zero port.  The new m= section MUST contain a new
-      MID.
-
    If the initial offer was applied using setLocalDescription, and an
    answer from the remote side has been applied using
    setRemoteDescription, meaning the PeerConnection is in the "remote-
@@ -2459,13 +2447,6 @@ Internet-Draft                    JSEP                          May 2017
       transceiver, the media formats on the m= line MUST be generated in
       the same order as in the current local description.
 
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 44]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    o  The RTP header extensions MUST only include those that are present
       in the most recent answer.
 
@@ -2477,6 +2458,13 @@ Internet-Draft                    JSEP                          May 2017
 
    o  The "a=rtcp-mux" line MUST only be added if present in the most
       recent answer.
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 44]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    o  The "a=rtcp-mux-only" line MUST NOT be added.
 
@@ -2513,15 +2501,6 @@ Internet-Draft                    JSEP                          May 2017
    MUST contain any previously existing MID identifiers, as long as the
    identified m= sections still exist and are not rejected, and the
    group still contains at least two MID identifiers.  This ensures that
-
-
-
-
-Uberti, et al.          Expires November 6, 2017               [Page 45]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    any synchronized "recvonly" m= sections continue to be synchronized
    in the new offer.
 
@@ -2530,6 +2509,18 @@ Internet-Draft                    JSEP                          May 2017
    The createOffer method takes as a parameter an RTCOfferOptions
    object.  Special processing is performed when generating a SDP
    description if the following options are present.
+
+
+
+
+
+
+
+
+Uberti, et al.          Expires November 6, 2017               [Page 45]
+
+Internet-Draft                    JSEP                          May 2017
+
 
 5.2.3.1.  IceRestart
 
@@ -2569,6 +2560,15 @@ Internet-Draft                    JSEP                          May 2017
 
    Note that setting the "VoiceActivityDetection" parameter when
    generating an offer is a request to receive audio with silence
+   suppression.  It has no impact on whether the local endpoint does
+   silence suppression for the audio it sends.
+
+   The "VoiceActivityDetection" option does not have any impact on the
+   setting of the "vad" value in the signaling of the client to mixer
+   audio level header extension described in [RFC6464], Section 4.
+
+
+
 
 
 
@@ -2577,13 +2577,6 @@ Uberti, et al.          Expires November 6, 2017               [Page 46]
 
 Internet-Draft                    JSEP                          May 2017
 
-
-   suppression.  It has no impact on whether the local endpoint does
-   silence suppression for the audio it sends.
-
-   The "VoiceActivityDetection" option does not have any impact on the
-   setting of the "vad" value in the signaling of the client to mixer
-   audio level header extension described in [RFC6464], Section 4.
 
 5.3.  Generating an Answer
 
@@ -2626,19 +2619,19 @@ Internet-Draft                    JSEP                          May 2017
    added.  Otherwise the offered "LS" group MUST be ignored and no
    corresponding group generated in the answer.
 
+   As a simple example, consider the following offer of a single audio
+   and single video track contained in the same MediaStream.  SDP lines
+   not relevant to this example have been removed for clarity.  As
+   explained in Section 5.2, a group of type "LS" has been added that
+   references each track's RtpTransceiver.
+
+
 
 
 
 Uberti, et al.          Expires November 6, 2017               [Page 47]
 
 Internet-Draft                    JSEP                          May 2017
-
-
-   As a simple example, consider the following offer of a single audio
-   and single video track contained in the same MediaStream.  SDP lines
-   not relevant to this example have been removed for clarity.  As
-   explained in Section 5.2, a group of type "LS" has been added that
-   references each track's RtpTransceiver.
 
 
              a=group:LS a1 v1
@@ -2682,6 +2675,13 @@ Internet-Draft                    JSEP                          May 2017
    will not reference any MediaStreams, causing the preferences of the
    offerer to be maintained, and so the subsequent answer will contain
    an identical "LS" group.
+
+
+
+
+
+
+
 
 
 
