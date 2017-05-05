@@ -2536,6 +2536,11 @@ Internet-Draft                    JSEP                          May 2017
 
 5.2.3.2.  VoiceActivityDetection
 
+   Silence suppression, also known as discontinuous transmission
+   ("DTX"), can reduce the bandwidth used for audio by switching to a
+   special encoding when voice activity is not detected, at the cost of
+   some fidelity.
+
    If the "VoiceActivityDetection" option is specified, with a value of
    "true", the offer MUST indicate support for silence suppression in
    the audio it receives by including comfort noise ("CN") codecs for
@@ -2546,9 +2551,7 @@ Internet-Draft                    JSEP                          May 2017
    specified to indicate that silence suppression for received audio is
    desired.  For example, when using the Opus codec [RFC6716], the
    "usedtx=1" parameter, specified in [RFC7587], would be used in the
-   offer.  This option allows the endpoint to significantly reduce the
-   amount of audio bandwidth it receives, at the cost of some fidelity,
-   depending on the quality of the remote VAD algorithm.
+   offer.
 
    If the "VoiceActivityDetection" option is specified, with a value of
    "false", the JSEP implementation MUST NOT emit "CN" codecs.  For
@@ -2566,9 +2569,6 @@ Internet-Draft                    JSEP                          May 2017
    The "VoiceActivityDetection" option does not have any impact on the
    setting of the "vad" value in the signaling of the client to mixer
    audio level header extension described in [RFC6464], Section 4.
-
-
-
 
 
 
@@ -3725,12 +3725,13 @@ Internet-Draft                    JSEP                          May 2017
 
       *  If the m= section is of type audio:
 
-         +  For each specified "CN" media format, enable DTX for all
-            supported media formats with the same clockrate, as
-            described in [RFC3389], Section 5, except for formats that
-            have their own internal DTX mechanisms.  DTX for such
-            formats (e.g., Opus) is controlled via fmtp parameters, as
-            discussed in Section 5.2.3.2.
+         +  For each specified "CN" media format, enable silence
+            suppression for all supported media formats with the same
+            clockrate, as described in [RFC3389], Section 5, except for
+            formats that have their own internal silence suppression
+            mechanisms.  Silence suppression for such formats (e.g.,
+            Opus) is controlled via fmtp parameters, as discussed in
+            Section 5.2.3.2.
 
          +  For each specified "telephone-event" media format, enable
             DTMF transmission for all supported media formats with the
@@ -3744,8 +3745,7 @@ Internet-Draft                    JSEP                          May 2017
             specified size is not supported for a media format, use the
             next closest value instead.
 
-   Finally, if this description is of type "pranswer" or "answer",
-   follow the processing defined in the Section 5.10 section below.
+
 
 
 
@@ -3753,6 +3753,9 @@ Uberti, et al.          Expires November 6, 2017               [Page 67]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+   Finally, if this description is of type "pranswer" or "answer",
+   follow the processing defined in the Section 5.10 section below.
 
 5.10.  Applying an Answer
 
@@ -3800,9 +3803,6 @@ Internet-Draft                    JSEP                          May 2017
          RTCP transmission for this m= section to use reduced-size RTCP,
          as specified in [RFC5506].
 
-      *  If the directional attribute in the answer is of type
-         "sendrecv" or "sendonly", choose the media format to send as
-
 
 
 Uberti, et al.          Expires November 6, 2017               [Page 68]
@@ -3810,6 +3810,8 @@ Uberti, et al.          Expires November 6, 2017               [Page 68]
 Internet-Draft                    JSEP                          May 2017
 
 
+      *  If the directional attribute in the answer is of type
+         "sendrecv" or "sendonly", choose the media format to send as
          the most preferred media format from the remote description
          that is also present in the answer, as described in [RFC3264],
          Sections 6.1 and 7, and start transmitting RTP media once the
@@ -3856,8 +3858,6 @@ Internet-Draft                    JSEP                          May 2017
          the rules and recommendations from
          [I-D.ietf-avtcore-rtp-multi-stream], Section 5.4.1 to select
          which SSRC to use.
-
-
 
 
 
