@@ -744,11 +744,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>This specification prescribes more specific behavior. When
           a sender of a given MediaStreamTrack, which is producing
           video of a certain resolution, receives an "a=imageattr recv"
-          attribute, it MUST check to see if the original resolution
-          meets the size criteria specified in the attribute, and adapt
-          the resolution accordingly by scaling (if appropriate). Note
-          that when considering a MediaStreamTrack that is producing
-          rotated video, the unrotated resolution MUST be used. This is
+          attribute, it will follow the rules below to check if the original
+          resolution meets the size criteria specified in the attribute,
+          and, if appropriate, adjust the resolution.
+          Note that when considering a MediaStreamTrack that is producing
+          rotated video, the unrotated resolution MUST be used for the
+          checks. This is
           required regardless of whether the receiver supports
           performing receive-side rotation (e.g., through CVO
           <xref target="TS26.114" />), as it significantly simplifies
@@ -779,15 +780,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           Downscaling MUST NOT change the track aspect ratio.</t>
 
           <t>If the original resolution is less than the size limits in
-          the attribute, upscaling is needed, but this may not be
-          appropriate in all cases. To address this concern, the
+          the attribute, upscaling is needed, but this may not always be
+          appropriate. To address this concern, the
           application can set an upscaling policy for each sent track.
-          For this case, if upscaling is permitted by policy, the
+          If upscaling is permitted by policy, the
           sender SHOULD apply upscaling in order to provide the desired
           resolution. Otherwise, the sender MUST NOT apply upscaling.
-          The sender SHOULD NOT upscale in other cases, even if the
-          policy permits it. Upscaling MUST NOT change the track aspect
-          ratio.</t>
+          Upscaling MUST NOT change the track aspect ratio.</t>
 
           <t>If there is no appropriate and permitted scaling mechanism
           that allows the received size limits to be satisfied, the
