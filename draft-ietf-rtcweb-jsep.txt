@@ -799,7 +799,13 @@ Internet-Draft                    JSEP                          May 2017
    use the "a=imageattr" SDP attribute [RFC6236] to indicate what video
    frame sizes it is capable of receiving.  A receiver may have hard
    limits on what its video decoder can process, or it may have some
-   maximum set by policy.
+   maximum set by policy.  By specifying these limits in an
+   "a=imageattr" attribute, JSEP endpoints can attempt to ensure that
+   the remote sender transmits video at an acceptable resolution.
+   However, when communicating with a non-JSEP endpoint that does not
+   understand this attribute, any signaled limits may be exceeded, and
+   the JSEP implementation MUST handle this gracefully, e.g., by
+   discarding the video.
 
    Note that certain codecs support transmission of samples with aspect
    ratios other than 1.0 (i.e., non-square pixels).  JSEP
@@ -827,12 +833,6 @@ Internet-Draft                    JSEP                          May 2017
    the "a=imageattr" q= value is not important.  It SHOULD be set to
    1.0.
 
-   The "a=imageattr" field is payload type specific.  When all video
-   codecs supported have the same capabilities, use of a single
-   attribute, with the wildcard payload type (*), is RECOMMENDED.
-   However, when the supported video codecs have different limitations,
-   specific "a=imageattr" attributes MUST be inserted for each payload
-   type.
 
 
 
@@ -841,6 +841,13 @@ Uberti, et al.          Expires November 10, 2017              [Page 15]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+   The "a=imageattr" field is payload type specific.  When all video
+   codecs supported have the same capabilities, use of a single
+   attribute, with the wildcard payload type (*), is RECOMMENDED.
+   However, when the supported video codecs have different limitations,
+   specific "a=imageattr" attributes MUST be inserted for each payload
+   type.
 
    As an example, consider a system with a multiformat video decoder,
    which is capable of decoding any resolution from 48x48 to 720p, In
@@ -883,13 +890,6 @@ Internet-Draft                    JSEP                          May 2017
    payload type than what has been selected for sending the
    MediaStreamTrack, it MUST be ignored.
 
-   If the original resolution matches the size limits in the attribute,
-   the track MUST be transmitted untouched.
-
-   If the original resolution exceeds the size limits in the attribute,
-   the sender SHOULD apply downscaling to the output of the
-   MediaStreamTrack in order to satisfy the limits.  Downscaling MUST
-   NOT change the track aspect ratio.
 
 
 
@@ -897,6 +897,14 @@ Uberti, et al.          Expires November 10, 2017              [Page 16]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+   If the original resolution matches the size limits in the attribute,
+   the track MUST be transmitted untouched.
+
+   If the original resolution exceeds the size limits in the attribute,
+   the sender SHOULD apply downscaling to the output of the
+   MediaStreamTrack in order to satisfy the limits.  Downscaling MUST
+   NOT change the track aspect ratio.
 
    If the original resolution is less than the size limits in the
    attribute, upscaling is needed, but this may not be appropriate in
@@ -939,20 +947,18 @@ Internet-Draft                    JSEP                          May 2017
    simulcast support is not negotiated, the RtpSender will only use the
    first configured encoding.
 
-   Note that the exact simulcast parameters are up to the sending
-   application.  While the aforementioned SDP markings are provided to
-   ensure the remote side can receive and demux multiple simulcast
-   encodings, the specific resolutions and bitrates to be used for each
-   encoding are purely a send-side decision in JSEP.
-
-
-
 
 
 Uberti, et al.          Expires November 10, 2017              [Page 17]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+   Note that the exact simulcast parameters are up to the sending
+   application.  While the aforementioned SDP markings are provided to
+   ensure the remote side can receive and demux multiple simulcast
+   encodings, the specific resolutions and bitrates to be used for each
+   encoding are purely a send-side decision in JSEP.
 
    JSEP currently does not provide a mechanism to configure receipt of
    simulcast.  This means that if simulcast is offered by the remote
@@ -997,18 +1003,18 @@ Internet-Draft                    JSEP                          May 2017
    The basic operations that the applications can have the media engine
    do are:
 
-   o  Start exchanging media with a given remote peer, but keep all the
-      resources reserved in the offer.
-
-   o  Start exchanging media with a given remote peer, and free any
-      resources in the offer that are not being used.
-
 
 
 Uberti, et al.          Expires November 10, 2017              [Page 18]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+   o  Start exchanging media with a given remote peer, but keep all the
+      resources reserved in the offer.
+
+   o  Start exchanging media with a given remote peer, and free any
+      resources in the offer that are not being used.
 
 3.8.1.  Sequential Forking
 
@@ -1051,13 +1057,7 @@ Internet-Draft                    JSEP                          May 2017
    endpoints at a time, then from a media engine point of view, this is
    exactly like the sequential forking case.
 
-   In the parallel forking case where the Javascript application wishes
-   to simultaneously exchange media with multiple peers, the flow is
-   slightly more complex, but the Javascript application can follow the
-   strategy that [RFC3960] describes using UPDATE.  The UPDATE approach
-   allows the signaling to set up a separate media flow for each peer
-   that it wishes to exchange media with.  In JSEP, this offer used in
-   the UPDATE would be formed by simply creating a new PeerConnection
+
 
 
 
@@ -1066,6 +1066,13 @@ Uberti, et al.          Expires November 10, 2017              [Page 19]
 Internet-Draft                    JSEP                          May 2017
 
 
+   In the parallel forking case where the Javascript application wishes
+   to simultaneously exchange media with multiple peers, the flow is
+   slightly more complex, but the Javascript application can follow the
+   strategy that [RFC3960] describes using UPDATE.  The UPDATE approach
+   allows the signaling to set up a separate media flow for each peer
+   that it wishes to exchange media with.  In JSEP, this offer used in
+   the UPDATE would be formed by simply creating a new PeerConnection
    and making sure that the same local media streams have been added
    into this new PeerConnection.  Then the new PeerConnection object
    would produce a SDP offer that could be used by the signaling to
@@ -1108,19 +1115,18 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-   relay:  All candidates except relay candidates will be filtered out.
-      This obfuscates the location information that might be ascertained
-      by the remote peer from the received candidates.  Depending on how
-      the application deploys and chooses relay servers, this could
-      obfuscate location to a metro or possibly even global level.
-
-
 
 
 Uberti, et al.          Expires November 10, 2017              [Page 20]
 
 Internet-Draft                    JSEP                          May 2017
 
+
+   relay:  All candidates except relay candidates will be filtered out.
+      This obfuscates the location information that might be ascertained
+      by the remote peer from the received candidates.  Depending on how
+      the application deploys and chooses relay servers, this could
+      obfuscate location to a metro or possibly even global level.
 
    The default ICE candidate policy MUST be set to "all" as this is
    generally the desired policy, and also typically reduces use of
@@ -1164,18 +1170,17 @@ Internet-Draft                    JSEP                          May 2017
 
    max-compat:  All m= sections will contain transport parameters; none
       will be marked as bundle-only.  This policy will allow all streams
-      to be received by non-bundle-aware endpoints, but require separate
-      candidates to be gathered for each media stream.
-
-
-
-
 
 
 
 Uberti, et al.          Expires November 10, 2017              [Page 21]
 
 Internet-Draft                    JSEP                          May 2017
+
+
+      to be received by non-bundle-aware endpoints, but require separate
+      candidates to be gathered for each media stream.
+
 
 
    max-bundle:  Only the first m= section will contain transport
@@ -1221,11 +1226,6 @@ Internet-Draft                    JSEP                          May 2017
    call to setRemoteDescription() and does not have a local track.
    Otherwise, a new transceiver will be created, as described in
    Section 4.1.4.
-
-
-
-
-
 
 
 
