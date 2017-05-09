@@ -395,11 +395,12 @@ Internet-Draft                    JSEP                          May 2017
 
 
    Lastly, while the exact media parameters are only known only after an
-   offer and an answer have been exchanged, it is possible for the
-   offerer to receive media after they have sent an offer and before
-   they have received an answer.  To properly process incoming media in
-   this case, the offerer's media handler must be aware of the details
-   of the offer before the answer arrives.
+   offer and an answer have been exchanged, the offerer may receive ICE
+   checks, and possibly media (e.g., in the case of a re-offer after a
+   connection has been established) before it receives an answer.  To
+   properly process incoming media in this case, the offerer's media
+   handler must be aware of the details of the offer before the answer
+   arrives.
 
    Therefore, in order to handle session descriptions properly, the user
    agent needs:
@@ -441,7 +442,6 @@ Internet-Draft                    JSEP                          May 2017
    using SIP for signaling, if one offer is sent, then cancelled using a
    SIP CANCEL, another offer can be generated even though no answer was
    received for the first offer.  To support this, the JSEP media layer
-   can provide an offer via the createOffer() method whenever the
 
 
 
@@ -450,6 +450,7 @@ Uberti, et al.          Expires November 10, 2017               [Page 8]
 Internet-Draft                    JSEP                          May 2017
 
 
+   can provide an offer via the createOffer() method whenever the
    Javascript application needs one for the signaling.  The answerer can
    send back zero or more provisional answers, and finally end the
    offer-answer exchange by sending a final answer.  The state machine
@@ -496,7 +497,6 @@ Internet-Draft                    JSEP                          May 2017
 
 
                        Figure 2: JSEP State Machine
-
 
 
 
@@ -1770,7 +1770,7 @@ Internet-Draft                    JSEP                          May 2017
    calls to createOffer and createAnswer.
 
    When creating offers, the transceiver direction is directly reflected
-   in the output, even for reoffers.  When creating answers, the
+   in the output, even for re-offers.  When creating answers, the
    transceiver direction is intersected with the offered direction, as
    explained in the Section 5.3 section below.
 
