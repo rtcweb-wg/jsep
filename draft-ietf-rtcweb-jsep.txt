@@ -629,9 +629,10 @@ Internet-Draft                    JSEP                          May 2017
 
    Note that gathering phases only gather the candidates needed by
    new/recycled/restarting m= sections; other m= sections continue to
-   use their existing candidates.  Also, when bundling is active,
-   candidates are only gathered (and exchanged) for the m= sections
-   referenced in BUNDLE-tags, as described in
+   use their existing candidates.  Also, if an m= section is bundled
+   (either by a successful bundle negotiation or by being marked as
+   bundle-only), then candidates will be gathered and exchanged for that
+   m= section if and only if its MID is a BUNDLE-tag, as described in
    [I-D.ietf-mmusic-sdp-bundle-negotiation].
 
 3.5.2.  ICE Candidate Trickling
@@ -664,7 +665,6 @@ Internet-Draft                    JSEP                          May 2017
    In JSEP, ICE candidates are abstracted by an IceCandidate object, and
    as with session descriptions, SDP syntax is used for the internal
    representation.
-
 
 
 
@@ -757,9 +757,9 @@ Internet-Draft                    JSEP                          May 2017
 
    JSEP applications typically inform the JSEP implementation to begin
    ICE gathering via the information supplied to setLocalDescription, as
-   this is where the app specifies the number of media streams, and
-   thereby ICE components, for which to gather candidates.  However, to
-   accelerate cases where the application knows the number of ICE
+   the local description indicates the number of ICE components which
+   will be needed and for which candidates must be gathered.  However,
+   to accelerate cases where the application knows the number of ICE
    components to use ahead of time, it may ask the implementation to
    gather a pool of potential ICE candidates to help ensure rapid media
    setup.
