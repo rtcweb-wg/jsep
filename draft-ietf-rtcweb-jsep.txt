@@ -5,10 +5,10 @@
 Network Working Group                                          J. Uberti
 Internet-Draft                                                    Google
 Intended status: Standards Track                             C. Jennings
-Expires: November 13, 2017                                         Cisco
+Expires: November 14, 2017                                         Cisco
                                                         E. Rescorla, Ed.
                                                                  Mozilla
-                                                            May 12, 2017
+                                                            May 13, 2017
 
 
                Javascript Session Establishment Protocol
@@ -36,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on November 13, 2017.
+   This Internet-Draft will expire on November 14, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Uberti, et al.          Expires November 13, 2017               [Page 1]
+Uberti, et al.          Expires November 14, 2017               [Page 1]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -78,7 +78,7 @@ Table of Contents
      3.5.  ICE . . . . . . . . . . . . . . . . . . . . . . . . . . .  11
        3.5.1.  ICE Gathering Overview  . . . . . . . . . . . . . . .  11
        3.5.2.  ICE Candidate Trickling . . . . . . . . . . . . . . .  12
-         3.5.2.1.  ICE Candidate Format  . . . . . . . . . . . . . .  13
+         3.5.2.1.  ICE Candidate Format  . . . . . . . . . . . . . .  12
        3.5.3.  ICE Candidate Policy  . . . . . . . . . . . . . . . .  13
        3.5.4.  ICE Candidate Pool  . . . . . . . . . . . . . . . . .  14
      3.6.  Video Size Negotiation  . . . . . . . . . . . . . . . . .  15
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Uberti, et al.          Expires November 13, 2017               [Page 2]
+Uberti, et al.          Expires November 14, 2017               [Page 2]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -165,7 +165,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017               [Page 3]
+Uberti, et al.          Expires November 14, 2017               [Page 3]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -221,7 +221,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017               [Page 4]
+Uberti, et al.          Expires November 14, 2017               [Page 4]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -272,18 +272,15 @@ Internet-Draft                    JSEP                          May 2017
    descriptions to the API, the API would produce and consume messages
    from this protocol.  While providing a more high-level API, this put
    more control of signaling within the JSEP implementation, forcing it
-   to have to understand and handle concepts like signaling glare.  In
+   to have to understand and handle concepts like signaling glare (see
+   [RFC3264], Section 4).
 
 
 
-
-Uberti, et al.          Expires November 13, 2017               [Page 5]
+Uberti, et al.          Expires November 14, 2017               [Page 5]
 
 Internet-Draft                    JSEP                          May 2017
 
-
-   addition, it prevented the application from driving the state machine
-   to a desired state, as is needed in the page reload case.
 
    A second approach that was considered but not chosen was to decouple
    the management of the media control objects from session
@@ -330,17 +327,17 @@ Internet-Draft                    JSEP                          May 2017
    of the session to know how to conduct the session.  JSEP provides
    mechanisms to create offers and answers, as well as to apply them to
    a session.  However, the JSEP implementation is totally decoupled
+   from the actual mechanism by which these offers and answers are
+   communicated to the remote side, including addressing,
+   retransmission, forking, and glare handling.  These issues are left
 
 
 
-Uberti, et al.          Expires November 13, 2017               [Page 6]
+Uberti, et al.          Expires November 14, 2017               [Page 6]
 
 Internet-Draft                    JSEP                          May 2017
 
 
-   from the actual mechanism by which these offers and answers are
-   communicated to the remote side, including addressing,
-   retransmission, forking, and glare handling.  These issues are left
    entirely up to the application; the application has complete control
    over which offers and answers get handed to the implementation, and
    when.
@@ -386,17 +383,17 @@ Internet-Draft                    JSEP                          May 2017
    described in [RFC4566], Section 5.14), but an answer must contain the
    exact same number as the offer.
 
+   Lastly, while the exact media parameters are only known only after an
+   offer and an answer have been exchanged, the offerer may receive ICE
+   checks, and possibly media (e.g., in the case of a re-offer after a
 
 
 
-Uberti, et al.          Expires November 13, 2017               [Page 7]
+Uberti, et al.          Expires November 14, 2017               [Page 7]
 
 Internet-Draft                    JSEP                          May 2017
 
 
-   Lastly, while the exact media parameters are only known only after an
-   offer and an answer have been exchanged, the offerer may receive ICE
-   checks, and possibly media (e.g., in the case of a re-offer after a
    connection has been established) before it receives an answer.  To
    properly process incoming media in this case, the offerer's media
    handler must be aware of the details of the offer before the answer
@@ -442,17 +439,17 @@ Internet-Draft                    JSEP                          May 2017
    using SIP for signaling, if one offer is sent, then cancelled using a
    SIP CANCEL, another offer can be generated even though no answer was
    received for the first offer.  To support this, the JSEP media layer
+   can provide an offer via the createOffer() method whenever the
+   Javascript application needs one for the signaling.  The answerer can
+   send back zero or more provisional answers, and finally end the
 
 
 
-Uberti, et al.          Expires November 13, 2017               [Page 8]
+Uberti, et al.          Expires November 14, 2017               [Page 8]
 
 Internet-Draft                    JSEP                          May 2017
 
 
-   can provide an offer via the createOffer() method whenever the
-   Javascript application needs one for the signaling.  The answerer can
-   send back zero or more provisional answers, and finally end the
    offer-answer exchange by sending a final answer.  The state machine
    for this is as follows:
 
@@ -498,17 +495,16 @@ Internet-Draft                    JSEP                          May 2017
 
                        Figure 2: JSEP State Machine
 
-
-
-
-Uberti, et al.          Expires November 13, 2017               [Page 9]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    Aside from these state transitions there is no other difference
    between the handling of provisional ("pranswer") and final ("answer")
    answers.
+
+
+
+Uberti, et al.          Expires November 14, 2017               [Page 9]
+
+Internet-Draft                    JSEP                          May 2017
+
 
 3.3.  Session Description Format
 
@@ -554,17 +550,17 @@ Internet-Draft                    JSEP                          May 2017
    or if RtpTransceivers have been stopped and disassociated from m=
    sections.  An RtpTransceiver is said to be associated with an m=
    section if its mid property is non-null; otherwise it is said to be
-
-
-
-Uberti, et al.          Expires November 13, 2017              [Page 10]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    disassociated.  The associated m= section is determined using a
    mapping between transceivers and m= section indices, formed when
    creating an offer or applying a remote offer.
+
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 10]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    An RtpTransceiver is never associated with more than one m= section,
    and once a session description is applied, a m= section is always
@@ -610,16 +606,17 @@ Internet-Draft                    JSEP                          May 2017
    gathering phase, a 'needs-ice-restart' bit is set.  When this bit is
    set, calls to the createOffer API will generate new ICE credentials.
    This bit is cleared by a call to the setLocalDescription API with new
+   ICE credentials from either an offer or an answer, i.e., from either
+   a local- or remote-initiated ICE restart.
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 11]
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 11]
 
 Internet-Draft                    JSEP                          May 2017
 
-
-   ICE credentials from either an offer or an answer, i.e., from either
-   a local- or remote-initiated ICE restart.
 
    When a new gathering phase starts, the ICE agent will notify the
    application that gathering is occurring through an event.  Then, when
@@ -663,22 +660,19 @@ Internet-Draft                    JSEP                          May 2017
    supply them to its ICE agent.  This triggers the ICE agent to start
    using the new remote candidates for connectivity checks.
 
-
-
-
-
-
-
-Uberti, et al.          Expires November 13, 2017              [Page 12]
-
-Internet-Draft                    JSEP                          May 2017
-
-
 3.5.2.1.  ICE Candidate Format
 
    In JSEP, ICE candidates are abstracted by an IceCandidate object, and
    as with session descriptions, SDP syntax is used for the internal
    representation.
+
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 12]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    The candidate details are specified in an IceCandidate field, using
    the same SDP syntax as the "candidate-attribute" field defined in
@@ -722,19 +716,20 @@ Internet-Draft                    JSEP                          May 2017
    want to have more specific control over the gathering process, due to
    privacy or related concerns.  For example, one may want to only use
    relay candidates, to leak as little location information as possible
-
-
-
-Uberti, et al.          Expires November 13, 2017              [Page 13]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    (keeping in mind that this choice comes with corresponding
    operational costs).  To accomplish this, JSEP allows the application
    to restrict which ICE candidates are used in a session.  Note that
    this filtering is applied on top of any restrictions the
    implementation chooses to enforce regarding which IP addresses are
+
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 13]
+
+Internet-Draft                    JSEP                          May 2017
+
+
    permitted for the application, as discussed in
    [I-D.ietf-rtcweb-ip-handling].
 
@@ -777,21 +772,20 @@ Internet-Draft                    JSEP                          May 2017
    becomes depleted, either because a larger-than-expected number of ICE
    components is used, or because the pool has not had enough time to
    gather candidates, the remaining candidates are gathered as usual.
-
-
-
-
-Uberti, et al.          Expires November 13, 2017              [Page 14]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    This only occurs for the first offer/answer exchange, after which the
    candidate pool is emptied and no longer used.
 
    One example of where this concept is useful is an application that
    expects an incoming call at some point in the future, and wants to
    minimize the time it takes to establish connectivity, to avoid
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 14]
+
+Internet-Draft                    JSEP                          May 2017
+
+
    clipping of initial media.  By pre-gathering candidates into the
    pool, it can exchange and start sending connectivity checks from
    these candidates almost immediately upon receipt of a call.  Note
@@ -835,16 +829,18 @@ Internet-Draft                    JSEP                          May 2017
    the degenerate case of no permitted resolutions, this MUST be
    represented by x=0 and y=0 values.
 
-
-
-Uberti, et al.          Expires November 13, 2017              [Page 15]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    The rules here express a single set of preferences, and therefore,
    the "a=imageattr" q= value is not important.  It SHOULD be set to
    1.0.
+
+
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 15]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    The "a=imageattr" field is payload type specific.  When all video
    codecs supported have the same capabilities, use of a single
@@ -890,17 +886,17 @@ Internet-Draft                    JSEP                          May 2017
    same "q=" value, those that appear after the first such attribute in
    the m= section MUST be ignored.
 
-
-
-
-Uberti, et al.          Expires November 13, 2017              [Page 16]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    If an "a=imageattr recv" attribute references a different video
    payload type than what has been selected for sending the
    MediaStreamTrack, it MUST be ignored.
+
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 16]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    If the original resolution matches the size limits in the attribute,
    the track MUST be transmitted untouched.
@@ -946,18 +942,17 @@ Internet-Draft                    JSEP                          May 2017
    answer, are indicated in SDP markings on the corresponding m=
    section, as described below.  Receivers that understand simulcast and
    are willing to receive it will also include SDP markings to indicate
-
-
-
-Uberti, et al.          Expires November 13, 2017              [Page 17]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    their support, and JSEP endpoints will use these markings to
    determine whether simulcast is permitted for a given RtpSender.  If
    simulcast support is not negotiated, the RtpSender will only use the
    first configured encoding.
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 17]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    Note that the exact simulcast parameters are up to the sending
    application.  While the aforementioned SDP markings are provided to
@@ -1002,19 +997,18 @@ Internet-Draft                    JSEP                          May 2017
    the media plane that is relevant.  When forking happens at the
    signaling layer, the Javascript application responsible for the
    signaling needs to make the decisions about what media should be sent
-
-
-
-Uberti, et al.          Expires November 13, 2017              [Page 18]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    or received at any point of time, as well as which remote endpoint it
    should communicate with; JSEP is used to make sure the media engine
    can make the RTP and media perform as required by the application.
    The basic operations that the applications can have the media engine
    do are:
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 18]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    o  Start exchanging media with a given remote peer, but keep all the
       resources reserved in the offer.
@@ -1058,18 +1052,19 @@ Internet-Draft                    JSEP                          May 2017
    audio sources, as that could result in a confusing situation.  For
    example, consider having a European ringback tone mixed together with
    the North American ringback tone - the resulting sound would not be
-
-
-
-Uberti, et al.          Expires November 13, 2017              [Page 19]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    like either tone, and would confuse the user.  If the signaling
    application wishes to only exchange media with one of the remote
    endpoints at a time, then from a media engine point of view, this is
    exactly like the sequential forking case.
+
+
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 19]
+
+Internet-Draft                    JSEP                          May 2017
+
 
    In the parallel forking case where the Javascript application wishes
    to simultaneously exchange media with multiple peers, the flow is
@@ -1115,16 +1110,16 @@ Internet-Draft                    JSEP                          May 2017
    filtering) to the application, and only use those candidates for
    connectivity checks.  The set of available policies is as follows:
 
-
-
-Uberti, et al.          Expires November 13, 2017              [Page 20]
-
-Internet-Draft                    JSEP                          May 2017
-
-
    all:  All candidates permitted by implementation policy will be
       gathered and used.
 
+
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 20]
+
+Internet-Draft                    JSEP                          May 2017
 
 
    relay:  All candidates except relay candidates will be filtered out.
@@ -1173,13 +1168,16 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 21]
+   max-compat:  All m= sections will contain transport parameters; none
+      will be marked as bundle-only.  This policy will allow all streams
+
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 21]
 
 Internet-Draft                    JSEP                          May 2017
 
 
-   max-compat:  All m= sections will contain transport parameters; none
-      will be marked as bundle-only.  This policy will allow all streams
       to be received by non-bundle-aware endpoints, but require separate
       candidates to be gathered for each media stream.
 
@@ -1226,16 +1224,15 @@ Internet-Draft                    JSEP                          May 2017
    is in the "have-remote-offer" state, the track will be attached to
    the first compatible transceiver that was created by the most recent
    call to setRemoteDescription() and does not have a local track.
+   Otherwise, a new transceiver will be created, as described in
+   Section 4.1.4.
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 22]
+Uberti, et al.          Expires November 14, 2017              [Page 22]
 
 Internet-Draft                    JSEP                          May 2017
 
-
-   Otherwise, a new transceiver will be created, as described in
-   Section 4.1.4.
 
 4.1.3.  removeTrack
 
@@ -1282,17 +1279,17 @@ Internet-Draft                    JSEP                          May 2017
    [RFC3264] offer with the supported configurations for the session,
    including descriptions of the media added to this PeerConnection, the
    codec/RTP/RTCP options supported by this implementation, and any
+   candidates that have been gathered by the ICE agent.  An options
+   parameter may be supplied to provide additional control over the
+   generated offer.  This options parameter allows an application to
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 23]
+Uberti, et al.          Expires November 14, 2017              [Page 23]
 
 Internet-Draft                    JSEP                          May 2017
 
 
-   candidates that have been gathered by the ICE agent.  An options
-   parameter may be supplied to provide additional control over the
-   generated offer.  This options parameter allows an application to
    trigger an ICE restart, for the purpose of reestablishing
    connectivity.
 
@@ -1338,17 +1335,17 @@ Internet-Draft                    JSEP                          May 2017
    that is compatible with the parameters supplied in the most recent
    call to setRemoteDescription, which MUST have been called prior to
    calling createAnswer.  Like createOffer, the returned blob contains
+   descriptions of the media added to this PeerConnection, the
+   codec/RTP/RTCP options negotiated for this session, and any
+   candidates that have been gathered by the ICE agent.  An options
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 24]
+Uberti, et al.          Expires November 14, 2017              [Page 24]
 
 Internet-Draft                    JSEP                          May 2017
 
 
-   descriptions of the media added to this PeerConnection, the
-   codec/RTP/RTCP options negotiated for this session, and any
-   candidates that have been gathered by the ICE agent.  An options
    parameter may be supplied to provide additional control over the
    generated answer.
 
@@ -1395,15 +1392,16 @@ Internet-Draft                    JSEP                          May 2017
    released.  A description used as an "answer" may be applied as a
    response to an "offer", or an update to a previously sent "pranswer".
 
+   The only difference between a provisional and final answer is that
+   the final answer results in the freeing of any unused resources that
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 25]
+
+Uberti, et al.          Expires November 14, 2017              [Page 25]
 
 Internet-Draft                    JSEP                          May 2017
 
 
-   The only difference between a provisional and final answer is that
-   the final answer results in the freeing of any unused resources that
    were allocated as a result of the offer.  As such, the application
    can use some discretion on whether an answer should be applied as
    provisional or final, and can change the type of the session
@@ -1453,7 +1451,9 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 26]
+
+
+Uberti, et al.          Expires November 14, 2017              [Page 26]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -1509,7 +1509,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 27]
+Uberti, et al.          Expires November 14, 2017              [Page 27]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -1565,7 +1565,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 28]
+Uberti, et al.          Expires November 14, 2017              [Page 28]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -1621,7 +1621,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 29]
+Uberti, et al.          Expires November 14, 2017              [Page 29]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -1677,7 +1677,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 30]
+Uberti, et al.          Expires November 14, 2017              [Page 30]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -1733,7 +1733,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 31]
+Uberti, et al.          Expires November 14, 2017              [Page 31]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -1789,7 +1789,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 32]
+Uberti, et al.          Expires November 14, 2017              [Page 32]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -1845,7 +1845,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 33]
+Uberti, et al.          Expires November 14, 2017              [Page 33]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -1901,7 +1901,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 34]
+Uberti, et al.          Expires November 14, 2017              [Page 34]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -1957,7 +1957,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 35]
+Uberti, et al.          Expires November 14, 2017              [Page 35]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2013,7 +2013,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 36]
+Uberti, et al.          Expires November 14, 2017              [Page 36]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2069,7 +2069,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 37]
+Uberti, et al.          Expires November 14, 2017              [Page 37]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2125,7 +2125,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 38]
+Uberti, et al.          Expires November 14, 2017              [Page 38]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2181,7 +2181,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 39]
+Uberti, et al.          Expires November 14, 2017              [Page 39]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2237,7 +2237,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 40]
+Uberti, et al.          Expires November 14, 2017              [Page 40]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2293,7 +2293,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 41]
+Uberti, et al.          Expires November 14, 2017              [Page 41]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2349,7 +2349,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 42]
+Uberti, et al.          Expires November 14, 2017              [Page 42]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2405,7 +2405,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 43]
+Uberti, et al.          Expires November 14, 2017              [Page 43]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2461,7 +2461,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 44]
+Uberti, et al.          Expires November 14, 2017              [Page 44]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2517,7 +2517,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 45]
+Uberti, et al.          Expires November 14, 2017              [Page 45]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2573,7 +2573,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 46]
+Uberti, et al.          Expires November 14, 2017              [Page 46]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2629,7 +2629,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 47]
+Uberti, et al.          Expires November 14, 2017              [Page 47]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2685,7 +2685,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 48]
+Uberti, et al.          Expires November 14, 2017              [Page 48]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2741,7 +2741,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 49]
+Uberti, et al.          Expires November 14, 2017              [Page 49]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2797,7 +2797,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 50]
+Uberti, et al.          Expires November 14, 2017              [Page 50]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2853,7 +2853,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 51]
+Uberti, et al.          Expires November 14, 2017              [Page 51]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2909,7 +2909,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 52]
+Uberti, et al.          Expires November 14, 2017              [Page 52]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -2965,7 +2965,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 53]
+Uberti, et al.          Expires November 14, 2017              [Page 53]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3021,7 +3021,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 54]
+Uberti, et al.          Expires November 14, 2017              [Page 54]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3077,7 +3077,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 55]
+Uberti, et al.          Expires November 14, 2017              [Page 55]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3133,7 +3133,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 56]
+Uberti, et al.          Expires November 14, 2017              [Page 56]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3189,7 +3189,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 57]
+Uberti, et al.          Expires November 14, 2017              [Page 57]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3245,7 +3245,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 58]
+Uberti, et al.          Expires November 14, 2017              [Page 58]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3301,7 +3301,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 59]
+Uberti, et al.          Expires November 14, 2017              [Page 59]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3357,7 +3357,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 60]
+Uberti, et al.          Expires November 14, 2017              [Page 60]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3413,7 +3413,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 61]
+Uberti, et al.          Expires November 14, 2017              [Page 61]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3469,7 +3469,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 62]
+Uberti, et al.          Expires November 14, 2017              [Page 62]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3525,7 +3525,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 63]
+Uberti, et al.          Expires November 14, 2017              [Page 63]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3581,7 +3581,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 64]
+Uberti, et al.          Expires November 14, 2017              [Page 64]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3637,7 +3637,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 65]
+Uberti, et al.          Expires November 14, 2017              [Page 65]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3693,7 +3693,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 66]
+Uberti, et al.          Expires November 14, 2017              [Page 66]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3749,7 +3749,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 67]
+Uberti, et al.          Expires November 14, 2017              [Page 67]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3805,7 +3805,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 68]
+Uberti, et al.          Expires November 14, 2017              [Page 68]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3861,7 +3861,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 69]
+Uberti, et al.          Expires November 14, 2017              [Page 69]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3917,7 +3917,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 70]
+Uberti, et al.          Expires November 14, 2017              [Page 70]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -3973,7 +3973,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 71]
+Uberti, et al.          Expires November 14, 2017              [Page 71]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4029,7 +4029,7 @@ AliceUA->BobUA:     media sent from Alice to Bob
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 72]
+Uberti, et al.          Expires November 14, 2017              [Page 72]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4085,7 +4085,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 73]
+Uberti, et al.          Expires November 14, 2017              [Page 73]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4141,7 +4141,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 74]
+Uberti, et al.          Expires November 14, 2017              [Page 74]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4197,7 +4197,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 75]
+Uberti, et al.          Expires November 14, 2017              [Page 75]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4253,7 +4253,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 76]
+Uberti, et al.          Expires November 14, 2017              [Page 76]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4309,7 +4309,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 77]
+Uberti, et al.          Expires November 14, 2017              [Page 77]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4365,7 +4365,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 78]
+Uberti, et al.          Expires November 14, 2017              [Page 78]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4421,7 +4421,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 79]
+Uberti, et al.          Expires November 14, 2017              [Page 79]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4477,7 +4477,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 80]
+Uberti, et al.          Expires November 14, 2017              [Page 80]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4533,7 +4533,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 81]
+Uberti, et al.          Expires November 14, 2017              [Page 81]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4589,7 +4589,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 82]
+Uberti, et al.          Expires November 14, 2017              [Page 82]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4645,7 +4645,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 83]
+Uberti, et al.          Expires November 14, 2017              [Page 83]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4701,7 +4701,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 84]
+Uberti, et al.          Expires November 14, 2017              [Page 84]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4757,7 +4757,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 85]
+Uberti, et al.          Expires November 14, 2017              [Page 85]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4813,7 +4813,7 @@ BobUA->AliceUA:     media sent from Bob to Alice
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 86]
+Uberti, et al.          Expires November 14, 2017              [Page 86]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4869,7 +4869,7 @@ BobJS->BobUA:       setRemoteDescription with |answer-C2|
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 87]
+Uberti, et al.          Expires November 14, 2017              [Page 87]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4925,7 +4925,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 88]
+Uberti, et al.          Expires November 14, 2017              [Page 88]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -4981,7 +4981,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 89]
+Uberti, et al.          Expires November 14, 2017              [Page 89]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5037,7 +5037,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 90]
+Uberti, et al.          Expires November 14, 2017              [Page 90]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5093,7 +5093,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 91]
+Uberti, et al.          Expires November 14, 2017              [Page 91]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5149,7 +5149,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 92]
+Uberti, et al.          Expires November 14, 2017              [Page 92]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5205,7 +5205,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 93]
+Uberti, et al.          Expires November 14, 2017              [Page 93]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5261,7 +5261,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 94]
+Uberti, et al.          Expires November 14, 2017              [Page 94]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5317,7 +5317,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 95]
+Uberti, et al.          Expires November 14, 2017              [Page 95]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5373,7 +5373,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 96]
+Uberti, et al.          Expires November 14, 2017              [Page 96]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5429,7 +5429,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 97]
+Uberti, et al.          Expires November 14, 2017              [Page 97]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5485,7 +5485,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 98]
+Uberti, et al.          Expires November 14, 2017              [Page 98]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5541,7 +5541,7 @@ Appendix A.  Appendix A
 
 
 
-Uberti, et al.          Expires November 13, 2017              [Page 99]
+Uberti, et al.          Expires November 14, 2017              [Page 99]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5597,7 +5597,7 @@ Appendix B.  Change log
 
 
 
-Uberti, et al.          Expires November 13, 2017             [Page 100]
+Uberti, et al.          Expires November 14, 2017             [Page 100]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5653,7 +5653,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017             [Page 101]
+Uberti, et al.          Expires November 14, 2017             [Page 101]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5709,7 +5709,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017             [Page 102]
+Uberti, et al.          Expires November 14, 2017             [Page 102]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5765,7 +5765,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017             [Page 103]
+Uberti, et al.          Expires November 14, 2017             [Page 103]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5821,7 +5821,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017             [Page 104]
+Uberti, et al.          Expires November 14, 2017             [Page 104]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5877,7 +5877,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017             [Page 105]
+Uberti, et al.          Expires November 14, 2017             [Page 105]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5933,7 +5933,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017             [Page 106]
+Uberti, et al.          Expires November 14, 2017             [Page 106]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -5989,7 +5989,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017             [Page 107]
+Uberti, et al.          Expires November 14, 2017             [Page 107]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -6045,7 +6045,7 @@ Internet-Draft                    JSEP                          May 2017
 
 
 
-Uberti, et al.          Expires November 13, 2017             [Page 108]
+Uberti, et al.          Expires November 14, 2017             [Page 108]
 
 Internet-Draft                    JSEP                          May 2017
 
@@ -6101,4 +6101,4 @@ Authors' Addresses
 
 
 
-Uberti, et al.          Expires November 13, 2017             [Page 109]
+Uberti, et al.          Expires November 14, 2017             [Page 109]
