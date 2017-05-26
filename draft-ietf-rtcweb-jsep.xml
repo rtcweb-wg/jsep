@@ -174,9 +174,8 @@ ipr="trust200902">
         consume messages from this protocol. While providing a more
         high-level API, this put more control of signaling within the
         JSEP implementation, forcing it to have to understand and
-        handle concepts like signaling glare. In addition, it prevented
-        the application from driving the state machine to a desired
-        state, as is needed in the page reload case.</t>
+        handle concepts like signaling glare (see
+        <xref target="RFC3264"/>, Section 4).</t>
 
         <t>A second approach that was considered but not chosen was to
         decouple the management of the media control objects from
@@ -256,7 +255,7 @@ ipr="trust200902">
       <section title="Session Descriptions and State Machine"
       anchor="sec.session-descriptions-and-">
 
-        <t>In order to establish the media plane, the user agent needs
+        <t>In order to establish the media plane, the JSEP implementation needs
         specific parameters to indicate what to transmit to the remote
         side, as well as how to handle the media that is received.
         These parameters are determined by the exchange of session
@@ -285,15 +284,16 @@ ipr="trust200902">
         contain the exact same number as the offer.</t>
 
         <t>Lastly, while the exact media parameters are only known only
-        after an offer and an answer have been exchanged, it is
-        possible for the offerer to receive media after they have sent
-        an offer and before they have received an answer. To properly
+        after an offer and an answer have been exchanged, the offerer may
+        receive ICE checks, and possibly media (e.g., in the case of a
+        re-offer after a connection has been established)
+        before it receives an answer. To properly
         process incoming media in this case, the offerer's media
         handler must be aware of the details of the offer before the
         answer arrives.</t>
 
         <t>Therefore, in order to handle session descriptions properly,
-        the user agent needs:
+        the JSEP implementation needs:
         <list style="numbers">
 
           <t>To know if a session description pertains to the local or
@@ -406,19 +406,14 @@ setRemote(ANSWER) |                                   |
         to SDP, at least until the time that this new encoding eclipsed
         SDP in popularity.</t>
 
-        <t>However, to simplify Javascript processing, and provide for
+        <t>However, to provide for
         future flexibility, the SDP syntax is encapsulated within a
         SessionDescription object, which can be constructed from SDP,
         and be serialized out to SDP. If future specifications agree on
         a JSON format for session descriptions, we could easily enable
         this object to generate and consume that JSON.</t>
 
-        <t>Other methods may be added to SessionDescription in the
-        future to simplify handling of SessionDescriptions from
-        Javascript. In the meantime, Javascript libraries can be used
-        to perform these manipulations.</t>
-
-        <t>Note that most applications should be able to treat the
+        <t>As detailed below, most applications should be able to treat the
         SessionDescriptions produced and consumed by these various API
         calls as opaque blobs; that is, the application will not need
         to read or change them.</t>
@@ -453,11 +448,15 @@ setRemote(ANSWER) |                                   |
           property is non-null; otherwise it is said to be
           disassociated. The associated m= section is determined using
           a mapping between transceivers and m= section indices, formed
-          when creating an offer or applying a remote offer. An
-          RtpTransceiver is never associated with more than one m=
+          when creating an offer or applying a remote offer.</t>
+
+          <t>An RtpTransceiver is never associated with more than one m=
           section, and once a session description is applied, a m=
           section is always associated with exactly one
-          RtpTransceiver.</t>
+          RtpTransceiver. However, in certain cases where a m= section has been
+          rejected, as discussed in <xref target="sec.subsequent-offers"/>
+          below, that m= section will be "recycled" and associated
+          with a new RtpTransceiver with a new mid value.</t>
 
           <t>RtpTransceivers can be created explicitly by the
           application or implicitly by calling setRemoteDescription
@@ -518,10 +517,12 @@ setRemote(ANSWER) |                                   |
           <t>Note that gathering phases only gather the candidates
           needed by new/recycled/restarting m= sections; other m=
           sections continue to use their existing candidates. Also,
-          when bundling is active, candidates are only gathered (and
-          exchanged) for the m= sections referenced in BUNDLE-tags, as
-          described in
-          <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />.</t>
+          if an m= section is bundled (either by a successful bundle
+          negotiation or by being marked as bundle-only), then candidates will be gathered
+          and exchanged for that m= section if and only if its MID
+          is a BUNDLE-tag, as described in
+          <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />.
+          </t>
         </section>
         <section title="ICE Candidate Trickling"
         anchor="sec.ice-candidate-trickling">
@@ -651,9 +652,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>JSEP applications typically inform the JSEP implementation
           to begin ICE gathering via the information supplied to
-          setLocalDescription, as this is where the app specifies the
-          number of media streams, and thereby ICE components, for
-          which to gather candidates. However, to accelerate cases
+          setLocalDescription, as the local description indicates the
+          number of ICE components which will be needed and for which
+          candidates must be gathered. However, to accelerate cases
           where the application knows the number of ICE components to
           use ahead of time, it may ask the implementation to gather a
           pool of potential ICE candidates to help ensure rapid media
@@ -691,7 +692,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <xref target="RFC6236" /> to indicate what video frame sizes it
         is capable of receiving. A receiver may have hard limits on
         what its video decoder can process, or it may have some maximum
-        set by policy.</t>
+        set by policy. By specifying these limits in an "a=imageattr"
+        attribute, JSEP endpoints can attempt to ensure that the remote
+        sender transmits video at an acceptable resolution. However, when
+        communicating with a non-JSEP endpoint that does not understand
+        this attribute, any signaled limits may be exceeded, and the JSEP
+        implementation MUST handle this gracefully, e.g., by discarding
+        the video.</t>
 
         <t>Note that certain codecs support transmission of samples
         with aspect ratios other than 1.0 (i.e., non-square pixels).
@@ -1414,7 +1421,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           able to simultaneously support use of both the current and
           pending local descriptions (e.g., support the codecs that
           exist in either description). This dual processing begins
-          when the PeerConnection enters the have-local-offer state,
+          when the PeerConnection enters the "have-local-offer" state,
           and continues until setRemoteDescription is called with
           either a final answer, at which point the PeerConnection can
           fully adopt the pending local description, or a rollback,
@@ -1651,7 +1658,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           createAnswer.</t>
 
           <t>When creating offers, the transceiver direction is
-          directly reflected in the output, even for reoffers. When
+          directly reflected in the output, even for re-offers. When
           creating answers, the transceiver direction is intersected
           with the offered direction, as explained in the
           <xref target="sec.generating-an-answer" /> section below.</t>
@@ -1915,7 +1922,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           itself, the following rules MUST be followed:
           <list style="symbols">
 
-            <t>The port value is set to the port of the default ICE
+            <t>If the m= section is marked as bundle-only, then
+            the port value MUST be set to 0. Otherwise,
+            the port value is set to the port of the default ICE
             candidate for this m= section, but given that no candidates
             are available yet, the "dummy" port value of 9 (Discard)
             MUST be used, as indicated in
@@ -1957,8 +1966,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           SDP attributes into different categories. To avoid
           unnecessary duplication when bundling, Section 8.1 of
           <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" /> specifies
-          that attributes of category IDENTICAL or TRANSPORT should not
-          be repeated in bundled m= sections.</t>
+          that attributes of category IDENTICAL or TRANSPORT MUST NOT
+          be repeated in bundled m= sections. This includes m=
+          sections for which bundling has been negotiated and is still desired,
+          as well as m= sections marked as bundle-only.
+          </t>
 
           <t>The following attributes, which are of a category other
           than IDENTICAL or TRANSPORT, MUST be included in each m=
@@ -2197,7 +2209,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           level even if they are identical. This assists development
           and debugging by making it easier to understand individual
           media sections, especially if one of a set of initially identical
-          attributes is subsequently changed.</t>
+          attributes is subsequently changed. However, implementations MAY
+          choose to aggregate attributes at the session level and JSEP
+          implementations MUST be prepared to receive attributes
+          in either location.</t>
 
           <t>Attributes other than the ones specified above MAY be
           included, except for the following attributes which are
@@ -2265,7 +2280,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>If the initial offer was applied using
           setLocalDescription, but an answer from the remote side has
           not yet been applied, meaning the PeerConnection is still in
-          the "local-offer" state, an offer is generated by following
+          the "have-local-offer" state, an offer is generated by following
           the steps in the "stable" state above, along with these
           exceptions:
           <list style="symbols">
@@ -2356,10 +2371,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>If the initial offer was applied using
           setLocalDescription, and an answer from the remote side has
           been applied using setRemoteDescription, meaning the
-          PeerConnection is in the "remote-pranswer" or "stable"
+          PeerConnection is in the "have-remote-pranswer" or "stable"
           states, an offer is generated based on the negotiated session
           descriptions by following the steps mentioned for the
-          "local-offer" state above.</t>
+          "have-local-offer" state above.</t>
 
           <t>In addition, for each non-recycled, non-rejected m=
           section in the new offer, the following adjustments are made
@@ -2389,15 +2404,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>The RTCP feedback extensions MUST only include those
             that are present in the most recent answer.</t>
 
-            <t>The "a=rtcp" line MUST only be added if the most recent
-            answer did not include an "a=rtcp-mux" line.</t>
+            <t>The "a=rtcp" line MUST NOT be added if the most recent
+            answer included an "a=rtcp-mux" line.</t>
 
-            <t>The "a=rtcp-mux" line MUST only be added if present in
+            <t>The "a=rtcp-mux" line MUST NOT be added unless present in
             the most recent answer.</t>
 
             <t>The "a=rtcp-mux-only" line MUST NOT be added.</t>
 
-            <t>The "a=rtcp-rsize" line MUST only be added if present in
+            <t>The "a=rtcp-rsize" line MUST NOT be added unless present in
             the most recent answer.</t>
 
             <t>An "a=bundle-only" line MUST NOT be added, as indicated
@@ -2465,9 +2480,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <section title="VoiceActivityDetection"
           anchor="sec.voiceactivitydetection1">
 
-            <t>If the "VoiceActivityDetection" option is specified,
-            with a value of "true", the offer MUST indicate support for
-            silence suppression in the audio it receives by including
+            <t>Silence suppression, also known as discontinuous transmission
+            ("DTX"), can reduce the bandwidth used for audio by switching to
+            a special encoding when voice activity is not detected, at the cost
+            of some fidelity.</t>
+
+            <t>If the "VoiceActivityDetection" option is
+            specified, with a value of "true", the offer MUST indicate support
+            for silence suppression in the audio it receives by including
             comfort noise ("CN") codecs for each offered audio codec,
             as specified in
             <xref target="RFC3389"></xref>, Section 5.1, except for
@@ -2479,11 +2499,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             when using the Opus codec
             <xref target="RFC6716" />, the "usedtx=1" parameter,
             specified in
-            <xref target="RFC7587" />, would be used in the offer. This
-            option allows the endpoint to significantly reduce the
-            amount of audio bandwidth it receives, at the cost of some
-            fidelity, depending on the quality of the remote VAD
-            algorithm.</t>
+            <xref target="RFC7587" />, would be used in the offer.</t>
 
             <t>If the "VoiceActivityDetection" option is specified,
             with a value of "false", the JSEP implementation MUST NOT
@@ -3089,10 +3105,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           MUST stop and an error MUST be returned.</t>
 
           <t>Next, the SessionDescription is parsed into a data
-          structure, as described in the
-          <xref target="sec.parsing-a-desc" /> section below. If parsing
-          fails for any reason, processing MUST stop and an error MUST
-          be returned.</t>
+          structure, as described in the <xref
+          target="sec.parsing-a-desc" /> section below. </t>
 
           <t>Finally, the parsed SessionDescription is applied as
           described in the
@@ -3135,11 +3149,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       </section>
       <section title="Parsing a Session Description"
       anchor="sec.parsing-a-desc">
-
-        <t>When a SessionDescription of any type is supplied to
-        setLocal/RemoteDescription, the implementation must parse it
-        and reject it if it is invalid. The exact details of this
-        process are explained below.</t>
 
         <t>The SDP contained in the session description object consists
         of a sequence of text lines, each containing a key-value
@@ -3257,9 +3266,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             stored.</t>
           </list></t>
 
-          <t>As required by
-          <xref target="RFC4566"></xref>, Section 5.13, unknown
-          attribute lines MUST be ignored.</t>
+          <t>Other attributes that are not relevant to JSEP may also
+          be present, and implementations SHOULD process any that they
+          recognize. As required by <xref target="RFC4566"></xref>, Section
+          5.13, unknown attribute lines MUST be ignored.</t>
 
           <t>Once all the session-level lines have been parsed,
           processing continues with the lines in m= sections.</t>
@@ -3360,10 +3370,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC4566" />, Section 6, and its value
             stored.</t>
 
-            <t>Any "a=ssrc" or "a=ssrc-group" attributes MUST be parsed
-            as specified in
-            <xref target="RFC5576" />, Sections 4.1-4.2, and their
-            values stored.</t>
+            <t>Any "a=ssrc" attributes MUST be parsed
+            as specified in <xref target="RFC5576" />, Section 4.1,
+            and their values stored.</t>
 
             <t>Any "a=extmap" attributes MUST be parsed as specified in
 
@@ -3435,9 +3444,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the value stored. Otherwise, use the specified default.</t>
           </list></t>
 
-          <t>As required by
-          <xref target="RFC4566"></xref>, Section 5.13, unknown
-          attribute lines MUST be ignored.</t>
+          <t>Other attributes that are not relevant to JSEP may also
+          be present, and implementations SHOULD process any that they
+          recognize. As required by <xref target="RFC4566"></xref>, Section
+          5.13, unknown attribute lines MUST be ignored.</t>
         </section>
         <section title="Semantics Verification">
 
@@ -3542,9 +3552,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <list style="symbols">
 
             <t>If there is no RtpTransceiver associated with this m=
-            section (which will only happen when applying an offer),
-            find one and associate it with this m= section according to
-            the following steps:
+            section, find one and associate it with this m= section
+            according to the following steps.  Note that this situation
+            will only occur when applying an offer.
+
             <list style="symbols">
 
               <t>Find the RtpTransceiver that corresponds to this m=
@@ -3573,14 +3584,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             demux RTP streams intended for this m= section based on the
             MID header extension, as described in
             <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />,
-            Section 14.</t>
+            Section 15.</t>
 
             <t>For each specified media format, establish a mapping
             between the payload type and the actual media format, as
             described in
-            <xref target="RFC3264" />, Section 6.1. If any indicated
-            media format is not supported, this MUST result in an
-            error.</t>
+            <xref target="RFC3264" />, Section 6.1. In addition, prepare to
+            demux RTP streams intended for this m= section based on the
+            media formats supported by this m= section, as described in
+            <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />,
+            Section 10.2.
+            If any indicated media format is not supported, this MUST result
+            in an error.</t>
 
             <t>For each specified "rtx" media format, establish a
             mapping between the RTX payload type and its associated
@@ -3729,11 +3744,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             primary payload type, as described in
             <xref target="RFC4588" />, Section 4. If any referenced
             primary payload types are not present, this MUST result in
-            an error.</t>
+            an error. Note that RTX payload types may
+            refer to primary payload types which are not supported
+            by the local media implementation,
+            in which case, the RTX payload type MUST also be
+            ignored.
+            </t>
 
             <t>For each specified fmtp parameter that is supported by
             the local implementation, enable them on the associated
             media formats.</t>
+
+            <t>For each specified SSRC that is signaled in the m= section,
+            prepare to demux RTP streams intended for this m= section using
+            that SSRC, as described in
+            <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />,
+            Section 10.2.</t>
 
             <t>For each specified RTP header extension that is also
             supported by the local implementation, establish a mapping
@@ -3776,11 +3802,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the m= section is of type audio:
             <list style="symbols">
 
-              <t>For each specified "CN" media format, enable DTX for
+              <t>For each specified "CN" media format, enable silence
+              suppression for
               all supported media formats with the same clockrate, as
               described in
               <xref target="RFC3389" />, Section 5, except for formats
-              that have their own internal DTX mechanisms. DTX for such
+              that have their own internal silence suppression mechanisms.
+              Silence suppression for such
               formats (e.g., Opus) is controlled via fmtp parameters,
               as discussed in
               <xref target="sec.voiceactivitydetection1" />.</t>
@@ -3859,8 +3887,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             reduced-size RTCP, as specified in
             <xref target="RFC5506" />.</t>
 
-            <t>If the directional attribute in the answer is of type
-            "sendrecv" or "sendonly", choose the media format to send
+            <t>If the directional attribute in the answer indicates
+            that the JSEP implementation should be sending media
+            ("sendonly" for local answers, "recvonly" for remote
+            answers, or "sendrecv" for either type of answer),
+            choose the media format to send
             as the most preferred media format from the remote
             description that is also present in the answer, as
             described in
@@ -3914,8 +3945,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC8108"></xref>,
             Section 5.4.1 to select which SSRC to use.</t>
 
-            <t>If the directional attribute is of type "recvonly" or
-            "inactive", stop transmitting all RTP media, but continue
+            <t>If the directional attribute in the answer indicates that
+            the JSEP implementation should not be sending media
+            ("recvonly" for local answers, "sendonly" for remote
+            answers, or "inactive" for either type of answer)
+            stop transmitting all RTP media, but continue
             sending RTCP, as described in
             <xref target="RFC3264" />, Section 5.1.</t>
           </list></t>
@@ -5159,6 +5193,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
   <back>
     <references title="Normative References">
 
+
       <?rfc include='reference.I-D.ietf-avtext-rid'?>
       <?rfc include='reference.I-D.ietf-ice-trickle'?>
       <?rfc include='reference.I-D.ietf-mmusic-dtls-sdp'?>
@@ -5220,6 +5255,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 
       <reference anchor="W3C.webrtc"
       target="https://www.w3.org/TR/2017/WD-webrtc-20170515/">
+
         <front>
           <title>WebRTC 1.0: Real-time Communication Between
           Browsers</title>
