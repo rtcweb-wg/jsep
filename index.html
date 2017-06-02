@@ -621,7 +621,7 @@ li, p {
   <h1 id="rfc.section.1">
 <a href="#rfc.section.1">1.</a> <a href="#sec.introduction" id="sec.introduction">Introduction</a>
 </h1>
-<p id="rfc.section.1.p.1">This document describes how the W3C WEBRTC RTCPeerConnection interface <a href="#W3C.WD-webrtc-20140617" class="xref">[W3C.WD-webrtc-20140617]</a> is used to control the setup, management and teardown of a multimedia session.</p>
+<p id="rfc.section.1.p.1">This document describes how the W3C WEBRTC RTCPeerConnection interface <a href="#W3C.webrtc" class="xref">[W3C.webrtc]</a> is used to control the setup, management and teardown of a multimedia session.</p>
 <h2 id="rfc.section.1.1">
 <a href="#rfc.section.1.1">1.1.</a> <a href="#sec.general-design-of-jsep" id="sec.general-design-of-jsep">General Design of JSEP</a>
 </h2>
@@ -671,7 +671,7 @@ li, p {
 <a href="#rfc.section.3.2">3.2.</a> <a href="#sec.session-descriptions-and-" id="sec.session-descriptions-and-">Session Descriptions and State Machine</a>
 </h2>
 <p id="rfc.section.3.2.p.1">In order to establish the media plane, the JSEP implementation needs specific parameters to indicate what to transmit to the remote side, as well as how to handle the media that is received.  These parameters are determined by the exchange of session descriptions in offers and answers, and there are certain details to this process that must be handled in the JSEP APIs.</p>
-<p id="rfc.section.3.2.p.2">Whether a session description applies to the local side or the remote side affects the meaning of that description. For example, the list of codecs sent to a remote party indicates what the local side is willing to receive, which, when intersected with the set of codecs the remote side supports, specifies what the remote side should send. However, not all parameters follow this rule; for example, the fingerprints <a href="#I-D.ietf-mmusic-4572-update" class="xref">[I-D.ietf-mmusic-4572-update]</a> sent to a remote party are calculated based on the local certificate(s) offered; the remote party MUST either accept these parameters or reject them altogether, with no option to choose different values.</p>
+<p id="rfc.section.3.2.p.2">Whether a session description applies to the local side or the remote side affects the meaning of that description. For example, the list of codecs sent to a remote party indicates what the local side is willing to receive, which, when intersected with the set of codecs the remote side supports, specifies what the remote side should send. However, not all parameters follow this rule; for example, the fingerprints <a href="#RFC8122" class="xref">[RFC8122]</a> sent to a remote party are calculated based on the local certificate(s) offered; the remote party MUST either accept these parameters or reject them altogether, with no option to choose different values.</p>
 <p id="rfc.section.3.2.p.3">In addition, various RFCs put different conditions on the format of offers versus answers. For example, an offer may propose an arbitrary number of m= sections (i.e., media descriptions as described in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.14), but an answer must contain the exact same number as the offer.</p>
 <p id="rfc.section.3.2.p.4">Lastly, while the exact media parameters are only known only after an offer and an answer have been exchanged, the offerer may receive ICE checks, and possibly media (e.g., in the case of a re-offer after a connection has been established) before it receives an answer. To properly process incoming media in this case, the offerer's media handler must be aware of the details of the offer before the answer arrives.</p>
 <p id="rfc.section.3.2.p.5">Therefore, in order to handle session descriptions properly, the JSEP implementation needs: </p>
@@ -1120,7 +1120,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.2.1.p.3">The next step is to generate m= sections, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a> Section 5.14. An m= section is generated for each RtpTransceiver that has been added to the PeerConnection, excluding any stopped RtpTransceivers. This is done in the order the RtpTransceivers were added to the PeerConnection.</p>
 <p id="rfc.section.5.2.1.p.4">For each m= section generated for an RtpTransceiver, establish a mapping between the transceiver and the index of the generated m= section.</p>
 <p id="rfc.section.5.2.1.p.5">Each m= section, provided it is not marked as bundle-only, MUST generate a unique set of ICE credentials and gather its own unique set of ICE candidates. Bundle-only m= sections MUST NOT contain any ICE credentials and MUST NOT gather any candidates.</p>
-<p id="rfc.section.5.2.1.p.6">For DTLS, all m= sections MUST use all the certificate(s) that have been specified for the PeerConnection; as a result, they MUST all have the same <a href="#I-D.ietf-mmusic-4572-update" class="xref">[I-D.ietf-mmusic-4572-update]</a> fingerprint value(s), or these value(s) MUST be session-level attributes.</p>
+<p id="rfc.section.5.2.1.p.6">For DTLS, all m= sections MUST use all the certificate(s) that have been specified for the PeerConnection; as a result, they MUST all have the same <a href="#RFC8122" class="xref">[RFC8122]</a> fingerprint value(s), or these value(s) MUST be session-level attributes.</p>
 <p id="rfc.section.5.2.1.p.7">Each m= section should be generated as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.14. For the m= line itself, the following rules MUST be followed: </p>
 
 <ul>
@@ -1161,7 +1161,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
 <li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4.</li>
-<li>An "a=fingerprint" line for each of the endpoint's certificates, as specified in <a href="#RFC4572" class="xref">[RFC4572]</a>, Section 5; the digest algorithm used for the fingerprint MUST match that used in the certificate signature.</li>
+<li>An "a=fingerprint" line for each of the endpoint's certificates, as specified in <a href="#RFC8122" class="xref">[RFC8122]</a>, Section 5; the digest algorithm used for the fingerprint MUST match that used in the certificate signature.</li>
 <li>An "a=setup" line, as specified in <a href="#RFC4145" class="xref">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763" class="xref">[RFC5763]</a>, Section 5. The role value in the offer MUST be "actpass".</li>
 <li>An "a=tls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.2.</li>
 <li>An "a=rtcp" line, as specified in <a href="#RFC3605" class="xref">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0", because no candidates have yet been gathered.</li>
@@ -1356,7 +1356,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
 <li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4.</li>
-<li>An "a=fingerprint" line for each of the endpoint's certificates, as specified in <a href="#RFC4572" class="xref">[RFC4572]</a>, Section 5; the digest algorithm used for the fingerprint MUST match that used in the certificate signature.</li>
+<li>An "a=fingerprint" line for each of the endpoint's certificates, as specified in <a href="#RFC8122" class="xref">[RFC8122]</a>, Section 5; the digest algorithm used for the fingerprint MUST match that used in the certificate signature.</li>
 <li>An "a=setup" line, as specified in <a href="#RFC4145" class="xref">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763" class="xref">[RFC5763]</a>, Section 5. The role value in the answer MUST be "active" or "passive"; the "active" role is RECOMMENDED.</li>
 <li>An "a=tls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5.3.</li>
 <li>If present in the offer, an "a=rtcp-mux" line, as specified in <a href="#RFC5761" class="xref">[RFC5761]</a>, Section 5.1.3. Otherwise, an "a=rtcp" line, as specified in <a href="#RFC3605" class="xref">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0" (because no candidates have yet been gathered).</li>
@@ -1475,7 +1475,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>If present, a single "a=ice-ufrag" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4, and the ufrag value is stored.</li>
 <li>If present, a single "a=ice-pwd" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4, and the password value is stored.</li>
 <li>If present, a single "a=ice-options" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.5, and the set of specified options is stored.</li>
-<li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC4572" class="xref">[RFC4572]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
+<li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC8122" class="xref">[RFC8122]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
 <li>If present, a single "a=setup" line is parsed as specified in <a href="#RFC4145" class="xref">[RFC4145]</a>, Section 4, and the setup value is stored.</li>
 <li>If present, a single "a=tls-id" line is parsed as specified in <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5, and the tls-id value is stored.</li>
 <li>Any "a=identity" lines are parsed and the identity values stored for subsequent verification, as specified <a href="#I-D.ietf-rtcweb-security-arch" class="xref">[I-D.ietf-rtcweb-security-arch]</a>, Section 5.</li>
@@ -1503,7 +1503,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>Any "a=candidate" attributes MUST be parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.1, and their values stored.</li>
 <li>Any "a=remote-candidates" attributes MUST be parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.2, but their values are ignored.</li>
 <li>If present, a single "a=end-of-candidates" attribute MUST be parsed as specified in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 8.2, and its presence or absence flagged and stored.</li>
-<li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC4572" class="xref">[RFC4572]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
+<li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC8122" class="xref">[RFC8122]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
 </ul>
 <p id="rfc.section.5.7.2.p.5">If the "m=" proto value indicates use of RTP, as described in the <a href="#sec.profile-names" class="xref">Section 5.1.2</a> section above, the following attribute lines MUST be processed: </p>
 
@@ -1652,7 +1652,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>If simulcast has been negotiated, send the number of Source RTP Streams as specified in <a href="#I-D.ietf-mmusic-sdp-simulcast" class="xref">[I-D.ietf-mmusic-sdp-simulcast]</a>, Section 6.2.2.</li>
 <li>If the send media format chosen above has a corresponding "rtx" media format, or a FEC mechanism has been negotiated, establish a Redundancy RTP Stream with a random SSRC for each Source RTP Stream, and start or continue transmitting RTX/FEC packets as needed.</li>
 <li>If the send media format chosen above has a corresponding "red" media format of the same clockrate, allow redundant encoding using the specified format for resiliency purposes, as discussed in <a href="#I-D.ietf-rtcweb-fec" class="xref">[I-D.ietf-rtcweb-fec]</a>, Section 3.2. Note that unlike RTX or FEC media formats, the "red" format is transmitted on the Source RTP Stream, not the Redundancy RTP Stream.</li>
-<li>Enable the RTCP feedback mechanisms referenced in the media section for all Source RTP Streams using the specified media formats. Specifically, begin or continue sending the requested feedback types and reacting to received feedback, as specified in <a href="#RFC4585" class="xref">[RFC4585]</a>, Section 4.2. When sending RTCP feedback, follow the rules and recommendations from <a href="#I-D.ietf-avtcore-rtp-multi-stream" class="xref">[I-D.ietf-avtcore-rtp-multi-stream]</a>, Section 5.4.1 to select which SSRC to use.</li>
+<li>Enable the RTCP feedback mechanisms referenced in the media section for all Source RTP Streams using the specified media formats. Specifically, begin or continue sending the requested feedback types and reacting to received feedback, as specified in <a href="#RFC4585" class="xref">[RFC4585]</a>, Section 4.2. When sending RTCP feedback, follow the rules and recommendations from <a href="#RFC8108" class="xref">[RFC8108]</a>, Section 5.4.1 to select which SSRC to use.</li>
 <li>If the directional attribute in the answer indicates that the JSEP implementation should not be sending media ("recvonly" for local answers, "sendonly" for remote answers, or "inactive" for either type of answer) stop transmitting all RTP media, but continue sending RTCP, as described in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 5.1.</li>
 </ul>
 </li>
@@ -1673,7 +1673,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <a href="#rfc.section.7">7.</a> <a href="#sec.examples" id="sec.examples">Examples</a>
 </h1>
 <p id="rfc.section.7.p.1">Note that this example section shows several SDP fragments. To format in 72 columns, some of the lines in SDP have been split into multiple lines, where leading whitespace indicates that a line is a continuation of the previous line. In addition, some blank lines have been added to improve readability but are not valid in SDP.</p>
-<p id="rfc.section.7.p.2">More examples of SDP for WebRTC call flows, including examples with IPv6 addresses, can be found in <a href="#I-D.nandakumar-rtcweb-sdp" class="xref">[I-D.nandakumar-rtcweb-sdp]</a>.</p>
+<p id="rfc.section.7.p.2">More examples of SDP for WebRTC call flows, including examples with IPv6 addresses, can be found in <a href="#I-D.ietf-rtcweb-sdp" class="xref">[I-D.ietf-rtcweb-sdp]</a>.</p>
 <h2 id="rfc.section.7.1">
 <a href="#rfc.section.7.1">7.1.</a> <a href="#sec.simple-examples" id="sec.simple-examples">Simple Example</a>
 </h2>
@@ -2662,109 +2662,99 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <a href="#rfc.references.1">11.1.</a> Normative References</h2>
 <table><tbody>
 <tr>
-<td class="reference"><b id="I-D.ietf-avtcore-rtp-multi-stream">[I-D.ietf-avtcore-rtp-multi-stream]</b></td>
-<td class="top">
-<a>Lennox, J.</a>, <a>Westerlund, M.</a>, <a>Wu, Q.</a> and <a>C. Perkins</a>, "<a href="http://tools.ietf.org/html/draft-ietf-avtcore-rtp-multi-stream-11">Sending Multiple RTP Streams in a Single RTP Session</a>", Internet-Draft draft-ietf-avtcore-rtp-multi-stream-11, December 2015.</td>
-</tr>
-<tr>
 <td class="reference"><b id="I-D.ietf-avtext-rid">[I-D.ietf-avtext-rid]</b></td>
 <td class="top">
-<a>Roach, A.</a>, <a>Nandakumar, S.</a> and <a>P. Thatcher</a>, "<a href="http://tools.ietf.org/html/draft-ietf-avtext-rid-00">RTP Stream Identifier (RID) Source Description (SDES)</a>", Internet-Draft draft-ietf-avtext-rid-00, February 2016.</td>
+<a>Roach, A.</a>, <a>Nandakumar, S.</a> and <a>P. Thatcher</a>, "<a href="http://tools.ietf.org/html/draft-ietf-avtext-rid-09">RTP Stream Identifier Source Description (SDES)</a>", Internet-Draft draft-ietf-avtext-rid-09, October 2016.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</b></td>
 <td class="top">
-<a href="mailto:emcho@jitsi.org" title="Jitsi">Ivov, E.</a>, <a href="mailto:ekr@rtfm.com" title="RTFM, Inc.">Rescorla, E.</a>, <a href="mailto:justin@uberti.name" title="Google">Uberti, J.</a> and <a href="mailto:peter@andyet.com" title="&amp;yet">P. Saint-Andre</a>, "<a>Trickle ICE: Incremental Provisioning of Candidates for the Interactive Connectivity Establishment (ICE) Protocol</a>"</td>
-</tr>
-<tr>
-<td class="reference"><b id="I-D.ietf-mmusic-4572-update">[I-D.ietf-mmusic-4572-update]</b></td>
-<td class="top">
-<a>Holmberg, C.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-4572-update-05">Updates to RFC 4572</a>", Internet-Draft draft-ietf-mmusic-4572-update-05, June 2016.</td>
+<a>Ivov, E.</a>, <a>Rescorla, E.</a>, <a>Uberti, J.</a> and <a>P. Saint-Andre</a>, "<a href="http://tools.ietf.org/html/draft-ietf-ice-trickle-11">Trickle ICE: Incremental Provisioning of Candidates for the Interactive Connectivity Establishment (ICE) Protocol</a>", Internet-Draft draft-ietf-ice-trickle-11, May 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</b></td>
 <td class="top">
-<a>Holmberg, C.</a> and <a>R. Shpount</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-dtls-sdp-14">Using the SDP Offer/Answer Mechanism for DTLS</a>", Internet-Draft draft-ietf-mmusic-dtls-sdp-14, July 2016.</td>
+<a>Holmberg, C.</a> and <a>R. Shpount</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-dtls-sdp-24">Using the SDP Offer/Answer Mechanism for DTLS</a>", Internet-Draft draft-ietf-mmusic-dtls-sdp-24, April 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</b></td>
 <td class="top">
-<a>Alvestrand, H.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-msid-01">Cross Session Stream Identification in the Session Description Protocol</a>", Internet-Draft draft-ietf-mmusic-msid-01, August 2013.</td>
+<a>Alvestrand, H.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-msid-16">WebRTC MediaStream Identification in the Session Description Protocol</a>", Internet-Draft draft-ietf-mmusic-msid-16, February 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-mux-exclusive">[I-D.ietf-mmusic-mux-exclusive]</b></td>
 <td class="top">
-<a>Holmberg, C.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-mux-exclusive-08">Indicating Exclusive Support of RTP/RTCP Multiplexing using SDP</a>", Internet-Draft draft-ietf-mmusic-mux-exclusive-08, June 2016.</td>
+<a>Holmberg, C.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-mux-exclusive-12">Indicating Exclusive Support of RTP/RTCP Multiplexing using SDP</a>", Internet-Draft draft-ietf-mmusic-mux-exclusive-12, May 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-rid">[I-D.ietf-mmusic-rid]</b></td>
 <td class="top">
-<a>Thatcher, P.</a>, <a>Zanaty, M.</a>, <a>Nandakumar, S.</a>, <a>Burman, B.</a>, <a>Roach, A.</a> and <a>B. Campen</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-rid-04">RTP Payload Format Constraints</a>", Internet-Draft draft-ietf-mmusic-rid-04, February 2016.</td>
+<a>Thatcher, P.</a>, <a>Zanaty, M.</a>, <a>Nandakumar, S.</a>, <a>Burman, B.</a>, <a>Roach, A.</a> and <a>B. Campen</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-rid-10">RTP Payload Format Restrictions</a>", Internet-Draft draft-ietf-mmusic-rid-10, March 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-sctp-sdp">[I-D.ietf-mmusic-sctp-sdp]</b></td>
 <td class="top">
-<a>Loreto, S.</a> and <a>G. Camarillo</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-sctp-sdp-04">Stream Control Transmission Protocol (SCTP)-Based Media Transport in the Session Description Protocol (SDP)</a>", Internet-Draft draft-ietf-mmusic-sctp-sdp-04, June 2013.</td>
+<a>Holmberg, C.</a>, <a>Shpount, R.</a>, <a>Loreto, S.</a> and <a>G. Camarillo</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-sctp-sdp-26">Session Description Protocol (SDP) Offer/Answer Procedures For Stream Control Transmission Protocol (SCTP) over Datagram Transport Layer Security (DTLS) Transport.</a>", Internet-Draft draft-ietf-mmusic-sctp-sdp-26, April 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</b></td>
 <td class="top">
-<a>Holmberg, C.</a>, <a>Alvestrand, H.</a> and <a>C. Jennings</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-sdp-bundle-negotiation-04">Multiplexing Negotiation Using Session Description Protocol (SDP) Port Numbers</a>", Internet-Draft draft-ietf-mmusic-sdp-bundle-negotiation-04, June 2013.</td>
+<a>Holmberg, C.</a>, <a>Alvestrand, H.</a> and <a>C. Jennings</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-sdp-bundle-negotiation-38">Negotiating Media Multiplexing Using the Session Description Protocol (SDP)</a>", Internet-Draft draft-ietf-mmusic-sdp-bundle-negotiation-38, April 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-sdp-mux-attributes">[I-D.ietf-mmusic-sdp-mux-attributes]</b></td>
 <td class="top">
-<a>Nandakumar, S.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-sdp-mux-attributes-01">A Framework for SDP Attributes when Multiplexing</a>", Internet-Draft draft-ietf-mmusic-sdp-mux-attributes-01, February 2014.</td>
+<a>Nandakumar, S.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-sdp-mux-attributes-16">A Framework for SDP Attributes when Multiplexing</a>", Internet-Draft draft-ietf-mmusic-sdp-mux-attributes-16, December 2016.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-sdp-simulcast">[I-D.ietf-mmusic-sdp-simulcast]</b></td>
 <td class="top">
-<a>Burman, B.</a>, <a>Westerlund, M.</a>, <a>Nandakumar, S.</a> and <a>M. Zanaty</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-sdp-simulcast-04">Using Simulcast in SDP and RTP Sessions</a>", Internet-Draft draft-ietf-mmusic-sdp-simulcast-04, February 2016.</td>
+<a>Burman, B.</a>, <a>Westerlund, M.</a>, <a>Nandakumar, S.</a> and <a>M. Zanaty</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-sdp-simulcast-08">Using Simulcast in SDP and RTP Sessions</a>", Internet-Draft draft-ietf-mmusic-sdp-simulcast-08, March 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-rtcweb-fec">[I-D.ietf-rtcweb-fec]</b></td>
 <td class="top">
-<a>Uberti, J.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-fec-00">WebRTC Forward Error Correction Requirements</a>", Internet-Draft draft-ietf-rtcweb-fec-00, February 2015.</td>
+<a>Uberti, J.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-fec-05">WebRTC Forward Error Correction Requirements</a>", Internet-Draft draft-ietf-rtcweb-fec-05, May 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-rtcweb-rtp-usage">[I-D.ietf-rtcweb-rtp-usage]</b></td>
 <td class="top">
-<a>Perkins, C.</a>, <a>Westerlund, M.</a> and <a>J. Ott</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-rtp-usage-09">Web Real-Time Communication (WebRTC): Media Transport and Use of RTP</a>", Internet-Draft draft-ietf-rtcweb-rtp-usage-09, September 2013.</td>
+<a>Perkins, C.</a>, <a>Westerlund, M.</a> and <a>J. Ott</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-rtp-usage-26">Web Real-Time Communication (WebRTC): Media Transport and Use of RTP</a>", Internet-Draft draft-ietf-rtcweb-rtp-usage-26, March 2016.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-rtcweb-security">[I-D.ietf-rtcweb-security]</b></td>
 <td class="top">
-<a>Rescorla, E.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-security-06">Security Considerations for WebRTC</a>", Internet-Draft draft-ietf-rtcweb-security-06, January 2014.</td>
+<a>Rescorla, E.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-security-08">Security Considerations for WebRTC</a>", Internet-Draft draft-ietf-rtcweb-security-08, February 2015.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</b></td>
 <td class="top">
-<a>Rescorla, E.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-security-arch-09">WebRTC Security Architecture</a>", Internet-Draft draft-ietf-rtcweb-security-arch-09, February 2014.</td>
+<a>Rescorla, E.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-security-arch-12">WebRTC Security Architecture</a>", Internet-Draft draft-ietf-rtcweb-security-arch-12, June 2016.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC2119">[RFC2119]</b></td>
 <td class="top">
-<a href="mailto:sob@harvard.edu" title="Harvard University">Bradner, S.</a>, "<a href="http://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>", BCP 14, RFC 2119, March 1997.</td>
+<a>Bradner, S.</a>, "<a href="http://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>", BCP 14, RFC 2119, DOI 10.17487/RFC2119, March 1997.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC3261">[RFC3261]</b></td>
 <td class="top">
-<a>Rosenberg, J.</a>, <a>Schulzrinne, H.</a>, <a>Camarillo, G.</a>, <a>Johnston, A.</a>, <a>Peterson, J.</a>, <a>Sparks, R.</a>, <a>Handley, M.</a> and <a>E. Schooler</a>, "<a href="http://tools.ietf.org/html/rfc3261">SIP: Session Initiation Protocol</a>", RFC 3261, June 2002.</td>
+<a>Rosenberg, J.</a>, <a>Schulzrinne, H.</a>, <a>Camarillo, G.</a>, <a>Johnston, A.</a>, <a>Peterson, J.</a>, <a>Sparks, R.</a>, <a>Handley, M.</a> and <a>E. Schooler</a>, "<a href="http://tools.ietf.org/html/rfc3261">SIP: Session Initiation Protocol</a>", RFC 3261, DOI 10.17487/RFC3261, June 2002.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC3264">[RFC3264]</b></td>
 <td class="top">
-<a>Rosenberg, J.</a> and <a>H. Schulzrinne</a>, "<a href="http://tools.ietf.org/html/rfc3264">An Offer/Answer Model with Session Description Protocol (SDP)</a>", RFC 3264, June 2002.</td>
+<a>Rosenberg, J.</a> and <a>H. Schulzrinne</a>, "<a href="http://tools.ietf.org/html/rfc3264">An Offer/Answer Model with Session Description Protocol (SDP)</a>", RFC 3264, DOI 10.17487/RFC3264, June 2002.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC3552">[RFC3552]</b></td>
 <td class="top">
-<a>Rescorla, E.</a> and <a>B. Korver</a>, "<a href="http://tools.ietf.org/html/rfc3552">Guidelines for Writing RFC Text on Security Considerations</a>", BCP 72, RFC 3552, July 2003.</td>
+<a>Rescorla, E.</a> and <a>B. Korver</a>, "<a href="http://tools.ietf.org/html/rfc3552">Guidelines for Writing RFC Text on Security Considerations</a>", BCP 72, RFC 3552, DOI 10.17487/RFC3552, July 2003.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC3605">[RFC3605]</b></td>
 <td class="top">
-<a>Huitema, C.</a>, "<a href="http://tools.ietf.org/html/rfc3605">Real Time Control Protocol (RTCP) attribute in Session Description Protocol (SDP)</a>", RFC 3605, October 2003.</td>
+<a>Huitema, C.</a>, "<a href="http://tools.ietf.org/html/rfc3605">Real Time Control Protocol (RTCP) attribute in Session Description Protocol (SDP)</a>", RFC 3605, DOI 10.17487/RFC3605, October 2003.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC3890">[RFC3890]</b></td>
@@ -2774,52 +2764,47 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="reference"><b id="RFC4145">[RFC4145]</b></td>
 <td class="top">
-<a>Yon, D.</a> and <a>G. Camarillo</a>, "<a href="http://tools.ietf.org/html/rfc4145">TCP-Based Media Transport in the Session Description Protocol (SDP)</a>", RFC 4145, September 2005.</td>
+<a>Yon, D.</a> and <a>G. Camarillo</a>, "<a href="http://tools.ietf.org/html/rfc4145">TCP-Based Media Transport in the Session Description Protocol (SDP)</a>", RFC 4145, DOI 10.17487/RFC4145, September 2005.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC4566">[RFC4566]</b></td>
 <td class="top">
-<a>Handley, M.</a>, <a>Jacobson, V.</a> and <a>C. Perkins</a>, "<a href="http://tools.ietf.org/html/rfc4566">SDP: Session Description Protocol</a>", RFC 4566, July 2006.</td>
-</tr>
-<tr>
-<td class="reference"><b id="RFC4572">[RFC4572]</b></td>
-<td class="top">
-<a>Lennox, J.</a>, "<a href="http://tools.ietf.org/html/rfc4572">Connection-Oriented Media Transport over the Transport Layer Security (TLS) Protocol in the Session Description Protocol (SDP)</a>", RFC 4572, July 2006.</td>
+<a>Handley, M.</a>, <a>Jacobson, V.</a> and <a>C. Perkins</a>, "<a href="http://tools.ietf.org/html/rfc4566">SDP: Session Description Protocol</a>", RFC 4566, DOI 10.17487/RFC4566, July 2006.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC4585">[RFC4585]</b></td>
 <td class="top">
-<a>Ott, J.</a>, <a>Wenger, S.</a>, <a>Sato, N.</a>, <a>Burmeister, C.</a> and <a>J. Rey</a>, "<a href="http://tools.ietf.org/html/rfc4585">Extended RTP Profile for Real-time Transport Control Protocol (RTCP)-Based Feedback (RTP/AVPF)</a>", RFC 4585, July 2006.</td>
+<a>Ott, J.</a>, <a>Wenger, S.</a>, <a>Sato, N.</a>, <a>Burmeister, C.</a> and <a>J. Rey</a>, "<a href="http://tools.ietf.org/html/rfc4585">Extended RTP Profile for Real-time Transport Control Protocol (RTCP)-Based Feedback (RTP/AVPF)</a>", RFC 4585, DOI 10.17487/RFC4585, July 2006.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5245">[RFC5245]</b></td>
 <td class="top">
-<a>Rosenberg, J.</a>, "<a href="http://tools.ietf.org/html/rfc5245">Interactive Connectivity Establishment (ICE): A Protocol for Network Address Translator (NAT) Traversal for Offer/Answer Protocols</a>", RFC 5245, April 2010.</td>
+<a>Rosenberg, J.</a>, "<a href="http://tools.ietf.org/html/rfc5245">Interactive Connectivity Establishment (ICE): A Protocol for Network Address Translator (NAT) Traversal for Offer/Answer Protocols</a>", RFC 5245, DOI 10.17487/RFC5245, April 2010.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5285">[RFC5285]</b></td>
 <td class="top">
-<a>Singer, D.</a> and <a>H. Desineni</a>, "<a href="http://tools.ietf.org/html/rfc5285">A General Mechanism for RTP Header Extensions</a>", RFC 5285, July 2008.</td>
+<a>Singer, D.</a> and <a>H. Desineni</a>, "<a href="http://tools.ietf.org/html/rfc5285">A General Mechanism for RTP Header Extensions</a>", RFC 5285, DOI 10.17487/RFC5285, July 2008.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5761">[RFC5761]</b></td>
 <td class="top">
-<a>Perkins, C.</a> and <a>M. Westerlund</a>, "<a href="http://tools.ietf.org/html/rfc5761">Multiplexing RTP Data and Control Packets on a Single Port</a>", RFC 5761, April 2010.</td>
+<a>Perkins, C.</a> and <a>M. Westerlund</a>, "<a href="http://tools.ietf.org/html/rfc5761">Multiplexing RTP Data and Control Packets on a Single Port</a>", RFC 5761, DOI 10.17487/RFC5761, April 2010.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5888">[RFC5888]</b></td>
 <td class="top">
-<a>Camarillo, G.</a> and <a>H. Schulzrinne</a>, "<a href="http://tools.ietf.org/html/rfc5888">The Session Description Protocol (SDP) Grouping Framework</a>", RFC 5888, June 2010.</td>
+<a>Camarillo, G.</a> and <a>H. Schulzrinne</a>, "<a href="http://tools.ietf.org/html/rfc5888">The Session Description Protocol (SDP) Grouping Framework</a>", RFC 5888, DOI 10.17487/RFC5888, June 2010.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC6236">[RFC6236]</b></td>
 <td class="top">
-<a>Johansson, I.</a> and <a>K. Jung</a>, "<a href="http://tools.ietf.org/html/rfc6236">Negotiation of Generic Image Attributes in the Session Description Protocol (SDP)</a>", RFC 6236, May 2011.</td>
+<a>Johansson, I.</a> and <a>K. Jung</a>, "<a href="http://tools.ietf.org/html/rfc6236">Negotiation of Generic Image Attributes in the Session Description Protocol (SDP)</a>", RFC 6236, DOI 10.17487/RFC6236, May 2011.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC6347">[RFC6347]</b></td>
 <td class="top">
-<a>Rescorla, E.</a> and <a>N. Modadugu</a>, "<a href="http://tools.ietf.org/html/rfc6347">Datagram Transport Layer Security Version 1.2</a>", RFC 6347, January 2012.</td>
+<a>Rescorla, E.</a> and <a>N. Modadugu</a>, "<a href="http://tools.ietf.org/html/rfc6347">Datagram Transport Layer Security Version 1.2</a>", RFC 6347, DOI 10.17487/RFC6347, January 2012.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC6716">[RFC6716]</b></td>
@@ -2829,7 +2814,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="reference"><b id="RFC6904">[RFC6904]</b></td>
 <td class="top">
-<a>Lennox, J.</a>, "<a href="http://tools.ietf.org/html/rfc6904">Encryption of Header Extensions in the Secure Real-time Transport Protocol (SRTP)</a>", RFC 6904, April 2013.</td>
+<a>Lennox, J.</a>, "<a href="http://tools.ietf.org/html/rfc6904">Encryption of Header Extensions in the Secure Real-time Transport Protocol (SRTP)</a>", RFC 6904, DOI 10.17487/RFC6904, April 2013.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC7160">[RFC7160]</b></td>
@@ -2856,6 +2841,16 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <td class="top">
 <a>Valin, JM.</a> and <a>C. Bran</a>, "<a href="http://tools.ietf.org/html/rfc7874">WebRTC Audio Codec and Processing Requirements</a>", RFC 7874, DOI 10.17487/RFC7874, May 2016.</td>
 </tr>
+<tr>
+<td class="reference"><b id="RFC8108">[RFC8108]</b></td>
+<td class="top">
+<a>Lennox, J.</a>, <a>Westerlund, M.</a>, <a>Wu, Q.</a> and <a>C. Perkins</a>, "<a href="http://tools.ietf.org/html/rfc8108">Sending Multiple RTP Streams in a Single RTP Session</a>", RFC 8108, DOI 10.17487/RFC8108, March 2017.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC8122">[RFC8122]</b></td>
+<td class="top">
+<a>Lennox, J.</a> and <a>C. Holmberg</a>, "<a href="http://tools.ietf.org/html/rfc8122">Connection-Oriented Media Transport over the Transport Layer Security (TLS) Protocol in the Session Description Protocol (SDP)</a>", RFC 8122, DOI 10.17487/RFC8122, March 2017.</td>
+</tr>
 </tbody></table>
 <h2 id="rfc.references.2">
 <a href="#rfc.references.2">11.2.</a> Informative References</h2>
@@ -2863,37 +2858,37 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="reference"><b id="I-D.ietf-rtcweb-ip-handling">[I-D.ietf-rtcweb-ip-handling]</b></td>
 <td class="top">
-<a>Uberti, J.</a> and <a>G. Shieh</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-ip-handling-01">WebRTC IP Address Handling Recommendations</a>", Internet-Draft draft-ietf-rtcweb-ip-handling-01, March 2016.</td>
+<a>Uberti, J.</a> and <a>G. Shieh</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-ip-handling-03">WebRTC IP Address Handling Requirements</a>", Internet-Draft draft-ietf-rtcweb-ip-handling-03, January 2017.</td>
 </tr>
 <tr>
-<td class="reference"><b id="I-D.nandakumar-rtcweb-sdp">[I-D.nandakumar-rtcweb-sdp]</b></td>
+<td class="reference"><b id="I-D.ietf-rtcweb-sdp">[I-D.ietf-rtcweb-sdp]</b></td>
 <td class="top">
-<a>Nandakumar, S.</a> and <a>C. Jennings</a>, "<a href="http://tools.ietf.org/html/draft-nandakumar-rtcweb-sdp-02">SDP for the WebRTC</a>", Internet-Draft draft-nandakumar-rtcweb-sdp-02, July 2013.</td>
+<a>Nandakumar, S.</a> and <a>C. Jennings</a>, "<a href="http://tools.ietf.org/html/draft-ietf-rtcweb-sdp-06">Annotated Example SDP for WebRTC</a>", Internet-Draft draft-ietf-rtcweb-sdp-06, April 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC3389">[RFC3389]</b></td>
 <td class="top">
-<a>Zopf, R.</a>, "<a href="http://tools.ietf.org/html/rfc3389">Real-time Transport Protocol (RTP) Payload for Comfort Noise (CN)</a>", RFC 3389, September 2002.</td>
+<a>Zopf, R.</a>, "<a href="http://tools.ietf.org/html/rfc3389">Real-time Transport Protocol (RTP) Payload for Comfort Noise (CN)</a>", RFC 3389, DOI 10.17487/RFC3389, September 2002.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC3556">[RFC3556]</b></td>
 <td class="top">
-<a>Casner, S.</a>, "<a href="http://tools.ietf.org/html/rfc3556">Session Description Protocol (SDP) Bandwidth Modifiers for RTP Control Protocol (RTCP) Bandwidth</a>", RFC 3556, July 2003.</td>
+<a>Casner, S.</a>, "<a href="http://tools.ietf.org/html/rfc3556">Session Description Protocol (SDP) Bandwidth Modifiers for RTP Control Protocol (RTCP) Bandwidth</a>", RFC 3556, DOI 10.17487/RFC3556, July 2003.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC3960">[RFC3960]</b></td>
 <td class="top">
-<a>Camarillo, G.</a> and <a>H. Schulzrinne</a>, "<a href="http://tools.ietf.org/html/rfc3960">Early Media and Ringing Tone Generation in the Session Initiation Protocol (SIP)</a>", RFC 3960, December 2004.</td>
+<a>Camarillo, G.</a> and <a>H. Schulzrinne</a>, "<a href="http://tools.ietf.org/html/rfc3960">Early Media and Ringing Tone Generation in the Session Initiation Protocol (SIP)</a>", RFC 3960, DOI 10.17487/RFC3960, December 2004.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC4568">[RFC4568]</b></td>
 <td class="top">
-<a>Andreasen, F.</a>, <a>Baugher, M.</a> and <a>D. Wing</a>, "<a href="http://tools.ietf.org/html/rfc4568">Session Description Protocol (SDP) Security Descriptions for Media Streams</a>", RFC 4568, July 2006.</td>
+<a>Andreasen, F.</a>, <a>Baugher, M.</a> and <a>D. Wing</a>, "<a href="http://tools.ietf.org/html/rfc4568">Session Description Protocol (SDP) Security Descriptions for Media Streams</a>", RFC 4568, DOI 10.17487/RFC4568, July 2006.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC4588">[RFC4588]</b></td>
 <td class="top">
-<a>Rey, J.</a>, <a>Leon, D.</a>, <a>Miyazaki, A.</a>, <a>Varsa, V.</a> and <a>R. Hakenberg</a>, "<a href="http://tools.ietf.org/html/rfc4588">RTP Retransmission Payload Format</a>", RFC 4588, July 2006.</td>
+<a>Rey, J.</a>, <a>Leon, D.</a>, <a>Miyazaki, A.</a>, <a>Varsa, V.</a> and <a>R. Hakenberg</a>, "<a href="http://tools.ietf.org/html/rfc4588">RTP Retransmission Payload Format</a>", RFC 4588, DOI 10.17487/RFC4588, July 2006.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC4733">[RFC4733]</b></td>
@@ -2903,22 +2898,22 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="reference"><b id="RFC5506">[RFC5506]</b></td>
 <td class="top">
-<a>Johansson, I.</a> and <a>M. Westerlund</a>, "<a href="http://tools.ietf.org/html/rfc5506">Support for Reduced-Size Real-Time Transport Control Protocol (RTCP): Opportunities and Consequences</a>", RFC 5506, April 2009.</td>
+<a>Johansson, I.</a> and <a>M. Westerlund</a>, "<a href="http://tools.ietf.org/html/rfc5506">Support for Reduced-Size Real-Time Transport Control Protocol (RTCP): Opportunities and Consequences</a>", RFC 5506, DOI 10.17487/RFC5506, April 2009.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5576">[RFC5576]</b></td>
 <td class="top">
-<a>Lennox, J.</a>, <a>Ott, J.</a> and <a>T. Schierl</a>, "<a href="http://tools.ietf.org/html/rfc5576">Source-Specific Media Attributes in the Session Description Protocol (SDP)</a>", RFC 5576, June 2009.</td>
+<a>Lennox, J.</a>, <a>Ott, J.</a> and <a>T. Schierl</a>, "<a href="http://tools.ietf.org/html/rfc5576">Source-Specific Media Attributes in the Session Description Protocol (SDP)</a>", RFC 5576, DOI 10.17487/RFC5576, June 2009.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5763">[RFC5763]</b></td>
 <td class="top">
-<a>Fischl, J.</a>, <a>Tschofenig, H.</a> and <a>E. Rescorla</a>, "<a href="http://tools.ietf.org/html/rfc5763">Framework for Establishing a Secure Real-time Transport Protocol (SRTP) Security Context Using Datagram Transport Layer Security (DTLS)</a>", RFC 5763, May 2010.</td>
+<a>Fischl, J.</a>, <a>Tschofenig, H.</a> and <a>E. Rescorla</a>, "<a href="http://tools.ietf.org/html/rfc5763">Framework for Establishing a Secure Real-time Transport Protocol (SRTP) Security Context Using Datagram Transport Layer Security (DTLS)</a>", RFC 5763, DOI 10.17487/RFC5763, May 2010.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5764">[RFC5764]</b></td>
 <td class="top">
-<a>McGrew, D.</a> and <a>E. Rescorla</a>, "<a href="http://tools.ietf.org/html/rfc5764">Datagram Transport Layer Security (DTLS) Extension to Establish Keys for the Secure Real-time Transport Protocol (SRTP)</a>", RFC 5764, May 2010.</td>
+<a>McGrew, D.</a> and <a>E. Rescorla</a>, "<a href="http://tools.ietf.org/html/rfc5764">Datagram Transport Layer Security (DTLS) Extension to Establish Keys for the Secure Real-time Transport Protocol (SRTP)</a>", RFC 5764, DOI 10.17487/RFC5764, May 2010.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC6464">[RFC6464]</b></td>
@@ -2936,9 +2931,9 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <a>3GPP TS 26.114 V12.8.0</a>, "<a href="http://www.3gpp.org/DynaReport/26114.htm">3rd Generation Partnership Project; Technical Specification Group Services and System Aspects; IP Multimedia Subsystem (IMS); Multimedia Telephony; Media handling and interaction (Release 12)</a>", December 2014.</td>
 </tr>
 <tr>
-<td class="reference"><b id="W3C.WD-webrtc-20140617">[W3C.WD-webrtc-20140617]</b></td>
+<td class="reference"><b id="W3C.webrtc">[W3C.webrtc]</b></td>
 <td class="top">
-<a>Bergkvist, A.</a>, <a>Burnett, D.</a>, <a>Narayanan, A.</a> and <a>C. Jennings</a>, "<a href="http://www.w3.org/TR/2011/WD-webrtc-20140617">WebRTC 1.0: Real-time Communication Between Browsers</a>", World Wide Web Consortium WD WD-webrtc-20140617, June 2014.</td>
+<a title="Ericsson">Bergkvist, A.</a>, <a>Burnett, D.</a>, <a title="Cisco">Jennings, C.</a>, <a title="Mozilla">Narayanan, A.</a>, <a title="Microsoft Corporation">Aboba, B.</a> and <a title="Google">T. Brandstetter</a>, "<a href="https://www.w3.org/TR/2017/WD-webrtc-20170515/">WebRTC 1.0: Real-time Communication Between Browsers</a>", World Wide Web Consortium WD WD-webrtc-20170515, May 2017.</td>
 </tr>
 </tbody></table>
 <h1 id="rfc.appendix.A">
@@ -3022,7 +3017,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="left">fingerprint</td>
 <td class="left">
-<a href="#RFC4572" class="xref">[RFC4572]</a> Section 5</td>
+<a href="#RFC8122" class="xref">[RFC8122]</a> Section 5</td>
 </tr>
 <tr>
 <td class="left">rtcp-fb</td>
