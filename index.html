@@ -1084,11 +1084,24 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <a href="#rfc.section.5.1.2">5.1.2.</a> <a href="#sec.profile-names" id="sec.profile-names">Profile Names and Interoperability</a>
 </h3>
 <p id="rfc.section.5.1.2.p.1">For media m= sections, JSEP implementations MUST support the "UDP/TLS/RTP/SAVPF" profile specified in <a href="#RFC7850" class="xref">[RFC7850]</a>, and MUST indicate this profile for each media m= line they produce in an offer. For data m= sections, implementations MUST support the "UDP/DTLS/SCTP" profile and MUST indicate this profile for each data m= line they produce in an offer. Because ICE can select either UDP <a href="#RFC5245" class="xref">[RFC5245]</a> or TCP <a href="#RFC6544" class="xref">[RFC6544]</a> transport depending on network conditions, this advertisement is consistent with ICE eventually selecting either either UDP or TCP.</p>
-<p id="rfc.section.5.1.2.p.2">Unfortunately, in an attempt at compatibility, some endpoints generate other profile strings even when they mean to support one of these profiles. For instance, an endpoint might generate "RTP/AVP" but supply "a=fingerprint" and "a=rtcp-fb" attributes, indicating its willingness to support "(UDP,TCP)/TLS/RTP/SAVPF". In order to simplify compatibility with such endpoints, JSEP implementations MUST follow the following rules when processing the media m= sections in a received offer:</p>
+<p id="rfc.section.5.1.2.p.2">Unfortunately, in an attempt at compatibility, some endpoints generate other profile strings even when they mean to support one of these profiles. For instance, an endpoint might generate "RTP/AVP" but supply "a=fingerprint" and "a=rtcp-fb" attributes, indicating its willingness to support "UDP/TLS/RTP/SAVPF" or "TCP/TLS/RTP/SAVPF". In order to simplify compatibility with such endpoints, JSEP implementations MUST follow the following rules when processing the media m= sections in a received offer:</p>
 <p></p>
 
 <ul>
-<li>Any profile in the offer matching the following patterns MUST be accepted: "RTP/[S]AVP[F]" and "(UDP|TCP)/TLS/RTP/SAVP[F]".  </li>
+<li>Any profile in the offer matching one of the following MUST be accepted: <ul>
+<li>"RTP/AVP" </li>
+<li>"RTP/AVPF" </li>
+<li>"RTP/SAVP" </li>
+<li>"RTP/SAVPF" </li>
+<li>"UDP/TLS/RTP/AVP" </li>
+<li>"UDP/TLS/RTP/AVPF" </li>
+<li>"UDP/TLS/RTP/SAVP" </li>
+<li>"UDP/TLS/RTP/SAVPF" </li>
+<li>"TCP/TLS/RTP/SAVP" </li>
+<li>"TCP/TLS/RTP/SAVPF" </li>
+</ul>
+<p> </p>
+</li>
 <li>The profile in any "m=" line in any generated answer MUST exactly match the profile provided in the offer.  </li>
 <li>Because DTLS-SRTP is REQUIRED, the choice of SAVP or AVP has no effect; support for DTLS-SRTP is determined by the presence of one or more "a=fingerprint" attribute.  Note that lack of an "a=fingerprint" attribute will lead to negotiation failure.</li>
 <li>The use of AVPF or AVP simply controls the timing rules used for RTCP feedback. If AVPF is provided, or an "a=rtcp-fb" attribute is present, assume AVPF timing, i.e., a default value of "trr-int=0". Otherwise, assume that AVPF is being used in an AVP compatible mode and use a value of "trr-int=4000".</li>
@@ -1678,7 +1691,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <a href="#rfc.section.7.1">7.1.</a> <a href="#sec.simple-examples" id="sec.simple-examples">Simple Example</a>
 </h2>
 <p id="rfc.section.7.1.p.1">This section shows a very simple example that sets up a minimal audio / video call between two JSEP endpoints without using trickle ICE. The example in the following section provides a more detailed example of what could happen in a JSEP session.</p>
-<p id="rfc.section.7.1.p.2">The code flow below shows Alice's endpoint initiating the session to Bob's endpoint. The messages from Alice's JS to Bob's JS are assumed to flow over some signaling protocol via a web server. The JS on both Alice's side and Bob's side waits for all candidates before sending the offer or answer, so the offers and answers are complete; trickle ICE is not used. Both Alice and Bob are using the default bundle policy of "balanced", and the default RTCP mux policy of "require".</p>
+<p id="rfc.section.7.1.p.2">The code flow below shows Alice's endpoint initiating the session to Bob's endpoint. The messages from the Javascript application in Alice's browser to the Javascript in Bob's browser, abbreviated as AliceJS and BobJS respectively, are assumed to flow over some signaling protocol via a web server. The Javascript on both Alice's side and Bob's side waits for all candidates before sending the offer or answer, so the offers and answers are complete; trickle ICE is not used. The user agents (JSEP implementations) in Alice and Bob's browsers, abbreviated as AliceUA and BobUA respectively, are using the default bundle policy of "balanced", and the default RTCP mux policy of "require".</p>
 <pre>
               
 //                  set up local media state
