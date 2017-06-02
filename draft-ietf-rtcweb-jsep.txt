@@ -3174,17 +3174,17 @@ Internet-Draft                    JSEP                         June 2017
    The following non-attribute lines are not meaningful in the JSEP
    context and MAY be discarded once they have been checked.
 
-      The "c=" line MUST be checked for syntax but its value is not
-      used.  This supersedes the guidance in [RFC5245], Section 6.1, to
-      use "ice-mismatch" to indicate mismatches between "c=" and the
-      candidate lines; because JSEP always uses ICE, "ice-mismatch" is
-      not useful in this context.
+      The "c=" line MUST be checked for syntax but its value is only
+      used for ICE mismatch detection, as defined in [RFC5245],
+      Section 6.1.  Note that JSEP implementations should never
+      encounter this condition because ICE is required for WebRTC.
 
       The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are
       not used by this specification; they MUST be checked for syntax
       but their values are not used.
 
    The remaining non-attribute lines are processed as follows:
+
 
 
 
@@ -3955,16 +3955,16 @@ Internet-Draft                    JSEP                         June 2017
    of what could happen in a JSEP session.
 
    The code flow below shows Alice's endpoint initiating the session to
-   Bob's endpoint.  The messages from Alice's JS to Bob's JS are assumed
-   to flow over some signaling protocol via a web server.  The JS on
-   both Alice's side and Bob's side waits for all candidates before
-   sending the offer or answer, so the offers and answers are complete;
-   trickle ICE is not used.  Both Alice and Bob are using the default
-   bundle policy of "balanced", and the default RTCP mux policy of
-   "require".
-
-
-
+   Bob's endpoint.  The messages from the Javascript application in
+   Alice's browser to the Javascript in Bob's browser, abbreviated as
+   AliceJS and BobJS respectively, are assumed to flow over some
+   signaling protocol via a web server.  The Javascript on both Alice's
+   side and Bob's side waits for all candidates before sending the offer
+   or answer, so the offers and answers are complete; trickle ICE is not
+   used.  The user agents (JSEP implementations) in Alice and Bob's
+   browsers, abbreviated as AliceUA and BobUA respectively, are using
+   the default bundle policy of "balanced", and the default RTCP mux
+   policy of "require".
 
 
 
