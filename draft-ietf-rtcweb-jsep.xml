@@ -3642,19 +3642,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         processing MUST stop and an error MUST be returned.
         <list style="symbols">
 
-          <t>If the ICE ufrag or password are unchanged from the previous remote description,
-          and the description is of type "answer" or "pranswer", and
-          the current local description is an ICE restart, then
-          generate an error.</t>
-
-          <t>If the ICE ufrag or password changed from the previous remote
-          description, then an ICE restart is needed, as described in
-          Section 9.1.1.1 of
+          <t>If the ICE ufrag or password changed from the previous remote:
           <xref target="RFC5245" />.
           <list style="symbols">
             <t>
               If the description is of type "offer", note that an ICE
-              restart is needed.
+              restart is needed, as described in
+              Section 9.1.1.1 of <xref target="RFC5245"/>.
             </t>
 
             <t>
@@ -3670,6 +3664,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             </t>
           </list>
           </t>
+
+          <t>If the current local description indicates an ICE restart,
+          then the ICE ufrag and password MUST have changed from the
+          previous remote description, as described in
+          Section 9.2.1.1 of <xref target="RFC5245"/>. Otherwise,
+          generate an error.</t>
 
           <t>Configure the ICE components associated with this media
           section to use the supplied ICE remote ufrag and password for
