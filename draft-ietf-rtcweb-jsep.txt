@@ -5,18 +5,18 @@
 Network Working Group                                          J. Uberti
 Internet-Draft                                                    Google
 Intended status: Standards Track                             C. Jennings
-Expires: December 4, 2017                                          Cisco
+Expires: December 18, 2017                                         Cisco
                                                         E. Rescorla, Ed.
                                                                  Mozilla
-                                                            June 2, 2017
+                                                           June 16, 2017
 
 
-               Javascript Session Establishment Protocol
+               JavaScript Session Establishment Protocol
                      draft-ietf-rtcweb-jsep-latest
 
 Abstract
 
-   This document describes the mechanisms for allowing a Javascript
+   This document describes the mechanisms for allowing a JavaScript
    application to control the signaling plane of a multimedia session
    via the interface specified in the W3C RTCPeerConnection API, and
    discusses how this relates to existing signaling protocols.
@@ -36,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 4, 2017.
+   This Internet-Draft will expire on December 18, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Uberti, et al.          Expires December 4, 2017                [Page 1]
+Uberti, et al.          Expires December 18, 2017               [Page 1]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Uberti, et al.          Expires December 4, 2017                [Page 2]
+Uberti, et al.          Expires December 18, 2017               [Page 2]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -165,7 +165,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017                [Page 3]
+Uberti, et al.          Expires December 18, 2017               [Page 3]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -192,16 +192,16 @@ Internet-Draft                    JSEP                         June 2017
    the media plane.
 
    With these considerations in mind, this document describes the
-   Javascript Session Establishment Protocol (JSEP) that allows for full
-   control of the signaling state machine from Javascript.  As described
-   above, JSEP assumes a model in which a Javascript application
+   JavaScript Session Establishment Protocol (JSEP) that allows for full
+   control of the signaling state machine from JavaScript.  As described
+   above, JSEP assumes a model in which a JavaScript application
    executes inside a runtime containing WebRTC APIs (the "JSEP
    implementation").  The JSEP implementation is almost entirely
    divorced from the core signaling flow, which is instead handled by
-   the Javascript making use of two interfaces: (1) passing in local and
+   the JavaScript making use of two interfaces: (1) passing in local and
    remote session descriptions and (2) interacting with the ICE state
    machine.  The combination of the JSEP implementation and the
-   Javascript application is referred to throughout this document as a
+   JavaScript application is referred to throughout this document as a
    "JSEP endpoint".
 
    In this document, the use of JSEP is described as if it always occurs
@@ -221,7 +221,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017                [Page 4]
+Uberti, et al.          Expires December 18, 2017               [Page 4]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -256,7 +256,7 @@ Internet-Draft                    JSEP                         June 2017
    protocol, and perform the reverse conversion on the messages it
    receives from the other side.
 
-   One way to mitigate this is to provide a Javascript library that
+   One way to mitigate this is to provide a JavaScript library that
    hides this complexity from the developer; said library would
    implement a given signaling protocol along with its state machine and
    serialization code, presenting a higher level call-oriented interface
@@ -277,7 +277,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017                [Page 5]
+Uberti, et al.          Expires December 18, 2017               [Page 5]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -333,7 +333,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017                [Page 6]
+Uberti, et al.          Expires December 18, 2017               [Page 6]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -389,7 +389,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017                [Page 7]
+Uberti, et al.          Expires December 18, 2017               [Page 7]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -440,12 +440,12 @@ Internet-Draft                    JSEP                         June 2017
    SIP CANCEL, another offer can be generated even though no answer was
    received for the first offer.  To support this, the JSEP media layer
    can provide an offer via the createOffer() method whenever the
-   Javascript application needs one for the signaling.  The answerer can
+   JavaScript application needs one for the signaling.  The answerer can
    send back zero or more provisional answers, and finally end the
 
 
 
-Uberti, et al.          Expires December 4, 2017                [Page 8]
+Uberti, et al.          Expires December 18, 2017               [Page 8]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -501,7 +501,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017                [Page 9]
+Uberti, et al.          Expires December 18, 2017               [Page 9]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -510,7 +510,7 @@ Internet-Draft                    JSEP                         June 2017
 
    JSEP's session descriptions use SDP syntax for their internal
    representation.  While this format is not optimal for manipulation
-   from Javascript, it is widely accepted, and frequently updated with
+   from JavaScript, it is widely accepted, and frequently updated with
    new features; any alternate encoding of session descriptions would
    have to keep pace with the changes to SDP, at least until the time
    that this new encoding eclipsed SDP in popularity.
@@ -531,7 +531,7 @@ Internet-Draft                    JSEP                         June 2017
    In order to give the application control over various common session
    parameters, JSEP provides control surfaces which tell the JSEP
    implementation how to generate session descriptions.  This avoids the
-   need for Javascript to modify session descriptions in most cases.
+   need for JavaScript to modify session descriptions in most cases.
 
    Changes to these objects result in changes to the session
    descriptions generated by subsequent createOffer/Answer calls.
@@ -557,7 +557,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 10]
+Uberti, et al.          Expires December 18, 2017              [Page 10]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -613,7 +613,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 11]
+Uberti, et al.          Expires December 18, 2017              [Page 11]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -669,7 +669,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 12]
+Uberti, et al.          Expires December 18, 2017              [Page 12]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -725,7 +725,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 13]
+Uberti, et al.          Expires December 18, 2017              [Page 13]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -781,7 +781,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 14]
+Uberti, et al.          Expires December 18, 2017              [Page 14]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -837,7 +837,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 15]
+Uberti, et al.          Expires December 18, 2017              [Page 15]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -893,7 +893,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 16]
+Uberti, et al.          Expires December 18, 2017              [Page 16]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -949,7 +949,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 17]
+Uberti, et al.          Expires December 18, 2017              [Page 17]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -995,7 +995,7 @@ Internet-Draft                    JSEP                         June 2017
    Although these are primarily signaling level issues that are outside
    the scope of JSEP, they do have some impact on the configuration of
    the media plane that is relevant.  When forking happens at the
-   signaling layer, the Javascript application responsible for the
+   signaling layer, the JavaScript application responsible for the
    signaling needs to make the decisions about what media should be sent
    or received at any point of time, as well as which remote endpoint it
    should communicate with; JSEP is used to make sure the media engine
@@ -1005,7 +1005,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 18]
+Uberti, et al.          Expires December 18, 2017              [Page 18]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1061,14 +1061,14 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 19]
+Uberti, et al.          Expires December 18, 2017              [Page 19]
 
 Internet-Draft                    JSEP                         June 2017
 
 
-   In the parallel forking case where the Javascript application wishes
+   In the parallel forking case where the JavaScript application wishes
    to simultaneously exchange media with multiple peers, the flow is
-   slightly more complex, but the Javascript application can follow the
+   slightly more complex, but the JavaScript application can follow the
    strategy that [RFC3960] describes using UPDATE.  The UPDATE approach
    allows the signaling to set up a separate media flow for each peer
    that it wishes to exchange media with.  In JSEP, this offer used in
@@ -1117,7 +1117,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 20]
+Uberti, et al.          Expires December 18, 2017              [Page 20]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1173,7 +1173,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 21]
+Uberti, et al.          Expires December 18, 2017              [Page 21]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1229,7 +1229,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 22]
+Uberti, et al.          Expires December 18, 2017              [Page 22]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1285,7 +1285,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 23]
+Uberti, et al.          Expires December 18, 2017              [Page 23]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1341,7 +1341,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 24]
+Uberti, et al.          Expires December 18, 2017              [Page 24]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1397,7 +1397,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 25]
+Uberti, et al.          Expires December 18, 2017              [Page 25]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1453,7 +1453,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 26]
+Uberti, et al.          Expires December 18, 2017              [Page 26]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1509,7 +1509,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 27]
+Uberti, et al.          Expires December 18, 2017              [Page 27]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1565,7 +1565,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 28]
+Uberti, et al.          Expires December 18, 2017              [Page 28]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1621,7 +1621,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 29]
+Uberti, et al.          Expires December 18, 2017              [Page 29]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1677,7 +1677,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 30]
+Uberti, et al.          Expires December 18, 2017              [Page 30]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1733,7 +1733,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 31]
+Uberti, et al.          Expires December 18, 2017              [Page 31]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1789,7 +1789,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 32]
+Uberti, et al.          Expires December 18, 2017              [Page 32]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1845,7 +1845,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 33]
+Uberti, et al.          Expires December 18, 2017              [Page 33]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1901,7 +1901,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 34]
+Uberti, et al.          Expires December 18, 2017              [Page 34]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -1957,7 +1957,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 35]
+Uberti, et al.          Expires December 18, 2017              [Page 35]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2013,7 +2013,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 36]
+Uberti, et al.          Expires December 18, 2017              [Page 36]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2069,7 +2069,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 37]
+Uberti, et al.          Expires December 18, 2017              [Page 37]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2125,7 +2125,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 38]
+Uberti, et al.          Expires December 18, 2017              [Page 38]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2181,7 +2181,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 39]
+Uberti, et al.          Expires December 18, 2017              [Page 39]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2237,7 +2237,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 40]
+Uberti, et al.          Expires December 18, 2017              [Page 40]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2293,7 +2293,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 41]
+Uberti, et al.          Expires December 18, 2017              [Page 41]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2349,7 +2349,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 42]
+Uberti, et al.          Expires December 18, 2017              [Page 42]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2405,7 +2405,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 43]
+Uberti, et al.          Expires December 18, 2017              [Page 43]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2461,7 +2461,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 44]
+Uberti, et al.          Expires December 18, 2017              [Page 44]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2517,7 +2517,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 45]
+Uberti, et al.          Expires December 18, 2017              [Page 45]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2573,7 +2573,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 46]
+Uberti, et al.          Expires December 18, 2017              [Page 46]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2629,7 +2629,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 47]
+Uberti, et al.          Expires December 18, 2017              [Page 47]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2685,7 +2685,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 48]
+Uberti, et al.          Expires December 18, 2017              [Page 48]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2741,7 +2741,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 49]
+Uberti, et al.          Expires December 18, 2017              [Page 49]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2797,7 +2797,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 50]
+Uberti, et al.          Expires December 18, 2017              [Page 50]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2853,7 +2853,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 51]
+Uberti, et al.          Expires December 18, 2017              [Page 51]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2909,7 +2909,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 52]
+Uberti, et al.          Expires December 18, 2017              [Page 52]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -2965,7 +2965,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 53]
+Uberti, et al.          Expires December 18, 2017              [Page 53]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3021,7 +3021,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 54]
+Uberti, et al.          Expires December 18, 2017              [Page 54]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3077,7 +3077,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 55]
+Uberti, et al.          Expires December 18, 2017              [Page 55]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3133,7 +3133,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 56]
+Uberti, et al.          Expires December 18, 2017              [Page 56]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3189,7 +3189,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 57]
+Uberti, et al.          Expires December 18, 2017              [Page 57]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3245,7 +3245,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 58]
+Uberti, et al.          Expires December 18, 2017              [Page 58]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3301,7 +3301,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 59]
+Uberti, et al.          Expires December 18, 2017              [Page 59]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3357,7 +3357,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 60]
+Uberti, et al.          Expires December 18, 2017              [Page 60]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3413,7 +3413,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 61]
+Uberti, et al.          Expires December 18, 2017              [Page 61]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3469,7 +3469,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 62]
+Uberti, et al.          Expires December 18, 2017              [Page 62]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3525,7 +3525,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 63]
+Uberti, et al.          Expires December 18, 2017              [Page 63]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3581,7 +3581,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 64]
+Uberti, et al.          Expires December 18, 2017              [Page 64]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3637,7 +3637,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 65]
+Uberti, et al.          Expires December 18, 2017              [Page 65]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3693,7 +3693,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 66]
+Uberti, et al.          Expires December 18, 2017              [Page 66]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3749,7 +3749,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 67]
+Uberti, et al.          Expires December 18, 2017              [Page 67]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3805,7 +3805,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 68]
+Uberti, et al.          Expires December 18, 2017              [Page 68]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3861,7 +3861,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 69]
+Uberti, et al.          Expires December 18, 2017              [Page 69]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3917,7 +3917,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 70]
+Uberti, et al.          Expires December 18, 2017              [Page 70]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -3962,10 +3962,10 @@ Internet-Draft                    JSEP                         June 2017
    of what could happen in a JSEP session.
 
    The code flow below shows Alice's endpoint initiating the session to
-   Bob's endpoint.  The messages from the Javascript application in
-   Alice's browser to the Javascript in Bob's browser, abbreviated as
+   Bob's endpoint.  The messages from the JavaScript application in
+   Alice's browser to the JavaScript in Bob's browser, abbreviated as
    AliceJS and BobJS respectively, are assumed to flow over some
-   signaling protocol via a web server.  The Javascript on both Alice's
+   signaling protocol via a web server.  The JavaScript on both Alice's
    side and Bob's side waits for all candidates before sending the offer
    or answer, so the offers and answers are complete; trickle ICE is not
    used.  The user agents (JSEP implementations) in Alice and Bob's
@@ -3973,7 +3973,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 71]
+Uberti, et al.          Expires December 18, 2017              [Page 71]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4029,7 +4029,7 @@ AliceUA->BobUA:     media sent from Alice to Bob
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 72]
+Uberti, et al.          Expires December 18, 2017              [Page 72]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4085,7 +4085,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 73]
+Uberti, et al.          Expires December 18, 2017              [Page 73]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4141,7 +4141,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 74]
+Uberti, et al.          Expires December 18, 2017              [Page 74]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4197,7 +4197,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 75]
+Uberti, et al.          Expires December 18, 2017              [Page 75]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4253,7 +4253,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 76]
+Uberti, et al.          Expires December 18, 2017              [Page 76]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4309,7 +4309,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 77]
+Uberti, et al.          Expires December 18, 2017              [Page 77]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4365,7 +4365,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 78]
+Uberti, et al.          Expires December 18, 2017              [Page 78]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4421,7 +4421,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 79]
+Uberti, et al.          Expires December 18, 2017              [Page 79]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4477,7 +4477,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 80]
+Uberti, et al.          Expires December 18, 2017              [Page 80]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4533,7 +4533,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 81]
+Uberti, et al.          Expires December 18, 2017              [Page 81]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4589,7 +4589,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 82]
+Uberti, et al.          Expires December 18, 2017              [Page 82]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4645,7 +4645,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 83]
+Uberti, et al.          Expires December 18, 2017              [Page 83]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4701,7 +4701,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 84]
+Uberti, et al.          Expires December 18, 2017              [Page 84]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4757,7 +4757,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 85]
+Uberti, et al.          Expires December 18, 2017              [Page 85]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4813,7 +4813,7 @@ BobUA->AliceUA:     media sent from Bob to Alice
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 86]
+Uberti, et al.          Expires December 18, 2017              [Page 86]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4869,7 +4869,7 @@ BobJS->BobUA:       setRemoteDescription with |answer-C2|
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 87]
+Uberti, et al.          Expires December 18, 2017              [Page 87]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4925,7 +4925,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 88]
+Uberti, et al.          Expires December 18, 2017              [Page 88]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -4981,7 +4981,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 89]
+Uberti, et al.          Expires December 18, 2017              [Page 89]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5037,7 +5037,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 90]
+Uberti, et al.          Expires December 18, 2017              [Page 90]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5093,7 +5093,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 91]
+Uberti, et al.          Expires December 18, 2017              [Page 91]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5149,7 +5149,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 92]
+Uberti, et al.          Expires December 18, 2017              [Page 92]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5205,7 +5205,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 93]
+Uberti, et al.          Expires December 18, 2017              [Page 93]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5261,7 +5261,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 94]
+Uberti, et al.          Expires December 18, 2017              [Page 94]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5317,7 +5317,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 95]
+Uberti, et al.          Expires December 18, 2017              [Page 95]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5373,7 +5373,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 96]
+Uberti, et al.          Expires December 18, 2017              [Page 96]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5429,7 +5429,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 97]
+Uberti, et al.          Expires December 18, 2017              [Page 97]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5485,7 +5485,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 98]
+Uberti, et al.          Expires December 18, 2017              [Page 98]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5541,7 +5541,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017               [Page 99]
+Uberti, et al.          Expires December 18, 2017              [Page 99]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5597,7 +5597,7 @@ Appendix A.  Appendix A
 
 
 
-Uberti, et al.          Expires December 4, 2017              [Page 100]
+Uberti, et al.          Expires December 18, 2017             [Page 100]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5653,7 +5653,7 @@ Appendix B.  Change log
 
 
 
-Uberti, et al.          Expires December 4, 2017              [Page 101]
+Uberti, et al.          Expires December 18, 2017             [Page 101]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5709,7 +5709,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017              [Page 102]
+Uberti, et al.          Expires December 18, 2017             [Page 102]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5765,7 +5765,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017              [Page 103]
+Uberti, et al.          Expires December 18, 2017             [Page 103]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5821,7 +5821,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017              [Page 104]
+Uberti, et al.          Expires December 18, 2017             [Page 104]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5877,7 +5877,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017              [Page 105]
+Uberti, et al.          Expires December 18, 2017             [Page 105]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5933,7 +5933,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017              [Page 106]
+Uberti, et al.          Expires December 18, 2017             [Page 106]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -5989,7 +5989,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017              [Page 107]
+Uberti, et al.          Expires December 18, 2017             [Page 107]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -6045,7 +6045,7 @@ Internet-Draft                    JSEP                         June 2017
 
 
 
-Uberti, et al.          Expires December 4, 2017              [Page 108]
+Uberti, et al.          Expires December 18, 2017             [Page 108]
 
 Internet-Draft                    JSEP                         June 2017
 
@@ -6101,4 +6101,4 @@ Authors' Addresses
 
 
 
-Uberti, et al.          Expires December 4, 2017              [Page 109]
+Uberti, et al.          Expires December 18, 2017             [Page 109]
