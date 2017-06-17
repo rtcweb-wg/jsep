@@ -13,7 +13,7 @@
 <rfc category="std" docName="draft-ietf-rtcweb-jsep-latest"
 ipr="trust200902">
   <front>
-    <title abbrev="JSEP">Javascript Session Establishment
+    <title abbrev="JSEP">JavaScript Session Establishment
     Protocol</title>
     <author fullname="Justin Uberti" initials="J." surname="Uberti">
       <organization>Google</organization>
@@ -61,7 +61,7 @@ ipr="trust200902">
     <abstract>
 
       <t>This document describes the mechanisms for allowing a
-      Javascript application to control the signaling plane of a
+      JavaScript application to control the signaling plane of a
       multimedia session via the interface specified in the W3C
       RTCPeerConnection API, and discusses how this relates to existing
       signaling protocols.</t>
@@ -90,17 +90,17 @@ ipr="trust200902">
         media plane.</t>
 
         <t>With these considerations in mind, this document describes
-        the Javascript Session Establishment Protocol (JSEP) that
+        the JavaScript Session Establishment Protocol (JSEP) that
         allows for full control of the signaling state machine from
-        Javascript. As described above, JSEP assumes a model in which a
-        Javascript application executes inside a runtime containing
+        JavaScript. As described above, JSEP assumes a model in which a
+        JavaScript application executes inside a runtime containing
         WebRTC APIs (the "JSEP implementation"). The JSEP
         implementation is almost entirely divorced from the core
-        signaling flow, which is instead handled by the Javascript
+        signaling flow, which is instead handled by the JavaScript
         making use of two interfaces: (1) passing in local and remote
         session descriptions and (2) interacting with the ICE state
         machine. The combination of the JSEP implementation and the
-        Javascript application is referred to throughout this document
+        JavaScript application is referred to throughout this document
         as a "JSEP endpoint".</t>
 
         <t>In this document, the use of JSEP is described as if it
@@ -159,7 +159,7 @@ ipr="trust200902">
         its chosen signaling protocol, and perform the reverse
         conversion on the messages it receives from the other side.</t>
 
-        <t>One way to mitigate this is to provide a Javascript library
+        <t>One way to mitigate this is to provide a JavaScript library
         that hides this complexity from the developer; said library
         would implement a given signaling protocol along with its state
         machine and serialization code, presenting a higher level
@@ -343,7 +343,7 @@ ipr="trust200902">
         CANCEL, another offer can be generated even though no answer
         was received for the first offer. To support this, the JSEP
         media layer can provide an offer via the createOffer() method
-        whenever the Javascript application needs one for the
+        whenever the JavaScript application needs one for the
         signaling. The answerer can send back zero or more provisional
         answers, and finally end the offer-answer exchange by sending a
         final answer. The state machine for this is as follows:</t>
@@ -404,7 +404,7 @@ setRemote(ANSWER) |                                   |
 
         <t>JSEP's session descriptions use SDP syntax for their
         internal representation. While this format is not optimal for
-        manipulation from Javascript, it is widely accepted, and
+        manipulation from JavaScript, it is widely accepted, and
         frequently updated with new features; any alternate encoding of
         session descriptions would have to keep pace with the changes
         to SDP, at least until the time that this new encoding eclipsed
@@ -428,7 +428,7 @@ setRemote(ANSWER) |                                   |
         <t>In order to give the application control over various common
         session parameters, JSEP provides control surfaces which tell
         the JSEP implementation how to generate session descriptions.
-        This avoids the need for Javascript to modify session
+        This avoids the need for JavaScript to modify session
         descriptions in most cases.</t>
 
         <t>Changes to these objects result in changes to the session
@@ -892,7 +892,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         level issues that are outside the scope of JSEP, they do have
         some impact on the configuration of the media plane that is
         relevant. When forking happens at the signaling layer, the
-        Javascript application responsible for the signaling needs to
+        JavaScript application responsible for the signaling needs to
         make the decisions about what media should be sent or received
         at any point of time, as well as which remote endpoint it
         should communicate with; JSEP is used to make sure the media
@@ -956,10 +956,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           point of view, this is exactly like the sequential forking
           case.</t>
 
-          <t>In the parallel forking case where the Javascript
+          <t>In the parallel forking case where the JavaScript
           application wishes to simultaneously exchange media with
           multiple peers, the flow is slightly more complex, but the
-          Javascript application can follow the strategy that
+          JavaScript application can follow the strategy that
           <xref target="RFC3960"></xref> describes using UPDATE. The
           UPDATE approach allows the signaling to set up a separate
           media flow for each peer that it wishes to exchange media
@@ -1799,16 +1799,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>Any profile in the offer matching one of the following
               MUST be accepted:
               <list style="symbols">
-                <t> "RTP/AVP" </t>
-                <t> "RTP/AVPF" </t>
-                <t> "RTP/SAVP" </t>
-                <t> "RTP/SAVPF" </t>
-                <t> "UDP/TLS/RTP/AVP" </t>
-                <t> "UDP/TLS/RTP/AVPF" </t>
-                <t> "UDP/TLS/RTP/SAVP" </t>
-                <t> "UDP/TLS/RTP/SAVPF" </t>
-                <t> "TCP/TLS/RTP/SAVP" </t>
-                <t> "TCP/TLS/RTP/SAVPF" </t>
+                <t>"RTP/AVP" (Defined in <xref target="RFC4566"></xref>, Section 8.2.2)</t>
+                <t>"RTP/AVPF" (Defined in <xref target="RFC4585"></xref>, Section 9)</t>
+                <t>"RTP/SAVP" (Defined in <xref target="RFC3711"></xref>, Section 12)</t>
+                <t>"RTP/SAVPF" (Defined in <xref target="RFC5124"></xref>, Section 6)</t>
+                <t>"TCP/DTLS/RTP/SAVP" (Defined in <xref target="RFC7850"></xref>, Section 3.4)</t>
+                <t>"TCP/DTLS/RTP/SAVPF" (Defined in <xref target="RFC7850"></xref>, Section 3.5)</t>
+                <t>"UDP/TLS/RTP/SAVP" (Defined in <xref target="RFC5764"></xref>, Section 9)</t>
+                <t>"UDP/TLS/RTP/SAVPF" (Defined in <xref target="RFC5764"></xref>, Section 9)</t>
               </list>
               </t>
 
@@ -2132,11 +2130,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in
               <xref target="RFC5245"></xref>, Section 15.4.</t>
 
-              <t>An "a=fingerprint" line for each of the endpoint's
+              <t>For each desired digest algorithm, one or more
+              "a=fingerprint" lines for each of the endpoint's
               certificates, as specified in
-              <xref target="RFC8122"></xref>, Section 5; the digest
-              algorithm used for the fingerprint MUST match that used
-              in the certificate signature.</t>
+              <xref target="RFC8122"></xref>, Section 5.</t>
 
               <t>An "a=setup" line, as specified in
               <xref target="RFC4145"></xref>, Section 4, and clarified
@@ -2861,18 +2858,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in
               <xref target="RFC5245"></xref>, Section 15.4.</t>
 
-              <t>An "a=fingerprint" line for each of the endpoint's
+              <t>For each desired digest algorithm, one or more
+              "a=fingerprint" lines for each of the endpoint's
               certificates, as specified in
-              <xref target="RFC8122"></xref>, Section 5; the digest
-              algorithm used for the fingerprint MUST match that used
-              in the certificate signature.</t>
+              <xref target="RFC8122"></xref>, Section 5.</t>
 
               <t>An "a=setup" line, as specified in
               <xref target="RFC4145"></xref>, Section 4, and clarified
               for use in DTLS-SRTP scenarios in
               <xref target="RFC5763"></xref>, Section 5. The role value
-              in the answer MUST be "active" or "passive"; the "active"
-              role is RECOMMENDED.</t>
+              in the answer MUST be "active" or "passive". When
+              the offer contains the "actpass" value, as
+              will always be the case with JSEP endpoints,
+              the answerer SHOULD use the "active" role.
+              Offers from non-JSEP endpoints MAY send other values for
+              "a=setup", in which case the answer MUST
+              use a value consistent with the value in the offer.</t>
 
               <t>An "a=tls-id" line, as specified in
               <xref target="I-D.ietf-mmusic-dtls-sdp" /> Section
@@ -4036,11 +4037,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         session.</t>
 
         <t>The code flow below shows Alice's endpoint initiating the
-        session to Bob's endpoint. The messages from the Javascript
-        application in Alice's browser to the Javascript in Bob's
+        session to Bob's endpoint. The messages from the JavaScript
+        application in Alice's browser to the JavaScript in Bob's
         browser, abbreviated as AliceJS and BobJS respectively,
         are assumed to flow over some signaling protocol via a
-        web server. The Javascript on both Alice's side and Bob's side waits
+        web server. The JavaScript on both Alice's side and Bob's side waits
         for all candidates before sending the offer or answer, so the
         offers and answers are complete; trickle ICE is not used. The
         user agents (JSEP implementations) in Alice and Bob's browsers, abbreviated as AliceUA
@@ -5225,7 +5226,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       <?rfc include='reference.I-D.ietf-rtcweb-rtp-usage'?>
       <?rfc include='reference.I-D.ietf-rtcweb-security'?>
       <?rfc include='reference.I-D.ietf-rtcweb-security-arch'?>
-
+ 
       <?rfc include='reference.RFC.2119.xml'?>
       <?rfc include='reference.RFC.3261.xml'?>
       <?rfc include='reference.RFC.3264.xml'?>
@@ -5235,6 +5236,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       <?rfc include='reference.RFC.4145.xml'?>
       <?rfc include='reference.RFC.4566.xml'?>
       <?rfc include='reference.RFC.4585.xml'?>
+      <?rfc include='reference.RFC.5124.xml'?>
       <?rfc include='reference.RFC.5245.xml'?>
       <?rfc include='reference.RFC.5285.xml'?>
       <?rfc include='reference.RFC.5761.xml'?>
@@ -5250,6 +5252,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       <?rfc include='reference.RFC.7874.xml'?>
       <?rfc include='reference.RFC.8108.xml'?>
       <?rfc include='reference.RFC.8122.xml'?>
+     <?rfc include='reference.RFC.3711.xml'?>
 
     </references>
     <references title="Informative References">
@@ -5322,6 +5325,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
           <date year="2014" month="December" />
         </front>
       </reference>
+      
     </references>
     <section title="Appendix A" anchor="sec.appendix-a">
 
