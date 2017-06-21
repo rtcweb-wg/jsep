@@ -3670,27 +3670,34 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         processing MUST stop and an error MUST be returned.
         <list style="symbols">
 
-          <t>If the PeerConnection state is "have-local-offer", and the
-          ICE ufrag or password changed from the previous remote
-          description, then an ICE restart is needed, as described in
-          Section 9.1.1.1 of
-          <xref target="RFC5245" />. If the description is of type
-          "offer", note that an ICE restart is needed. If the
-          description is of type "answer" or "pranswer" and the current
-          local description is also an ICE restart, then signal the ICE
-          agent to begin checks as described in Section 9.3.1.1 of
-          <xref target="RFC5245" />. An answerer MUST change the ufrag
-          and password in an answer if and only if ICE is restarting,
-          as described in Section 9.2.1.1 of
-          <xref target="RFC5245" />.</t>
+          <t>If the ICE ufrag or password changed from the previous remote description:
+          <xref target="RFC5245" />.
+          <list style="symbols">
+            <t>
+              If the description is of type "offer", note that an ICE
+              restart is needed, as described in
+              Section 9.1.1.1 of <xref target="RFC5245"/>.
+            </t>
 
-          <t>If the PeerConnection state is "have-remote-pranswer", and
-          the ICE ufrag or password changed from the previous
-          provisional answer, then signal the ICE agent to discard any
-          previous ICE check list state for the m= section and begin
-          checks as if this were the first answer. However, such an
-          answer MAY only change the ICE ufrag or password if the local
-          offer is starting or restarting ICE for the m= section.</t>
+            <t>
+              If the description is of type "answer" or "pranswer", then
+              check to see if the current local description is an ICE
+              restart, and if not, generate an error.
+              It the PeerConnection state is "have-remote-pranswer", and
+              the ICE ufrag or password changed from the previous
+              provisional answer, then signal the ICE agent to discard any
+              previous ICE check list state for the m= section.
+              Finally, signal the ICE agent to begin checks as described in
+              Section 9.3.1.1 of <xref target="RFC5245"/>.
+            </t>
+          </list>
+          </t>
+
+          <t>If the current local description indicates an ICE
+          restart, and either the ICE ufrag or password has not
+          changed from the previous remote description, as
+          prescribed by <xref target="RFC5245"/>, Section 9.2.1.1,
+          generate an error.</t>
 
           <t>Configure the ICE components associated with this media
           section to use the supplied ICE remote ufrag and password for
