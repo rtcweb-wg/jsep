@@ -747,19 +747,20 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           to a RtpSender, which is encoding the track video
           at the same or lower resolution(s) (the "encoder resolutions"),
           and a remote description is applied that references the sender and
-          contains valid "a=imageattr recv" attributes, it will
+          contains valid "a=imageattr recv" attributes, it MUST
           follow the rules below to ensure the sender does not transmit a
           resolution that would exceed the size criteria specified in the
-          attributes. These rules are followed
+          attributes. These rules MUST be followed
           as long as the attributes remain present in the remote description,
-          including if the track changes its resolution,
-          or if the track is replaced with a different track.
+          including cases in which the track changes its resolution,
+          or is replaced with a different track.
           </t>
 
           <t>Depending on how the RtpSender is configured, it may be producing
-          a single resolution, or, if simulcast <xref target="sec.simulcast" />
-          has been negotiated, multiple specific resolutions. In addition,
-          depending on the configuration, each encoding may have the
+          a single encoding at a certain resolution, or, if
+          simulcast <xref target="sec.simulcast" /> has been negotiated,
+          multiple encodings, each at their own specific resolution. In
+          addition, depending on the configuration, each encoding may have the
           flexibility to reduce resolution when needed, or may be locked to
           a specific output resolution.
           </t>
@@ -768,20 +769,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           rules are applied to determine what should be transmitted:
             <list style="symbols">
               <t>First, the right "a=imageattr recv" attribute is selected.
-              While JSEP endpoints will not include more than one such
-              attribute per media format, non-JSEP endpoints may send
-              multiple relevant "a=imageattr recv" attributes in a m=
-              section. The correct attribute is selected by taking the
+              This is performed by taking the
               attribute with the highest "q=" value from the set of attributes
               that reference the media format that has been selected for the
               specified encoding. If multiple attributes have the same "q="
               value, the one that appears first in the m= section is used.
+              Note that while JSEP endpoints will include at most
+              one "a=imageattr recv" attribute per media format, JSEP
+              endpoints may receive session descriptions from non-JSEP
+              endpoints with m= sections that contain multiple such attributes.
               </t>
 
               <t>If there is an applicable "a=imageattr recv" attribute for
               the encoding, the limits from the attribute are then compared to
               the encoder resolution. Only the specific limits mentioned below
-              are considered; any other values, e.g. picture aspect ratio,
+              are considered; any other values, such as picture aspect ratio,
               MUST be ignored.
               Note that when considering a MediaStreamTrack that is producing
               rotated video, the unrotated resolution MUST be used for the
