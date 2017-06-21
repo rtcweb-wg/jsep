@@ -741,65 +741,80 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           constrain the video formats that the sender can use, but
           gives an indication of the preferred values.</t>
 
-          <t>This specification prescribes more specific behavior. When
-          a sender of a given MediaStreamTrack, which is producing
-          video of a certain resolution, receives an "a=imageattr recv"
-          attribute, it will follow the rules below to check if the original
-          resolution meets the size criteria specified in the attribute,
-          and, if appropriate, adjust the resolution.
-          Note that when considering a MediaStreamTrack that is producing
-          rotated video, the unrotated resolution MUST be used for the
-          checks. This is
-          required regardless of whether the receiver supports
-          performing receive-side rotation (e.g., through CVO
-          <xref target="TS26.114" />), as it significantly simplifies
-          the matching logic.</t>
+          <t>This specification prescribes more specific behavior.
+          When a MediaStreamTrack, which is producing
+          video of a certain resolution (the "track resolution"), is attached
+          to a RtpSender, which is encoding the track video
+          at the same or lower resolution(s) (the "encoder resolutions"),
+          and a remote description is applied that references the sender and
+          contains valid "a=imageattr recv" attributes, it will
+          follow the rules below to ensure the sender does not transmit a
+          resolution that would exceed the size criteria specified in the
+          attributes. These rules are followed
+          as long as the attributes remain present in the remote description,
+          including if the track changes its resolution,
+          or if the track is replaced with a different track.
+          </t>
 
-          <t>For the purposes of resolution negotiation, only size
-          limits are considered. Any other values, e.g. picture or
-          sample aspect ratio, MUST be ignored.</t>
+          <t>Depending on how the RtpSender is configured, it may be producing
+          a single resolution, or, if simulcast <xref target="sec.simulcast" />
+          has been negotiated, multiple specific resolutions. In addition,
+          depending on the configuration, each encoding may have the
+          flexibility to reduce resolution when needed, or may be locked to
+          a specific output resolution.
+          </t>
 
-          <t>When communicating with a non-JSEP endpoint, multiple
-          relevant "a=imageattr recv" attributes may be present in a
-          received m= section. If this occurs, attributes other than
-          the one with the highest "q=" value MUST be ignored. If
-          multiple attributes have the same "q=" value, those that
-          appear after the first such attribute in the m= section MUST
-          be ignored.</t>
+          <t>For each encoding being produced by the RtpSender, the following
+          rules are applied to determine what should be transmitted:
+            <list type="symbols">
+              <t>First, the right "a=imageattr recv" attribute is selected.
+              While JSEP endpoints will not include more than one such
+              attribute per media format, non-JSEP endpoints may send
+              multiple relevant "a=imageattr recv" attributes in a m=
+              section. The correct attribute is selected by taking the
+              attribute with the highest "q=" value from the set of attributes
+              that reference the media format that has been selected for the
+              specified encoding. If multiple attributes have the same "q="
+              value, the one that appears first in the m= section is used.
+              </t>
 
-          <t>If an "a=imageattr recv" attribute references a different
-          video payload type than what has been selected for sending
-          the MediaStreamTrack, it MUST be ignored.</t>
+              <t>If there is an applicable "a=imageattr recv" attribute for
+              the encoding, the limits from the attribute are then compared to
+              the encoder resolution. Only the specific limits mentioned below
+              are considered; any other values, e.g. picture aspect ratio,
+              MUST be ignored.
+              Note that when considering a MediaStreamTrack that is producing
+              rotated video, the unrotated resolution MUST be used for the
+              checks. This is
+              required regardless of whether the receiver supports
+              performing receive-side rotation (e.g., through CVO
+              <xref target="TS26.114" />), as it significantly simplifies
+              the matching logic.</t>
 
-          <t>If the original resolution matches the size limits in the
-          attribute, the track MUST be transmitted untouched.</t>
+              <t>If the attribute includes a "sar=" (sample aspect ratio)
+              value set to something other than "1.0", indicating the
+              receiver wants to receive non-square pixels, this cannot be
+              satisfied and the sender MUST NOT transmit the encoding.</t>
 
-          <t>If the original resolution exceeds the size limits in the
-          attribute, the sender SHOULD apply downscaling to the output
-          of the MediaStreamTrack in order to satisfy the limits.
-          Downscaling MUST NOT change the track aspect ratio.</t>
+              <t>If the encoder resolution exceeds the maximum size permitted by the
+              attribute, and the encoder is allowed to adjust its resolution,
+              the encoder SHOULD apply downscaling in order to satisfy the limits,
+              although the downscaling MUST NOT change the track aspect ratio.
+              If downscaling cannot be applied, the encoding MUST NOT be
+              transmitted, and an error SHOULD be surfaced to the application.</t>
 
-          <t>If the original resolution is less than the size limits in
-          the attribute, upscaling is needed, but this may not always be
-          appropriate. To address this concern, the
-          application can set an upscaling policy for each sent track.
-          If upscaling is permitted by policy, the
-          sender SHOULD apply upscaling in order to provide the desired
-          resolution. Otherwise, the sender MUST NOT apply upscaling.
-          Upscaling MUST NOT change the track aspect ratio.</t>
+              <t>If the encoder resolution is less than the minimum size permitted
+              by the attribute, the encoding MUST NOT be transmitted, and an
+              error SHOULD be surfaced to the application; the encoder
+              MUST NOT apply upscaling. JSEP implementations SHOULD avoid this
+              situation by allowing receipt of arbitrarily small resolutions,
+              perhaps via fallback to a software decoder.</t>
 
-          <t>If there is no appropriate and permitted scaling mechanism
-          that allows the received size limits to be satisfied, the
-          sender MUST NOT transmit the track.</t>
-
-          <t>If the attribute includes a "sar=" (sample aspect ratio)
-          value set to something other than "1.0", indicating the
-          receiver wants to receive non-square pixels, this cannot be
-          satisfied and the sender MUST NOT transmit the track.</t>
-
-          <t>In the special case of receiving a maximum resolution of
-          [0, 0], as described above, the sender MUST NOT transmit the
-          track.</t>
+              <t>In the special case of a maximum resolution of
+              [0, 0], as described above, the sender MUST NOT transmit the
+              encoding.</t>
+            </list>
+          </t>
         </section>
       </section>
       <section title="Simulcast" anchor="sec.simulcast">
