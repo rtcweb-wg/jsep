@@ -362,12 +362,12 @@ li, p {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.6.1 - http://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.6.2 - http://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-6-17" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-6-21" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -391,7 +391,7 @@ li, p {
 <td class="right">C. Jennings</td>
 </tr>
 <tr>
-<td class="left">Expires: December 19, 2017</td>
+<td class="left">Expires: December 23, 2017</td>
 <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -404,7 +404,7 @@ li, p {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">June 17, 2017</td>
+<td class="right">June 21, 2017</td>
 </tr>
 
     	
@@ -420,7 +420,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on December 19, 2017.</p>
+<p>This Internet-Draft will expire on December 23, 2017.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1607,8 +1607,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.9.p.4">For each m= section, the following steps MUST be performed; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
 
 <ul>
-<li>If the PeerConnection state is "have-local-offer", and the ICE ufrag or password changed from the previous remote description, then an ICE restart is needed, as described in Section 9.1.1.1 of <a href="#RFC5245" class="xref">[RFC5245]</a>. If the description is of type "offer", note that an ICE restart is needed. If the description is of type "answer" or "pranswer" and the current local description is also an ICE restart, then signal the ICE agent to begin checks as described in Section 9.3.1.1 of <a href="#RFC5245" class="xref">[RFC5245]</a>. An answerer MUST change the ufrag and password in an answer if and only if ICE is restarting, as described in Section 9.2.1.1 of <a href="#RFC5245" class="xref">[RFC5245]</a>.</li>
-<li>If the PeerConnection state is "have-remote-pranswer", and the ICE ufrag or password changed from the previous provisional answer, then signal the ICE agent to discard any previous ICE check list state for the m= section and begin checks as if this were the first answer. However, such an answer MAY only change the ICE ufrag or password if the local offer is starting or restarting ICE for the m= section.</li>
+<li>If the ICE ufrag or password changed from the previous remote description: <a href="#RFC5245" class="xref">[RFC5245]</a>.  <ul>
+<li>If the description is of type "offer", note that an ICE restart is needed, as described in Section 9.1.1.1 of <a href="#RFC5245" class="xref">[RFC5245]</a>.  </li>
+<li>If the description is of type "answer" or "pranswer", then check to see if the current local description is an ICE restart, and if not, generate an error.  It the PeerConnection state is "have-remote-pranswer", and the ICE ufrag or password changed from the previous provisional answer, then signal the ICE agent to discard any previous ICE check list state for the m= section.  Finally, signal the ICE agent to begin checks as described in Section 9.3.1.1 of <a href="#RFC5245" class="xref">[RFC5245]</a>.  </li>
+</ul>
+<p> </p>
+</li>
+<li>If the current local description indicates an ICE restart, and either the ICE ufrag or password has not changed from the previous remote description, as prescribed by <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.2.1.1, generate an error.</li>
 <li>Configure the ICE components associated with this media section to use the supplied ICE remote ufrag and password for their connectivity checks.</li>
 <li>Pair any supplied ICE candidates with any gathered local candidates, as described in Section 5.7 of <a href="#RFC5245" class="xref">[RFC5245]</a> and start connectivity checks with the appropriate credentials.</li>
 <li>If an "a=end-of-candidates" attribute is present, process the end-of-candidates indication as described in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a> Section 11.</li>
@@ -2685,7 +2690,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</b></td>
 <td class="top">
-<a>Holmberg, C.</a> and <a>R. Shpount</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-dtls-sdp-24">Using the SDP Offer/Answer Mechanism for DTLS</a>", Internet-Draft draft-ietf-mmusic-dtls-sdp-24, April 2017.</td>
+<a>Holmberg, C.</a> and <a>R. Shpount</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-dtls-sdp-25">Using the SDP Offer/Answer Mechanism for DTLS</a>", Internet-Draft draft-ietf-mmusic-dtls-sdp-25, June 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</b></td>
