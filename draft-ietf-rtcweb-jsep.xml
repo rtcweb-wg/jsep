@@ -1433,7 +1433,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           PeerConnection to apply the supplied session description as
           its local configuration. The type field indicates whether the
           description should be processed as an offer, provisional
-          answer, or final answer; offers and answers are checked
+          answer, rollback, or final answer; offers and answers are checked
           differently, using the various rules that exist for each SDP
           line.</t>
 
@@ -1477,7 +1477,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>This API changes the local media state; among other
           things, it sets up local resources for sending and encoding
-          media.</t>
+          media.
+          A rollback will revert to the current local description.</t>
 
           <t>If setLocalDescription was previously called with an
           offer, and setRemoteDescription is called with an answer
@@ -3565,6 +3566,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         session MUST be restored to the state it was in before
         performing these steps.</t>
 
+        <t>If the description is of type "rollback", follow the
+        processing defined in the <xref target="sec.rollback" /> and
+        skip the processing described in the rest of this
+        section.</t>
+
         <t>Next, m= sections are processed. For each m= section, the
         following steps MUST be performed; if any parameters are out of
         bounds, or cannot be applied, processing MUST stop and an error
@@ -3657,6 +3663,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         description. If an error is returned, the session MUST be
         restored to the state it was in before performing these
         steps.</t>
+
+        <t>If the description is of type "rollback", follow the
+        processing defined in the <xref target="sec.rollback" /> and
+        skip the processing described in the rest of this
+        section.</t>
 
         <t>If the answer contains any "a=ice-options" attributes where
         "trickle" is listed as an attribute, update the PeerConnection
