@@ -768,8 +768,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>For each encoding being produced by the RtpSender, the following
           rules are applied to determine what should be transmitted:
             <list style="symbols">
-              <t>First, the right "a=imageattr recv" attribute is selected.
-              This is performed by taking the
+              <t>First, the most suitable "a=imageattr recv" attribute is
+              selected. This is performed by taking the
               attribute with the highest "q=" value from the set of attributes
               that reference the media format that has been selected for the
               specified encoding. If multiple attributes have the same "q="
@@ -801,7 +801,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>If the encoder resolution exceeds the maximum size permitted by the
               attribute, and the encoder is allowed to adjust its resolution,
               the encoder SHOULD apply downscaling in order to satisfy the limits,
-              although the downscaling MUST NOT change the track aspect ratio.
+              although the downscaling MUST NOT change the picture aspect ratio
+              of the encoding. For example, if the encoder resolution is
+              1280x720, and the attribute specified a maximum of 640x480, the
+              expected output resolution would be 640x360.
               If downscaling cannot be applied, the encoding MUST NOT be
               transmitted, and an error SHOULD be surfaced to the application.</t>
 
