@@ -2544,11 +2544,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             For example, when using the Opus codec, the "usedtx=0"
             parameter would be specified in the offer.</t>
 
-            <t>Note that setting the "VoiceActivityDetection" parameter
-            when generating an offer is a request to receive audio with
-            silence suppression. It has no impact on whether the local
-            endpoint does silence suppression for the audio it
-            sends.</t>
+            <t>Depending on the selected codec, setting the
+            "VoiceActivityDetection" option may or may not impact
+            whether the JSEP implementation performs silence suppression
+            for the audio it sends. In particular, for Opus and for
+            codecs without internal silence suppression which therefore use
+            CN, the SDP indication is unilateral and therefore only
+            the peer's indication matters for whether the JSEP
+            implementation performs silence suppression. For G.729,
+            the "dtx" parameter
+            as specified in <xref target="RFC5459"/>, Section 5.2.1,
+            is bidirectional and therefore
+            setting "VoiceActivityDetection" to "false" disables
+            silence suppression in both directions.</t>
 
             <t>The "VoiceActivityDetection" option does not have any
             impact on the setting of the "vad" value in the signaling
@@ -5302,6 +5310,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       <?rfc include='reference.RFC.6464.xml'?>
       <?rfc include='reference.RFC.6544.xml'?>
       <?rfc include='reference.RFC.3556.xml'?>
+      <?rfc include='reference.RFC.5459.xml'?>
 
       <reference anchor="W3C.webrtc"
       target="https://www.w3.org/TR/2017/WD-webrtc-20170515/">
