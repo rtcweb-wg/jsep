@@ -1973,11 +1973,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             corresponding order, and MUST exclude any codecs not
             present in the codec preferences.</t>
 
-            <t>The media formats in the answer MAY include codecs
-            present in the offer that were discarded in a previous
-            offer/answer exchange. This is necessary for compatibility
-            with third- party call control and SIP use cases.</t>
-
             <t>Unless excluded by the above restrictions, the media
             formats MUST include the mandatory audio/video codecs as
             specified in
@@ -2410,33 +2405,32 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           descriptions by following the steps mentioned for the
           "have-local-offer" state above.</t>
 
-          <t>In addition, for each non-recycled, non-rejected m=
+          <t>In addition, for each existing, non-recycled, non-rejected m=
           section in the new offer, the following adjustments are made
           based on the contents of the corresponding m= section in the
-          current remote description, if any:
+          current local or remote description, as appropriate:
           <list style="symbols">
 
             <t>The m= line and corresponding "a=rtpmap" and "a=fmtp"
-            lines MUST only include codecs present in the most recent
-            answer which have not been excluded by the codec
-            preferences of the associated transceiver. Note that
-            non-JSEP endpoints are not subject to these restrictions,
-            and might offer media formats that were not present in the
-            most recent answer, as specified in
-            <xref target="RFC3264"></xref>, Section 8. Therefore, JSEP
-            implementations MUST be prepared to receive such
-            offers.</t>
+            lines MUST only include media formats which have not been excluded
+            by the codec preferences of the associated transceiver, and
+            MUST include all currently available formats. Media formats that
+            were previously offered but are no longer available (e.g., a
+            shared hardware codec) MAY be excluded.</t>
 
-            <t>Unless codec preferences have been set for the
-            associated transceiver, the media formats on the m= line
-            MUST be generated in the same order as in the current local
-            description.</t>
+            <t>Unless codec preferences have been set for the associated
+            transceiver, the media formats on the m= line MUST be generated in
+            the same order as in the most recent answer. Any media
+            formats that were not present in the most recent answer MUST be
+            added after all existing formats.</t>
 
             <t>The RTP header extensions MUST only include those that
             are present in the most recent answer.</t>
 
-            <t>The RTCP feedback extensions MUST only include those
-            that are present in the most recent answer.</t>
+            <t>The RTCP feedback mechanisms MUST only include those
+            that are present in the most recent answer, except for the
+            case of format-specific mechanisms that are referencing a
+            newly-added media format.</t>
 
             <t>The "a=rtcp" line MUST NOT be added if the most recent
             answer included an "a=rtcp-mux" line.</t>
