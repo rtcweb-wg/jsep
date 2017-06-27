@@ -150,7 +150,7 @@ Internet-Draft                    JSEP                         June 2017
      5.9.  Applying a Remote Description . . . . . . . . . . . . . .  66
      5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  70
    6.  Processing RTP/RTCP . . . . . . . . . . . . . . . . . . . . .  72
-   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  72
+   7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  73
      7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  73
      7.2.  Detailed Example  . . . . . . . . . . . . . . . . . . . .  77
      7.3.  Early Transport Warmup Example  . . . . . . . . . . . . .  87
@@ -3896,10 +3896,12 @@ Internet-Draft                    JSEP                         June 2017
 
    o  If the m= section proto value indicates use of RTP:
 
-      *  If the m= section references any media formats, RTP header
-         extensions, or RTCP feedback mechanisms that were not present
-         in the corresponding m= section in the offer, this indicates a
-         negotiation problem and MUST result in an error.
+      *  If the m= section references RTCP feedback mechanisms that were
+         not present in the corresponding m= section in the offer, this
+         indicates a negotiation problem and MUST result in an error.
+         However, new media formats and new RTP header extension values
+         are permitted in the answer, as described in [RFC3264],
+         Section 7, and [RFC5285], Section 6.
 
       *  If the m= section has RTCP mux enabled, discard the RTCP ICE
          component, if one exists, and begin or continue muxing RTCP
@@ -3912,8 +3914,6 @@ Internet-Draft                    JSEP                         June 2017
          RTCP transmission for this m= section to use reduced-size RTCP,
          as specified in [RFC5506].
 
-      *  If the directional attribute in the answer indicates that the
-         JSEP implementation should be sending media ("sendonly" for
 
 
 
@@ -3922,6 +3922,8 @@ Uberti, et al.          Expires December 29, 2017              [Page 70]
 Internet-Draft                    JSEP                         June 2017
 
 
+      *  If the directional attribute in the answer indicates that the
+         JSEP implementation should be sending media ("sendonly" for
          local answers, "recvonly" for remote answers, or "sendrecv" for
          either type of answer), choose the media format to send as the
          most preferred media format from the remote description that is
@@ -3967,8 +3969,6 @@ Internet-Draft                    JSEP                         June 2017
          formats.  Specifically, begin or continue sending the requested
          feedback types and reacting to received feedback, as specified
          in [RFC4585], Section 4.2.  When sending RTCP feedback, follow
-         the rules and recommendations from [RFC8108] Section 5.4.1, to
-         select which SSRC to use.
 
 
 
@@ -3977,6 +3977,9 @@ Uberti, et al.          Expires December 29, 2017              [Page 71]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+         the rules and recommendations from [RFC8108] Section 5.4.1, to
+         select which SSRC to use.
 
       *  If the directional attribute in the answer indicates that the
          JSEP implementation should not be sending media ("recvonly" for
@@ -4021,11 +4024,8 @@ Internet-Draft                    JSEP                         June 2017
    multiple Encoded Streams, as well as determine which Source RTP
    stream should be repaired by a given Redundancy RTP stream.
 
-7.  Examples
 
-   Note that this example section shows several SDP fragments.  To
-   format in 72 columns, some of the lines in SDP have been split into
-   multiple lines, where leading whitespace indicates that a line is a
+
 
 
 
@@ -4034,6 +4034,11 @@ Uberti, et al.          Expires December 29, 2017              [Page 72]
 Internet-Draft                    JSEP                         June 2017
 
 
+7.  Examples
+
+   Note that this example section shows several SDP fragments.  To
+   format in 72 columns, some of the lines in SDP have been split into
+   multiple lines, where leading whitespace indicates that a line is a
    continuation of the previous line.  In addition, some blank lines
    have been added to improve readability but are not valid in SDP.
 
@@ -4058,11 +4063,6 @@ Internet-Draft                    JSEP                         June 2017
    browsers, abbreviated as AliceUA and BobUA respectively, are using
    the default bundle policy of "balanced", and the default RTCP mux
    policy of "require".
-
-
-
-
-
 
 
 
