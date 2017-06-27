@@ -1722,9 +1722,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           createAnswer, in which case the corresponding media formats
           in the associated m= section will be excluded. The codec
           preferences cannot add media formats that would otherwise not
-          be present. This includes codecs that were not negotiated in
-          a previous offer/answer exchange that included the
-          transceiver.</t>
+          be present. TODO?</t>
 
           <t>The codec preferences of an RtpTransceiver can also
           determine the order of codecs in subsequent calls to
@@ -1944,11 +1942,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             transceiver, media formats MUST be generated in the
             corresponding order, and MUST exclude any codecs not
             present in the codec preferences.</t>
-
-            <t>The media formats in the answer MAY include codecs
-            present in the offer that were discarded in a previous
-            offer/answer exchange. This is necessary for compatibility
-            with third- party call control and SIP use cases.</t>
 
             <t>Unless excluded by the above restrictions, the media
             formats MUST include the mandatory audio/video codecs as
@@ -2381,21 +2374,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           current remote description, if any:
           <list style="symbols">
 
-            <t>The m= line and corresponding "a=rtpmap" and "a=fmtp"
-            lines MUST only include codecs present in the most recent
-            answer which have not been excluded by the codec
-            preferences of the associated transceiver. Note that
-            non-JSEP endpoints are not subject to these restrictions,
-            and might offer media formats that were not present in the
-            most recent answer, as specified in
-            <xref target="RFC3264"></xref>, Section 8. Therefore, JSEP
-            implementations MUST be prepared to receive such
-            offers.</t>
-
             <t>Unless codec preferences have been set for the
             associated transceiver, the media formats on the m= line
             MUST be generated in the same order as in the current local
-            description.</t>
+            description. Any media formats not in the current local ... TODO ...</t>
 
             <t>The RTP header extensions MUST only include those that
             are present in the most recent answer.</t>
@@ -2718,21 +2700,21 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If codec preferences have been set for the associated
             transceiver, media formats MUST be generated in the
             corresponding order, and MUST exclude any codecs not
-            present in the codec preferences or not present in the
-            offer. Note that non-JSEP endpoints are not subject to this
-            restriction, and might add media formats in the answer that
-            are not present in the offer, as specified in
-            <xref target="RFC3264"></xref>, Section 6.1. Therefore,
-            JSEP implementations MUST be prepared to receive such
-            answers.</t>
+            present in the codec preferences.</t>
 
-            <t>Unless excluded by the above restrictions, the media
+            <t>Unless excluded by the above restriction, the media
             formats MUST include the mandatory audio/video codecs as
             specified in
             <xref target="RFC7874"></xref> (see Section 3)
             and
             <xref target="RFC7742"></xref> (see Section
             5).</t>
+
+            <t>The media formats in the answer MAY include codecs
+            that are supported by the JSEP implementation, but not present in
+            the offer, as mentioned in <xref target="RFC3264" />, Section 6.1.
+            Any new codecs ... offer format</t>
+            </t>
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -2971,7 +2953,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Unless codec preferences have been set for the
             associated transceiver, the media formats on the m= line
             MUST be generated in the same order as in the current local
-            description.</t>
+            description. TODO new formats?</t>
 
             <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
             same, unless the m= section is restarting, in which case
