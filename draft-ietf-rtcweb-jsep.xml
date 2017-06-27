@@ -2542,21 +2542,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             parameters for that codec MUST be specified to indicate
             that silence suppression for received audio is not desired.
             For example, when using the Opus codec, the "usedtx=0"
-            parameter would be specified in the offer.</t>
-
-            <t>Depending on the selected codec, setting the
-            "VoiceActivityDetection" option may or may not impact
-            whether the JSEP implementation performs silence suppression
-            for the audio it sends. In particular, for Opus and for
-            codecs without internal silence suppression which therefore use
-            CN, the SDP indication is unilateral and therefore only
-            the peer's indication matters for whether the JSEP
-            implementation performs silence suppression. For G.729,
-            the "dtx" parameter
-            as specified in <xref target="RFC5459"/>, Section 5.2.1,
-            is bidirectional and therefore
-            setting "VoiceActivityDetection" to "false" disables
-            silence suppression in both directions.</t>
+            parameter would be specified in the offer. In addition,
+            the implementation MUST NOT use silence suppression for
+            media it generates, regardless of whether the "CN"
+            codecs or DTX fmtp parameters appear in the peer's
+            description. The impact of these rules is that silence
+            suppression depends on mutual agreement of both sides,
+            which is consistent with the current behavior of G.729,
+            as specified in as specified in <xref target="RFC5459"/>, Section 5.2.1,
+            but more restrictive than the behavior of Opus or
+            G.711.
+            </t>
 
             <t>The "VoiceActivityDetection" option does not have any
             impact on the setting of the "vad" value in the signaling
@@ -3085,7 +3081,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             on a per-codec basis (e.g., if the offerer somehow offered
             support for CN but set "usedtx=0" for Opus, setting
             VoiceActivityDetection to true would result in an answer
-            with CN codecs and "usedtx=0").</t>
+            with CN codecs and "usedtx=0"). The impact of this rule is that
+            an answerer will not offer silence suppression with any
+            endpoint that does not offer it, making silence suppression
+            support bilateral even with non-JSEP endpoints.</t>
           </section>
         </section>
       </section>
