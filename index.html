@@ -1241,7 +1241,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>The RTP header extensions MUST only include those that are present in the most recent answer.</li>
 <li>The RTCP feedback mechanisms MUST only include those that are present in the most recent answer, except for the case of format-specific mechanisms that are referencing a newly-added media format.</li>
 <li>The "a=rtcp" line MUST NOT be added if the most recent answer included an "a=rtcp-mux" line.</li>
-<li>The "a=rtcp-mux" line MUST NOT be added unless present in the most recent answer.</li>
+<li>The "a=rtcp-mux" line MUST be the same as that in the most recent answer.</li>
 <li>The "a=rtcp-mux-only" line MUST NOT be added.</li>
 <li>The "a=rtcp-rsize" line MUST NOT be added unless present in the most recent answer.</li>
 <li>An "a=bundle-only" line MUST NOT be added, as indicated in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 6. Instead, JSEP implementations MUST simply omit parameters in the IDENTICAL and TRANSPORT categories for bundled m= sections, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 8.1.</li>
@@ -1408,6 +1408,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>Unless codec preferences have been set for the associated transceiver, the media formats on the m= line MUST be generated in the same order as in the current local description.</li>
 <li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the m= section is restarting, in which case new ICE credentials must be created as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.2.1.1. If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.</li>
 <li>Each "a=setup" line MUST use an "active" or "passive" role value consistent with the existing DTLS association, if the association is being continued by the offerer.</li>
+<li>RTCP multiplexing must be used, and an "a=rtcp-mux" line inserted if and only if the m= section previously used RTCP multiplexing.</li>
 <li>If the m= section is not bundled into another m= section and RTCP multiplexing is not active, an "a=rtcp" attribute line MUST be filled in with the port and address of the default RTCP candidate. If no RTCP candidates have yet been gathered, dummy values MUST be used, as described in the initial answer section above.</li>
 <li>If the m= section is not bundled into another m= section, for each candidate that has been gathered during the most recent gathering phase (see <a href="#sec.ice-gather-overview" class="xref">Section 3.5.1</a>), an "a=candidate" line MUST be added, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.3., paragraph 3.  If candidate gathering for the section has completed, an "a=end-of-candidates" attribute MUST be added, as described in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 9.3.  If the m= section is bundled into another m= section, both "a=candidate" and "a=end-of-candidates" MUST be omitted.</li>
 <li>For RtpTransceivers that are not stopped, the "a=msid" line(s) MUST stay the same, regardless of changes to the transceiver's direction or track. If no "a=msid" line is present in the current description, "a=msid" line(s) MUST be generated according to the same rules as for an initial answer.</li>
@@ -1561,7 +1562,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </li>
 <li>All RID values referenced in an "a=simulcast" line MUST exist as "a=rid" lines.</li>
 <li>Each m= section is also checked to ensure prohibited features are not used.</li>
-<li>If the RTP/RTCP multiplexing policy is "require", each m= section MUST contain an "a=rtcp-mux" attribute. If an "m=" section contains an "a=rtcp-mux-only" attribute then that section MUST also contain an "a=rtcp-mux" attribute.</li>
+<li>If the RTP/RTCP multiplexing policy is "require", each m= section MUST contain an "a=rtcp-mux" attribute. If an m= section contains an "a=rtcp-mux-only" attribute then that section MUST also contain an "a=rtcp-mux" attribute.</li>
+<li>If this m= section was present in the previous answer then the state of RTP/RTCP multiplexing MUST match what was previously negotiated.</li>
 </ul>
 <p id="rfc.section.5.7.3.p.2">If this session description is of type "pranswer" or "answer", the following additional checks are applied: </p>
 
@@ -1577,19 +1579,19 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.8.p.2">Next, m= sections are processed. For each m= section, the following steps MUST be performed; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
 
 <ul>
-<li>If this m= section is new, begin gathering candidates for it, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.1.1, unless it has been marked as bundle-only.</li>
-<li>Or, if the ICE ufrag and password values have changed, and it has not been marked as bundle-only, trigger the ICE agent to start an ICE restart, and begin gathering new candidates for the m= section as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.1.1.1. If this description is an answer, also start checks on that media section as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.3.1.1.</li>
+<li>If this m= section is new, begin gathering candidates for it, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.1.1, unless it is definitively being bundled (either this is an offer and the m= section is marked bundle-only, or it is an answer and the m= section is bundled into into another m= section.)</li>
+<li>Or, if the ICE ufrag and password values have changed, trigger the ICE agent to start an ICE restart, and begin gathering new candidates for the m= section as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.1.1.1. If this description is an answer, also start checks on that media section as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.3.1.1.</li>
 <li>If the m= section proto value indicates use of RTP: <ul>
 <li>If there is no RtpTransceiver associated with this m= section, find one and associate it with this m= section according to the following steps.  Note that this situation will only occur when applying an offer.  <ul>
 <li>Find the RtpTransceiver that corresponds to this m= section, using the mapping between transceivers and m= section indices established when creating the offer.</li>
 <li>Set the value of this RtpTransceiver's mid property to the MID of the m= section.</li>
 </ul>
 </li>
-<li>If RTCP mux is indicated, prepare to demux RTP and RTCP from the RTP ICE component, as specified in <a href="#RFC5761" class="xref">[RFC5761]</a>, Section 5.1.3. If RTCP mux is not indicated, but was previously negotiated, i.e., the RTCP ICE component no longer exists, this MUST result in an error.</li>
-<li>For each specified RTP header extension, establish a mapping between the extension ID and URI, as described in section 6 of <a href="#RFC5285" class="xref">[RFC5285]</a>. If any indicated RTP header extension is not supported, this MUST result in an error.</li>
+<li>If RTCP mux is indicated, prepare to demux RTP and RTCP from the RTP ICE component, as specified in <a href="#RFC5761" class="xref">[RFC5761]</a>, Section 5.1.3.</li>
+<li>For each specified RTP header extension, establish a mapping between the extension ID and URI, as described in <a href="#RFC5285" class="xref">[RFC5285]</a>, Section 6.</li>
 <li>If the MID header extension is supported, prepare to demux RTP streams intended for this m= section based on the MID header extension, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 15.</li>
-<li>For each specified media format, establish a mapping between the payload type and the actual media format, as described in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6.1. In addition, prepare to demux RTP streams intended for this m= section based on the media formats supported by this m= section, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 10.2.  If any indicated media format is not supported, this MUST result in an error.</li>
-<li>For each specified "rtx" media format, establish a mapping between the RTX payload type and its associated primary payload type, as described in <a href="#RFC4588" class="xref">[RFC4588]</a>, Sections 8.6 and 8.7. If any referenced primary payload types are not present, this MUST result in an error.</li>
+<li>For each specified media format, establish a mapping between the payload type and the actual media format, as described in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6.1. In addition, prepare to demux RTP streams intended for this m= section based on the media formats supported by this m= section, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 10.2.</li>
+<li>For each specified "rtx" media format, establish a mapping between the RTX payload type and its associated primary payload type, as described in <a href="#RFC4588" class="xref">[RFC4588]</a>, Sections 8.6 and 8.7.</li>
 <li>If the directional attribute is of type "sendrecv" or "recvonly", enable receipt and decoding of media.</li>
 </ul>
 </li>
