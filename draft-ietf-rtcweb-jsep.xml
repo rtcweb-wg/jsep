@@ -1975,9 +1975,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             formats MUST include the mandatory audio/video codecs as
             specified in
             <xref target="RFC7874"></xref>, Section 3,
-            and
-            <xref target="RFC7742"></xref>, Section
-            5.</t>
+            and <xref target="RFC7742"></xref>, Section 5.</t>
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -2744,29 +2742,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>If codec preferences have been set for the associated
             transceiver, media formats MUST be generated in the
-            corresponding order, and MUST exclude any codecs not
-            present in the codec preferences.</t>
+            corresponding order, regardless of what was offered,
+            and MUST exclude any codecs not present in the codec
+            preferences.</t>
 
-            <t>Unless excluded by the above restriction, the media
-            formats MUST include the mandatory audio/video codecs as
-            specified in
-            <xref target="RFC7874"></xref>, Section 3,
-            and <xref target="RFC7742"></xref>, Section
-            5.</t>
+            <t>Otherwise, the media formats on the m= line
+            MUST be generated in the same order as those offered in the
+            current remote description, excluding any currently unsupported
+            formats. Any currently available media formats that are
+            not present in the current remote description MUST be added after
+            all existing formats.</t>
 
-            <t>Unless codec preferences have been set for the
-            associated transceiver, the media formats on the m= line
-            MUST be generated in the same order as in the current local
-            description, excluding any unsupported formats. Any media formats
-            not present in the current local description MUST be added after
-            all existing formats. !!!!!</t>
-
-            <t>The media formats in the answer MAY include codecs
-            that are supported by the JSEP implementation, but not present in
-            the offer, as mentioned in <xref target="RFC3264" />, Section 6.1.
-            Any new codecs ... offer format</t>
+            <t>In either case, the media formats in the answer MUST include
+            at least one format that is present in the offer, but MAY include
+            formats that are locally supported but not present in the offer,
+            as mentioned in <xref target="RFC3264" />, Section 6.1.
             </t>
-
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -3929,13 +3920,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             that the JSEP implementation should be sending media
             ("sendonly" for local answers, "recvonly" for remote
             answers, or "sendrecv" for either type of answer),
-            choose the media format to send
-            as the most preferred media format from the remote
-            description that is also present in the answer, as
-            described in
-            <xref target="RFC3264" />, Sections 6.1 and 7, and start
-            transmitting RTP media once the underlying transport layers
-            have been established. If an SSRC has not already been
+            choose the media format to send; for the offerer, this will be
+            the most preferred media format from the answer that is also
+            locally supported, as described in <xref target="RFC3264" />,
+            Section 7; for the answerer, this will be
+            the most preferred media format from the offer that is also present
+            in the answer, as
+            described in <xref target="RFC3264" />, Sections 6.1. Once the
+            underlying transport layers have been established, start
+            transmitting RTP media using this
+            media format. If an SSRC has not already been
             chosen for this outgoing RTP stream, choose a random one.
             If media is already being transmitted, the same SSRC SHOULD
             be used unless the clockrate of the new codec is different,
