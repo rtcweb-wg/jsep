@@ -6,7 +6,7 @@ Group](http://trac.tools.ietf.org/wg/rtcweb/trac/wiki) draft of [JSEP](http://to
 
 JSEP specification:
 * [Editor's copy](http://rtcweb-wg.github.io/jsep/)
-* [Working Group Draft] (http://tools.ietf.org/html/draft-ietf-rtcweb-jsep)
+* [Working Group Draft](http://tools.ietf.org/html/draft-ietf-rtcweb-jsep)
 
 Status Into:
 
@@ -95,5 +95,11 @@ Examples are generated with
 
 ```
 python tools/gen_examples.py --replace draft-ietf-rtcweb-jsep.xml
+```
+
+The document can be reflowed with
+
+```
+tools/reflow.sh
 ```
 
