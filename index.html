@@ -367,7 +367,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-6-23" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-6-27" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -391,7 +391,7 @@ li, p {
 <td class="right">C. Jennings</td>
 </tr>
 <tr>
-<td class="left">Expires: December 25, 2017</td>
+<td class="left">Expires: December 29, 2017</td>
 <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -404,7 +404,7 @@ li, p {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">June 23, 2017</td>
+<td class="right">June 27, 2017</td>
 </tr>
 
     	
@@ -420,7 +420,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on December 25, 2017.</p>
+<p>This Internet-Draft will expire on December 29, 2017.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1142,7 +1142,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>If the m= section is marked as bundle-only, then the port value MUST be set to 0. Otherwise, the port value is set to the port of the default ICE candidate for this m= section, but given that no candidates are available yet, the "dummy" port value of 9 (Discard) MUST be used, as indicated in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 5.1.</li>
 <li>To properly indicate use of DTLS, the &lt;proto&gt; field MUST be set to "UDP/TLS/RTP/SAVPF", as specified in <a href="#RFC5764" class="xref">[RFC5764]</a>, Section 8.</li>
 <li>If codec preferences have been set for the associated transceiver, media formats MUST be generated in the corresponding order, and MUST exclude any codecs not present in the codec preferences.</li>
-<li>The media formats in the answer MAY include codecs present in the offer that were discarded in a previous offer/answer exchange. This is necessary for compatibility with third- party call control and SIP use cases.</li>
 <li>Unless excluded by the above restrictions, the media formats MUST include the mandatory audio/video codecs as specified in <a href="#RFC7874" class="xref">[RFC7874]</a>, Section 3, and <a href="#RFC7742" class="xref">[RFC7742]</a>, Section 5.</li>
 </ul>
 <p id="rfc.section.5.2.1.p.8">The m= line MUST be followed immediately by a "c=" line, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.7. Again, as no candidates are available yet, the "c=" line must contain the "dummy" value "IN IP4 0.0.0.0", as defined in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 5.1.</p>
@@ -1234,13 +1233,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>For RtpTransceivers that are still present, any "a=simulcast" line MUST stay the same.</li>
 </ul>
 <p id="rfc.section.5.2.2.p.5">If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "have-remote-pranswer" or "stable" states, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "have-local-offer" state above.</p>
-<p id="rfc.section.5.2.2.p.6">In addition, for each non-recycled, non-rejected m= section in the new offer, the following adjustments are made based on the contents of the corresponding m= section in the current remote description, if any: </p>
+<p id="rfc.section.5.2.2.p.6">In addition, for each existing, non-recycled, non-rejected m= section in the new offer, the following adjustments are made based on the contents of the corresponding m= section in the current local or remote description, as appropriate: </p>
 
 <ul>
-<li>The m= line and corresponding "a=rtpmap" and "a=fmtp" lines MUST only include codecs present in the most recent answer which have not been excluded by the codec preferences of the associated transceiver. Note that non-JSEP endpoints are not subject to these restrictions, and might offer media formats that were not present in the most recent answer, as specified in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 8. Therefore, JSEP implementations MUST be prepared to receive such offers.</li>
-<li>Unless codec preferences have been set for the associated transceiver, the media formats on the m= line MUST be generated in the same order as in the current local description.</li>
+<li>The m= line and corresponding "a=rtpmap" and "a=fmtp" lines MUST only include media formats which have not been excluded by the codec preferences of the associated transceiver, and MUST include all currently available formats. Media formats that were previously offered but are no longer available (e.g., a shared hardware codec) MAY be excluded.</li>
+<li>Unless codec preferences have been set for the associated transceiver, the media formats on the m= line MUST be generated in the same order as in the most recent answer. Any media formats that were not present in the most recent answer MUST be added after all existing formats.</li>
 <li>The RTP header extensions MUST only include those that are present in the most recent answer.</li>
-<li>The RTCP feedback extensions MUST only include those that are present in the most recent answer.</li>
+<li>The RTCP feedback mechanisms MUST only include those that are present in the most recent answer, except for the case of format-specific mechanisms that are referencing a newly-added media format.</li>
 <li>The "a=rtcp" line MUST NOT be added if the most recent answer included an "a=rtcp-mux" line.</li>
 <li>The "a=rtcp-mux" line MUST NOT be added unless present in the most recent answer.</li>
 <li>The "a=rtcp-mux-only" line MUST NOT be added.</li>
@@ -2689,7 +2688,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="reference"><b id="I-D.ietf-ice-trickle">[I-D.ietf-ice-trickle]</b></td>
 <td class="top">
-<a>Ivov, E.</a>, <a>Rescorla, E.</a>, <a>Uberti, J.</a> and <a>P. Saint-Andre</a>, "<a href="http://tools.ietf.org/html/draft-ietf-ice-trickle-11">Trickle ICE: Incremental Provisioning of Candidates for the Interactive Connectivity Establishment (ICE) Protocol</a>", Internet-Draft draft-ietf-ice-trickle-11, May 2017.</td>
+<a>Ivov, E.</a>, <a>Rescorla, E.</a>, <a>Uberti, J.</a> and <a>P. Saint-Andre</a>, "<a href="http://tools.ietf.org/html/draft-ietf-ice-trickle-12">Trickle ICE: Incremental Provisioning of Candidates for the Interactive Connectivity Establishment (ICE) Protocol</a>", Internet-Draft draft-ietf-ice-trickle-12, June 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</b></td>
