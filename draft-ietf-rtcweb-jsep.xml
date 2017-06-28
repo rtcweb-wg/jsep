@@ -2706,13 +2706,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           conditions are true, the corresponding m= section in the
           answer MUST be marked as rejected by setting the port in the
           m= line to zero, as indicated in
-          <xref target="RFC3264"></xref>, Section 6., and further
+          <xref target="RFC3264"></xref>, Section 6, and further
           processing for this m= section can be skipped:
           <list style="symbols">
 
             <t>The associated RtpTransceiver has been stopped.</t>
 
-            <t>No supported codec is present in the offer.</t>
+            <t>None of the offered media formats are supported and, if
+            applicable, allowed by codec preferences.</t>
 
             <t>The bundle policy is "max-bundle", and this is not the
             first m= section or in the same bundle group as the first
@@ -2756,7 +2757,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>In either case, the media formats in the answer MUST include
             at least one format that is present in the offer, but MAY include
             formats that are locally supported but not present in the offer,
-            as mentioned in <xref target="RFC3264" />, Section 6.1.
+            as mentioned in <xref target="RFC3264" />, Section 6.1. If no
+            common format exists, the m= section is rejected as described
+            above.
             </t>
           </list></t>
 
