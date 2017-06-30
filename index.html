@@ -1262,9 +1262,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </h4>
 <p id="rfc.section.5.2.3.2.p.1">Silence suppression, also known as discontinuous transmission ("DTX"), can reduce the bandwidth used for audio by switching to a special encoding when voice activity is not detected, at the cost of some fidelity.</p>
 <p id="rfc.section.5.2.3.2.p.2">If the "VoiceActivityDetection" option is specified, with a value of "true", the offer MUST indicate support for silence suppression in the audio it receives by including comfort noise ("CN") codecs for each offered audio codec, as specified in <a href="#RFC3389" class="xref">[RFC3389]</a>, Section 5.1, except for codecs that have their own internal silence suppression support. For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is desired. For example, when using the Opus codec <a href="#RFC6716" class="xref">[RFC6716]</a>, the "usedtx=1" parameter, specified in <a href="#RFC7587" class="xref">[RFC7587]</a>, would be used in the offer.</p>
-<p id="rfc.section.5.2.3.2.p.3">If the "VoiceActivityDetection" option is specified, with a value of "false", the JSEP implementation MUST NOT emit "CN" codecs. For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is not desired.  For example, when using the Opus codec, the "usedtx=0" parameter would be specified in the offer.</p>
-<p id="rfc.section.5.2.3.2.p.4">Note that setting the "VoiceActivityDetection" parameter when generating an offer is a request to receive audio with silence suppression. It has no impact on whether the local endpoint does silence suppression for the audio it sends.</p>
-<p id="rfc.section.5.2.3.2.p.5">The "VoiceActivityDetection" option does not have any impact on the setting of the "vad" value in the signaling of the client to mixer audio level header extension described in <a href="#RFC6464" class="xref">[RFC6464]</a>, Section 4.</p>
+<p id="rfc.section.5.2.3.2.p.3">If the "VoiceActivityDetection" option is specified, with a value of "false", the JSEP implementation MUST NOT emit "CN" codecs. For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is not desired.  For example, when using the Opus codec, the "usedtx=0" parameter would be specified in the offer. In addition, the implementation MUST NOT use silence suppression for media it generates, regardless of whether the "CN" codecs or related fmtp parameters appear in the peer's description. The impact of these rules is that silence suppression in JSEP depends on mutual agreement of both sides, which ensures consistent handling regardless of which codec is used.  </p>
+<p id="rfc.section.5.2.3.2.p.4">The "VoiceActivityDetection" option does not have any impact on the setting of the "vad" value in the signaling of the client to mixer audio level header extension described in <a href="#RFC6464" class="xref">[RFC6464]</a>, Section 4.</p>
 <h2 id="rfc.section.5.3">
 <a href="#rfc.section.5.3">5.3.</a> <a href="#sec.generating-an-answer" id="sec.generating-an-answer">Generating an Answer</a>
 </h2>
@@ -1421,7 +1420,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h4 id="rfc.section.5.3.3.1">
 <a href="#rfc.section.5.3.3.1">5.3.3.1.</a> <a href="#sec.voiceactivitydetection2" id="sec.voiceactivitydetection2">VoiceActivityDetection</a>
 </h4>
-<p id="rfc.section.5.3.3.1.p.1">Silence suppression in the answer is handled as described in <a href="#sec.voiceactivitydetection1" class="xref">Section 5.2.3.2</a>, with one exception: if support for silence suppression was not indicated in the offer, the VoiceActivityDetection parameter has no effect, and the answer should be generated as if VoiceActivityDetection was set to false. This is done on a per-codec basis (e.g., if the offerer somehow offered support for CN but set "usedtx=0" for Opus, setting VoiceActivityDetection to true would result in an answer with CN codecs and "usedtx=0").</p>
+<p id="rfc.section.5.3.3.1.p.1">Silence suppression in the answer is handled as described in <a href="#sec.voiceactivitydetection1" class="xref">Section 5.2.3.2</a>, with one exception: if support for silence suppression was not indicated in the offer, the VoiceActivityDetection parameter has no effect, and the answer should be generated as if VoiceActivityDetection was set to false. This is done on a per-codec basis (e.g., if the offerer somehow offered support for CN but set "usedtx=0" for Opus, setting VoiceActivityDetection to true would result in an answer with CN codecs and "usedtx=0"). The impact of this rule is that an answerer will not try to use silence suppression with any endpoint that does not offer it, making silence suppression support bilateral even with non-JSEP endpoints.</p>
 <h2 id="rfc.section.5.4">
 <a href="#rfc.section.5.4">5.4.</a> <a href="#sec.modifying-sdp" id="sec.modifying-sdp">Modifying an Offer or Answer</a>
 </h2>
@@ -2930,6 +2929,11 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <td class="reference"><b id="RFC4733">[RFC4733]</b></td>
 <td class="top">
 <a>Schulzrinne, H.</a> and <a>T. Taylor</a>, "<a href="http://tools.ietf.org/html/rfc4733">RTP Payload for DTMF Digits, Telephony Tones, and Telephony Signals</a>", RFC 4733, DOI 10.17487/RFC4733, December 2006.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC5459">[RFC5459]</b></td>
+<td class="top">
+<a>Sollaud, A.</a>, "<a href="http://tools.ietf.org/html/rfc5459">G.729.1 RTP Payload Format Update: Discontinuous Transmission (DTX) Support</a>", RFC 5459, DOI 10.17487/RFC5459, January 2009.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5506">[RFC5506]</b></td>

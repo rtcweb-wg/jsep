@@ -2659,12 +2659,12 @@ Internet-Draft                    JSEP                         June 2017
    appropriate fmtp parameters for that codec MUST be specified to
    indicate that silence suppression for received audio is not desired.
    For example, when using the Opus codec, the "usedtx=0" parameter
-   would be specified in the offer.
-
-   Note that setting the "VoiceActivityDetection" parameter when
-   generating an offer is a request to receive audio with silence
-   suppression.  It has no impact on whether the local endpoint does
-   silence suppression for the audio it sends.
+   would be specified in the offer.  In addition, the implementation
+   MUST NOT use silence suppression for media it generates, regardless
+   of whether the "CN" codecs or related fmtp parameters appear in the
+   peer's description.  The impact of these rules is that silence
+   suppression in JSEP depends on mutual agreement of both sides, which
+   ensures consistent handling regardless of which codec is used.
 
    The "VoiceActivityDetection" option does not have any impact on the
    setting of the "vad" value in the signaling of the client to mixer
@@ -3143,7 +3143,10 @@ Internet-Draft                    JSEP                         June 2017
    done on a per-codec basis (e.g., if the offerer somehow offered
    support for CN but set "usedtx=0" for Opus, setting
    VoiceActivityDetection to true would result in an answer with CN
-   codecs and "usedtx=0").
+   codecs and "usedtx=0").  The impact of this rule is that an answerer
+   will not try to use silence suppression with any endpoint that does
+   not offer it, making silence suppression support bilateral even with
+   non-JSEP endpoints.
 
 5.4.  Modifying an Offer or Answer
 
@@ -3184,15 +3187,15 @@ Internet-Draft                    JSEP                         June 2017
       *  If the type is "offer", the PeerConnection state MUST be either
          "stable" or "have-local-offer".
 
-      *  If the type is "pranswer" or "answer", the PeerConnection state
-         MUST be either "have-remote-offer" or "have-local-pranswer".
-
 
 
 Uberti, et al.           Expires January 1, 2018               [Page 57]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+      *  If the type is "pranswer" or "answer", the PeerConnection state
+         MUST be either "have-remote-offer" or "have-local-pranswer".
 
    o  If the type is not correct for the current state, processing MUST
       stop and an error MUST be returned.
@@ -3239,9 +3242,6 @@ Internet-Draft                    JSEP                         June 2017
    sequence of text lines, each containing a key-value expression, as
    described in [RFC4566], Section 5.  The SDP is read, line-by-line,
    and converted to a data structure that contains the deserialized
-   information.  However, SDP allows many types of lines, not all of
-   which are relevant to JSEP applications.  For each line, the
-   implementation will first ensure it is syntactically correct
 
 
 
@@ -3250,6 +3250,9 @@ Uberti, et al.           Expires January 1, 2018               [Page 58]
 Internet-Draft                    JSEP                         June 2017
 
 
+   information.  However, SDP allows many types of lines, not all of
+   which are relevant to JSEP applications.  For each line, the
+   implementation will first ensure it is syntactically correct
    according to its defining ABNF, check that it conforms to [RFC4566]
    and [RFC3264] semantics, and then either parse and store or discard
    the provided value, as described below.
@@ -3294,9 +3297,6 @@ Internet-Draft                    JSEP                         June 2017
    Finally, the attribute lines are processed.  Specific processing MUST
    be applied for the following session-level attribute ("a=") lines:
 
-   o  Any "a=group" lines are parsed as specified in [RFC5888],
-      Section 5, and the group's semantics and mids are stored.
-
 
 
 
@@ -3305,6 +3305,9 @@ Uberti, et al.           Expires January 1, 2018               [Page 59]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+   o  Any "a=group" lines are parsed as specified in [RFC5888],
+      Section 5, and the group's semantics and mids are stored.
 
    o  If present, a single "a=ice-lite" line is parsed as specified in
       [RFC5245], Section 15.3, and a value indicating the presence of
@@ -3352,15 +3355,15 @@ Internet-Draft                    JSEP                         June 2017
    the specific order and with the specific syntax defined in [RFC4566],
    Section 5.
 
-   The "m=" line itself MUST be parsed as described in [RFC4566],
-   Section 5.14, and the media, port, proto, and fmt values stored.
-
 
 
 Uberti, et al.           Expires January 1, 2018               [Page 60]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+   The "m=" line itself MUST be parsed as described in [RFC4566],
+   Section 5.14, and the media, port, proto, and fmt values stored.
 
    Following the "m=" line, specific processing MUST be applied for the
    following non-attribute lines:
@@ -3407,9 +3410,6 @@ Internet-Draft                    JSEP                         June 2017
    o  The "m=" fmt value MUST be parsed as specified in [RFC4566],
       Section 5.14, and the individual values stored.
 
-   o  Any "a=rtpmap" or "a=fmtp" lines MUST be parsed as specified in
-      [RFC4566], Section 6, and their values stored.
-
 
 
 
@@ -3417,6 +3417,9 @@ Uberti, et al.           Expires January 1, 2018               [Page 61]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+   o  Any "a=rtpmap" or "a=fmtp" lines MUST be parsed as specified in
+      [RFC4566], Section 6, and their values stored.
 
    o  If present, a single "a=ptime" line MUST be parsed as described in
       [RFC4566], Section 6, and its value stored.
@@ -3462,9 +3465,6 @@ Internet-Draft                    JSEP                         June 2017
    o  Any "a=rid" lines MUST be parsed as specified in
       [I-D.ietf-mmusic-rid], Section 10, and their values stored.
 
-   o  If present, a single "a=simulcast" line MUST be parsed as
-      specified in [I-D.ietf-mmusic-sdp-simulcast], and its values
-      stored.
 
 
 
@@ -3473,6 +3473,10 @@ Uberti, et al.           Expires January 1, 2018               [Page 62]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+   o  If present, a single "a=simulcast" line MUST be parsed as
+      specified in [I-D.ietf-mmusic-sdp-simulcast], and its values
+      stored.
 
    Otherwise, if the "m=" proto value indicates use of SCTP, the
    following attribute lines MUST be processed:
@@ -3517,10 +3521,6 @@ Internet-Draft                    JSEP                         June 2017
          ufrag and password values.  If this is an answer, the tls-id
          value, if present, MUST be the same as in the offer.
 
-      *  DTLS setup value, which MUST be set according to the rules
-         specified in [RFC5763], Section 5 and MUST be consistent with
-         the selected role of the current DTLS connection, if one exists
-         and is being continued.
 
 
 
@@ -3529,6 +3529,11 @@ Uberti, et al.           Expires January 1, 2018               [Page 63]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+      *  DTLS setup value, which MUST be set according to the rules
+         specified in [RFC5763], Section 5 and MUST be consistent with
+         the selected role of the current DTLS connection, if one exists
+         and is being continued.
 
       *  DTLS fingerprint values, where at least one fingerprint MUST be
          present.
@@ -3574,11 +3579,6 @@ Internet-Draft                    JSEP                         June 2017
    cannot be applied, processing MUST stop and an error MUST be
    returned.
 
-   o  If this m= section is new, begin gathering candidates for it, as
-      defined in [RFC5245], Section 4.1.1, unless it is definitively
-      being bundled (either this is an offer and the m= section is
-
-
 
 
 Uberti, et al.           Expires January 1, 2018               [Page 64]
@@ -3586,6 +3586,9 @@ Uberti, et al.           Expires January 1, 2018               [Page 64]
 Internet-Draft                    JSEP                         June 2017
 
 
+   o  If this m= section is new, begin gathering candidates for it, as
+      defined in [RFC5245], Section 4.1.1, unless it is definitively
+      being bundled (either this is an offer and the m= section is
       marked bundle-only, or it is an answer and the m= section is
       bundled into into another m= section.)
 
@@ -3630,9 +3633,6 @@ Internet-Draft                    JSEP                         June 2017
          supported by this m= section, as described in
          [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 10.2.
 
-      *  For each specified "rtx" media format, establish a mapping
-         between the RTX payload type and its associated primary payload
-         type, as described in [RFC4588], Sections 8.6 and 8.7.
 
 
 
@@ -3641,6 +3641,10 @@ Uberti, et al.           Expires January 1, 2018               [Page 65]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+      *  For each specified "rtx" media format, establish a mapping
+         between the RTX payload type and its associated primary payload
+         type, as described in [RFC4588], Sections 8.6 and 8.7.
 
       *  If the directional attribute is of type "sendrecv" or
          "recvonly", enable receipt and decoding of media.
@@ -3685,11 +3689,7 @@ Internet-Draft                    JSEP                         June 2017
       *  If the description is of type "offer", note that an ICE restart
          is needed, as described in [RFC5245], Section 9.1.1.1 .
 
-      *  If the description is of type "answer" or "pranswer", then
-         check to see if the current local description is an ICE
-         restart, and if not, generate an error.  It the PeerConnection
-         state is "have-remote-pranswer", and the ICE ufrag or password
-         changed from the previous provisional answer, then signal the
+
 
 
 
@@ -3698,6 +3698,11 @@ Uberti, et al.           Expires January 1, 2018               [Page 66]
 Internet-Draft                    JSEP                         June 2017
 
 
+      *  If the description is of type "answer" or "pranswer", then
+         check to see if the current local description is an ICE
+         restart, and if not, generate an error.  It the PeerConnection
+         state is "have-remote-pranswer", and the ICE ufrag or password
+         changed from the previous provisional answer, then signal the
          ICE agent to discard any previous ICE check list state for the
          m= section.  Finally, signal the ICE agent to begin checks as
          described in [RFC5245], Section 9.3.1.1.
@@ -3741,11 +3746,6 @@ Internet-Draft                    JSEP                         June 2017
          +  If no RtpTransceiver was found in the previous step, create
             one with a recvonly direction.
 
-         +  Associate the found or created RtpTransceiver with the m=
-            section by setting the value of the RtpTransceiver's mid
-            property to the MID of the m= section, and establish a
-            mapping between the transceiver and the index of the m=
-            section.  If the m= section does not include a MID (i.e.,
 
 
 
@@ -3754,6 +3754,11 @@ Uberti, et al.           Expires January 1, 2018               [Page 67]
 Internet-Draft                    JSEP                         June 2017
 
 
+         +  Associate the found or created RtpTransceiver with the m=
+            section by setting the value of the RtpTransceiver's mid
+            property to the MID of the m= section, and establish a
+            mapping between the transceiver and the index of the m=
+            section.  If the m= section does not include a MID (i.e.,
             the remote endpoint does not support the MID extension),
             generate a value for the RtpTransceiver mid property,
             following the guidance for "a=mid" mentioned in
@@ -3796,12 +3801,7 @@ Internet-Draft                    JSEP                         June 2017
          extension is not supported by the local implementation, it MUST
          be ignored.
 
-      *  For each specified RTCP feedback mechanism that is supported by
-         the local implementation, enable them on the associated media
-         formats.
 
-      *  For any specified "TIAS" bandwidth value, set this value as a
-         constraint on the maximum RTP bitrate to be used when sending
 
 
 
@@ -3810,6 +3810,12 @@ Uberti, et al.           Expires January 1, 2018               [Page 68]
 Internet-Draft                    JSEP                         June 2017
 
 
+      *  For each specified RTCP feedback mechanism that is supported by
+         the local implementation, enable them on the associated media
+         formats.
+
+      *  For any specified "TIAS" bandwidth value, set this value as a
+         constraint on the maximum RTP bitrate to be used when sending
          media, as specified in [RFC3890].  If a "TIAS" value is not
          present, but an "AS" value is specified, generate a "TIAS"
          value using this formula:
@@ -3851,12 +3857,6 @@ Internet-Draft                    JSEP                         June 2017
             specified size is not supported for a media format, use the
             next closest value instead.
 
-   Finally, if this description is of type "pranswer" or "answer",
-   follow the processing defined in the Section 5.10 section below.
-
-
-
-
 
 
 
@@ -3865,6 +3865,9 @@ Uberti, et al.           Expires January 1, 2018               [Page 69]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+   Finally, if this description is of type "pranswer" or "answer",
+   follow the processing defined in the Section 5.10 section below.
 
 5.10.  Applying an Answer
 
@@ -3910,9 +3913,6 @@ Internet-Draft                    JSEP                         June 2017
          RTCP ICE component; if no RTCP ICE component exists, because
          RTCP mux was previously enabled, this MUST result in an error.
 
-      *  If the m= section has reduced-size RTCP enabled, configure the
-         RTCP transmission for this m= section to use reduced-size RTCP,
-         as specified in [RFC5506].
 
 
 
@@ -3921,6 +3921,10 @@ Uberti, et al.           Expires January 1, 2018               [Page 70]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+      *  If the m= section has reduced-size RTCP enabled, configure the
+         RTCP transmission for this m= section to use reduced-size RTCP,
+         as specified in [RFC5506].
 
       *  If the directional attribute in the answer indicates that the
          JSEP implementation should be sending media ("sendonly" for
@@ -3966,10 +3970,6 @@ Internet-Draft                    JSEP                         June 2017
 
       *  Enable the RTCP feedback mechanisms referenced in the media
          section for all Source RTP Streams using the specified media
-         formats.  Specifically, begin or continue sending the requested
-         feedback types and reacting to received feedback, as specified
-         in [RFC4585], Section 4.2.  When sending RTCP feedback, follow
-
 
 
 
@@ -3978,6 +3978,9 @@ Uberti, et al.           Expires January 1, 2018               [Page 71]
 Internet-Draft                    JSEP                         June 2017
 
 
+         formats.  Specifically, begin or continue sending the requested
+         feedback types and reacting to received feedback, as specified
+         in [RFC4585], Section 4.2.  When sending RTCP feedback, follow
          the rules and recommendations from [RFC8108] Section 5.4.1, to
          select which SSRC to use.
 
@@ -4023,9 +4026,6 @@ Internet-Draft                    JSEP                         June 2017
    includes using RID [I-D.ietf-mmusic-rid] to distinguish between
    multiple Encoded Streams, as well as determine which Source RTP
    stream should be repaired by a given Redundancy RTP stream.
-
-
-
 
 
 
@@ -5617,6 +5617,11 @@ Internet-Draft                    JSEP                         June 2017
               DOI 10.17487/RFC4733, December 2006,
               <http://www.rfc-editor.org/info/rfc4733>.
 
+   [RFC5459]  Sollaud, A., "G.729.1 RTP Payload Format Update:
+              Discontinuous Transmission (DTX) Support", RFC 5459,
+              DOI 10.17487/RFC5459, January 2009,
+              <http://www.rfc-editor.org/info/rfc5459>.
+
    [RFC5506]  Johansson, I. and M. Westerlund, "Support for Reduced-Size
               Real-Time Transport Control Protocol (RTCP): Opportunities
               and Consequences", RFC 5506, DOI 10.17487/RFC5506, April
@@ -5645,11 +5650,6 @@ Internet-Draft                    JSEP                         June 2017
               DOI 10.17487/RFC6464, December 2011,
               <http://www.rfc-editor.org/info/rfc6464>.
 
-   [RFC6544]  Rosenberg, J., Keranen, A., Lowekamp, B., and A. Roach,
-              "TCP Candidates with Interactive Connectivity
-              Establishment (ICE)", RFC 6544, DOI 10.17487/RFC6544,
-              March 2012, <http://www.rfc-editor.org/info/rfc6544>.
-
 
 
 
@@ -5657,6 +5657,11 @@ Uberti, et al.           Expires January 1, 2018              [Page 101]
 
 Internet-Draft                    JSEP                         June 2017
 
+
+   [RFC6544]  Rosenberg, J., Keranen, A., Lowekamp, B., and A. Roach,
+              "TCP Candidates with Interactive Connectivity
+              Establishment (ICE)", RFC 6544, DOI 10.17487/RFC6544,
+              March 2012, <http://www.rfc-editor.org/info/rfc6544>.
 
    [TS26.114]
               3GPP TS 26.114 V12.8.0, "3rd Generation Partnership
@@ -5676,11 +5681,6 @@ Appendix A.  Appendix A
 
    For the syntax validation performed in Section 5.7, the following
    list of ABNF definitions is used:
-
-
-
-
-
 
 
 
