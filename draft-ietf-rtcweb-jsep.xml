@@ -717,15 +717,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           (e.g., hardware decoder capababilities, local policy) to
           determine the absolute minimum and maximum sizes it can
           receive. If there are no known local limits, the
-          "a=imageattr" attribute SHOULD be omitted.</t>
+          "a=imageattr" attribute SHOULD be omitted. If these local limits
+          preclude receiving any video, i.e., the degenerate case of no
+          permitted resolutions, the "a=imageattr" attribute MUST be omitted,
+          and the m= section MUST be marked as sendonly/inactive, as
+          appropriate.</t>
 
           <t>Otherwise, an "a=imageattr" attribute is created with
           "recv" direction, and the resulting resolution space formed
           from the aforementioned intersection is used to specify its
-          minimum and maximum x= and y= values. If the intersection is
-          the null set, i.e., the degenerate case of no permitted
-          resolutions, this MUST be represented by x=0 and y=0
-          values.</t>
+          minimum and maximum x= and y= values.</t>
 
           <t>The rules here express a single set of preferences, and
           therefore, the "a=imageattr" q= value is not important. It
@@ -830,10 +831,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               MUST NOT apply upscaling. JSEP implementations SHOULD avoid this
               situation by allowing receipt of arbitrarily small resolutions,
               perhaps via fallback to a software decoder.</t>
-
-              <t>In the special case of a maximum resolution of
-              [0, 0], as described above, the sender MUST NOT transmit the
-              encoding.</t>
             </list>
           </t>
         </section>
@@ -3909,11 +3906,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the m= section references RTCP feedback mechanisms
             that were not present in the corresponding m= section in
             the offer, this indicates a negotiation problem and MUST
-            result in an error. However, new media formats and new 
+            result in an error. However, new media formats and new
             RTP header extension values are permitted in the answer, as
-            described in <xref target="RFC3264" />, Section 7, and   
+            described in <xref target="RFC3264" />, Section 7, and
             <xref target="RFC5285" />, Section 6.</t>
-            
+
             <t>If the m= section has RTCP mux enabled, discard the RTCP
             ICE component, if one exists, and begin or continue muxing
             RTCP over the RTP ICE component, as specified in
