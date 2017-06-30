@@ -1739,9 +1739,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           createAnswer, in which case the corresponding media formats
           in the associated m= section will be excluded. The codec
           preferences cannot add media formats that would otherwise not
-          be present. This includes codecs that were not negotiated in
-          a previous offer/answer exchange that included the
-          transceiver.</t>
+          be present.</t>
 
           <t>The codec preferences of an RtpTransceiver can also
           determine the order of codecs in subsequent calls to
@@ -1977,9 +1975,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             formats MUST include the mandatory audio/video codecs as
             specified in
             <xref target="RFC7874"></xref>, Section 3,
-            and
-            <xref target="RFC7742"></xref>, Section
-            5.</t>
+            and <xref target="RFC7742"></xref>, Section 5.</t>
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -2710,13 +2706,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           conditions are true, the corresponding m= section in the
           answer MUST be marked as rejected by setting the port in the
           m= line to zero, as indicated in
-          <xref target="RFC3264"></xref>, Section 6., and further
+          <xref target="RFC3264"></xref>, Section 6, and further
           processing for this m= section can be skipped:
           <list style="symbols">
 
             <t>The associated RtpTransceiver has been stopped.</t>
 
-            <t>No supported codec is present in the offer.</t>
+            <t>None of the offered media formats are supported and, if
+            applicable, allowed by codec preferences.</t>
 
             <t>The bundle policy is "max-bundle", and this is not the
             first m= section or in the same bundle group as the first
@@ -2746,22 +2743,24 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>If codec preferences have been set for the associated
             transceiver, media formats MUST be generated in the
-            corresponding order, and MUST exclude any codecs not
-            present in the codec preferences or not present in the
-            offer. Note that non-JSEP endpoints are not subject to this
-            restriction, and might add media formats in the answer that
-            are not present in the offer, as specified in
-            <xref target="RFC3264"></xref>, Section 6.1. Therefore,
-            JSEP implementations MUST be prepared to receive such
-            answers.</t>
+            corresponding order, regardless of what was offered,
+            and MUST exclude any codecs not present in the codec
+            preferences.</t>
 
-            <t>Unless excluded by the above restrictions, the media
-            formats MUST include the mandatory audio/video codecs as
-            specified in
-            <xref target="RFC7874"></xref>, Section 3,
-            and
-            <xref target="RFC7742"></xref>, Section
-            5.</t>
+            <t>Otherwise, the media formats on the m= line
+            MUST be generated in the same order as those offered in the
+            current remote description, excluding any currently unsupported
+            formats. Any currently available media formats that are
+            not present in the current remote description MUST be added after
+            all existing formats.</t>
+
+            <t>In either case, the media formats in the answer MUST include
+            at least one format that is present in the offer, but MAY include
+            formats that are locally supported but not present in the offer,
+            as mentioned in <xref target="RFC3264" />, Section 6.1. If no
+            common format exists, the m= section is rejected as described
+            above.
+            </t>
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -3000,11 +2999,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             that the m= line protocol need not match the default
             candidate, because this protocol value must instead match
             what was supplied in the offer, as described above.</t>
-
-            <t>Unless codec preferences have been set for the
-            associated transceiver, the media formats on the m= line
-            MUST be generated in the same order as in the current local
-            description.</t>
 
             <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
             same, unless the m= section is restarting, in which case
@@ -3935,11 +3929,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             answers, or "sendrecv" for either type of answer),
             choose the media format to send
             as the most preferred media format from the remote
-            description that is also present in the answer, as
-            described in
+            description that is also locally supported, as
+            discussed in
             <xref target="RFC3264" />, Sections 6.1 and 7, and start
-            transmitting RTP media once the underlying transport layers
-            have been established. If an SSRC has not already been
+            transmitting RTP media using that format once the underlying
+            transport layers have been established.
+            If an SSRC has not already been
             chosen for this outgoing RTP stream, choose a random one.
             If media is already being transmitted, the same SSRC SHOULD
             be used unless the clockrate of the new codec is different,
