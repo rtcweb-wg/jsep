@@ -805,8 +805,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.3.6.p.2">Note that certain codecs support transmission of samples with aspect ratios other than 1.0 (i.e., non-square pixels).  JSEP implementations will not transmit non-square pixels, but SHOULD receive and render such video with the correct aspect ratio. However, sample aspect ratio has no impact on the size negotiation described below; all dimensions are measured in pixels, whether square or not.</p>
 <h3 id="rfc.section.3.6.1">
 <a href="#rfc.section.3.6.1">3.6.1.</a> Creating an imageattr Attribute</h3>
-<p id="rfc.section.3.6.1.p.1">The receiver will first intersect any known local limits (e.g., hardware decoder capababilities, local policy) to determine the absolute minimum and maximum sizes it can receive. If there are no known local limits, the "a=imageattr" attribute SHOULD be omitted.</p>
-<p id="rfc.section.3.6.1.p.2">Otherwise, an "a=imageattr" attribute is created with "recv" direction, and the resulting resolution space formed from the aforementioned intersection is used to specify its minimum and maximum x= and y= values. If the intersection is the null set, i.e., the degenerate case of no permitted resolutions, this MUST be represented by x=0 and y=0 values.</p>
+<p id="rfc.section.3.6.1.p.1">The receiver will first intersect any known local limits (e.g., hardware decoder capababilities, local policy) to determine the absolute minimum and maximum sizes it can receive. If there are no known local limits, the "a=imageattr" attribute SHOULD be omitted. If these local limits preclude receiving any video, i.e., the degenerate case of no permitted resolutions, the "a=imageattr" attribute MUST be omitted, and the m= section MUST be marked as sendonly/inactive, as appropriate.</p>
+<p id="rfc.section.3.6.1.p.2">Otherwise, an "a=imageattr" attribute is created with "recv" direction, and the resulting resolution space formed from the aforementioned intersection is used to specify its minimum and maximum x= and y= values.</p>
 <p id="rfc.section.3.6.1.p.3">The rules here express a single set of preferences, and therefore, the "a=imageattr" q= value is not important. It SHOULD be set to 1.0.</p>
 <p id="rfc.section.3.6.1.p.4">The "a=imageattr" field is payload type specific. When all video codecs supported have the same capabilities, use of a single attribute, with the wildcard payload type (*), is RECOMMENDED. However, when the supported video codecs have different limitations, specific "a=imageattr" attributes MUST be inserted for each payload type.</p>
 <p id="rfc.section.3.6.1.p.5">As an example, consider a system with a multiformat video decoder, which is capable of decoding any resolution from 48x48 to 720p, In this case, the implementation would generate this attribute:</p>
@@ -825,7 +825,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>If the attribute includes a "sar=" (sample aspect ratio) value set to something other than "1.0", indicating the receiver wants to receive non-square pixels, this cannot be satisfied and the sender MUST NOT transmit the encoding.</li>
 <li>If the encoder resolution exceeds the maximum size permitted by the attribute, and the encoder is allowed to adjust its resolution, the encoder SHOULD apply downscaling in order to satisfy the limits, although the downscaling MUST NOT change the picture aspect ratio of the encoding. For example, if the encoder resolution is 1280x720, and the attribute specified a maximum of 640x480, the expected output resolution would be 640x360.  If downscaling cannot be applied, the encoding MUST NOT be transmitted, and an error SHOULD be surfaced to the application.</li>
 <li>If the encoder resolution is less than the minimum size permitted by the attribute, the encoding MUST NOT be transmitted, and an error SHOULD be surfaced to the application; the encoder MUST NOT apply upscaling. JSEP implementations SHOULD avoid this situation by allowing receipt of arbitrarily small resolutions, perhaps via fallback to a software decoder.</li>
-<li>In the special case of a maximum resolution of [0, 0], as described above, the sender MUST NOT transmit the encoding.</li>
 </ul>
 
 <p> </p>
@@ -1644,9 +1643,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>For any "RR" or "RS" bandwidth values, handle as specified in <a href="#RFC3556" class="xref">[RFC3556]</a>, Section 2.</li>
 <li>Any specified "CT" bandwidth value MUST be ignored, as the meaning of this construct at the media level is not well defined.</li>
 <li>If the m= section is of type audio: <ul>
-<li>For each specified "CN" media format, enable silence suppression for all supported media formats with the same clockrate, as described in <a href="#RFC3389" class="xref">[RFC3389]</a>, Section 5, except for formats that have their own internal silence suppression mechanisms.  Silence suppression for such formats (e.g., Opus) is controlled via fmtp parameters, as discussed in <a href="#sec.voiceactivitydetection1" class="xref">Section 5.2.3.2</a>.</li>
+<li>For each specified "CN" media format, configure silence suppression for all supported media formats with the same clockrate, as described in <a href="#RFC3389" class="xref">[RFC3389]</a>, Section 5, except for formats that have their own internal silence suppression mechanisms.  Silence suppression for such formats (e.g., Opus) is controlled via fmtp parameters, as discussed in <a href="#sec.voiceactivitydetection1" class="xref">Section 5.2.3.2</a>.</li>
 <li>For each specified "telephone-event" media format, enable DTMF transmission for all supported media formats with the same clockrate, as described in <a href="#RFC4733" class="xref">[RFC4733]</a>, Section 2.5.1.2. If the application attempts to transmit DTMF when using a media format that does not have a corresponding telephone-event format, this MUST result in an error.</li>
-<li>For any specified "ptime" value, configure the available media formats to use the specified packet size.  If the specified size is not supported for a media format, use the next closest value instead.</li>
+<li>For any specified "ptime" value, configure the available media formats to use the specified packet size when sending. If the specified size is not supported for a media format, use the next closest value instead.</li>
 </ul>
 </li>
 </ul>
@@ -1669,6 +1668,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>If the m= section has reduced-size RTCP enabled, configure the RTCP transmission for this m= section to use reduced-size RTCP, as specified in <a href="#RFC5506" class="xref">[RFC5506]</a>.</li>
 <li>If the directional attribute in the answer indicates that the JSEP implementation should be sending media ("sendonly" for local answers, "recvonly" for remote answers, or "sendrecv" for either type of answer), choose the media format to send as the most preferred media format from the remote description that is also locally supported, as discussed in <a href="#RFC3264" class="xref">[RFC3264]</a>, Sections 6.1 and 7, and start transmitting RTP media using that format once the underlying transport layers have been established.  If an SSRC has not already been chosen for this outgoing RTP stream, choose a random one.  If media is already being transmitted, the same SSRC SHOULD be used unless the clockrate of the new codec is different, in which case a new SSRC MUST be chosen, as specified in <a href="#RFC7160" class="xref">[RFC7160]</a>, Section 3.1.</li>
 <li>The payload type mapping from the remote description is used to determine payload types for the outgoing RTP streams, including the payload type for the send media format chosen above. Any RTP header extensions that were negotiated should be included in the outgoing RTP streams, using the extension mapping from the remote description; if the RID header extension has been negotiated, and RID values are specified, include the RID header extension in the outgoing RTP streams, as indicated in <a href="#I-D.ietf-mmusic-rid" class="xref">[I-D.ietf-mmusic-rid]</a>, Section 4.</li>
+<li>If the m= section is of type audio, and silence suppression was configured for the send media format as a result of processing the remote description, and is also enabled for that format in the local description, use silence suppression for outgoing media, in accordance with the guidance in <a href="#sec.voiceactivitydetection1" class="xref">Section 5.2.3.2</a>. If these conditions are not met, silence suppression MUST NOT be used for outgoing media.</li>
 <li>If simulcast has been negotiated, send the number of Source RTP Streams as specified in <a href="#I-D.ietf-mmusic-sdp-simulcast" class="xref">[I-D.ietf-mmusic-sdp-simulcast]</a>, Section 6.2.2.</li>
 <li>If the send media format chosen above has a corresponding "rtx" media format, or a FEC mechanism has been negotiated, establish a Redundancy RTP Stream with a random SSRC for each Source RTP Stream, and start or continue transmitting RTX/FEC packets as needed.</li>
 <li>If the send media format chosen above has a corresponding "red" media format of the same clockrate, allow redundant encoding using the specified format for resiliency purposes, as discussed in <a href="#I-D.ietf-rtcweb-fec" class="xref">[I-D.ietf-rtcweb-fec]</a>, Section 3.2. Note that unlike RTX or FEC media formats, the "red" format is transmitted on the Source RTP Stream, not the Redundancy RTP Stream.</li>
@@ -2929,11 +2929,6 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <td class="reference"><b id="RFC4733">[RFC4733]</b></td>
 <td class="top">
 <a>Schulzrinne, H.</a> and <a>T. Taylor</a>, "<a href="http://tools.ietf.org/html/rfc4733">RTP Payload for DTMF Digits, Telephony Tones, and Telephony Signals</a>", RFC 4733, DOI 10.17487/RFC4733, December 2006.</td>
-</tr>
-<tr>
-<td class="reference"><b id="RFC5459">[RFC5459]</b></td>
-<td class="top">
-<a>Sollaud, A.</a>, "<a href="http://tools.ietf.org/html/rfc5459">G.729.1 RTP Payload Format Update: Discontinuous Transmission (DTX) Support</a>", RFC 5459, DOI 10.17487/RFC5459, January 2009.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5506">[RFC5506]</b></td>
