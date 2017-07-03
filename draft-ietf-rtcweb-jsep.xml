@@ -395,12 +395,6 @@ setRemote(ANSWER) |                                   |
           </figure>
         </t>
 
-        <t> In addition to theses state transitions, there is a rollback
-        operation, described in <xref target="sec.rollback"/>, that is
-        can take the system back to the last stable state. It is
-        typically used to recovering from errors that happened on the
-        remote side.</t>
-
         <t>Aside from these state transitions there is no other
         difference between the handling of provisional ("pranswer") and
         final ("answer") answers.</t>
@@ -1384,13 +1378,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             setLocalDescription. However, the remote side, either
             before or after setRemoteDescription, decides it does not
             want to accept the new parameters, and sends a reject
-            message back to the offerer.
-            Now, the offerer, and possibly the answerer as well, need
-            to return to the state machine described in <xref
-            target="sec.session-descriptions-and-state-machine"/> to
-            the "Stable" state and the previous local/remote
-            description. To support this, we introduce the concept of
-            "rollback".</t>
+            message back to the offerer. Now, the offerer, and possibly
+            the answerer as well, need to return to a stable state and
+            the previous local/remote description. To support this, we
+            introduce the concept of "rollback".</t>
 
             <t>A rollback discards any proposed changes to the session,
             returning the state machine to the stable state, and
@@ -1458,8 +1449,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           and continues until setRemoteDescription is called with
           either a final answer, at which point the PeerConnection can
           fully adopt the pending local description, or a rollback,
-          which results in a revert back from the pending local
-          description to the current local
+          which results in a revert to the current local
           description.</t>
 
           <t>This API indirectly controls the candidate gathering
@@ -1487,9 +1477,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>This API changes the local media state; among other
           things, it sets up local resources for sending and encoding
-          media.
-          A rollback will revert from the pending remote description
-          to the current remote description.</t>
+          media.</t>
 
           <t>If setLocalDescription was previously called with an
           offer, and setRemoteDescription is called with an answer
@@ -3587,7 +3575,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         session MUST be restored to the state it was in before
         performing these steps.</t>
 
-         <t>Next, m= sections are processed. For each m= section, the
+        <t>Next, m= sections are processed. For each m= section, the
         following steps MUST be performed; if any parameters are out of
         bounds, or cannot be applied, processing MUST stop and an error
         MUST be returned.
