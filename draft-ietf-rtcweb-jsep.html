@@ -362,12 +362,12 @@ li, p {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.6.2 - http://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.7.0 - http://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-6-30" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-7-3" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -391,7 +391,7 @@ li, p {
 <td class="right">C. Jennings</td>
 </tr>
 <tr>
-<td class="left">Expires: January 1, 2018</td>
+<td class="left">Expires: January 4, 2018</td>
 <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -404,7 +404,7 @@ li, p {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">June 30, 2017</td>
+<td class="right">July 3, 2017</td>
 </tr>
 
     	
@@ -420,7 +420,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on January 1, 2018.</p>
+<p>This Internet-Draft will expire on January 4, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1212,11 +1212,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <a href="#rfc.section.5.2.2">5.2.2.</a> <a href="#sec.subsequent-offers" id="sec.subsequent-offers">Subsequent Offers</a>
 </h3>
 <p id="rfc.section.5.2.2.p.1">When createOffer is called a second (or later) time, or is called after a local description has already been installed, the processing is somewhat different than for an initial offer.</p>
-<p id="rfc.section.5.2.2.p.2">If the initial offer was not applied using setLocalDescription, meaning the PeerConnection is still in the "stable" state, the steps for generating an initial offer should be followed, subject to the following restriction: </p>
+<p id="rfc.section.5.2.2.p.2">If the previous offer was not applied using setLocalDescription, meaning the PeerConnection is still in the "stable" state, the steps for generating an initial offer should be followed, subject to the following restriction: </p>
 
 <ul><li>The fields of the "o=" line MUST stay the same except for the &lt;session-version&gt; field, which MUST increment by one on each call to createOffer if the offer might differ from the output of the previous call to createOffer; implementations MAY opt to increment &lt;session-version&gt; on every call. The value of the generated &lt;session-version&gt; is independent of the &lt;session-version&gt; of the current local description; in particular, in the case where the current version is N, an offer is created and applied with version N+1, and then that offer is rolled back so that the current version is again N, the next generated offer will still have version N+2.</li></ul>
 <p id="rfc.section.5.2.2.p.3">Note that if the application creates an offer by reading currentLocalDescription instead of calling createOffer, the returned SDP may be different than when setLocalDescription was originally called, due to the addition of gathered ICE candidates, but the &lt;session-version&gt; will not have changed. There are no known scenarios in which this causes problems, but if this is a concern, the solution is simply to use createOffer to ensure a unique &lt;session-version&gt;.</p>
-<p id="rfc.section.5.2.2.p.4">If the initial offer was applied using setLocalDescription, but an answer from the remote side has not yet been applied, meaning the PeerConnection is still in the "have-local-offer" state, an offer is generated by following the steps in the "stable" state above, along with these exceptions: </p>
+<p id="rfc.section.5.2.2.p.4">If the previous offer was applied using setLocalDescription, but a corresponding answer from the remote side has not yet been applied, meaning the PeerConnection is still in the "have-local-offer" state, an offer is generated by following the steps in the "stable" state above, along with these exceptions: </p>
 
 <ul>
 <li>The "s=" and "t=" lines MUST stay the same.</li>
@@ -1232,7 +1232,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>For RtpTransceivers that are still present, the "a=rid" lines MUST stay the same.</li>
 <li>For RtpTransceivers that are still present, any "a=simulcast" line MUST stay the same.</li>
 </ul>
-<p id="rfc.section.5.2.2.p.5">If the initial offer was applied using setLocalDescription, and an answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "have-remote-pranswer" or "stable" states, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "have-local-offer" state above.</p>
+<p id="rfc.section.5.2.2.p.5">If the previous offer was applied using setLocalDescription, and a corresponding answer from the remote side has been applied using setRemoteDescription, meaning the PeerConnection is in the "have-remote-pranswer" or "stable" states, an offer is generated based on the negotiated session descriptions by following the steps mentioned for the "have-local-offer" state above.</p>
 <p id="rfc.section.5.2.2.p.6">In addition, for each existing, non-recycled, non-rejected m= section in the new offer, the following adjustments are made based on the contents of the corresponding m= section in the current local or remote description, as appropriate: </p>
 
 <ul>
@@ -1397,7 +1397,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <a href="#rfc.section.5.3.2">5.3.2.</a> <a href="#sec.subsequent-answers" id="sec.subsequent-answers">Subsequent Answers</a>
 </h3>
 <p id="rfc.section.5.3.2.p.1">When createAnswer is called a second (or later) time, or is called after a local description has already been installed, the processing is somewhat different than for an initial answer.</p>
-<p id="rfc.section.5.3.2.p.2">If the initial answer was not applied using setLocalDescription, meaning the PeerConnection is still in the "have-remote-offer" state, the steps for generating an initial answer should be followed, subject to the following restriction: </p>
+<p id="rfc.section.5.3.2.p.2">If the previous answer was not applied using setLocalDescription, meaning the PeerConnection is still in the "have-remote-offer" state, the steps for generating an initial answer should be followed, subject to the following restriction: </p>
 
 <ul><li>The fields of the "o=" line MUST stay the same except for the &lt;session-version&gt; field, which MUST increment if the session description changes in any way from the previously generated answer.</li></ul>
 <p id="rfc.section.5.3.2.p.3">If any session description was previously supplied to setLocalDescription, an answer is generated by following the steps in the "have-remote-offer" state above, along with these exceptions: </p>
