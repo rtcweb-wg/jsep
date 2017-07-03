@@ -3840,7 +3840,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the m= section is of type audio:
             <list style="symbols">
 
-              <t>For each specified "CN" media format, enable silence
+              <t>For each specified "CN" media format, configure silence
               suppression for
               all supported media formats with the same clockrate, as
               described in
@@ -3860,8 +3860,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               format, this MUST result in an error.</t>
 
               <t>For any specified "ptime" value, configure the
-              available media formats to use the specified packet size.
-              If the specified size is not supported for a media
+              available media formats to use the specified packet size when
+              sending. If the specified size is not supported for a media
               format, use the next closest value instead.</t>
             </list></t>
           </list></t>
@@ -3955,6 +3955,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             values are specified, include the RID header extension in
             the outgoing RTP streams, as indicated in
             <xref target="I-D.ietf-mmusic-rid"></xref>, Section 4.</t>
+
+            <t>If the m= section is of type audio, and silence suppression
+            was configured for the send media format as a result of
+            processing the remote description, and is also enabled for that
+            format in the local description, use silence suppression
+            for outgoing media, in accordance with the guidance in
+            <xref target="sec.voiceactivitydetection1" />. If these conditions
+            are not met, silence suppression MUST NOT be used for
+            outgoing media.</t>
 
             <t>If simulcast has been negotiated, send the number of
             Source RTP Streams as specified in
@@ -5299,7 +5308,6 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       <?rfc include='reference.RFC.6464.xml'?>
       <?rfc include='reference.RFC.6544.xml'?>
       <?rfc include='reference.RFC.3556.xml'?>
-      <?rfc include='reference.RFC.5459.xml'?>
 
       <reference anchor="W3C.webrtc"
       target="https://www.w3.org/TR/2017/WD-webrtc-20170515/">
