@@ -1592,9 +1592,9 @@ Internet-Draft                    JSEP                         July 2017
    The setLocalDescription method instructs the PeerConnection to apply
    the supplied session description as its local configuration.  The
    type field indicates whether the description should be processed as
-   an offer, provisional answer, or final answer; offers and answers are
-   checked differently, using the various rules that exist for each SDP
-   line.
+   an offer, provisional answer, final answer, or rollback; offers and
+   answers are checked differently, using the various rules that exist
+   for each SDP line.
 
    This API changes the local media state; among other things, it sets
    up local resources for receiving and decoding media.  In order to
@@ -1838,7 +1838,7 @@ Internet-Draft                    JSEP                         July 2017
    When creating offers, the transceiver direction is directly reflected
    in the output, even for re-offers.  When creating answers, the
    transceiver direction is intersected with the offered direction, as
-   explained in the Section 5.3 section below.
+   explained in Section 5.3 below.
 
    Note that while setDirection sets the direction property of the
    transceiver immediately (Section 4.2.4), this property does not
@@ -3164,8 +3164,12 @@ Internet-Draft                    JSEP                         July 2017
    When a SessionDescription is supplied to setLocalDescription, the
    following steps MUST be performed:
 
-   o  First, the type of the SessionDescription is checked against the
-      current state of the PeerConnection:
+   o  If the description is of type "rollback", follow the processing
+      defined in Section 4.1.8.2 and skip the processing described in
+      the rest of this section.
+
+   o  Otherwise, the type of the SessionDescription is checked against
+      the current state of the PeerConnection:
 
       *  If the type is "offer", the PeerConnection state MUST be either
          "stable" or "have-local-offer".
@@ -3182,10 +3186,6 @@ Internet-Draft                    JSEP                         July 2017
       Section 5.4; otherwise, processing MUST stop and an error MUST be
       returned.
 
-   o  Next, the SessionDescription is parsed into a data structure, as
-      described in the Section 5.7 section below.
-
-
 
 
 
@@ -3194,16 +3194,23 @@ Uberti, et al.           Expires January 4, 2018               [Page 57]
 Internet-Draft                    JSEP                         July 2017
 
 
+   o  Next, the SessionDescription is parsed into a data structure, as
+      described in Section 5.7 below.
+
    o  Finally, the parsed SessionDescription is applied as described in
-      the Section 5.8 section below.
+      Section 5.8 below.
 
 5.6.  Processing a Remote Description
 
    When a SessionDescription is supplied to setRemoteDescription, the
    following steps MUST be performed:
 
-   o  First, the type of the SessionDescription is checked against the
-      current state of the PeerConnection:
+   o  If the description is of type "rollback", follow the processing
+      defined in Section 4.1.8.2 and skip the processing described in
+      the rest of this section.
+
+   o  Otherwise, the type of the SessionDescription is checked against
+      the current state of the PeerConnection:
 
       *  If the type is "offer", the PeerConnection state MUST be either
          "stable" or "have-remote-offer".
@@ -3215,11 +3222,11 @@ Internet-Draft                    JSEP                         July 2017
       stop and an error MUST be returned.
 
    o  Next, the SessionDescription is parsed into a data structure, as
-      described in the Section 5.7 section below.  If parsing fails for
-      any reason, processing MUST stop and an error MUST be returned.
+      described in Section 5.7 below.  If parsing fails for any reason,
+      processing MUST stop and an error MUST be returned.
 
    o  Finally, the parsed SessionDescription is applied as described in
-      the Section 5.9 section below.
+      Section 5.9 below.
 
 5.7.  Parsing a Session Description
 
@@ -3234,13 +3241,6 @@ Internet-Draft                    JSEP                         July 2017
    and [RFC3264] semantics, and then either parse and store or discard
    the provided value, as described below.
 
-   If any line is not well-formed, or cannot be parsed as described, the
-   parser MUST stop with an error and reject the session description,
-   even if the value is to be discarded.  This ensures that
-   implementations do not accidentally misinterpret ambiguous SDP.
-
-
-
 
 
 
@@ -3249,6 +3249,11 @@ Uberti, et al.           Expires January 4, 2018               [Page 58]
 
 Internet-Draft                    JSEP                         July 2017
 
+
+   If any line is not well-formed, or cannot be parsed as described, the
+   parser MUST stop with an error and reject the session description,
+   even if the value is to be discarded.  This ensures that
+   implementations do not accidentally misinterpret ambiguous SDP.
 
 5.7.1.  Session-Level Parsing
 
@@ -3292,11 +3297,6 @@ Internet-Draft                    JSEP                         July 2017
       [RFC5245], Section 15.3, and a value indicating the presence of
       ice-lite is stored.
 
-   o  If present, a single "a=ice-ufrag" line is parsed as specified in
-      [RFC5245], Section 15.4, and the ufrag value is stored.
-
-   o  If present, a single "a=ice-pwd" line is parsed as specified in
-      [RFC5245], Section 15.4, and the password value is stored.
 
 
 
@@ -3305,6 +3305,12 @@ Uberti, et al.           Expires January 4, 2018               [Page 59]
 
 Internet-Draft                    JSEP                         July 2017
 
+
+   o  If present, a single "a=ice-ufrag" line is parsed as specified in
+      [RFC5245], Section 15.4, and the ufrag value is stored.
+
+   o  If present, a single "a=ice-pwd" line is parsed as specified in
+      [RFC5245], Section 15.4, and the password value is stored.
 
    o  If present, a single "a=ice-options" line is parsed as specified
       in [RFC5245], Section 15.5, and the set of specified options is
@@ -3348,12 +3354,6 @@ Internet-Draft                    JSEP                         July 2017
    Following the "m=" line, specific processing MUST be applied for the
    following non-attribute lines:
 
-   o  As with the "c=" line at the session level, the "c=" line MUST be
-      parsed according to [RFC4566], Section 5.7, but its value is not
-      used.
-
-
-
 
 
 
@@ -3361,6 +3361,10 @@ Uberti, et al.           Expires January 4, 2018               [Page 60]
 
 Internet-Draft                    JSEP                         July 2017
 
+
+   o  As with the "c=" line at the session level, the "c=" line MUST be
+      parsed according to [RFC4566], Section 5.7, but its value is not
+      used.
 
    o  The "b=" line, if present, MUST be parsed as specified in
       [RFC4566], Section 5.8, and the bwtype and bandwidth values
@@ -3393,9 +3397,8 @@ Internet-Draft                    JSEP                         July 2017
       Section 5, and the set of fingerprint and algorithm values is
       stored.
 
-   If the "m=" proto value indicates use of RTP, as described in the
-   Section 5.1.2 section above, the following attribute lines MUST be
-   processed:
+   If the "m=" proto value indicates use of RTP, as described in
+   Section 5.1.2 above, the following attribute lines MUST be processed:
 
    o  The "m=" fmt value MUST be parsed as specified in [RFC4566],
       Section 5.14, and the individual values stored.
@@ -3406,9 +3409,6 @@ Internet-Draft                    JSEP                         July 2017
    o  If present, a single "a=ptime" line MUST be parsed as described in
       [RFC4566], Section 6, and its value stored.
 
-   o  If present, a single "a=maxptime" line MUST be parsed as described
-      in [RFC4566], Section 6, and its value stored.
-
 
 
 
@@ -3417,6 +3417,9 @@ Uberti, et al.           Expires January 4, 2018               [Page 61]
 
 Internet-Draft                    JSEP                         July 2017
 
+
+   o  If present, a single "a=maxptime" line MUST be parsed as described
+      in [RFC4566], Section 6, and its value stored.
 
    o  If present, a single direction attribute line (e.g.  "a=sendrecv")
       MUST be parsed as described in [RFC4566], Section 6, and its value
@@ -3463,9 +3466,6 @@ Internet-Draft                    JSEP                         July 2017
    Otherwise, if the "m=" proto value indicates use of SCTP, the
    following attribute lines MUST be processed:
 
-   o  The "m=" fmt value MUST be parsed as specified in
-      [I-D.ietf-mmusic-sctp-sdp], Section 4.3, and the application
-      protocol value stored.
 
 
 
@@ -3473,6 +3473,10 @@ Uberti, et al.           Expires January 4, 2018               [Page 62]
 
 Internet-Draft                    JSEP                         July 2017
 
+
+   o  The "m=" fmt value MUST be parsed as specified in
+      [I-D.ietf-mmusic-sctp-sdp], Section 4.3, and the application
+      protocol value stored.
 
    o  An "a=sctp-port" attribute MUST be present, and it MUST be parsed
       as specified in [I-D.ietf-mmusic-sctp-sdp], Section 5.2, and the
@@ -3518,10 +3522,6 @@ Internet-Draft                    JSEP                         July 2017
       *  DTLS fingerprint values, where at least one fingerprint MUST be
          present.
 
-   o  All RID values referenced in an "a=simulcast" line MUST exist as
-      "a=rid" lines.
-
-
 
 
 
@@ -3529,6 +3529,9 @@ Uberti, et al.           Expires January 4, 2018               [Page 63]
 
 Internet-Draft                    JSEP                         July 2017
 
+
+   o  All RID values referenced in an "a=simulcast" line MUST exist as
+      "a=rid" lines.
 
    o  Each m= section is also checked to ensure prohibited features are
       not used.
@@ -3574,10 +3577,7 @@ Internet-Draft                    JSEP                         July 2017
       marked bundle-only, or it is an answer and the m= section is
       bundled into into another m= section.)
 
-   o  Or, if the ICE ufrag and password values have changed, trigger the
-      ICE agent to start an ICE restart, and begin gathering new
-      candidates for the m= section as described in [RFC5245],
-      Section 9.1.1.1.  If this description is an answer, also start
+
 
 
 
@@ -3586,6 +3586,10 @@ Uberti, et al.           Expires January 4, 2018               [Page 64]
 Internet-Draft                    JSEP                         July 2017
 
 
+   o  Or, if the ICE ufrag and password values have changed, trigger the
+      ICE agent to start an ICE restart, and begin gathering new
+      candidates for the m= section as described in [RFC5245],
+      Section 9.1.1.1.  If this description is an answer, also start
       checks on that media section as defined in [RFC5245],
       Section 9.3.1.1.
 
@@ -3630,10 +3634,6 @@ Internet-Draft                    JSEP                         July 2017
       *  If the directional attribute is of type "sendrecv" or
          "recvonly", enable receipt and decoding of media.
 
-   Finally, if this description is of type "pranswer" or "answer",
-   follow the processing defined in the Section 5.10 section below.
-
-
 
 
 
@@ -3641,6 +3641,9 @@ Uberti, et al.           Expires January 4, 2018               [Page 65]
 
 Internet-Draft                    JSEP                         July 2017
 
+
+   Finally, if this description is of type "pranswer" or "answer",
+   follow the processing defined in Section 5.10 below.
 
 5.9.  Applying a Remote Description
 
@@ -3688,9 +3691,6 @@ Internet-Draft                    JSEP                         July 2017
          m= section.  Finally, signal the ICE agent to begin checks as
          described in [RFC5245], Section 9.3.1.1.
 
-   o  If the current local description indicates an ICE restart, and
-      either the ICE ufrag or password has not changed from the previous
-
 
 
 Uberti, et al.           Expires January 4, 2018               [Page 66]
@@ -3698,6 +3698,8 @@ Uberti, et al.           Expires January 4, 2018               [Page 66]
 Internet-Draft                    JSEP                         July 2017
 
 
+   o  If the current local description indicates an ICE restart, and
+      either the ICE ufrag or password has not changed from the previous
       remote description, as prescribed by [RFC5245], Section 9.2.1.1,
       generate an error.
 
@@ -3744,8 +3746,6 @@ Internet-Draft                    JSEP                         July 2017
             generate a value for the RtpTransceiver mid property,
             following the guidance for "a=mid" mentioned in
             Section 5.2.1.
-
-
 
 
 
@@ -3846,7 +3846,7 @@ Internet-Draft                    JSEP                         July 2017
             use the next closest value instead.
 
    Finally, if this description is of type "pranswer" or "answer",
-   follow the processing defined in the Section 5.10 section below.
+   follow the processing defined in Section 5.10 below.
 
 5.10.  Applying an Answer
 
