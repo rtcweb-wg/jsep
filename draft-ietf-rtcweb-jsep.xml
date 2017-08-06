@@ -395,6 +395,11 @@ setRemote(ANSWER) |                                   |
           </figure>
         </t>
 
+        <t> In addition to these state transitions, there is a
+        rollback operation, described in <xref
+        target="sec.rollback"/>, that returns the system to the stable
+        state. Rollback is typically used to recover when an offer is rejected.</t>
+
         <t>Aside from these state transitions there is no other
         difference between the handling of provisional ("pranswer") and
         final ("answer") answers.</t>
@@ -1379,47 +1384,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the previous local/remote description. To support this, we
             introduce the concept of "rollback".</t>
 
-            <t>A rollback discards any proposed changes to the session,
-            returning the state machine to the stable state, and
-            setting the pending local and/or remote description (see
-            <xref target="sec.pendinglocaldescription" /> and
-            <xref target="sec.pendingremotedescription" />) to null.
-            Any resources or candidates that were allocated by the
-            abandoned local description are discarded; any media that
-            is received will be processed according to the previous
-            local and remote descriptions. Rollback can only be used to
-            cancel proposed changes; there is no support for rolling
-            back from a stable state to a previous stable state. Note
-            that this implies that once the answerer has performed
-            setLocalDescription with his answer, this cannot be rolled
-            back.</t>
+             <t>A rollback is performed by supplying a session
+             description of type "rollback" with empty contents to
+             either setLocalDescription or setRemoteDescription. It is
+             further described in <xref
+             target="sec.processing-a-rollback"/>.  Rollback can only
+             be used to cancel proposed changes; there is no support
+             for rolling back from a stable state to a previous stable
+             state. Note that this implies that once the answerer has
+             performed setLocalDescription with his answer, this
+             cannot be rolled back and neither the endpoint offerer or
+             answerer should do a rollback after that point.</t>
 
-            <t>A rollback will disassociate any RtpTransceivers that
-            were associated with m= sections by the application of the
-            rolled-back session description (see
-            <xref target="sec.applying-a-remote-desc" /> and
-            <xref target="sec.applying-a-local-desc" />). This means
-            that some RtpTransceivers that were previously associated
-            will no longer be associated with any m= section; in such
-            cases, the value of the RtpTransceiver's mid property MUST
-            be set to null, and the mapping between the transceiver and
-            its m= section index MUST be discarded. RtpTransceivers
-            that were created by applying a remote offer that was
-            subsequently rolled back MUST be stopped and removed from
-            the PeerConnection. However, a RtpTransceiver MUST NOT be
-            removed if a track was attached to the RtpTransceiver via
-            the addTrack method. This is so that an application may
-            call addTrack, then call setRemoteDescription with an
-            offer, then roll back that offer, then call createOffer and
-            have a m= section for the added track appear in the
-            generated offer.</t>
-
-            <t>A rollback is performed by supplying a session
-            description of type "rollback" with empty contents to
-            either setLocalDescription or setRemoteDescription,
-            depending on which was most recently used (i.e. if the new
-            offer was supplied to setLocalDescription, the rollback
-            should be done using setLocalDescription as well).</t>
           </section>
         </section>
         <section title="setLocalDescription"
@@ -1445,7 +1421,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           and continues until setRemoteDescription is called with
           either a final answer, at which point the PeerConnection can
           fully adopt the pending local description, or a rollback,
-          which results in a revert to the current local
+          which causes the JSEP implementation to revert back from the
+          pending local description to the current local
           description.</t>
 
           <t>This API indirectly controls the candidate gathering
@@ -1473,7 +1450,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>This API changes the local media state; among other
           things, it sets up local resources for sending and encoding
-          media.</t>
+          media.
+          A rollback will causes the JSEP implementation to revert
+          back from the pending remote description to the current
+          remote description.</t>
 
           <t>If setLocalDescription was previously called with an
           offer, and setRemoteDescription is called with an answer
@@ -3114,7 +3094,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <list style="symbols">
 
           <t>If the description is of type "rollback", follow the
-          processing defined in <xref target="sec.rollback" /> and
+          processing defined in <xref target="sec.processing-a-rollback" /> and
           skip the processing described in the rest of this
           section.</t>
 
@@ -3157,7 +3137,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <list style="symbols">
 
           <t>If the description is of type "rollback", follow the
-          processing defined in <xref target="sec.rollback" /> and
+          processing defined in <xref target="sec.processing-a-rollback" /> and
           skip the processing described in the rest of this
           section.</t>
 
@@ -3188,6 +3168,52 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           below.</t>
         </list></t>
       </section>
+
+      <section title="Processing a Rollback"
+               anchor="sec.processing-a-rollback">
+
+        <t>  The rollback is used to recover from possible errors and
+        return to stable state the system was in before a new offer /
+        answer negotiation started. </t>
+
+        <t> When either setLocalDescription or setRemoteDescription
+        method is called with a a session description of type
+        "rollback" a rollback occurs. </t>
+
+        <t> If the system is currently in the "stable" state, no
+        further processing happens. </t>
+
+        <t>A rollback MUST discard any proposed changes to the session,
+        returning the state machine to the stable state, and setting
+        the pending local and/or remote description (see <xref
+        target="sec.pendinglocaldescription" /> and <xref
+        target="sec.pendingremotedescription" />) to null.  Any
+        resources or candidates that were allocated by the abandoned
+        local description are discarded; any media that is received
+        will be processed according to the previous local and remote
+        descriptions.</t>
+
+        <t>A rollback will disassociate any RtpTransceivers that were
+        associated with m= sections by the application of the
+        rolled-back session description (see <xref
+        target="sec.applying-a-remote-desc" /> and <xref
+        target="sec.applying-a-local-desc" />). This means that some
+        RtpTransceivers that were previously associated will no longer
+        be associated with any m= section; in such cases, the value of
+        the RtpTransceiver's mid property MUST be set to null, and the
+        mapping between the transceiver and its m= section index MUST
+        be discarded. RtpTransceivers that were created by applying a
+        remote offer that was subsequently rolled back MUST be stopped
+        and removed from the PeerConnection. However, a RtpTransceiver
+        MUST NOT be removed if a track was attached to the
+        RtpTransceiver via the addTrack method. This is so that an
+        application may call addTrack, then call setRemoteDescription
+        with an offer, then roll back that offer, then call
+        createOffer and have a m= section for the added track appear
+        in the generated offer.</t>
+
+      </section>
+
       <section title="Parsing a Session Description"
       anchor="sec.parsing-a-desc">
 
