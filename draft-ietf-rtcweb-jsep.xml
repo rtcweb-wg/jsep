@@ -1417,10 +1417,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>A rollback is performed by supplying a session
             description of type "rollback" with empty contents to
-            either setLocalDescription or setRemoteDescription,
-            depending on which was most recently used (i.e. if the new
-            offer was supplied to setLocalDescription, the rollback
-            should be done using setLocalDescription as well).</t>
+            either setLocalDescription or setRemoteDescription.
+            The effects MUST be the same regardless of whether
+            setLocalDescription or setRemoteDescription is called. Note
+            that the only reason rollbacks use setLocalDescription
+            and setRemoteDescription rather than an independent method
+            is for compatibility with existing implementations.</t>
+
+            <t>A rollback may be performed if the PeerConnection is in
+            any state except for "stable". This means that both offers
+            and provisional answers can be rolled back. If a rollback is
+            attempted in the "stable" state, processing MUST stop and an
+            error MUST be returned.</t>
           </section>
         </section>
         <section title="setLocalDescription"
@@ -3128,9 +3136,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the type is "pranswer" or "answer", the
             PeerConnection state MUST be either "have-remote-offer" or
             "have-local-pranswer".</t>
-
-            <t>If the type is "rollback", the PeerConnection state MUST
-            be "have-local-offer".</t>
           </list></t>
 
           <t>If the type is not correct for the current state,
@@ -3174,9 +3179,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the type is "pranswer" or "answer", the
             PeerConnection state MUST be either "have-local-offer" or
             "have-remote-pranswer".</t>
-
-            <t>If the type is "rollback", the PeerConnection state MUST
-            be "have-remote-offer".</t>
           </list></t>
 
           <t>If the type is not correct for the current state,
