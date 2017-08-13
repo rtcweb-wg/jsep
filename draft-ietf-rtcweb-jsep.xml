@@ -722,15 +722,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           (e.g., hardware decoder capababilities, local policy) to
           determine the absolute minimum and maximum sizes it can
           receive. If there are no known local limits, the
-          "a=imageattr" attribute SHOULD be omitted.</t>
+          "a=imageattr" attribute SHOULD be omitted. If these local limits
+          preclude receiving any video, i.e., the degenerate case of no
+          permitted resolutions, the "a=imageattr" attribute MUST be omitted,
+          and the m= section MUST be marked as sendonly/inactive, as
+          appropriate.</t>
 
           <t>Otherwise, an "a=imageattr" attribute is created with
           "recv" direction, and the resulting resolution space formed
           from the aforementioned intersection is used to specify its
-          minimum and maximum x= and y= values. If the intersection is
-          the null set, i.e., the degenerate case of no permitted
-          resolutions, this MUST be represented by x=0 and y=0
-          values.</t>
+          minimum and maximum x= and y= values.</t>
 
           <t>The rules here express a single set of preferences, and
           therefore, the "a=imageattr" q= value is not important. It
@@ -835,10 +836,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               MUST NOT apply upscaling. JSEP implementations SHOULD avoid this
               situation by allowing receipt of arbitrarily small resolutions,
               perhaps via fallback to a software decoder.</t>
-
-              <t>In the special case of a maximum resolution of
-              [0, 0], as described above, the sender MUST NOT transmit the
-              encoding.</t>
             </list>
           </t>
         </section>
@@ -1383,9 +1380,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             setLocalDescription. However, the remote side, either
             before or after setRemoteDescription, decides it does not
             want to accept the new parameters, and sends a reject
-            message back to the offerer.  Now, the offerer, and possibly
+            message back to the offerer. Now, the offerer, and possibly
             the answerer as well, need to return to a stable state and
-            the previous local/remote description.  To support this, we
+            the previous local/remote description. To support this, we
             introduce the concept of "rollback".</t>
 
              <t>A rollback is performed by supplying a session
@@ -1719,9 +1716,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           createAnswer, in which case the corresponding media formats
           in the associated m= section will be excluded. The codec
           preferences cannot add media formats that would otherwise not
-          be present. This includes codecs that were not negotiated in
-          a previous offer/answer exchange that included the
-          transceiver.</t>
+          be present.</t>
 
           <t>The codec preferences of an RtpTransceiver can also
           determine the order of codecs in subsequent calls to
@@ -1953,18 +1948,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             corresponding order, and MUST exclude any codecs not
             present in the codec preferences.</t>
 
-            <t>The media formats in the answer MAY include codecs
-            present in the offer that were discarded in a previous
-            offer/answer exchange. This is necessary for compatibility
-            with third- party call control and SIP use cases.</t>
-
             <t>Unless excluded by the above restrictions, the media
             formats MUST include the mandatory audio/video codecs as
             specified in
             <xref target="RFC7874"></xref>, Section 3,
-            and
-            <xref target="RFC7742"></xref>, Section
-            5.</t>
+            and <xref target="RFC7742"></xref>, Section 5.</t>
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -2260,7 +2248,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           the processing is somewhat different than for an initial
           offer.</t>
 
-          <t>If the initial offer was not applied using
+          <t>If the previous offer was not applied using
           setLocalDescription, meaning the PeerConnection is still in
           the "stable" state, the steps for generating an initial offer
           should be followed, subject to the following restriction:
@@ -2291,9 +2279,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           use createOffer to ensure a unique
           &lt;session-version&gt;.</t>
 
-          <t>If the initial offer was applied using
-          setLocalDescription, but an answer from the remote side has
-          not yet been applied, meaning the PeerConnection is still in
+          <t>If the previous offer was applied using
+          setLocalDescription, but a corresponding answer from the remote side
+          has not yet been applied, meaning the PeerConnection is still in
           the "have-local-offer" state, an offer is generated by following
           the steps in the "stable" state above, along with these
           exceptions:
@@ -2382,47 +2370,46 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             "a=simulcast" line MUST stay the same.</t>
           </list></t>
 
-          <t>If the initial offer was applied using
-          setLocalDescription, and an answer from the remote side has
-          been applied using setRemoteDescription, meaning the
+          <t>If the previous offer was applied using
+          setLocalDescription, and a corresponding answer from the remote
+          side has been applied using setRemoteDescription, meaning the
           PeerConnection is in the "have-remote-pranswer" or "stable"
           states, an offer is generated based on the negotiated session
           descriptions by following the steps mentioned for the
           "have-local-offer" state above.</t>
 
-          <t>In addition, for each non-recycled, non-rejected m=
+          <t>In addition, for each existing, non-recycled, non-rejected m=
           section in the new offer, the following adjustments are made
           based on the contents of the corresponding m= section in the
-          current remote description, if any:
+          current local or remote description, as appropriate:
           <list style="symbols">
 
             <t>The m= line and corresponding "a=rtpmap" and "a=fmtp"
-            lines MUST only include codecs present in the most recent
-            answer which have not been excluded by the codec
-            preferences of the associated transceiver. Note that
-            non-JSEP endpoints are not subject to these restrictions,
-            and might offer media formats that were not present in the
-            most recent answer, as specified in
-            <xref target="RFC3264"></xref>, Section 8. Therefore, JSEP
-            implementations MUST be prepared to receive such
-            offers.</t>
+            lines MUST only include media formats which have not been excluded
+            by the codec preferences of the associated transceiver, and
+            MUST include all currently available formats. Media formats that
+            were previously offered but are no longer available (e.g., a
+            shared hardware codec) MAY be excluded.</t>
 
-            <t>Unless codec preferences have been set for the
-            associated transceiver, the media formats on the m= line
-            MUST be generated in the same order as in the current local
-            description.</t>
+            <t>Unless codec preferences have been set for the associated
+            transceiver, the media formats on the m= line MUST be generated in
+            the same order as in the most recent answer. Any media
+            formats that were not present in the most recent answer MUST be
+            added after all existing formats.</t>
 
             <t>The RTP header extensions MUST only include those that
             are present in the most recent answer.</t>
 
-            <t>The RTCP feedback extensions MUST only include those
-            that are present in the most recent answer.</t>
+            <t>The RTCP feedback mechanisms MUST only include those
+            that are present in the most recent answer, except for the
+            case of format-specific mechanisms that are referencing a
+            newly-added media format.</t>
 
             <t>The "a=rtcp" line MUST NOT be added if the most recent
             answer included an "a=rtcp-mux" line.</t>
 
-            <t>The "a=rtcp-mux" line MUST NOT be added unless present in
-            the most recent answer.</t>
+            <t>The "a=rtcp-mux" line MUST be the same as that in the most
+            recent answer.</t>
 
             <t>The "a=rtcp-mux-only" line MUST NOT be added.</t>
 
@@ -2522,13 +2509,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             parameters for that codec MUST be specified to indicate
             that silence suppression for received audio is not desired.
             For example, when using the Opus codec, the "usedtx=0"
-            parameter would be specified in the offer.</t>
-
-            <t>Note that setting the "VoiceActivityDetection" parameter
-            when generating an offer is a request to receive audio with
-            silence suppression. It has no impact on whether the local
-            endpoint does silence suppression for the audio it
-            sends.</t>
+            parameter would be specified in the offer. In addition,
+            the implementation MUST NOT use silence suppression for
+            media it generates, regardless of whether the "CN"
+            codecs or related fmtp parameters appear in the peer's
+            description. The impact of these rules is that silence
+            suppression in JSEP depends on mutual agreement of both sides,
+            which ensures consistent handling regardless of which codec is used.
+            </t>
 
             <t>The "VoiceActivityDetection" option does not have any
             impact on the setting of the "vad" value in the signaling
@@ -2696,13 +2684,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           conditions are true, the corresponding m= section in the
           answer MUST be marked as rejected by setting the port in the
           m= line to zero, as indicated in
-          <xref target="RFC3264"></xref>, Section 6., and further
+          <xref target="RFC3264"></xref>, Section 6, and further
           processing for this m= section can be skipped:
           <list style="symbols">
 
             <t>The associated RtpTransceiver has been stopped.</t>
 
-            <t>No supported codec is present in the offer.</t>
+            <t>None of the offered media formats are supported and, if
+            applicable, allowed by codec preferences.</t>
 
             <t>The bundle policy is "max-bundle", and this is not the
             first m= section or in the same bundle group as the first
@@ -2732,22 +2721,24 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>If codec preferences have been set for the associated
             transceiver, media formats MUST be generated in the
-            corresponding order, and MUST exclude any codecs not
-            present in the codec preferences or not present in the
-            offer. Note that non-JSEP endpoints are not subject to this
-            restriction, and might add media formats in the answer that
-            are not present in the offer, as specified in
-            <xref target="RFC3264"></xref>, Section 6.1. Therefore,
-            JSEP implementations MUST be prepared to receive such
-            answers.</t>
+            corresponding order, regardless of what was offered,
+            and MUST exclude any codecs not present in the codec
+            preferences.</t>
 
-            <t>Unless excluded by the above restrictions, the media
-            formats MUST include the mandatory audio/video codecs as
-            specified in
-            <xref target="RFC7874"></xref>, Section 3,
-            and
-            <xref target="RFC7742"></xref>, Section
-            5.</t>
+            <t>Otherwise, the media formats on the m= line
+            MUST be generated in the same order as those offered in the
+            current remote description, excluding any currently unsupported
+            formats. Any currently available media formats that are
+            not present in the current remote description MUST be added after
+            all existing formats.</t>
+
+            <t>In either case, the media formats in the answer MUST include
+            at least one format that is present in the offer, but MAY include
+            formats that are locally supported but not present in the offer,
+            as mentioned in <xref target="RFC3264" />, Section 6.1. If no
+            common format exists, the m= section is rejected as described
+            above.
+            </t>
           </list></t>
 
           <t>The m= line MUST be followed immediately by a "c=" line,
@@ -2958,7 +2949,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           installed, the processing is somewhat different than for an
           initial answer.</t>
 
-          <t>If the initial answer was not applied using
+          <t>If the previous answer was not applied using
           setLocalDescription, meaning the PeerConnection is still in
           the "have-remote-offer" state, the steps for generating an
           initial answer should be followed, subject to the following
@@ -2987,11 +2978,6 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             candidate, because this protocol value must instead match
             what was supplied in the offer, as described above.</t>
 
-            <t>Unless codec preferences have been set for the
-            associated transceiver, the media formats on the m= line
-            MUST be generated in the same order as in the current local
-            description.</t>
-
             <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
             same, unless the m= section is restarting, in which case
             new ICE credentials must be created as specified in
@@ -3002,6 +2988,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Each "a=setup" line MUST use an "active" or "passive"
             role value consistent with the existing DTLS association,
             if the association is being continued by the offerer.</t>
+
+            <t>RTCP multiplexing must be used, and an "a=rtcp-mux"
+            line inserted if and only if the m= section previously
+            used RTCP multiplexing.</t>
 
             <t>If the m= section is not bundled into another m= section
             and RTCP multiplexing is not active, an "a=rtcp" attribute
@@ -3057,7 +3047,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             on a per-codec basis (e.g., if the offerer somehow offered
             support for CN but set "usedtx=0" for Opus, setting
             VoiceActivityDetection to true would result in an answer
-            with CN codecs and "usedtx=0").</t>
+            with CN codecs and "usedtx=0"). The impact of this rule is that
+            an answerer will not try to use silence suppression with any
+            endpoint that does not offer it, making silence suppression
+            support bilateral even with non-JSEP endpoints.</t>
           </section>
         </section>
       </section>
@@ -3105,7 +3098,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           skip the processing described in the rest of this
           section.</t>
 
-          <t>The type of the SessionDescription is checked
+          <t>Otherwise, the type of the SessionDescription is checked
           against the current state of the PeerConnection:
           <list style="symbols">
 
@@ -3148,7 +3141,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           skip the processing described in the rest of this
           section.</t>
 
-          <t>The type of the SessionDescription is checked
+          <t>Otherwise, the type of the SessionDescription is checked
           against the current state of the PeerConnection:
           <list style="symbols">
 
@@ -3568,9 +3561,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>If the RTP/RTCP multiplexing policy is "require", each
             m= section MUST contain an "a=rtcp-mux" attribute. If an
-            "m=" section contains an "a=rtcp-mux-only" attribute then
+            m= section contains an "a=rtcp-mux-only" attribute then
             that section MUST also contain an "a=rtcp-mux"
             attribute.</t>
+
+            <t>
+            If this m= section was present in the previous
+            answer then the state of RTP/RTCP multiplexing MUST
+            match what was previously negotiated.</t>
           </list></t>
 
           <t>If this session description is of type "pranswer" or
@@ -3601,7 +3599,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         session MUST be restored to the state it was in before
         performing these steps.</t>
 
-         <t>Next, m= sections are processed. For each m= section, the
+        <t>Next, m= sections are processed. For each m= section, the
         following steps MUST be performed; if any parameters are out of
         bounds, or cannot be applied, processing MUST stop and an error
         MUST be returned.
@@ -3609,11 +3607,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>If this m= section is new, begin gathering candidates for
           it, as defined in
-          <xref target="RFC5245" />, Section 4.1.1, unless it has been
-          marked as bundle-only.</t>
+          <xref target="RFC5245" />, Section 4.1.1, unless it
+          is definitively being bundled (either this is an
+          offer and the m= section is marked bundle-only, or
+          it is an answer and the m= section is bundled into
+          into another m= section.)</t>
 
-          <t>Or, if the ICE ufrag and password values have changed, and
-          it has not been marked as bundle-only, trigger the ICE agent
+          <t>Or, if the ICE ufrag and password values have changed,
+          trigger the ICE agent
           to start an ICE restart, and begin gathering new candidates
           for the m= section as described in
           <xref target="RFC5245" />, Section 9.1.1.1. If this
@@ -3641,17 +3642,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>If RTCP mux is indicated, prepare to demux RTP and RTCP
             from the RTP ICE component, as specified in
-            <xref target="RFC5761" />, Section 5.1.3. If RTCP mux is
-            not indicated, but was previously negotiated, i.e., the
-            RTCP ICE component no longer exists, this MUST result in an
-            error.</t>
+            <xref target="RFC5761" />, Section 5.1.3.</t>
 
             <t>For each specified RTP header extension, establish a
             mapping between the extension ID and URI, as described in
-            section 6 of
-            <xref target="RFC5285" />. If any indicated RTP header
-            extension is not supported, this MUST result in an
-            error.</t>
+            <xref target="RFC5285" />, Section 6.</t>
 
             <t>If the MID header extension is supported, prepare to
             demux RTP streams intended for this m= section based on the
@@ -3666,16 +3661,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             demux RTP streams intended for this m= section based on the
             media formats supported by this m= section, as described in
             <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />,
-            Section 10.2.
-            If any indicated media format is not supported, this MUST result
-            in an error.</t>
+            Section 10.2.</t>
 
             <t>For each specified "rtx" media format, establish a
             mapping between the RTX payload type and its associated
             primary payload type, as described in
-            <xref target="RFC4588" />, Sections 8.6 and 8.7. If any
-            referenced primary payload types are not present, this MUST
-            result in an error.</t>
+            <xref target="RFC4588" />, Sections 8.6 and 8.7.</t>
 
             <t>If the directional attribute is of type "sendrecv" or
             "recvonly", enable receipt and decoding of media.</t>
@@ -3882,7 +3873,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If the m= section is of type audio:
             <list style="symbols">
 
-              <t>For each specified "CN" media format, enable silence
+              <t>For each specified "CN" media format, configure silence
               suppression for
               all supported media formats with the same clockrate, as
               described in
@@ -3902,8 +3893,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               format, this MUST result in an error.</t>
 
               <t>For any specified "ptime" value, configure the
-              available media formats to use the specified packet size.
-              If the specified size is not supported for a media
+              available media formats to use the specified packet size when
+              sending. If the specified size is not supported for a media
               format, use the next closest value instead.</t>
             </list></t>
           </list></t>
@@ -3948,11 +3939,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <t>If the m= section proto value indicates use of RTP:
           <list style="symbols">
 
-            <t>If the m= section references any media formats, RTP
-            header extensions, or RTCP feedback mechanisms that were
-            not present in the corresponding m= section in the offer,
-            this indicates a negotiation problem and MUST result in an
-            error.</t>
+            <t>If the m= section references RTCP feedback mechanisms
+            that were not present in the corresponding m= section in
+            the offer, this indicates a negotiation problem and MUST
+            result in an error. However, new media formats and new
+            RTP header extension values are permitted in the answer, as
+            described in <xref target="RFC3264" />, Section 7, and
+            <xref target="RFC5285" />, Section 6.</t>
 
             <t>If the m= section has RTCP mux enabled, discard the RTCP
             ICE component, if one exists, and begin or continue muxing
@@ -3973,11 +3966,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             answers, or "sendrecv" for either type of answer),
             choose the media format to send
             as the most preferred media format from the remote
-            description that is also present in the answer, as
-            described in
+            description that is also locally supported, as
+            discussed in
             <xref target="RFC3264" />, Sections 6.1 and 7, and start
-            transmitting RTP media once the underlying transport layers
-            have been established. If an SSRC has not already been
+            transmitting RTP media using that format once the underlying
+            transport layers have been established.
+            If an SSRC has not already been
             chosen for this outgoing RTP stream, choose a random one.
             If media is already being transmitted, the same SSRC SHOULD
             be used unless the clockrate of the new codec is different,
@@ -3994,6 +3988,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             values are specified, include the RID header extension in
             the outgoing RTP streams, as indicated in
             <xref target="I-D.ietf-mmusic-rid"></xref>, Section 4.</t>
+
+            <t>If the m= section is of type audio, and silence suppression
+            was configured for the send media format as a result of
+            processing the remote description, and is also enabled for that
+            format in the local description, use silence suppression
+            for outgoing media, in accordance with the guidance in
+            <xref target="sec.voiceactivitydetection1" />. If these conditions
+            are not met, silence suppression MUST NOT be used for
+            outgoing media.</t>
 
             <t>If simulcast has been negotiated, send the number of
             Source RTP Streams as specified in
@@ -5496,6 +5499,53 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 
       <t>Note: This section will be removed by RFC Editor before
       publication.</t>
+
+
+      
+       <t>Changes in draft-21:</t>
+
+      <t>
+        <list style="symbols">
+          <t>Change dtls-id to tls-id to match MMUSIC draft.</t>
+
+          <t>Replace regular expression for proto field with a list
+          and clarify that the answer must exactly match the offer.</t>
+
+          <t>Remove text about how to error check on setLocal because
+          local descriptions cannot be changed.</t>
+
+          <t>Rework silence suppression support to always require
+          that both sides agree to silence suppression or none is
+          used.</t>
+
+          <t>Remove instructions to parse "a=ssrc-group".</t>
+
+          <t>Allow the addition of new codecs in answers and in subsequent
+          offers.</t>
+
+          <t>Clarify imageattr processing. Replace use of [x=0,y=0] with direction
+          indicators.</t>
+
+          <t>Document when early media can occur.</t>
+
+          <t>Fix ICE default port handling when bundle-only is used.</t>
+
+          <t>Forbid duplicating IDENTICAL/TRANSPORT attributes when you are bundling.</t>
+
+          <t>Clarify the number of components to gather when bundle is involved.</t>
+
+          <t>Explicitly state that PTs and SSRCs are to be used for demuxing.</t>
+
+          <t>Update guidance on "a=setup" line. This should now match the MMUSIC
+          draft.</t>
+
+          <t>Update guidance on certificate/digest matching to conform to
+          RFC8122.</t>
+
+          <t>Update examples.</t>
+        </list>
+      </t>
+
 
        <t>Changes in draft-20:</t>
 
