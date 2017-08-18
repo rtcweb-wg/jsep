@@ -852,9 +852,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         a server, which then, for each receiving client, chooses the
         appropriate encoding to forward.</t>
 
-        <t>Applications request support for simulcast by configuring
-        multiple encodings on an RtpSender, which, upon generation of
-        an offer or answer, are indicated in SDP markings on the
+        <t>Applications request support for simulcast by configuring multiple
+        encodings on an RtpSender. Upon generation of an offer or
+        answer, these encodings are indicated via SDP markings on the
         corresponding m= section, as described below. Receivers that
         understand simulcast and are willing to receive it will also
         include SDP markings to indicate their support, and JSEP
@@ -879,12 +879,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <t>In addition, JSEP does not provide a mechanism to handle an
         incoming offer requesting simulcast from the JSEP endpoint.
-        This means that established simulcast streams will continue to
-        work through a received re-offer, but setting up initial
-        simulcast by way of a received offer requires out-of-band
-        signaling or SDP inspection. Future versions of this
-        specification may add additional APIs to provide direct
-        control.</t>
+        This means that setting up simulcast in the case where the
+        JSEP endpoint receives the initial offer requires out-of-band
+        signaling or SDP inspection. However, in the case where the JSEP
+        endpoint sets up simulcast in its in initial offer, any established
+        simulcast streams will continue to work upon receipt of an incoming
+        re-offer. Future versions of this
+        specification may add additional APIs to handle the incoming initial
+        offer scenario.</t>
 
         <t>When using JSEP to transmit multiple encodings from a
         RtpSender, the techniques from
