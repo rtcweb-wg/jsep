@@ -140,28 +140,28 @@ Internet-Draft                    JSEP                       August 2017
        5.3.3.  Options Handling  . . . . . . . . . . . . . . . . . .  56
          5.3.3.1.  VoiceActivityDetection  . . . . . . . . . . . . .  57
      5.4.  Modifying an Offer or Answer  . . . . . . . . . . . . . .  57
-     5.5.  Processing a Local Description  . . . . . . . . . . . . .  58
+     5.5.  Processing a Local Description  . . . . . . . . . . . . .  57
      5.6.  Processing a Remote Description . . . . . . . . . . . . .  58
      5.7.  Parsing a Session Description . . . . . . . . . . . . . .  59
        5.7.1.  Session-Level Parsing . . . . . . . . . . . . . . . .  59
        5.7.2.  Media Section Parsing . . . . . . . . . . . . . . . .  61
-       5.7.3.  Semantics Verification  . . . . . . . . . . . . . . .  64
+       5.7.3.  Semantics Verification  . . . . . . . . . . . . . . .  63
      5.8.  Applying a Local Description  . . . . . . . . . . . . . .  65
      5.9.  Applying a Remote Description . . . . . . . . . . . . . .  66
      5.10. Applying an Answer  . . . . . . . . . . . . . . . . . . .  70
    6.  Processing RTP/RTCP . . . . . . . . . . . . . . . . . . . . .  73
    7.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  73
      7.1.  Simple Example  . . . . . . . . . . . . . . . . . . . . .  73
-     7.2.  Detailed Example  . . . . . . . . . . . . . . . . . . . .  78
-     7.3.  Early Transport Warmup Example  . . . . . . . . . . . . .  88
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  95
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  96
-   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  96
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  96
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  96
-     11.2.  Informative References . . . . . . . . . . . . . . . . . 101
-   Appendix A.  Appendix A . . . . . . . . . . . . . . . . . . . . . 103
-   Appendix B.  Change log . . . . . . . . . . . . . . . . . . . . . 104
+     7.2.  Detailed Example  . . . . . . . . . . . . . . . . . . . .  77
+     7.3.  Early Transport Warmup Example  . . . . . . . . . . . . .  87
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  94
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  95
+   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  95
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  95
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  95
+     11.2.  Informative References . . . . . . . . . . . . . . . . . 100
+   Appendix A.  Appendix A . . . . . . . . . . . . . . . . . . . . . 102
+   Appendix B.  Change log . . . . . . . . . . . . . . . . . . . . . 103
 
 
 
@@ -170,7 +170,7 @@ Uberti, et al.          Expires February 19, 2018               [Page 3]
 Internet-Draft                    JSEP                       August 2017
 
 
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 113
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 112
 
 1.  Introduction
 
@@ -1413,10 +1413,10 @@ Internet-Draft                    JSEP                       August 2017
    resources.
 
    Calling this method may do things such as generating new ICE
-   credentials, but does not result in candidate gathering, or cause
-   media to start or stop flowing.  Specifically, the offer is not
-   applied, and does not become the pending local description, until
-   setLocalDescription is called.
+   credentials, but does not change the PeerConnection state, trigger
+   candidate gathering, or cause media to start or stop flowing.
+   Specifically, the offer is not applied, and does not become the
+   pending local description, until setLocalDescription is called.
 
 4.1.7.  createAnswer
 
@@ -1443,10 +1443,10 @@ Internet-Draft                    JSEP                       August 2017
    description should reflect the current state of the system.
 
    Calling this method may do things such as generating new ICE
-   credentials, but does not trigger candidate gathering or cause a
-   media state change.  Specifically, the answer is not applied, and
-   does not become the current local description, until
-   setLocalDescription is called.
+   credentials, but does not change the PeerConnection state, trigger
+   candidate gathering, or or cause a media state change.  Specifically,
+   the answer is not applied, and does not become the current local
+   description, until setLocalDescription is called.
 
 
 
@@ -3165,18 +3165,13 @@ Internet-Draft                    JSEP                       August 2017
    the SDP is needed, the aforementioned createOffer/createAnswer
    options or RtpTransceiver APIs MUST be used.
 
-   Note that the application MAY modify the SDP to reduce the
-   capabilities in the offer it sends to the far side (post-
-   setLocalDescription) or the offer that it installs from the far side
-   (pre-setRemoteDescription), as long as it remains a valid SDP offer
-   and specifies a subset of what was in the original offer.  This is
-   safe because the answer is not permitted to expand capabilities, and
-   therefore will just respond to what is present in the offer.
-
-   The application SHOULD NOT modify the SDP in the answer it transmits,
-   as the answer contains the negotiated capabilities, and this can
-   cause the two sides to have different ideas about what exactly was
-   negotiated.
+   After calling setLocalDescription with an offer or answer, the
+   application MAY modify the SDP to reduce its capabilities before
+   sending it to the far side, as long as it follows the rules above
+   that define a valid JSEP offer or answer.  Likewise, an application
+   that has received an offer or answer from a peer MAY modify the
+   received SDP, subject to the same constraints, before calling
+   setRemoteDescription.
 
    As always, the application is solely responsible for what it sends to
    the other party, and all incoming SDP will be processed by the JSEP
@@ -3186,6 +3181,11 @@ Internet-Draft                    JSEP                       August 2017
    process, as a remote offer or answer, unmodified SDP coming from any
    other implementation of this specification.
 
+5.5.  Processing a Local Description
+
+   When a SessionDescription is supplied to setLocalDescription, the
+   following steps MUST be performed:
+
 
 
 
@@ -3193,11 +3193,6 @@ Uberti, et al.          Expires February 19, 2018              [Page 57]
 
 Internet-Draft                    JSEP                       August 2017
 
-
-5.5.  Processing a Local Description
-
-   When a SessionDescription is supplied to setLocalDescription, the
-   following steps MUST be performed:
 
    o  If the description is of type "rollback", follow the processing
       defined in Section 4.1.8.2 and skip the processing described in
@@ -3242,6 +3237,11 @@ Internet-Draft                    JSEP                       August 2017
       *  If the type is "offer", the PeerConnection state MUST be either
          "stable" or "have-remote-offer".
 
+      *  If the type is "pranswer" or "answer", the PeerConnection state
+         MUST be either "have-local-offer" or "have-remote-pranswer".
+
+   o  If the type is not correct for the current state, processing MUST
+      stop and an error MUST be returned.
 
 
 
@@ -3249,12 +3249,6 @@ Uberti, et al.          Expires February 19, 2018              [Page 58]
 
 Internet-Draft                    JSEP                       August 2017
 
-
-      *  If the type is "pranswer" or "answer", the PeerConnection state
-         MUST be either "have-local-offer" or "have-remote-pranswer".
-
-   o  If the type is not correct for the current state, processing MUST
-      stop and an error MUST be returned.
 
    o  Next, the SessionDescription is parsed into a data structure, as
       described in Section 5.7 below.  If parsing fails for any reason,
@@ -3297,6 +3291,12 @@ Internet-Draft                    JSEP                       August 2017
       Section 6.1.  Note that JSEP implementations should never
       encounter this condition because ICE is required for WebRTC.
 
+      The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are
+      not used by this specification; they MUST be checked for syntax
+      but their values are not used.
+
+   The remaining non-attribute lines are processed as follows:
+
 
 
 
@@ -3305,12 +3305,6 @@ Uberti, et al.          Expires February 19, 2018              [Page 59]
 
 Internet-Draft                    JSEP                       August 2017
 
-
-      The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are
-      not used by this specification; they MUST be checked for syntax
-      but their values are not used.
-
-   The remaining non-attribute lines are processed as follows:
 
       The "v=" line MUST have a version of 0, as specified in [RFC4566],
       Section 5.1.
@@ -3353,6 +3347,12 @@ Internet-Draft                    JSEP                       August 2017
       [I-D.ietf-mmusic-dtls-sdp] Section 5, and the tls-id value is
       stored.
 
+   o  Any "a=identity" lines are parsed and the identity values stored
+      for subsequent verification, as specified
+      [I-D.ietf-rtcweb-security-arch], Section 5.
+
+   o  Any "a=extmap" lines are parsed as specified in [RFC5285],
+      Section 5, and their values are stored.
 
 
 
@@ -3361,13 +3361,6 @@ Uberti, et al.          Expires February 19, 2018              [Page 60]
 
 Internet-Draft                    JSEP                       August 2017
 
-
-   o  Any "a=identity" lines are parsed and the identity values stored
-      for subsequent verification, as specified
-      [I-D.ietf-rtcweb-security-arch], Section 5.
-
-   o  Any "a=extmap" lines are parsed as specified in [RFC5285],
-      Section 5, and their values are stored.
 
    Other attributes that are not relevant to JSEP may also be present,
    and implementations SHOULD process any that they recognize.  As
@@ -3410,6 +3403,13 @@ Internet-Draft                    JSEP                       August 2017
       in [RFC5245], Section 15.5, and the set of specified options is
       stored.
 
+   o  Any "a=candidate" attributes MUST be parsed as specified in
+      [RFC5245], Section 15.1, and their values stored.
+
+   o  Any "a=remote-candidates" attributes MUST be parsed as specified
+      in [RFC5245], Section 15.2, but their values are ignored.
+
+
 
 
 
@@ -3417,12 +3417,6 @@ Uberti, et al.          Expires February 19, 2018              [Page 61]
 
 Internet-Draft                    JSEP                       August 2017
 
-
-   o  Any "a=candidate" attributes MUST be parsed as specified in
-      [RFC5245], Section 15.1, and their values stored.
-
-   o  Any "a=remote-candidates" attributes MUST be parsed as specified
-      in [RFC5245], Section 15.2, but their values are ignored.
 
    o  If present, a single "a=end-of-candidates" attribute MUST be
       parsed as specified in [I-D.ietf-ice-trickle], Section 8.2, and
@@ -3464,7 +3458,13 @@ Internet-Draft                    JSEP                       August 2017
       specified in [RFC5761], Section 5.1.3, and its presence or absence
       flagged and stored.
 
+   o  If present, a single "a=rtcp-mux-only" attribute MUST be parsed as
+      specified in [I-D.ietf-mmusic-mux-exclusive], Section 3, and its
+      presence or absence flagged and stored.
 
+   o  If present, a single "a=rtcp-rsize" attribute MUST be parsed as
+      specified in [RFC5506], Section 5, and its presence or absence
+      flagged and stored.
 
 
 
@@ -3473,14 +3473,6 @@ Uberti, et al.          Expires February 19, 2018              [Page 62]
 
 Internet-Draft                    JSEP                       August 2017
 
-
-   o  If present, a single "a=rtcp-mux-only" attribute MUST be parsed as
-      specified in [I-D.ietf-mmusic-mux-exclusive], Section 3, and its
-      presence or absence flagged and stored.
-
-   o  If present, a single "a=rtcp-rsize" attribute MUST be parsed as
-      specified in [RFC5506], Section 5, and its presence or absence
-      flagged and stored.
 
    o  If present, a single "a=rtcp" attribute MUST be parsed as
       specified in [RFC3605], Section 2.1, but its value is ignored, as
@@ -3519,17 +3511,6 @@ Internet-Draft                    JSEP                       August 2017
    required by [RFC4566], Section 5.13, unknown attribute lines MUST be
    ignored.
 
-
-
-
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 63]
-
-Internet-Draft                    JSEP                       August 2017
-
-
 5.7.3.  Semantics Verification
 
    Assuming parsing completes successfully, the parsed description is
@@ -3541,6 +3522,13 @@ Internet-Draft                    JSEP                       August 2017
       features enumerated in Section 5.1.1 MUST be present.  These
       values MAY either be present at the media level, or inherited from
       the session level.
+
+
+
+Uberti, et al.          Expires February 19, 2018              [Page 63]
+
+Internet-Draft                    JSEP                       August 2017
+
 
       *  ICE ufrag and password values, which MUST comply with the size
          limits specified in [RFC5245], Section 15.4.
@@ -3578,14 +3566,6 @@ Internet-Draft                    JSEP                       August 2017
    If this session description is of type "pranswer" or "answer", the
    following additional checks are applied:
 
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 64]
-
-Internet-Draft                    JSEP                       August 2017
-
-
    o  The session description must follow the rules defined in
       [RFC3264], Section 6, including the requirement that the number of
       m= sections MUST exactly match the number of m= sections in the
@@ -3597,6 +3577,14 @@ Internet-Draft                    JSEP                       August 2017
 
    If any of the preceding checks failed, processing MUST stop and an
    error MUST be returned.
+
+
+
+
+Uberti, et al.          Expires February 19, 2018              [Page 64]
+
+Internet-Draft                    JSEP                       August 2017
+
 
 5.8.  Applying a Local Description
 
@@ -3633,15 +3621,6 @@ Internet-Draft                    JSEP                       August 2017
             using the mapping between transceivers and m= section
             indices established when creating the offer.
 
-
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 65]
-
-Internet-Draft                    JSEP                       August 2017
-
-
          +  Set the value of this RtpTransceiver's mid property to the
             MID of the m= section.
 
@@ -3655,6 +3634,14 @@ Internet-Draft                    JSEP                       August 2017
 
       *  If the MID header extension is supported, prepare to demux RTP
          streams intended for this m= section based on the MID header
+
+
+
+Uberti, et al.          Expires February 19, 2018              [Page 65]
+
+Internet-Draft                    JSEP                       August 2017
+
+
          extension, as described in
          [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 15.
 
@@ -3689,15 +3676,6 @@ Internet-Draft                    JSEP                       August 2017
    level; if any parameters are out of bounds, or cannot be applied,
    processing MUST stop and an error MUST be returned.
 
-
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 66]
-
-Internet-Draft                    JSEP                       August 2017
-
-
    o  For any specified "CT" bandwidth value, set this as the limit for
       the maximum total bitrate for all m= sections, as specified in
       [RFC4566], Section 5.8.  Within this overall limit, the
@@ -3711,6 +3689,15 @@ Internet-Draft                    JSEP                       August 2017
    o  Any "AS" bandwidth value MUST be ignored, as the meaning of this
       construct at the session level is not well defined.
 
+
+
+
+
+Uberti, et al.          Expires February 19, 2018              [Page 66]
+
+Internet-Draft                    JSEP                       August 2017
+
+
    For each m= section, the following steps MUST be performed; if any
    parameters are out of bounds, or cannot be applied, processing MUST
    stop and an error MUST be returned.
@@ -3718,8 +3705,9 @@ Internet-Draft                    JSEP                       August 2017
    o  If the ICE ufrag or password changed from the previous remote
       description: [RFC5245].
 
-      *  If the description is of type "offer", note that an ICE restart
-         is needed, as described in [RFC5245], Section 9.1.1.1 .
+      *  If the description is of type "offer", the implementation MUST
+         note that an ICE restart is needed, as described in [RFC5245],
+         Section 9.1.1.1.
 
       *  If the description is of type "answer" or "pranswer", then
          check to see if the current local description is an ICE
@@ -3747,13 +3735,6 @@ Internet-Draft                    JSEP                       August 2017
       of-candidates indication as described in [I-D.ietf-ice-trickle],
       Section 11.
 
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 67]
-
-Internet-Draft                    JSEP                       August 2017
-
-
    o  If the m= section proto value indicates use of RTP:
 
       *  If the m= section is being recycled (see Section 5.2.2),
@@ -3765,6 +3746,13 @@ Internet-Draft                    JSEP                       August 2017
          (possibly because it was dissociated in the previous step),
          either find an RtpTransceiver or create one according to the
          following steps:
+
+
+
+Uberti, et al.          Expires February 19, 2018              [Page 67]
+
+Internet-Draft                    JSEP                       August 2017
+
 
          +  If the m= section is sendrecv or recvonly, and there are
             RtpTransceivers of the same type that were added to the
@@ -3802,14 +3790,6 @@ Internet-Draft                    JSEP                       August 2017
          primary payload types are not present, this MUST result in an
          error.  Note that RTX payload types may refer to primary
          payload types which are not supported by the local media
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 68]
-
-Internet-Draft                    JSEP                       August 2017
-
-
          implementation, in which case, the RTX payload type MUST also
          be ignored.
 
@@ -3821,6 +3801,14 @@ Internet-Draft                    JSEP                       August 2017
          prepare to demux RTP streams intended for this m= section using
          that SSRC, as described in
          [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 10.2.
+
+
+
+
+Uberti, et al.          Expires February 19, 2018              [Page 68]
+
+Internet-Draft                    JSEP                       August 2017
+
 
       *  For each specified RTP header extension that is also supported
          by the local implementation, establish a mapping between the
@@ -3858,14 +3846,6 @@ Internet-Draft                    JSEP                       August 2017
 
       *  If the m= section is of type audio:
 
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 69]
-
-Internet-Draft                    JSEP                       August 2017
-
-
          +  For each specified "CN" media format, configure silence
             suppression for all supported media formats with the same
             clockrate, as described in [RFC3389], Section 5, except for
@@ -3878,6 +3858,14 @@ Internet-Draft                    JSEP                       August 2017
             DTMF transmission for all supported media formats with the
             same clockrate, as described in [RFC4733], Section 2.5.1.2.
             If the application attempts to transmit DTMF when using a
+
+
+
+Uberti, et al.          Expires February 19, 2018              [Page 69]
+
+Internet-Draft                    JSEP                       August 2017
+
+
             media format that does not have a corresponding telephone-
             event format, this MUST result in an error.
 
@@ -3913,15 +3901,6 @@ Internet-Draft                    JSEP                       August 2017
       then the same DTLS connection is continued over the new ICE
       channel.
 
-
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 70]
-
-Internet-Draft                    JSEP                       August 2017
-
-
    o  If no valid DTLS connection exists, prepare to start a DTLS
       connection, using the specified roles and fingerprints, on any
       underlying ICE components, once they are active.
@@ -3934,6 +3913,14 @@ Internet-Draft                    JSEP                       August 2017
          However, new media formats and new RTP header extension values
          are permitted in the answer, as described in [RFC3264],
          Section 7, and [RFC5285], Section 6.
+
+
+
+
+Uberti, et al.          Expires February 19, 2018              [Page 70]
+
+Internet-Draft                    JSEP                       August 2017
+
 
       *  If the m= section has RTCP mux enabled, discard the RTCP ICE
          component, if one exists, and begin or continue muxing RTCP
@@ -3970,14 +3957,6 @@ Internet-Draft                    JSEP                       August 2017
          header extension in the outgoing RTP streams, as indicated in
          [I-D.ietf-mmusic-rid], Section 4.
 
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 71]
-
-Internet-Draft                    JSEP                       August 2017
-
-
       *  If the m= section is of type audio, and silence suppression was
          configured for the send media format as a result of processing
          the remote description, and is also enabled for that format in
@@ -3989,6 +3968,15 @@ Internet-Draft                    JSEP                       August 2017
       *  If simulcast has been negotiated, send the number of Source RTP
          Streams as specified in [I-D.ietf-mmusic-sdp-simulcast],
          Section 6.2.2.
+
+
+
+
+
+Uberti, et al.          Expires February 19, 2018              [Page 71]
+
+Internet-Draft                    JSEP                       August 2017
+
 
       *  If the send media format chosen above has a corresponding "rtx"
          media format, or a FEC mechanism has been negotiated, establish
@@ -4025,15 +4013,6 @@ Internet-Draft                    JSEP                       August 2017
          the case when the PeerConnection state is "have-remote-
          pranswer".
 
-
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 72]
-
-Internet-Draft                    JSEP                       August 2017
-
-
       *  If no valid SCTP association exists, prepare to initiate a SCTP
          association over the associated ICE component and DTLS
          connection, using the local SCTP port value from the local
@@ -4046,6 +4025,14 @@ Internet-Draft                    JSEP                       August 2017
    ICE components in each bundle, and begin muxing these m= sections
    accordingly, as described in
    [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 8.2.
+
+
+
+
+Uberti, et al.          Expires February 19, 2018              [Page 72]
+
+Internet-Draft                    JSEP                       August 2017
+
 
    If the description is of type "answer", and there are still remaining
    candidates in the ICE candidate pool, discard them.
@@ -4082,14 +4069,6 @@ Internet-Draft                    JSEP                       August 2017
    The example in the following section provides a more detailed example
    of what could happen in a JSEP session.
 
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 73]
-
-Internet-Draft                    JSEP                       August 2017
-
-
    The code flow below shows Alice's endpoint initiating the session to
    Bob's endpoint.  The messages from the JavaScript application in
    Alice's browser to the JavaScript in Bob's browser, abbreviated as
@@ -4106,42 +4085,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Uberti, et al.          Expires February 19, 2018              [Page 74]
+Uberti, et al.          Expires February 19, 2018              [Page 73]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4197,7 +4141,7 @@ AliceUA->BobUA:     media sent from Alice to Bob
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 75]
+Uberti, et al.          Expires February 19, 2018              [Page 74]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4253,7 +4197,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 76]
+Uberti, et al.          Expires February 19, 2018              [Page 75]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4309,7 +4253,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 77]
+Uberti, et al.          Expires February 19, 2018              [Page 76]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4365,7 +4309,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 78]
+Uberti, et al.          Expires February 19, 2018              [Page 77]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4421,7 +4365,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 79]
+Uberti, et al.          Expires February 19, 2018              [Page 78]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4477,7 +4421,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 80]
+Uberti, et al.          Expires February 19, 2018              [Page 79]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4533,7 +4477,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 81]
+Uberti, et al.          Expires February 19, 2018              [Page 80]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4589,7 +4533,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 82]
+Uberti, et al.          Expires February 19, 2018              [Page 81]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4645,7 +4589,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 83]
+Uberti, et al.          Expires February 19, 2018              [Page 82]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4701,7 +4645,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 84]
+Uberti, et al.          Expires February 19, 2018              [Page 83]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4757,7 +4701,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 85]
+Uberti, et al.          Expires February 19, 2018              [Page 84]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4813,7 +4757,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 86]
+Uberti, et al.          Expires February 19, 2018              [Page 85]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4869,7 +4813,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 87]
+Uberti, et al.          Expires February 19, 2018              [Page 86]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4925,7 +4869,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 88]
+Uberti, et al.          Expires February 19, 2018              [Page 87]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -4981,7 +4925,7 @@ BobUA->AliceUA:     media sent from Bob to Alice
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 89]
+Uberti, et al.          Expires February 19, 2018              [Page 88]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5037,7 +4981,7 @@ BobJS->BobUA:       setRemoteDescription with |answer-C2|
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 90]
+Uberti, et al.          Expires February 19, 2018              [Page 89]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5093,7 +5037,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 91]
+Uberti, et al.          Expires February 19, 2018              [Page 90]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5149,7 +5093,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 92]
+Uberti, et al.          Expires February 19, 2018              [Page 91]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5205,7 +5149,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 93]
+Uberti, et al.          Expires February 19, 2018              [Page 92]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5261,7 +5205,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 94]
+Uberti, et al.          Expires February 19, 2018              [Page 93]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5317,7 +5261,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 95]
+Uberti, et al.          Expires February 19, 2018              [Page 94]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5373,7 +5317,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 96]
+Uberti, et al.          Expires February 19, 2018              [Page 95]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5429,7 +5373,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 97]
+Uberti, et al.          Expires February 19, 2018              [Page 96]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5485,7 +5429,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 98]
+Uberti, et al.          Expires February 19, 2018              [Page 97]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5541,7 +5485,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018              [Page 99]
+Uberti, et al.          Expires February 19, 2018              [Page 98]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5597,7 +5541,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 100]
+Uberti, et al.          Expires February 19, 2018              [Page 99]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5653,7 +5597,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 101]
+Uberti, et al.          Expires February 19, 2018             [Page 100]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5709,7 +5653,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 102]
+Uberti, et al.          Expires February 19, 2018             [Page 101]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5765,7 +5709,7 @@ Appendix A.  Appendix A
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 103]
+Uberti, et al.          Expires February 19, 2018             [Page 102]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5821,7 +5765,7 @@ Appendix B.  Change log
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 104]
+Uberti, et al.          Expires February 19, 2018             [Page 103]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5877,7 +5821,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 105]
+Uberti, et al.          Expires February 19, 2018             [Page 104]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5933,7 +5877,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 106]
+Uberti, et al.          Expires February 19, 2018             [Page 105]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -5989,7 +5933,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 107]
+Uberti, et al.          Expires February 19, 2018             [Page 106]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -6045,7 +5989,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 108]
+Uberti, et al.          Expires February 19, 2018             [Page 107]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -6101,7 +6045,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 109]
+Uberti, et al.          Expires February 19, 2018             [Page 108]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -6157,7 +6101,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 110]
+Uberti, et al.          Expires February 19, 2018             [Page 109]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -6213,7 +6157,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 111]
+Uberti, et al.          Expires February 19, 2018             [Page 110]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -6269,7 +6213,7 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 112]
+Uberti, et al.          Expires February 19, 2018             [Page 111]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -6325,7 +6269,7 @@ Authors' Addresses
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 113]
+Uberti, et al.          Expires February 19, 2018             [Page 112]
 
 Internet-Draft                    JSEP                       August 2017
 
@@ -6381,4 +6325,4 @@ Internet-Draft                    JSEP                       August 2017
 
 
 
-Uberti, et al.          Expires February 19, 2018             [Page 114]
+Uberti, et al.          Expires February 19, 2018             [Page 113]
