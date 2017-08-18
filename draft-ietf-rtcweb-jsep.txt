@@ -5267,26 +5267,28 @@ Internet-Draft                    JSEP                       August 2017
 
 
    While formally the JSEP interface is an API, it is better to think of
-   it is an Internet protocol, with the JS being untrustworthy from the
-   perspective of the endpoint.  Thus, the threat model of [RFC3552]
-   applies.  In particular, JS can call the API in any order and with
-   any inputs, including malicious ones.  This is particularly relevant
-   when we consider the SDP which is passed to setLocalDescription().
-   While correct API usage requires that the application pass in SDP
-   which was derived from createOffer() or createAnswer(), there is no
-   guarantee that applications do so.  The JSEP implementation MUST be
-   prepared for the JS to pass in bogus data instead.
+   it is an Internet protocol, with the application JavaScript being
+   untrustworthy from the perspective of the JSEP implementation.  Thus,
+   the threat model of [RFC3552] applies.  In particular, JavaScript can
+   call the API in any order and with any inputs, including malicious
+   ones.  This is particularly relevant when we consider the SDP which
+   is passed to setLocalDescription().  While correct API usage requires
+   that the application pass in SDP which was derived from createOffer()
+   or createAnswer(), there is no guarantee that applications do so.
+   The JSEP implementation MUST be prepared for the JavaScript to pass
+   in bogus data instead.
 
-   Conversely, the application programmer needs to be aware that the JS
-   does not have complete control of endpoint behavior.  One case that
-   bears particular mention is that editing ICE candidates out of the
-   SDP or suppressing trickled candidates does not have the expected
-   behavior: implementations will still perform checks from those
-   candidates even if they are not sent to the other side.  Thus, for
-   instance, it is not possible to prevent the remote peer from learning
-   your public IP address by removing server reflexive candidates.
-   Applications which wish to conceal their public IP address should
-   instead configure the ICE agent to use only relay candidates.
+   Conversely, the application programmer needs to be aware that the
+   JavaScript does not have complete control of endpoint behavior.  One
+   case that bears particular mention is that editing ICE candidates out
+   of the SDP or suppressing trickled candidates does not have the
+   expected behavior: implementations will still perform checks from
+   those candidates even if they are not sent to the other side.  Thus,
+   for instance, it is not possible to prevent the remote peer from
+   learning your public IP address by removing server reflexive
+   candidates.  Applications which wish to conceal their public IP
+   address should instead configure the ICE agent to use only relay
+   candidates.
 
 9.  IANA Considerations
 
@@ -5310,8 +5312,6 @@ Internet-Draft                    JSEP                       August 2017
               Roach, A., Nandakumar, S., and P. Thatcher, "RTP Stream
               Identifier Source Description (SDES)", draft-ietf-avtext-
               rid-09 (work in progress), October 2016.
-
-
 
 
 
