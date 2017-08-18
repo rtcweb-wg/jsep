@@ -1015,11 +1015,11 @@ Internet-Draft                    JSEP                       August 2017
    each receiving client, chooses the appropriate encoding to forward.
 
    Applications request support for simulcast by configuring multiple
-   encodings on an RtpSender, which, upon generation of an offer or
-   answer, are indicated in SDP markings on the corresponding m=
-   section, as described below.  Receivers that understand simulcast and
-   are willing to receive it will also include SDP markings to indicate
-   their support, and JSEP endpoints will use these markings to
+   encodings on an RtpSender.  Upon generation of an offer or answer,
+   these encodings are indicated via SDP markings on the corresponding
+   m= section, as described below.  Receivers that understand simulcast
+   and are willing to receive it will also include SDP markings to
+   indicate their support, and JSEP endpoints will use these markings to
    determine whether simulcast is permitted for a given RtpSender.  If
    simulcast support is not negotiated, the RtpSender will only use the
    first configured encoding.
@@ -1038,11 +1038,13 @@ Internet-Draft                    JSEP                       August 2017
 
    In addition, JSEP does not provide a mechanism to handle an incoming
    offer requesting simulcast from the JSEP endpoint.  This means that
-   established simulcast streams will continue to work through a
-   received re-offer, but setting up initial simulcast by way of a
-   received offer requires out-of-band signaling or SDP inspection.
-   Future versions of this specification may add additional APIs to
-   provide direct control.
+   setting up simulcast in the case where the JSEP endpoint receives the
+   initial offer requires out-of-band signaling or SDP inspection.
+   However, in the case where the JSEP endpoint sets up simulcast in its
+   in initial offer, any established simulcast streams will continue to
+   work upon receipt of an incoming re-offer.  Future versions of this
+   specification may add additional APIs to handle the incoming initial
+   offer scenario.
 
    When using JSEP to transmit multiple encodings from a RtpSender, the
    techniques from [I-D.ietf-mmusic-sdp-simulcast] and
@@ -1056,8 +1058,6 @@ Internet-Draft                    JSEP                       August 2017
    [I-D.ietf-mmusic-rid], Section 4; the use of RID identifiers allows
    the individual encodings to be disambiguated even though they are all
    part of the same m= section.
-
-
 
 
 
