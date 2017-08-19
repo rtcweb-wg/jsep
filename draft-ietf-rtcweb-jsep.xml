@@ -865,9 +865,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         a server, which then, for each receiving client, chooses the
         appropriate encoding to forward.</t>
 
-        <t>Applications request support for simulcast by configuring
-        multiple encodings on an RtpSender, which, upon generation of
-        an offer or answer, are indicated in SDP markings on the
+        <t>Applications request support for simulcast by configuring multiple
+        encodings on an RtpSender. Upon generation of an offer or
+        answer, these encodings are indicated via SDP markings on the
         corresponding m= section, as described below. Receivers that
         understand simulcast and are willing to receive it will also
         include SDP markings to indicate their support, and JSEP
@@ -892,12 +892,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
         <t>In addition, JSEP does not provide a mechanism to handle an
         incoming offer requesting simulcast from the JSEP endpoint.
-        This means that established simulcast streams will continue to
-        work through a received re-offer, but setting up initial
-        simulcast by way of a received offer requires out-of-band
-        signaling or SDP inspection. Future versions of this
-        specification may add additional APIs to provide direct
-        control.</t>
+        This means that setting up simulcast in the case where the
+        JSEP endpoint receives the initial offer requires out-of-band
+        signaling or SDP inspection. However, in the case where the JSEP
+        endpoint sets up simulcast in its in initial offer, any established
+        simulcast streams will continue to work upon receipt of an incoming
+        re-offer. Future versions of this
+        specification may add additional APIs to handle the incoming initial
+        offer scenario.</t>
 
         <t>When using JSEP to transmit multiple encodings from a
         RtpSender, the techniques from
@@ -1000,7 +1002,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           UPDATE approach allows the signaling to set up a separate
           media flow for each peer that it wishes to exchange media
           with. In JSEP, this offer used in the UPDATE would be formed
-          by simply creating a new PeerConnection and making sure that
+          by simply creating a new PeerConnection (see <xref target="sec.peerconnection"/>)
+          and making sure that
           the same local media streams have been added into this new
           PeerConnection. Then the new PeerConnection object would
           produce a SDP offer that could be used by the signaling to
@@ -1149,7 +1152,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           PeerConnection, using the MediaStream argument to associate
           the track with other tracks in the same MediaStream, so that
           they can be added to the same "LS" group when creating an
-          offer or answer. addTrack attempts to minimize the number of
+          offer or answer.
+          Adding tracks to the same "LS" group indicates that the playback of
+          these tracks should be synchronized for proper lip sync,
+          as described in <xref target="RFC5888"></xref>, Section 7.
+          addTrack attempts to minimize the number of
           transceivers as follows: If the PeerConnection is in the
           "have-remote-offer" state, the track will be attached to the
           first compatible transceiver that was created by the most
@@ -1249,8 +1256,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           when it attempts to acquire those resources.</t>
 
           <t>Calling this method may do things such as generating new
-          ICE credentials, but does not result in candidate gathering,
-          or cause media to start or stop flowing. Specifically, the
+          ICE credentials, but does not change the PeerConnection state,
+          trigger candidate gathering, or
+          cause media to start or stop flowing. Specifically, the
           offer is not applied, and does not become the pending local
           description, until setLocalDescription is called.</t>
         </section>
@@ -1283,8 +1291,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           the system.</t>
 
           <t>Calling this method may do things such as generating new
-          ICE credentials, but does not trigger candidate gathering or
-          cause a media state change. Specifically, the answer is not
+          ICE credentials, but does not change the PeerConnection state,
+          trigger candidate gathering, or
+          or cause a media state change. Specifically, the answer is not
           applied, and does not become the current local description,
           until setLocalDescription is called.</t>
         </section>
@@ -1812,16 +1821,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>For media m= sections, JSEP implementations MUST support
           the "UDP/TLS/RTP/SAVPF" profile specified in
-          <xref target="RFC7850"></xref>, and MUST indicate this
+          <xref target="RFC5764"></xref>, and MUST indicate this
           profile for each media m= line they produce in an offer. For
           data m= sections, implementations MUST support the
           "UDP/DTLS/SCTP" profile and MUST indicate this profile for
-          each data m= line they produce in an offer. Because ICE can
-          select either UDP
+          each data m= line they produce in an offer. Although these
+          profiles are formally associated with UDP,
+          ICE can select either UDP
           <xref target="RFC5245" /> or TCP
           <xref target='RFC6544' /> transport depending on network
-          conditions, this advertisement is consistent with ICE
-          eventually selecting either either UDP or TCP.</t>
+          conditions, even when advertising a UDP profile.</t>
 
           <t>Unfortunately, in an attempt at compatibility, some
           endpoints generate other profile strings even when they mean
@@ -3108,18 +3117,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         control over the SDP is needed, the aforementioned
         createOffer/createAnswer options or RtpTransceiver APIs MUST be
         used.</t>
-
-        <t>After calling setLocalDescription, the application MAY modify the SDP to
-        reduce the capabilities in the offer before sending it to the far side, as
-        long as it remains a valid SDP offer and specifies a subset of what was in
-        the original offer. Likewise, an application that has received an offer
-        from a peer MAY modify the received SDP, subject to those same constraints,
-        before calling setRemoteDescription.o</t>
-
-        <t>The application SHOULD NOT modify the SDP in the answer it
-        transmits, as the answer contains the negotiated capabilities,
-        and this can cause the two sides to have different ideas about
-        what exactly was negotiated.</t>
+        
+        <t>After calling setLocalDescription with an offer or answer,
+        the application MAY modify the SDP to reduce its capabilities before
+        sending it to the far side, as long as it follows the rules above
+        that define a valid JSEP offer or answer. Likewise, an application
+        that has received an offer or answer from a peer MAY modify the
+        received SDP, subject to the same constraints, before calling
+        setRemoteDescription.</t>
 
         <t>As always, the application is solely responsible for what it
         sends to the other party, and all incoming SDP will be
@@ -3721,9 +3726,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <xref target="RFC5245" />.
           <list style="symbols">
             <t>
-              If the description is of type "offer", note that an ICE
-              restart is needed, as described in
-              <xref target="RFC5245"/>, Section 9.1.1.1 .
+              If the description is of type "offer", the implementation MUST
+              note that an ICE restart is needed, as described in
+              <xref target="RFC5245"/>, Section 9.1.1.1.
             </t>
 
             <t>
@@ -3885,10 +3890,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>For each specified "telephone-event" media format,
               enable DTMF transmission for all supported media formats
               with the same clockrate, as described in
-              <xref target="RFC4733" />, Section 2.5.1.2. If the
-              application attempts to transmit DTMF when using a media
-              format that does not have a corresponding telephone-event
-              format, this MUST result in an error.</t>
+              <xref target="RFC4733" />, Section 2.5.1.2.
+              If there are any supported media formats that do not have a
+              corresponding telephone-event format, disable DTMF
+              transmission for those formats.</t>
 
               <t>For any specified "ptime" value, configure the
               available media formats to use the specified packet size when
@@ -5233,28 +5238,28 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       describes security considerations for this document.</t>
 
       <t>While formally the JSEP interface is an API, it is better to
-      think of it is an Internet protocol, with the JS being
-      untrustworthy from the perspective of the endpoint. Thus, the
+      think of it is an Internet protocol, with the application JavaScript being
+      untrustworthy from the perspective of the JSEP implementation. Thus, the
       threat model of
-      <xref target="RFC3552" /> applies. In particular, JS can call the
+      <xref target="RFC3552" /> applies. In particular, JavaScript can call the
       API in any order and with any inputs, including malicious ones.
       This is particularly relevant when we consider the SDP which is
       passed to setLocalDescription(). While correct API usage requires
       that the application pass in SDP which was derived from
       createOffer() or createAnswer(), there is no guarantee that
       applications do so. The JSEP implementation MUST be prepared for
-      the JS to pass in bogus data instead.</t>
+      the JavaScript to pass in bogus data instead.</t>
 
-      <t>Conversely, the application programmer needs to be aware that the
-      JS does not have complete control of endpoint behavior. One case
-      that bears particular mention is that editing ICE candidates out
-      of the SDP or suppressing trickled candidates does not have the
-      expected behavior: implementations will still perform checks from
-      those candidates even if they are not sent to the other side.
-      Thus, for instance, it is not possible to prevent the remote peer
-      from learning your public IP address by removing server reflexive
-      candidates. Applications which wish to conceal their public IP
-      address should instead configure the ICE agent to use only relay
+      <t>Conversely, the application programmer needs to be aware that
+      the JavaScript does not have complete control of endpoint
+      behavior. One case that bears particular mention is that editing ICE
+      candidates out of the SDP or suppressing trickled candidates does not
+      have the expected behavior: implementations will still perform checks
+      from those candidates even if they are not sent to the other side.
+      Thus, for instance, it is not possible to prevent the remote peer from
+      learning your public IP address by removing server reflexive
+      candidates. Applications which wish to conceal their public IP address
+      should instead configure the ICE agent to use only relay
       candidates.</t>
     </section>
     <section title="IANA Considerations"
@@ -5499,6 +5504,25 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       publication.</t>
 
 
+      <t>Changes in draft-22:</t>
+      <t>
+        <list style="symbols">
+        <t>Clarify currentDirection versus direction.</t>
+
+        <t>Correct session-id text so that it aligns with RFC 3264.</t>
+
+        <t>Clarify that generated ICE candidate objects must have all four fields.</t>
+
+        <t>Make rollback work from any state besides stable and regardless of
+        whether setLocalDescription or setRemoteDescription is used.</t>
+
+        <t>Allow modifying SDP before sending or after receiving either
+        offers or answers (previously this was forbidden for answers).</t>
+
+        <t>Provide rationale for several design choices.</t>
+
+        </list>
+      </t>
 
        <t>Changes in draft-21:</t>
 
