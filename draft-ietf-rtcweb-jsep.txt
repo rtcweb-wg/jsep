@@ -431,17 +431,17 @@ Internet-Draft                    JSEP                       August 2017
    answerer, who first calls setRemoteDescription(sdp [offer]) and then
    later setLocalDescription(sdp [answer]).
 
+   During the offer/answer exchange, the outstanding offer is considered
+   to be "pending" at the offerer and the answerer, as it may either be
+   accepted or rejected.  If this is a re-offer, each side will also
+   have "current" local and remote descriptions, which reflect the
+   result of the last offer/answer exchange.  Sections Section 4.1.12,
+   Section 4.1.14, Section 4.1.11, and Section 4.1.13, provide more
+   detail on pending and current descriptions.
+
    JSEP also allows for an answer to be treated as provisional by the
    application.  Provisional answers provide a way for an answerer to
    communicate initial session parameters back to the offerer, in order
-   to allow the session to begin, while allowing a final answer to be
-   specified later.  This concept of a final answer is important to the
-   offer/answer model; when such an answer is received, any extra
-   resources allocated by the caller can be released, now that the exact
-   session configuration is known.  These "resources" can include things
-   like extra ICE components, TURN candidates, or video decoders.
-   Provisional answers, on the other hand, do no such deallocation; as a
-   result, multiple dissimilar provisional answers, with their own codec
 
 
 
@@ -450,6 +450,14 @@ Uberti, et al.          Expires February 20, 2018               [Page 8]
 Internet-Draft                    JSEP                       August 2017
 
 
+   to allow the session to begin, while allowing a final answer to be
+   specified later.  This concept of a final answer is important to the
+   offer/answer model; when such an answer is received, any extra
+   resources allocated by the caller can be released, now that the exact
+   session configuration is known.  These "resources" can include things
+   like extra ICE components, TURN candidates, or video decoders.
+   Provisional answers, on the other hand, do no such deallocation; as a
+   result, multiple dissimilar provisional answers, with their own codec
    choices, transport parameters, etc., can be received and applied
    during call setup.  Note that the final answer itself may be
    different than any received provisional answers.
@@ -465,14 +473,6 @@ Internet-Draft                    JSEP                       August 2017
    send back zero or more provisional answers, and finally end the
    offer-answer exchange by sending a final answer.  The state machine
    for this is as follows:
-
-
-
-
-
-
-
-
 
 
 
