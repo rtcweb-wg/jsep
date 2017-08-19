@@ -123,7 +123,7 @@ Internet-Draft                    JSEP                       August 2017
        4.2.3.  setDirection  . . . . . . . . . . . . . . . . . . . .  34
        4.2.4.  direction . . . . . . . . . . . . . . . . . . . . . .  34
        4.2.5.  currentDirection  . . . . . . . . . . . . . . . . . .  34
-       4.2.6.  setCodecPreferences . . . . . . . . . . . . . . . . .  34
+       4.2.6.  setCodecPreferences . . . . . . . . . . . . . . . . .  35
    5.  SDP Interaction Procedures  . . . . . . . . . . . . . . . . .  35
      5.1.  Requirements Overview . . . . . . . . . . . . . . . . . .  35
        5.1.1.  Usage Requirements  . . . . . . . . . . . . . . . . .  35
@@ -1857,7 +1857,10 @@ Internet-Draft                    JSEP                       August 2017
 
    The setDirection method sets the direction of a transceiver, which
    affects the direction property of the associated m= section on future
-   calls to createOffer and createAnswer.
+   calls to createOffer and createAnswer.  The permitted values for
+   direction are "recvonly", "sendrecv", "sendonly", and "inactive",
+   mirroring the identically-named directional attributes defined in
+   [RFC4566], Section 6.
 
    When creating offers, the transceiver direction is directly reflected
    in the output, even for re-offers.  When creating answers, the
@@ -1892,12 +1895,9 @@ Internet-Draft                    JSEP                       August 2017
    applied, or if the transceiver is stopped, currentDirection is set to
    null.
 
-4.2.6.  setCodecPreferences
 
-   The setCodecPreferences method sets the codec preferences of a
-   transceiver, which in turn affect the presence and order of codecs of
-   the associated m= section on future calls to createOffer and
-   createAnswer.  Note that setCodecPreferences does not directly affect
+
+
 
 
 
@@ -1906,6 +1906,12 @@ Uberti, et al.          Expires February 20, 2018              [Page 34]
 Internet-Draft                    JSEP                       August 2017
 
 
+4.2.6.  setCodecPreferences
+
+   The setCodecPreferences method sets the codec preferences of a
+   transceiver, which in turn affect the presence and order of codecs of
+   the associated m= section on future calls to createOffer and
+   createAnswer.  Note that setCodecPreferences does not directly affect
    which codec the implementation decides to send.  It only affects
    which codecs the implementation indicates that it prefers to receive,
    via the offer or answer.  Even when a codec is excluded by
@@ -1948,12 +1954,6 @@ Internet-Draft                    JSEP                       August 2017
       appropriate for the media type, as specified in
       [I-D.ietf-rtcweb-security-arch]
 
-   The SDES SRTP keying mechanism from [RFC4568] MUST NOT be used, as
-   discussed in [I-D.ietf-rtcweb-security-arch].
-
-
-
-
 
 
 
@@ -1961,6 +1961,9 @@ Uberti, et al.          Expires February 20, 2018              [Page 35]
 
 Internet-Draft                    JSEP                       August 2017
 
+
+   The SDES SRTP keying mechanism from [RFC4568] MUST NOT be used, as
+   discussed in [I-D.ietf-rtcweb-security-arch].
 
 5.1.2.  Profile Names and Interoperability
 
@@ -2007,9 +2010,6 @@ Internet-Draft                    JSEP                       August 2017
 
    o  Because DTLS-SRTP is REQUIRED, the choice of SAVP or AVP has no
       effect; support for DTLS-SRTP is determined by the presence of one
-      or more "a=fingerprint" attribute.  Note that lack of an
-      "a=fingerprint" attribute will lead to negotiation failure.
-
 
 
 
@@ -2017,6 +2017,9 @@ Uberti, et al.          Expires February 20, 2018              [Page 36]
 
 Internet-Draft                    JSEP                       August 2017
 
+
+      or more "a=fingerprint" attribute.  Note that lack of an
+      "a=fingerprint" attribute will lead to negotiation failure.
 
    o  The use of AVPF or AVP simply controls the timing rules used for
       RTCP feedback.  If AVPF is provided, or an "a=rtcp-fb" attribute
@@ -2063,9 +2066,6 @@ Internet-Draft                    JSEP                       August 2017
       bits being set to zero and the remaining 62 bits being
       cryptographically random.  The value of the <nettype> <addrtype>
       <unicast-address> tuple SHOULD be set to a non-meaningful address,
-      such as IN IP4 0.0.0.0, to prevent leaking the local address in
-      this field.  As mentioned in [RFC4566], the entire o= line needs
-
 
 
 
@@ -2074,6 +2074,8 @@ Uberti, et al.          Expires February 20, 2018              [Page 37]
 Internet-Draft                    JSEP                       August 2017
 
 
+      such as IN IP4 0.0.0.0, to prevent leaking the local address in
+      this field.  As mentioned in [RFC4566], the entire o= line needs
       to be unique, but selecting a random number for <sess-id> is
       sufficient to accomplish this.
 
@@ -2120,8 +2122,6 @@ Internet-Draft                    JSEP                       August 2017
    been specified for the PeerConnection; as a result, they MUST all
    have the same [RFC8122] fingerprint value(s), or these value(s) MUST
    be session-level attributes.
-
-
 
 
 
