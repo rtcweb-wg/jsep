@@ -1638,11 +1638,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>In either case, the m= section index, MID, and ufrag fields from
           the supplied IceCandidate are used to determine which m= section
-          and ICE candidate generation the IceCandidate is for, as described
+          and ICE candidate generation the IceCandidate belongs to, as described
           in <xref target="sec.ice-candidate-format" /> above. In the
-          specific case of an end-of-candidates indication, both the m= section
-          index and MID may be omitted to mean that the indication applies
-          to all m= sections in the specified ICE candidate generation.</t>
+          case of an end-of-candidates indication, the absence of both
+          the m= section index and MID fields is interpreted to mean that
+          the indication applies to all m= sections in the specified ICE
+          candidate generation. However, if both fields are absent for a new
+          remote candidate, this MUST be treated as an invalid condition, as
+          specified below.
+          </t>
 
           <t>If any IceCandidate fields contain invalid values, or an error
           occurs during the processing of the IceCandidate object, the supplied
