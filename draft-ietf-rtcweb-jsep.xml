@@ -1648,39 +1648,35 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         </section>
         <section title="addIceCandidate" anchor="sec.addicecandidate">
 
-          <t>The addIceCandidate method provides a remote candidate to
-          the ICE agent, which, if parsed successfully, will be added
+          <t>The addIceCandidate method provides an update to
+          the ICE agent via an IceCandidate object
+          <xref target="sec.ice-candidate-format"/>. If the
+          IceCandidate's candidate field is filled in, the IceCandidate
+          is treated as a new remote ICE candidate, which will be added
           to the current and/or pending remote description according to
-          the rules defined for Trickle ICE. The pair of MID and ufrag
-          is used to determine the m= section and ICE candidate
-          generation to which the candidate belongs. If the MID is not
-          present, the m= section index is used to look up the locally
-          generated MID (see
-          <xref target="sec.applying-a-remote-desc" />), which is used
-          in place of a supplied MID. If these values or the candidate
-          string are invalid, an error is generated.</t>
+          the rules defined for Trickle ICE. Otherwise, the IceCandidate
+          is treated as an end-of-candidates indication, as defined in
+          <xref target="I-D.ietf-ice-trickle" />.</t>
 
-          <t>The purpose of the ufrag is to resolve ambiguities when
-          trickle ICE is in progress during an ICE restart. If the
-          ufrag is absent, the candidate MUST be assumed to belong to
-          the most recently applied remote description. Connectivity
-          checks will be sent to the new candidate.</t>
+          <t>In either case, the m= section index, MID, and ufrag fields from
+          the supplied IceCandidate are used to determine which m= section
+          and ICE candidate generation the IceCandidate belongs to, as described
+          in <xref target="sec.ice-candidate-format" /> above. In the
+          case of an end-of-candidates indication, the absence of both
+          the m= section index and MID fields is interpreted to mean that
+          the indication applies to all m= sections in the specified ICE
+          candidate generation. However, if both fields are absent for a new
+          remote candidate, this MUST be treated as an invalid condition, as
+          specified below.
+          </t>
 
-          <t>This method can also be used to provide an
-          end-of-candidates indication to the ICE agent, as defined in
-          <xref target="I-D.ietf-ice-trickle" />). The MID and ufrag
-          are used as described above to determine the m= section and
-          ICE generation for which candidate gathering is complete. If
-          the ufrag is not present, then the end-of-candidates
-          indication MUST be assumed to apply to the relevant m=
-          section in the most recently applied remote description. If
-          neither the MID nor the m= index is present, then the
-          indication MUST be assumed to apply to all m= sections in the
-          most recently applied remote description.</t>
+          <t>If any IceCandidate fields contain invalid values, or an error
+          occurs during the processing of the IceCandidate object, the supplied
+          IceCandidate MUST be ignored and an error MUST be returned.</t>
 
-          <t>This call will result in a change to the state of the ICE
-          Agent, and may result in a change to media state if it
-          results in connectivity being established.</t>
+          <t>Otherwise, the new remote candidate or end-of-candidates indication
+          is supplied to the ICE agent. In the case of a new remote candidate,
+          connectivity checks will be sent to the new candidate.</t>
         </section>
       </section>
       <section title="RtpTransceiver" anchor="sec.transceiver">
