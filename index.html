@@ -367,7 +367,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-8-19" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-8-26" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -391,7 +391,7 @@ li, p {
 <td class="right">C. Jennings</td>
 </tr>
 <tr>
-<td class="left">Expires: February 20, 2018</td>
+<td class="left">Expires: February 27, 2018</td>
 <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -404,7 +404,7 @@ li, p {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">August 19, 2017</td>
+<td class="right">August 26, 2017</td>
 </tr>
 
     	
@@ -420,7 +420,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on February 20, 2018.</p>
+<p>This Internet-Draft will expire on February 27, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1029,10 +1029,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h3 id="rfc.section.4.1.17">
 <a href="#rfc.section.4.1.17">4.1.17.</a> <a href="#sec.addicecandidate" id="sec.addicecandidate">addIceCandidate</a>
 </h3>
-<p id="rfc.section.4.1.17.p.1">The addIceCandidate method provides a remote candidate to the ICE agent, which, if parsed successfully, will be added to the current and/or pending remote description according to the rules defined for Trickle ICE. The pair of MID and ufrag is used to determine the m= section and ICE candidate generation to which the candidate belongs. If the MID is not present, the m= section index is used to look up the locally generated MID (see <a href="#sec.applying-a-remote-desc" class="xref">Section 5.9</a>), which is used in place of a supplied MID. If these values or the candidate string are invalid, an error is generated.</p>
-<p id="rfc.section.4.1.17.p.2">The purpose of the ufrag is to resolve ambiguities when trickle ICE is in progress during an ICE restart. If the ufrag is absent, the candidate MUST be assumed to belong to the most recently applied remote description. Connectivity checks will be sent to the new candidate.</p>
-<p id="rfc.section.4.1.17.p.3">This method can also be used to provide an end-of-candidates indication to the ICE agent, as defined in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>). The MID and ufrag are used as described above to determine the m= section and ICE generation for which candidate gathering is complete. If the ufrag is not present, then the end-of-candidates indication MUST be assumed to apply to the relevant m= section in the most recently applied remote description. If neither the MID nor the m= index is present, then the indication MUST be assumed to apply to all m= sections in the most recently applied remote description.</p>
-<p id="rfc.section.4.1.17.p.4">This call will result in a change to the state of the ICE Agent, and may result in a change to media state if it results in connectivity being established.</p>
+<p id="rfc.section.4.1.17.p.1">The addIceCandidate method provides an update to the ICE agent via an IceCandidate object <a href="#sec.ice-candidate-format" class="xref">Section 3.5.2.1</a>. If the IceCandidate's candidate field is filled in, the IceCandidate is treated as a new remote ICE candidate, which will be added to the current and/or pending remote description according to the rules defined for Trickle ICE. Otherwise, the IceCandidate is treated as an end-of-candidates indication, as defined in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>.</p>
+<p id="rfc.section.4.1.17.p.2">In either case, the m= section index, MID, and ufrag fields from the supplied IceCandidate are used to determine which m= section and ICE candidate generation the IceCandidate belongs to, as described in <a href="#sec.ice-candidate-format" class="xref">Section 3.5.2.1</a> above. In the case of an end-of-candidates indication, the absence of both the m= section index and MID fields is interpreted to mean that the indication applies to all m= sections in the specified ICE candidate generation. However, if both fields are absent for a new remote candidate, this MUST be treated as an invalid condition, as specified below.  </p>
+<p id="rfc.section.4.1.17.p.3">If any IceCandidate fields contain invalid values, or an error occurs during the processing of the IceCandidate object, the supplied IceCandidate MUST be ignored and an error MUST be returned.</p>
+<p id="rfc.section.4.1.17.p.4">Otherwise, the new remote candidate or end-of-candidates indication is supplied to the ICE agent. In the case of a new remote candidate, connectivity checks will be sent to the new candidate.</p>
 <h2 id="rfc.section.4.2">
 <a href="#rfc.section.4.2">4.2.</a> <a href="#sec.transceiver" id="sec.transceiver">RtpTransceiver</a>
 </h2>
