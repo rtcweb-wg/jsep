@@ -83,12 +83,12 @@ Table of Contents
        3.5.4.  ICE Candidate Pool  . . . . . . . . . . . . . . . . .  15
      3.6.  Video Size Negotiation  . . . . . . . . . . . . . . . . .  16
        3.6.1.  Creating an imageattr Attribute . . . . . . . . . . .  16
-       3.6.2.  Interpreting an imageattr Attribute . . . . . . . . .  17
-     3.7.  Simulcast . . . . . . . . . . . . . . . . . . . . . . . .  18
+       3.6.2.  Interpreting imageattr Attributes . . . . . . . . . .  17
+     3.7.  Simulcast . . . . . . . . . . . . . . . . . . . . . . . .  19
      3.8.  Interactions With Forking . . . . . . . . . . . . . . . .  20
        3.8.1.  Sequential Forking  . . . . . . . . . . . . . . . . .  20
        3.8.2.  Parallel Forking  . . . . . . . . . . . . . . . . . .  21
-   4.  Interface . . . . . . . . . . . . . . . . . . . . . . . . . .  21
+   4.  Interface . . . . . . . . . . . . . . . . . . . . . . . . . .  22
      4.1.  PeerConnection  . . . . . . . . . . . . . . . . . . . . .  22
        4.1.1.  Constructor . . . . . . . . . . . . . . . . . . . . .  22
        4.1.2.  addTrack  . . . . . . . . . . . . . . . . . . . . . .  24
@@ -98,7 +98,7 @@ Table of Contents
        4.1.6.  createOffer . . . . . . . . . . . . . . . . . . . . .  25
        4.1.7.  createAnswer  . . . . . . . . . . . . . . . . . . . .  26
        4.1.8.  SessionDescriptionType  . . . . . . . . . . . . . . .  27
-         4.1.8.1.  Use of Provisional Answers  . . . . . . . . . . .  27
+         4.1.8.1.  Use of Provisional Answers  . . . . . . . . . . .  28
          4.1.8.2.  Rollback  . . . . . . . . . . . . . . . . . . . .  28
        4.1.9.  setLocalDescription . . . . . . . . . . . . . . . . .  29
        4.1.10. setRemoteDescription  . . . . . . . . . . . . . . . .  29
@@ -918,7 +918,7 @@ Internet-Draft                    JSEP                    September 2017
    This declaration indicates that the receiver is capable of decoding
    any image resolution from 48x48 up to 1280x720 pixels.
 
-3.6.2.  Interpreting an imageattr Attribute
+3.6.2.  Interpreting imageattr Attributes
 
    [RFC6236] defines "a=imageattr" to be an advisory field.  This means
    that it does not absolutely constrain the video formats that the
@@ -944,8 +944,8 @@ Internet-Draft                    JSEP                    September 2017
    encoding may have the flexibility to reduce resolution when needed,
    or may be locked to a specific output resolution.
 
-   For each encoding being produced by the RtpSender, the following
-   rules are applied to determine what should be transmitted:
+   For each encoding being produced by the RtpSender, the set of
+   "a=imageattr recv" attributes in the corresponding m= section of the
 
 
 
@@ -954,19 +954,27 @@ Uberti, et al.            Expires March 5, 2018                [Page 17]
 Internet-Draft                    JSEP                    September 2017
 
 
-   o  First, the most suitable "a=imageattr recv" attribute is selected.
-      This is performed by taking the attribute with the highest "q="
-      value from the set of attributes that reference the media format
-      that has been selected for the specified encoding.  If multiple
-      attributes have the same "q=" value, the one that appears first in
-      the m= section is used.  Note that while JSEP endpoints will
-      include at most one "a=imageattr recv" attribute per media format,
-      JSEP endpoints may receive session descriptions from non-JSEP
-      endpoints with m= sections that contain multiple such attributes.
+   remote description is processed to determine what should be
+   transmitted.  Only attributes that reference the media format
+   selected for the encoding are considered; each such attribute is
+   evaluated individually, starting with the attribute with the highest
+   "q=" value.  If multiple attributes have the same "q=" value, they
+   are evaluated in the order they appear in their containing m=
+   section.  Note that while JSEP endpoints will include at most one
+   "a=imageattr recv" attribute per media format, JSEP endpoints may
+   receive session descriptions from non-JSEP endpoints with m= sections
+   that contain multiple such attributes.
 
-   o  If there is an applicable "a=imageattr recv" attribute for the
-      encoding, the limits from the attribute are then compared to the
-      encoder resolution.  Only the specific limits mentioned below are
+   For each "a=imageattr recv" attribute, the following rules are
+   applied.  If this processing is successful, the encoding is
+   transmitted accordingly, and no further attributes are considered for
+   that encoding.  Otherwise, the next attribute is evaluated, in the
+   aforementioned order.  If none of the supplied attributes can be
+   processed successfully, the encoding MUST NOT be transmitted, and an
+   error SHOULD be raised to the application.
+
+   o  The limits from the attribute are compared to the encoder
+      resolution.  Only the specific limits mentioned below are
       considered; any other values, such as picture aspect ratio, MUST
       be ignored.  When considering a MediaStreamTrack that is producing
       rotated video, the unrotated resolution MUST be used for the
@@ -976,8 +984,8 @@ Internet-Draft                    JSEP                    September 2017
 
    o  If the attribute includes a "sar=" (sample aspect ratio) value set
       to something other than "1.0", indicating the receiver wants to
-      receive non-square pixels, this cannot be satisfied and the sender
-      MUST NOT transmit the encoding.
+      receive non-square pixels, this cannot be satisfied and the
+      attribute MUST NOT be used.
 
    o  If the encoder resolution exceeds the maximum size permitted by
       the attribute, and the encoder is allowed to adjust its
@@ -986,22 +994,14 @@ Internet-Draft                    JSEP                    September 2017
       picture aspect ratio of the encoding.  For example, if the encoder
       resolution is 1280x720, and the attribute specified a maximum of
       640x480, the expected output resolution would be 640x360.  If
-      downscaling cannot be applied, the encoding MUST NOT be
-      transmitted, and an error SHOULD be raised to the application.
+      downscaling cannot be applied, the attribute MUST NOT be used.
 
    o  If the encoder resolution is less than the minimum size permitted
-      by the attribute, the encoding MUST NOT be transmitted, and an
-      error SHOULD be raised to the application; the encoder MUST NOT
-      apply upscaling.  JSEP implementations SHOULD avoid this situation
-      by allowing receipt of arbitrarily small resolutions, perhaps via
-      fallback to a software decoder.
+      by the attribute, the attribute MUST NOT be used; the encoder MUST
+      NOT apply upscaling.  JSEP implementations SHOULD avoid this
+      situation by allowing receipt of arbitrarily small resolutions,
+      perhaps via fallback to a software decoder.
 
-3.7.  Simulcast
-
-   JSEP supports simulcast transmission of a MediaStreamTrack, where
-   multiple encodings of the source media can be transmitted within the
-   context of a single m= section.  The current JSEP API is designed to
-   allow applications to send simulcasted media but only to receive a
 
 
 
@@ -1010,6 +1010,15 @@ Uberti, et al.            Expires March 5, 2018                [Page 18]
 Internet-Draft                    JSEP                    September 2017
 
 
+   o  If the encoder resolution is within the maximum and minimum sizes,
+      no action is needed.
+
+3.7.  Simulcast
+
+   JSEP supports simulcast transmission of a MediaStreamTrack, where
+   multiple encodings of the source media can be transmitted within the
+   context of a single m= section.  The current JSEP API is designed to
+   allow applications to send simulcasted media but only to receive a
    single encoding.  This allows for multi-user scenarios where each
    sending client sends multiple encodings to a server, which then, for
    each receiving client, chooses the appropriate encoding to forward.
@@ -1049,6 +1058,14 @@ Internet-Draft                    JSEP                    September 2017
    When using JSEP to transmit multiple encodings from a RtpSender, the
    techniques from [I-D.ietf-mmusic-sdp-simulcast] and
    [I-D.ietf-mmusic-rid] are used.  Specifically, when multiple
+
+
+
+Uberti, et al.            Expires March 5, 2018                [Page 19]
+
+Internet-Draft                    JSEP                    September 2017
+
+
    encodings have been configured for a RtpSender, the m= section for
    the RtpSender will include an "a=simulcast" attribute, as defined in
    [I-D.ietf-mmusic-sdp-simulcast], Section 6.2, with a "send" simulcast
@@ -1058,13 +1075,6 @@ Internet-Draft                    JSEP                    September 2017
    [I-D.ietf-mmusic-rid], Section 4; the use of RID identifiers allows
    the individual encodings to be disambiguated even though they are all
    part of the same m= section.
-
-
-
-Uberti, et al.            Expires March 5, 2018                [Page 19]
-
-Internet-Draft                    JSEP                    September 2017
-
 
 3.8.  Interactions With Forking
 
@@ -1102,16 +1112,6 @@ Internet-Draft                    JSEP                    September 2017
    possibility of using a different answer in the future, or apply it as
    a final answer, ending the setup flow.
 
-   In a "first-one-wins" situation, the first answer will be applied as
-   a final answer, and the application will reject any subsequent
-   answers.  In SIP parlance, this would be ACK + BYE.
-
-   In a "last-one-wins" situation, all answers would be applied as
-   provisional answers, and any previous call leg will be terminated.
-   At some point, the application will end the setup process, perhaps
-   with a timer; at this point, the application could reapply the
-   pending remote description as a final answer.
-
 
 
 
@@ -1121,6 +1121,16 @@ Uberti, et al.            Expires March 5, 2018                [Page 20]
 
 Internet-Draft                    JSEP                    September 2017
 
+
+   In a "first-one-wins" situation, the first answer will be applied as
+   a final answer, and the application will reject any subsequent
+   answers.  In SIP parlance, this would be ACK + BYE.
+
+   In a "last-one-wins" situation, all answers would be applied as
+   provisional answers, and any previous call leg will be terminated.
+   At some point, the application will end the setup process, perhaps
+   with a timer; at this point, the application could reapply the
+   pending remote description as a final answer.
 
 3.8.2.  Parallel Forking
 
@@ -1160,16 +1170,6 @@ Internet-Draft                    JSEP                    September 2017
    wants to only keep a single session, it can simply terminate the
    sessions that it no longer needs.
 
-4.  Interface
-
-   This section details the basic operations that must be present to
-   implement JSEP functionality.  The actual API exposed in the W3C API
-   may have somewhat different syntax, but should map easily to these
-   concepts.
-
-
-
-
 
 
 
@@ -1177,6 +1177,13 @@ Uberti, et al.            Expires March 5, 2018                [Page 21]
 
 Internet-Draft                    JSEP                    September 2017
 
+
+4.  Interface
+
+   This section details the basic operations that must be present to
+   implement JSEP functionality.  The actual API exposed in the W3C API
+   may have somewhat different syntax, but should map easily to these
+   concepts.
 
 4.1.  PeerConnection
 
@@ -1219,13 +1226,6 @@ Internet-Draft                    JSEP                    September 2017
    The application can specify its preferred policy regarding use of
    bundle, the multiplexing mechanism defined in
    [I-D.ietf-mmusic-sdp-bundle-negotiation].  Regardless of policy, the
-   application will always try to negotiate bundle onto a single
-   transport, and will offer a single bundle group across all m=
-   sections; use of this single transport is contingent upon the
-   answerer accepting bundle.  However, by specifying a policy from the
-   list below, the application can control exactly how aggressively it
-   will try to bundle media streams together, which affects how it will
-   interoperate with a non-bundle-aware endpoint.  When negotiating with
 
 
 
@@ -1234,6 +1234,13 @@ Uberti, et al.            Expires March 5, 2018                [Page 22]
 Internet-Draft                    JSEP                    September 2017
 
 
+   application will always try to negotiate bundle onto a single
+   transport, and will offer a single bundle group across all m=
+   sections; use of this single transport is contingent upon the
+   answerer accepting bundle.  However, by specifying a policy from the
+   list below, the application can control exactly how aggressively it
+   will try to bundle media streams together, which affects how it will
+   interoperate with a non-bundle-aware endpoint.  When negotiating with
    a non-bundle-aware endpoint, only the streams not marked as bundle-
    only streams will be established.
 
@@ -1275,13 +1282,6 @@ Internet-Draft                    JSEP                    September 2017
    The application can specify its preferred policy regarding use of
    RTP/RTCP multiplexing [RFC5761] using one of the following policies:
 
-   negotiate:  The JSEP implementation will gather both RTP and RTCP
-      candidates but also will offer "a=rtcp-mux", thus allowing for
-      compatibility with either multiplexing or non-multiplexing
-      endpoints.
-
-   require:  The JSEP implementation will only gather RTP candidates and
-      will insert an "a=rtcp-mux-only" indication into any new m=
 
 
 
@@ -1290,6 +1290,13 @@ Uberti, et al.            Expires March 5, 2018                [Page 23]
 Internet-Draft                    JSEP                    September 2017
 
 
+   negotiate:  The JSEP implementation will gather both RTP and RTCP
+      candidates but also will offer "a=rtcp-mux", thus allowing for
+      compatibility with either multiplexing or non-multiplexing
+      endpoints.
+
+   require:  The JSEP implementation will only gather RTP candidates and
+      will insert an "a=rtcp-mux-only" indication into any new m=
       sections in offers it generates.  This halves the number of
       candidates that the offerer needs to gather.  Applying a
       description with an m= section that does not contain an "a=rtcp-
@@ -1331,13 +1338,6 @@ Internet-Draft                    JSEP                    September 2017
    transceiver will be configured with that media type and the track
    will be attached to the transceiver.  Otherwise, the application MUST
    explicitly specify the type; this mode is useful for creating
-   recvonly transceivers as well as for creating transceivers to which a
-   track can be attached at some later point.
-
-   At the time of creation, the application can also specify a
-   transceiver direction attribute, a set of MediaStreams which the
-   transceiver is associated with (allowing LS group assignments), and a
-
 
 
 
@@ -1346,6 +1346,12 @@ Uberti, et al.            Expires March 5, 2018                [Page 24]
 Internet-Draft                    JSEP                    September 2017
 
 
+   recvonly transceivers as well as for creating transceivers to which a
+   track can be attached at some later point.
+
+   At the time of creation, the application can also specify a
+   transceiver direction attribute, a set of MediaStreams which the
+   transceiver is associated with (allowing LS group assignments), and a
    set of encodings for the media (used for simulcast as described in
    Section 3.7).
 
@@ -1388,12 +1394,6 @@ Internet-Draft                    JSEP                    September 2017
    or stopping RtpTransceivers, or requesting an ICE restart.  For each
    existing stream, the generation of each SDP line must follow the
    process defined for generating an updated offer from the RFC that
-   specifies the given SDP line.  For each new stream, the generation of
-   the SDP must follow the process of generating an initial offer, as
-   mentioned above.  If no changes have been made, or for SDP lines that
-   are unaffected by the requested changes, the offer will only contain
-   the parameters negotiated by the last offer-answer exchange.  The
-
 
 
 
@@ -1402,6 +1402,11 @@ Uberti, et al.            Expires March 5, 2018                [Page 25]
 Internet-Draft                    JSEP                    September 2017
 
 
+   specifies the given SDP line.  For each new stream, the generation of
+   the SDP must follow the process of generating an initial offer, as
+   mentioned above.  If no changes have been made, or for SDP lines that
+   are unaffected by the requested changes, the offer will only contain
+   the parameters negotiated by the last offer-answer exchange.  The
    exact handling of subsequent offer generation is detailed in
    Section 5.2.2. below.
 
@@ -1445,11 +1450,6 @@ Internet-Draft                    JSEP                    September 2017
    Calling this method may do things such as generating new ICE
    credentials, but does not change the PeerConnection state, trigger
    candidate gathering, or or cause a media state change.  Specifically,
-   the answer is not applied, and does not become the current local
-   description, until setLocalDescription is called.
-
-
-
 
 
 
@@ -1457,6 +1457,9 @@ Uberti, et al.            Expires March 5, 2018                [Page 26]
 
 Internet-Draft                    JSEP                    September 2017
 
+
+   the answer is not applied, and does not become the current local
+   description, until setLocalDescription is called.
 
 4.1.8.  SessionDescriptionType
 
@@ -1500,12 +1503,9 @@ Internet-Draft                    JSEP                    September 2017
    state machine should be rolled back to the previous stable state, as
    described in Section 4.1.8.2.  The contents MUST be empty.
 
-4.1.8.1.  Use of Provisional Answers
 
-   Most applications will not need to create answers using the
-   "pranswer" type.  While it is good practice to send an immediate
-   response to an offer, in order to warm up the session transport and
-   prevent media clipping, the preferred handling for a JSEP application
+
+
 
 
 
@@ -1514,6 +1514,12 @@ Uberti, et al.            Expires March 5, 2018                [Page 27]
 Internet-Draft                    JSEP                    September 2017
 
 
+4.1.8.1.  Use of Provisional Answers
+
+   Most applications will not need to create answers using the
+   "pranswer" type.  While it is good practice to send an immediate
+   response to an offer, in order to warm up the session transport and
+   prevent media clipping, the preferred handling for a JSEP application
    is to create and send a "sendonly" final answer with a null
    MediaStreamTrack immediately after receiving the offer, which will
    prevent media from being sent by the caller, and allow media to be
@@ -1556,12 +1562,6 @@ Internet-Draft                    JSEP                    September 2017
    setLocalDescription.  However, the remote side, either before or
    after setRemoteDescription, decides it does not want to accept the
    new parameters, and sends a reject message back to the offerer.  Now,
-   the offerer, and possibly the answerer as well, need to return to a
-   stable state and the previous local/remote description.  To support
-   this, we introduce the concept of "rollback", which discards any
-   proposed changes to the session, returning the state machine to the
-   stable state.  A rollback is performed by supplying a session
-
 
 
 
@@ -1570,6 +1570,11 @@ Uberti, et al.            Expires March 5, 2018                [Page 28]
 Internet-Draft                    JSEP                    September 2017
 
 
+   the offerer, and possibly the answerer as well, need to return to a
+   stable state and the previous local/remote description.  To support
+   this, we introduce the concept of "rollback", which discards any
+   proposed changes to the session, returning the state machine to the
+   stable state.  A rollback is performed by supplying a session
    description of type "rollback" with empty contents to either
    setLocalDescription or setRemoteDescription.
 
@@ -1614,17 +1619,15 @@ Internet-Draft                    JSEP                    September 2017
    As in setLocalDescription, the type field of the description
    indicates how it should be processed.
 
-   This API changes the local media state; among other things, it sets
-   up local resources for sending and encoding media.
-
-
-
 
 
 Uberti, et al.            Expires March 5, 2018                [Page 29]
 
 Internet-Draft                    JSEP                    September 2017
 
+
+   This API changes the local media state; among other things, it sets
+   up local resources for sending and encoding media.
 
    If setLocalDescription was previously called with an offer, and
    setRemoteDescription is called with an answer (provisional or final),
@@ -1672,15 +1675,15 @@ Internet-Draft                    JSEP                    September 2017
    candidates that have been supplied via processIceMessage since the
    remote description was set.
 
-   A null object will be returned if the state of the PeerConnection is
-   "stable" or "have-local-offer".
-
 
 
 Uberti, et al.            Expires March 5, 2018                [Page 30]
 
 Internet-Draft                    JSEP                    September 2017
 
+
+   A null object will be returned if the state of the PeerConnection is
+   "stable" or "have-local-offer".
 
 4.1.15.  canTrickleIceCandidates
 
@@ -1726,9 +1729,6 @@ Internet-Draft                    JSEP                    September 2017
       restart and kicking off a new gathering phase, in which the new
       servers will be used.  If the ICE candidate pool has a nonzero
       size, and a local description has not yet been applied, any
-      existing candidates will be discarded, and new candidates will be
-      gathered from the new servers.
-
 
 
 
@@ -1737,6 +1737,9 @@ Uberti, et al.            Expires March 5, 2018                [Page 31]
 
 Internet-Draft                    JSEP                    September 2017
 
+
+      existing candidates will be discarded, and new candidates will be
+      gathered from the new servers.
 
    o  Any change to the ICE candidate policy affects the next gathering
       phase.  If an ICE gathering phase has already started or
@@ -1781,9 +1784,6 @@ Internet-Draft                    JSEP                    September 2017
    during the processing of the IceCandidate object, the supplied
    IceCandidate MUST be ignored and an error MUST be returned.
 
-   Otherwise, the new remote candidate or end-of-candidates indication
-   is supplied to the ICE agent.  In the case of a new remote candidate,
-   connectivity checks will be sent to the new candidate.
 
 
 
@@ -1793,6 +1793,10 @@ Uberti, et al.            Expires March 5, 2018                [Page 32]
 
 Internet-Draft                    JSEP                    September 2017
 
+
+   Otherwise, the new remote candidate or end-of-candidates indication
+   is supplied to the ICE agent.  In the case of a new remote candidate,
+   connectivity checks will be sent to the new candidate.
 
 4.2.  RtpTransceiver
 
@@ -1838,10 +1842,6 @@ Internet-Draft                    JSEP                    September 2017
    The direction property indicates the last value passed into
    setDirection.  If setDirection has never been called, it is set to
    the direction the transceiver was initialized with.
-
-
-
-
 
 
 
