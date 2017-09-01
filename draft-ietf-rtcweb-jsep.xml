@@ -769,7 +769,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           decoding any image resolution from 48x48 up to 1280x720
           pixels.</t>
         </section>
-        <section title="Interpreting an imageattr Attribute">
+        <section title="Interpreting imageattr Attributes">
 
           <t>
           <xref target="RFC6236" /> defines "a=imageattr" to be an
@@ -801,23 +801,28 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           a specific output resolution.
           </t>
 
-          <t>For each encoding being produced by the RtpSender, the following
-          rules are applied to determine what should be transmitted:
-            <list style="symbols">
-              <t>First, the most suitable "a=imageattr recv" attribute is
-              selected. This is performed by taking the
-              attribute with the highest "q=" value from the set of attributes
-              that reference the media format that has been selected for the
-              specified encoding. If multiple attributes have the same "q="
-              value, the one that appears first in the m= section is used.
-              Note that while JSEP endpoints will include at most
-              one "a=imageattr recv" attribute per media format, JSEP
-              endpoints may receive session descriptions from non-JSEP
-              endpoints with m= sections that contain multiple such attributes.
-              </t>
+          <t>For each encoding being produced by the RtpSender, the set of
+          "a=imageattr recv" attributes in the corresponding m= section of the
+          remote description is
+          processed to determine what should be transmitted. Only attributes that
+          reference the media format selected for the encoding are considered;
+          each such attribute is evaluated individually, starting with the attribute
+          with the highest "q=" value. If multiple attributes have the same
+          "q=" value, they are evaluated in the order they appear in their
+          containing m= section. Note that while JSEP endpoints will include at
+          most one "a=imageattr recv" attribute per media format, JSEP
+          endpoints may receive session descriptions from non-JSEP
+          endpoints with m= sections that contain multiple such attributes.</t>
 
-              <t>If there is an applicable "a=imageattr recv" attribute for
-              the encoding, the limits from the attribute are then compared to
+          <t>For each "a=imageattr recv" attribute, the following rules are applied. If this
+          processing is successful, the encoding is transmitted accordingly,
+          and no further attributes are considered for that encoding.
+          Otherwise, the next attribute
+          is evaluated, in the aforementioned order. If none of the supplied
+          attributes can be processed successfully, the encoding MUST NOT be
+          transmitted, and an error SHOULD be raised to the application.
+            <list style="symbols">
+              <t>The limits from the attribute are compared to
               the encoder resolution. Only the specific limits mentioned below
               are considered; any other values, such as picture aspect ratio,
               MUST be ignored.
@@ -832,7 +837,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               <t>If the attribute includes a "sar=" (sample aspect ratio)
               value set to something other than "1.0", indicating the
               receiver wants to receive non-square pixels, this cannot be
-              satisfied and the sender MUST NOT transmit the encoding.</t>
+              satisfied and the attribute MUST NOT be used.</t>
 
               <t>If the encoder resolution exceeds the maximum size permitted by the
               attribute, and the encoder is allowed to adjust its resolution,
@@ -841,15 +846,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
               of the encoding. For example, if the encoder resolution is
               1280x720, and the attribute specified a maximum of 640x480, the
               expected output resolution would be 640x360.
-              If downscaling cannot be applied, the encoding MUST NOT be
-              transmitted, and an error SHOULD be raised to the application.</t>
+              If downscaling cannot be applied, the attribute MUST NOT be used.</t>
 
               <t>If the encoder resolution is less than the minimum size permitted
-              by the attribute, the encoding MUST NOT be transmitted, and an
-              error SHOULD be raised to the application; the encoder
+              by the attribute, the attribute MUST NOT be used; the encoder
               MUST NOT apply upscaling. JSEP implementations SHOULD avoid this
               situation by allowing receipt of arbitrarily small resolutions,
               perhaps via fallback to a software decoder.</t>
+
+              <t>If the encoder resolution is within the maximum and minimum
+              sizes, no action is needed.</t>
             </list>
           </t>
         </section>
