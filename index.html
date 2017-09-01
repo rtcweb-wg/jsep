@@ -339,13 +339,14 @@ li, p {
 <link href="#rfc.section.5.4" rel="Chapter" title="5.4 Modifying an Offer or Answer">
 <link href="#rfc.section.5.5" rel="Chapter" title="5.5 Processing a Local Description">
 <link href="#rfc.section.5.6" rel="Chapter" title="5.6 Processing a Remote Description">
-<link href="#rfc.section.5.7" rel="Chapter" title="5.7 Parsing a Session Description">
-<link href="#rfc.section.5.7.1" rel="Chapter" title="5.7.1 Session-Level Parsing">
-<link href="#rfc.section.5.7.2" rel="Chapter" title="5.7.2 Media Section Parsing">
-<link href="#rfc.section.5.7.3" rel="Chapter" title="5.7.3 Semantics Verification">
-<link href="#rfc.section.5.8" rel="Chapter" title="5.8 Applying a Local Description">
-<link href="#rfc.section.5.9" rel="Chapter" title="5.9 Applying a Remote Description">
-<link href="#rfc.section.5.10" rel="Chapter" title="5.10 Applying an Answer">
+<link href="#rfc.section.5.7" rel="Chapter" title="5.7 Processing a Rollback">
+<link href="#rfc.section.5.8" rel="Chapter" title="5.8 Parsing a Session Description">
+<link href="#rfc.section.5.8.1" rel="Chapter" title="5.8.1 Session-Level Parsing">
+<link href="#rfc.section.5.8.2" rel="Chapter" title="5.8.2 Media Section Parsing">
+<link href="#rfc.section.5.8.3" rel="Chapter" title="5.8.3 Semantics Verification">
+<link href="#rfc.section.5.9" rel="Chapter" title="5.9 Applying a Local Description">
+<link href="#rfc.section.5.10" rel="Chapter" title="5.10 Applying a Remote Description">
+<link href="#rfc.section.5.11" rel="Chapter" title="5.11 Applying an Answer">
 <link href="#rfc.section.6" rel="Chapter" title="6 Processing RTP/RTCP">
 <link href="#rfc.section.7" rel="Chapter" title="7 Examples">
 <link href="#rfc.section.7.1" rel="Chapter" title="7.1 Simple Example">
@@ -367,7 +368,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-8-26" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-9-1" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -391,7 +392,7 @@ li, p {
 <td class="right">C. Jennings</td>
 </tr>
 <tr>
-<td class="left">Expires: February 27, 2018</td>
+<td class="left">Expires: March 5, 2018</td>
 <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -404,7 +405,7 @@ li, p {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">August 26, 2017</td>
+<td class="right">September 1, 2017</td>
 </tr>
 
     	
@@ -420,7 +421,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on February 27, 2018.</p>
+<p>This Internet-Draft will expire on March 5, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -572,19 +573,21 @@ li, p {
 </li>
 <li>5.6.   <a href="#rfc.section.5.6">Processing a Remote Description</a>
 </li>
-<li>5.7.   <a href="#rfc.section.5.7">Parsing a Session Description</a>
+<li>5.7.   <a href="#rfc.section.5.7">Processing a Rollback</a>
 </li>
-<ul><li>5.7.1.   <a href="#rfc.section.5.7.1">Session-Level Parsing</a>
+<li>5.8.   <a href="#rfc.section.5.8">Parsing a Session Description</a>
 </li>
-<li>5.7.2.   <a href="#rfc.section.5.7.2">Media Section Parsing</a>
+<ul><li>5.8.1.   <a href="#rfc.section.5.8.1">Session-Level Parsing</a>
 </li>
-<li>5.7.3.   <a href="#rfc.section.5.7.3">Semantics Verification</a>
+<li>5.8.2.   <a href="#rfc.section.5.8.2">Media Section Parsing</a>
 </li>
-</ul><li>5.8.   <a href="#rfc.section.5.8">Applying a Local Description</a>
+<li>5.8.3.   <a href="#rfc.section.5.8.3">Semantics Verification</a>
 </li>
-<li>5.9.   <a href="#rfc.section.5.9">Applying a Remote Description</a>
+</ul><li>5.9.   <a href="#rfc.section.5.9">Applying a Local Description</a>
 </li>
-<li>5.10.   <a href="#rfc.section.5.10">Applying an Answer</a>
+<li>5.10.   <a href="#rfc.section.5.10">Applying a Remote Description</a>
+</li>
+<li>5.11.   <a href="#rfc.section.5.11">Applying an Answer</a>
 </li>
 </ul><li>6.   <a href="#rfc.section.6">Processing RTP/RTCP</a>
 </li>
@@ -785,7 +788,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 </pre>
 <p id="rfc.section.3.5.2.1.p.3">The IceCandidate object contains a field to indicate which ICE ufrag it is associated with, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4. This value is used to determine which session description (and thereby which gathering phase) this IceCandidate belongs to, which helps resolve ambiguities during ICE restarts. If this field is absent in a received IceCandidate (perhaps when communicating with a non-JSEP endpoint), the most recently received session description is assumed.</p>
-<p id="rfc.section.3.5.2.1.p.4">The IceCandidate object also contains fields to indicate which m= section it is associated with, which can be identified in one of two ways, either by a m= section index, or a MID. The m= section index is a zero-based index, with index N referring to the N+1th m= section in the session description referenced by this IceCandidate.  The MID is a "media stream identification" value, as defined in <a href="#RFC5888" class="xref">[RFC5888]</a>, Section 4, which provides a more robust way to identify the m= section in the session description, using the MID of the associated RtpTransceiver object (which may have been locally generated by the answerer when interacting with a non-JSEP endpoint that does not support the MID attribute, as discussed in <a href="#sec.applying-a-remote-desc" class="xref">Section 5.9</a> below). If the MID field is present in a received IceCandidate, it MUST be used for identification; otherwise, the m= section index is used instead.</p>
+<p id="rfc.section.3.5.2.1.p.4">The IceCandidate object also contains fields to indicate which m= section it is associated with, which can be identified in one of two ways, either by a m= section index, or a MID. The m= section index is a zero-based index, with index N referring to the N+1th m= section in the session description referenced by this IceCandidate.  The MID is a "media stream identification" value, as defined in <a href="#RFC5888" class="xref">[RFC5888]</a>, Section 4, which provides a more robust way to identify the m= section in the session description, using the MID of the associated RtpTransceiver object (which may have been locally generated by the answerer when interacting with a non-JSEP endpoint that does not support the MID attribute, as discussed in <a href="#sec.applying-a-remote-desc" class="xref">Section 5.10</a> below). If the MID field is present in a received IceCandidate, it MUST be used for identification; otherwise, the m= section index is used instead.</p>
 <p id="rfc.section.3.5.2.1.p.5">When creating an IceCandidate object, JSEP implementations MUST populate each of the candidate, ufrag, m= section index, and MID fields.  Implementations MUST also be prepared to receive objects with some fields missing, as mentioned above.</p>
 <h3 id="rfc.section.3.5.3">
 <a href="#rfc.section.3.5.3">3.5.3.</a> <a href="#sec.ice-candidate-policy" id="sec.ice-candidate-policy">ICE Candidate Policy</a>
@@ -959,11 +962,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h4 id="rfc.section.4.1.8.2">
 <a href="#rfc.section.4.1.8.2">4.1.8.2.</a> <a href="#sec.rollback" id="sec.rollback">Rollback</a>
 </h4>
-<p id="rfc.section.4.1.8.2.p.1">In certain situations it may be desirable to "undo" a change made to setLocalDescription or setRemoteDescription.  Consider a case where a call is ongoing, and one side wants to change some of the session parameters; that side generates an updated offer and then calls setLocalDescription. However, the remote side, either before or after setRemoteDescription, decides it does not want to accept the new parameters, and sends a reject message back to the offerer. Now, the offerer, and possibly the answerer as well, need to return to a stable state and the previous local/remote description. To support this, we introduce the concept of "rollback".</p>
-<p id="rfc.section.4.1.8.2.p.2">A rollback discards any proposed changes to the session, returning the state machine to the stable state, and setting the pending local and/or remote description (see <a href="#sec.pendinglocaldescription" class="xref">Section 4.1.12</a> and <a href="#sec.pendingremotedescription" class="xref">Section 4.1.14</a>) to null.  Any resources or candidates that were allocated by the abandoned local description are discarded; any media that is received will be processed according to the previous local and remote descriptions. Rollback can only be used to cancel proposed changes; there is no support for rolling back from a stable state to a previous stable state. Note that this implies that once the answerer has performed setLocalDescription with his answer, this cannot be rolled back.</p>
-<p id="rfc.section.4.1.8.2.p.3">A rollback will disassociate any RtpTransceivers that were associated with m= sections by the application of the rolled-back session description (see <a href="#sec.applying-a-remote-desc" class="xref">Section 5.9</a> and <a href="#sec.applying-a-local-desc" class="xref">Section 5.8</a>). This means that some RtpTransceivers that were previously associated will no longer be associated with any m= section; in such cases, the value of the RtpTransceiver's mid property MUST be set to null, and the mapping between the transceiver and its m= section index MUST be discarded. RtpTransceivers that were created by applying a remote offer that was subsequently rolled back MUST be stopped and removed from the PeerConnection. However, a RtpTransceiver MUST NOT be removed if a track was attached to the RtpTransceiver via the addTrack method. This is so that an application may call addTrack, then call setRemoteDescription with an offer, then roll back that offer, then call createOffer and have a m= section for the added track appear in the generated offer.</p>
-<p id="rfc.section.4.1.8.2.p.4">A rollback is performed by supplying a session description of type "rollback" with empty contents to either setLocalDescription or setRemoteDescription.  The effect MUST be the same regardless of whether setLocalDescription or setRemoteDescription is called.</p>
-<p id="rfc.section.4.1.8.2.p.5">A rollback may be performed if the PeerConnection is in any state except for "stable". This means that both offers and provisional answers can be rolled back. If a rollback is attempted in the "stable" state, processing MUST stop and an error MUST be returned.</p>
+<p id="rfc.section.4.1.8.2.p.1">In certain situations it may be desirable to "undo" a change made to setLocalDescription or setRemoteDescription.  Consider a case where a call is ongoing, and one side wants to change some of the session parameters; that side generates an updated offer and then calls setLocalDescription. However, the remote side, either before or after setRemoteDescription, decides it does not want to accept the new parameters, and sends a reject message back to the offerer. Now, the offerer, and possibly the answerer as well, need to return to a stable state and the previous local/remote description. To support this, we introduce the concept of "rollback", which discards any proposed changes to the session, returning the state machine to the stable state.  A rollback is performed by supplying a session description of type "rollback" with empty contents to either setLocalDescription or setRemoteDescription.  </p>
 <h3 id="rfc.section.4.1.9">
 <a href="#rfc.section.4.1.9">4.1.9.</a> <a href="#sec.setlocaldescription" id="sec.setlocaldescription">setLocalDescription</a>
 </h3>
@@ -1328,7 +1327,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </pre>
 <p></p>
 <p id="rfc.section.5.3.1.p.13">The <a href="#sec.detailed-example" class="xref">Section 7.2</a> example later in this document shows a more involved case of "LS" group generation.</p>
-<p id="rfc.section.5.3.1.p.14">The next step is to generate m= sections for each m= section that is present in the remote offer, as specified in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6. For the purposes of this discussion, any session-level attributes in the offer that are also valid as media-level attributes are considered to be present in each m= section.  Each offered m= section will have an associated RtpTransceiver, as described in <a href="#sec.applying-a-remote-desc" class="xref">Section 5.9</a>. If there are more RtpTransceivers than there are m= sections, the unmatched RtpTransceivers will need to be associated in a subsequent offer.</p>
+<p id="rfc.section.5.3.1.p.14">The next step is to generate m= sections for each m= section that is present in the remote offer, as specified in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6. For the purposes of this discussion, any session-level attributes in the offer that are also valid as media-level attributes are considered to be present in each m= section.  Each offered m= section will have an associated RtpTransceiver, as described in <a href="#sec.applying-a-remote-desc" class="xref">Section 5.10</a>. If there are more RtpTransceivers than there are m= sections, the unmatched RtpTransceivers will need to be associated in a subsequent offer.</p>
 <p id="rfc.section.5.3.1.p.15">For each offered m= section, if any of the following conditions are true, the corresponding m= section in the answer MUST be marked as rejected by setting the port in the m= line to zero, as indicated in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6, and further processing for this m= section can be skipped: </p>
 
 <ul>
@@ -1433,7 +1432,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.5.p.1">When a SessionDescription is supplied to setLocalDescription, the following steps MUST be performed: </p>
 
 <ul>
-<li>If the description is of type "rollback", follow the processing defined in <a href="#sec.rollback" class="xref">Section 4.1.8.2</a> and skip the processing described in the rest of this section.</li>
+<li>If the description is of type "rollback", follow the processing defined in <a href="#sec.processing-a-rollback" class="xref">Section 5.7</a> and skip the processing described in the rest of this section.</li>
 <li>Otherwise, the type of the SessionDescription is checked against the current state of the PeerConnection: <ul>
 <li>If the type is "offer", the PeerConnection state MUST be either "stable" or "have-local-offer".</li>
 <li>If the type is "pranswer" or "answer", the PeerConnection state MUST be either "have-remote-offer" or "have-local-pranswer".</li>
@@ -1441,8 +1440,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </li>
 <li>If the type is not correct for the current state, processing MUST stop and an error MUST be returned.</li>
 <li>The SessionDescription is then checked to ensure that its contents are identical to those generated in the last call to createOffer/createAnswer, and thus have not been altered, as discussed in <a href="#sec.modifying-sdp" class="xref">Section 5.4</a>; otherwise, processing MUST stop and an error MUST be returned.</li>
-<li>Next, the SessionDescription is parsed into a data structure, as described in <a href="#sec.parsing-a-desc" class="xref">Section 5.7</a> below. </li>
-<li>Finally, the parsed SessionDescription is applied as described in <a href="#sec.applying-a-local-desc" class="xref">Section 5.8</a> below.</li>
+<li>Next, the SessionDescription is parsed into a data structure, as described in <a href="#sec.parsing-a-desc" class="xref">Section 5.8</a> below. </li>
+<li>Finally, the parsed SessionDescription is applied as described in <a href="#sec.applying-a-local-desc" class="xref">Section 5.9</a> below.</li>
 </ul>
 <h2 id="rfc.section.5.6">
 <a href="#rfc.section.5.6">5.6.</a> <a href="#sec.processing-a-remote-desc" id="sec.processing-a-remote-desc">Processing a Remote Description</a>
@@ -1450,39 +1449,46 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.6.p.1">When a SessionDescription is supplied to setRemoteDescription, the following steps MUST be performed: </p>
 
 <ul>
-<li>If the description is of type "rollback", follow the processing defined in <a href="#sec.rollback" class="xref">Section 4.1.8.2</a> and skip the processing described in the rest of this section.</li>
+<li>If the description is of type "rollback", follow the processing defined in <a href="#sec.processing-a-rollback" class="xref">Section 5.7</a> and skip the processing described in the rest of this section.</li>
 <li>Otherwise, the type of the SessionDescription is checked against the current state of the PeerConnection: <ul>
 <li>If the type is "offer", the PeerConnection state MUST be either "stable" or "have-remote-offer".</li>
 <li>If the type is "pranswer" or "answer", the PeerConnection state MUST be either "have-local-offer" or "have-remote-pranswer".</li>
 </ul>
 </li>
 <li>If the type is not correct for the current state, processing MUST stop and an error MUST be returned.</li>
-<li>Next, the SessionDescription is parsed into a data structure, as described in <a href="#sec.parsing-a-desc" class="xref">Section 5.7</a> below. If parsing fails for any reason, processing MUST stop and an error MUST be returned.</li>
-<li>Finally, the parsed SessionDescription is applied as described in <a href="#sec.applying-a-remote-desc" class="xref">Section 5.9</a> below.</li>
+<li>Next, the SessionDescription is parsed into a data structure, as described in <a href="#sec.parsing-a-desc" class="xref">Section 5.8</a> below. If parsing fails for any reason, processing MUST stop and an error MUST be returned.</li>
+<li>Finally, the parsed SessionDescription is applied as described in <a href="#sec.applying-a-remote-desc" class="xref">Section 5.10</a> below.</li>
 </ul>
 <h2 id="rfc.section.5.7">
-<a href="#rfc.section.5.7">5.7.</a> <a href="#sec.parsing-a-desc" id="sec.parsing-a-desc">Parsing a Session Description</a>
+<a href="#rfc.section.5.7">5.7.</a> <a href="#sec.processing-a-rollback" id="sec.processing-a-rollback">Processing a Rollback</a>
 </h2>
-<p id="rfc.section.5.7.p.1">The SDP contained in the session description object consists of a sequence of text lines, each containing a key-value expression, as described in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5. The SDP is read, line-by-line, and converted to a data structure that contains the deserialized information. However, SDP allows many types of lines, not all of which are relevant to JSEP applications. For each line, the implementation will first ensure it is syntactically correct according to its defining ABNF, check that it conforms to <a href="#RFC4566" class="xref">[RFC4566]</a> and <a href="#RFC3264" class="xref">[RFC3264]</a> semantics, and then either parse and store or discard the provided value, as described below.</p>
-<p id="rfc.section.5.7.p.2">If any line is not well-formed, or cannot be parsed as described, the parser MUST stop with an error and reject the session description, even if the value is to be discarded. This ensures that implementations do not accidentally misinterpret ambiguous SDP.</p>
-<h3 id="rfc.section.5.7.1">
-<a href="#rfc.section.5.7.1">5.7.1.</a> <a href="#sec.session-level-parse" id="sec.session-level-parse">Session-Level Parsing</a>
+<p id="rfc.section.5.7.p.1">A rollback may be performed if the PeerConnection is in any state except for "stable". This means that both offers and provisional answers can be rolled back. Rollback can only be used to cancel proposed changes; there is no support for rolling back from a stable state to a previous stable state.  If a rollback is attempted in the "stable" state, processing MUST stop and an error MUST be returned.  Note that this implies that once the answerer has performed setLocalDescription with his answer, this cannot be rolled back.</p>
+<p id="rfc.section.5.7.p.2">The effect of rollback MUST be the same regardless of whether setLocalDescription or setRemoteDescription is called.</p>
+<p id="rfc.section.5.7.p.3">In order to process rollback, a JSEP implementation abandons the current offer/answer transaction, sets the signaling state to "stable", and sets the pending local and/or remote description (see <a href="#sec.pendinglocaldescription" class="xref">Section 4.1.12</a> and <a href="#sec.pendingremotedescription" class="xref">Section 4.1.14</a>) to null.  Any resources or candidates that were allocated by the abandoned local description are discarded; any media that is received is processed according to the previous local and remote descriptions.</p>
+<p id="rfc.section.5.7.p.4">A rollback disassociates any RtpTransceivers that were associated with m= sections by the application of the rolled-back session description (see <a href="#sec.applying-a-remote-desc" class="xref">Section 5.10</a> and <a href="#sec.applying-a-local-desc" class="xref">Section 5.9</a>). This means that some RtpTransceivers that were previously associated will no longer be associated with any m= section; in such cases, the value of the RtpTransceiver's mid property MUST be set to null, and the mapping between the transceiver and its m= section index MUST be discarded. RtpTransceivers that were created by applying a remote offer that was subsequently rolled back MUST be stopped and removed from the PeerConnection. However, a RtpTransceiver MUST NOT be removed if a track was attached to the RtpTransceiver via the addTrack method. This is so that an application may call addTrack, then call setRemoteDescription with an offer, then roll back that offer, then call createOffer and have a m= section for the added track appear in the generated offer.</p>
+<h2 id="rfc.section.5.8">
+<a href="#rfc.section.5.8">5.8.</a> <a href="#sec.parsing-a-desc" id="sec.parsing-a-desc">Parsing a Session Description</a>
+</h2>
+<p id="rfc.section.5.8.p.1">The SDP contained in the session description object consists of a sequence of text lines, each containing a key-value expression, as described in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5. The SDP is read, line-by-line, and converted to a data structure that contains the deserialized information. However, SDP allows many types of lines, not all of which are relevant to JSEP applications. For each line, the implementation will first ensure it is syntactically correct according to its defining ABNF, check that it conforms to <a href="#RFC4566" class="xref">[RFC4566]</a> and <a href="#RFC3264" class="xref">[RFC3264]</a> semantics, and then either parse and store or discard the provided value, as described below.</p>
+<p id="rfc.section.5.8.p.2">If any line is not well-formed, or cannot be parsed as described, the parser MUST stop with an error and reject the session description, even if the value is to be discarded. This ensures that implementations do not accidentally misinterpret ambiguous SDP.</p>
+<h3 id="rfc.section.5.8.1">
+<a href="#rfc.section.5.8.1">5.8.1.</a> <a href="#sec.session-level-parse" id="sec.session-level-parse">Session-Level Parsing</a>
 </h3>
-<p id="rfc.section.5.7.1.p.1">First, the session-level lines are checked and parsed.  These lines MUST occur in a specific order, and with a specific syntax, as defined in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5. Note that while the specific line types (e.g. "v=", "c=") MUST occur in the defined order, lines of the same type (typically "a=") can occur in any order.</p>
-<p id="rfc.section.5.7.1.p.2">The following non-attribute lines are not meaningful in the JSEP context and MAY be discarded once they have been checked.  </p>
+<p id="rfc.section.5.8.1.p.1">First, the session-level lines are checked and parsed.  These lines MUST occur in a specific order, and with a specific syntax, as defined in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5. Note that while the specific line types (e.g. "v=", "c=") MUST occur in the defined order, lines of the same type (typically "a=") can occur in any order.</p>
+<p id="rfc.section.5.8.1.p.2">The following non-attribute lines are not meaningful in the JSEP context and MAY be discarded once they have been checked.  </p>
 
 <ul class="empty">
 <li>The "c=" line MUST be checked for syntax but its value is only used for ICE mismatch detection, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 6.1. Note that JSEP implementations should never encounter this condition because ICE is required for WebRTC.</li>
 <li>The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are not used by this specification; they MUST be checked for syntax but their values are not used.</li>
 </ul>
-<p id="rfc.section.5.7.1.p.3">The remaining non-attribute lines are processed as follows: </p>
+<p id="rfc.section.5.8.1.p.3">The remaining non-attribute lines are processed as follows: </p>
 
 <ul class="empty">
 <li>The "v=" line MUST have a version of 0, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.1.</li>
 <li>The "o=" line MUST be parsed as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.2.</li>
 <li>The "b=" line, if present, MUST be parsed as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.8, and the bwtype and bandwidth values stored.</li>
 </ul>
-<p id="rfc.section.5.7.1.p.4">Finally, the attribute lines are processed. Specific processing MUST be applied for the following session-level attribute ("a=") lines: </p>
+<p id="rfc.section.5.8.1.p.4">Finally, the attribute lines are processed. Specific processing MUST be applied for the following session-level attribute ("a=") lines: </p>
 
 <ul>
 <li>Any "a=group" lines are parsed as specified in <a href="#RFC5888" class="xref">[RFC5888]</a>, Section 5, and the group's semantics and mids are stored.</li>
@@ -1496,20 +1502,20 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>Any "a=identity" lines are parsed and the identity values stored for subsequent verification, as specified <a href="#I-D.ietf-rtcweb-security-arch" class="xref">[I-D.ietf-rtcweb-security-arch]</a>, Section 5.</li>
 <li>Any "a=extmap" lines are parsed as specified in <a href="#RFC5285" class="xref">[RFC5285]</a>, Section 5, and their values are stored.</li>
 </ul>
-<p id="rfc.section.5.7.1.p.5">Other attributes that are not relevant to JSEP may also be present, and implementations SHOULD process any that they recognize. As required by <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.13, unknown attribute lines MUST be ignored.</p>
-<p id="rfc.section.5.7.1.p.6">Once all the session-level lines have been parsed, processing continues with the lines in m= sections.</p>
-<h3 id="rfc.section.5.7.2">
-<a href="#rfc.section.5.7.2">5.7.2.</a> <a href="#sec.media-level-parse" id="sec.media-level-parse">Media Section Parsing</a>
+<p id="rfc.section.5.8.1.p.5">Other attributes that are not relevant to JSEP may also be present, and implementations SHOULD process any that they recognize. As required by <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.13, unknown attribute lines MUST be ignored.</p>
+<p id="rfc.section.5.8.1.p.6">Once all the session-level lines have been parsed, processing continues with the lines in m= sections.</p>
+<h3 id="rfc.section.5.8.2">
+<a href="#rfc.section.5.8.2">5.8.2.</a> <a href="#sec.media-level-parse" id="sec.media-level-parse">Media Section Parsing</a>
 </h3>
-<p id="rfc.section.5.7.2.p.1">Like the session-level lines, the media section lines MUST occur in the specific order and with the specific syntax defined in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.</p>
-<p id="rfc.section.5.7.2.p.2">The "m=" line itself MUST be parsed as described in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.14, and the media, port, proto, and fmt values stored.</p>
-<p id="rfc.section.5.7.2.p.3">Following the "m=" line, specific processing MUST be applied for the following non-attribute lines: </p>
+<p id="rfc.section.5.8.2.p.1">Like the session-level lines, the media section lines MUST occur in the specific order and with the specific syntax defined in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.</p>
+<p id="rfc.section.5.8.2.p.2">The "m=" line itself MUST be parsed as described in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.14, and the media, port, proto, and fmt values stored.</p>
+<p id="rfc.section.5.8.2.p.3">Following the "m=" line, specific processing MUST be applied for the following non-attribute lines: </p>
 
 <ul>
 <li>As with the "c=" line at the session level, the "c=" line MUST be parsed according to <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.7, but its value is not used.</li>
 <li>The "b=" line, if present, MUST be parsed as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.8, and the bwtype and bandwidth values stored.</li>
 </ul>
-<p id="rfc.section.5.7.2.p.4">Specific processing MUST also be applied for the following attribute lines: </p>
+<p id="rfc.section.5.8.2.p.4">Specific processing MUST also be applied for the following attribute lines: </p>
 
 <ul>
 <li>If present, a single "a=ice-ufrag" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4, and the ufrag value is stored.</li>
@@ -1520,7 +1526,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>If present, a single "a=end-of-candidates" attribute MUST be parsed as specified in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 8.2, and its presence or absence flagged and stored.</li>
 <li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC8122" class="xref">[RFC8122]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
 </ul>
-<p id="rfc.section.5.7.2.p.5">If the "m=" proto value indicates use of RTP, as described in <a href="#sec.profile-names" class="xref">Section 5.1.2</a> above, the following attribute lines MUST be processed: </p>
+<p id="rfc.section.5.8.2.p.5">If the "m=" proto value indicates use of RTP, as described in <a href="#sec.profile-names" class="xref">Section 5.1.2</a> above, the following attribute lines MUST be processed: </p>
 
 <ul>
 <li>The "m=" fmt value MUST be parsed as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.14, and the individual values stored.</li>
@@ -1540,17 +1546,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>Any "a=rid" lines MUST be parsed as specified in <a href="#I-D.ietf-mmusic-rid" class="xref">[I-D.ietf-mmusic-rid]</a>, Section 10, and their values stored.</li>
 <li>If present, a single "a=simulcast" line MUST be parsed as specified in <a href="#I-D.ietf-mmusic-sdp-simulcast" class="xref">[I-D.ietf-mmusic-sdp-simulcast]</a>, and its values stored.</li>
 </ul>
-<p id="rfc.section.5.7.2.p.6">Otherwise, if the "m=" proto value indicates use of SCTP, the following attribute lines MUST be processed: </p>
+<p id="rfc.section.5.8.2.p.6">Otherwise, if the "m=" proto value indicates use of SCTP, the following attribute lines MUST be processed: </p>
 
 <ul>
 <li>The "m=" fmt value MUST be parsed as specified in <a href="#I-D.ietf-mmusic-sctp-sdp" class="xref">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 4.3, and the application protocol value stored.</li>
 <li>An "a=sctp-port" attribute MUST be present, and it MUST be parsed as specified in <a href="#I-D.ietf-mmusic-sctp-sdp" class="xref">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 5.2, and the value stored.</li>
 <li>If present, a single "a=max-message-size" attribute MUST be parsed as specified in <a href="#I-D.ietf-mmusic-sctp-sdp" class="xref">[I-D.ietf-mmusic-sctp-sdp]</a>, Section 6, and the value stored. Otherwise, use the specified default.</li>
 </ul>
-<p id="rfc.section.5.7.2.p.7">Other attributes that are not relevant to JSEP may also be present, and implementations SHOULD process any that they recognize. As required by <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.13, unknown attribute lines MUST be ignored.</p>
-<h3 id="rfc.section.5.7.3">
-<a href="#rfc.section.5.7.3">5.7.3.</a> Semantics Verification</h3>
-<p id="rfc.section.5.7.3.p.1">Assuming parsing completes successfully, the parsed description is then evaluated to ensure internal consistency as well as proper support for mandatory features.  Specifically, the following checks are performed: </p>
+<p id="rfc.section.5.8.2.p.7">Other attributes that are not relevant to JSEP may also be present, and implementations SHOULD process any that they recognize. As required by <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.13, unknown attribute lines MUST be ignored.</p>
+<h3 id="rfc.section.5.8.3">
+<a href="#rfc.section.5.8.3">5.8.3.</a> Semantics Verification</h3>
+<p id="rfc.section.5.8.3.p.1">Assuming parsing completes successfully, the parsed description is then evaluated to ensure internal consistency as well as proper support for mandatory features.  Specifically, the following checks are performed: </p>
 
 <ul>
 <li>For each m= section, valid values for each of the mandatory-to-use features enumerated in <a href="#sec.usage-requirements" class="xref">Section 5.1.1</a> MUST be present.  These values MAY either be present at the media level, or inherited from the session level.  <ul>
@@ -1565,18 +1571,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>If the RTP/RTCP multiplexing policy is "require", each m= section MUST contain an "a=rtcp-mux" attribute. If an m= section contains an "a=rtcp-mux-only" attribute, that section MUST also contain an "a=rtcp-mux" attribute.</li>
 <li>If an m= section was present in the previous answer, the state of RTP/RTCP multiplexing MUST match what was previously negotiated.</li>
 </ul>
-<p id="rfc.section.5.7.3.p.2">If this session description is of type "pranswer" or "answer", the following additional checks are applied: </p>
+<p id="rfc.section.5.8.3.p.2">If this session description is of type "pranswer" or "answer", the following additional checks are applied: </p>
 
 <ul>
 <li>The session description must follow the rules defined in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6, including the requirement that the number of m= sections MUST exactly match the number of m= sections in the associated offer.</li>
 <li>For each m= section, the media type and protocol values MUST exactly match the media type and protocol values in the corresponding m= section in the associated offer.</li>
 </ul>
-<p id="rfc.section.5.7.3.p.3">If any of the preceding checks failed, processing MUST stop and an error MUST be returned.</p>
-<h2 id="rfc.section.5.8">
-<a href="#rfc.section.5.8">5.8.</a> <a href="#sec.applying-a-local-desc" id="sec.applying-a-local-desc">Applying a Local Description</a>
+<p id="rfc.section.5.8.3.p.3">If any of the preceding checks failed, processing MUST stop and an error MUST be returned.</p>
+<h2 id="rfc.section.5.9">
+<a href="#rfc.section.5.9">5.9.</a> <a href="#sec.applying-a-local-desc" id="sec.applying-a-local-desc">Applying a Local Description</a>
 </h2>
-<p id="rfc.section.5.8.p.1">The following steps are performed at the media engine level to apply a local description. If an error is returned, the session MUST be restored to the state it was in before performing these steps.</p>
-<p id="rfc.section.5.8.p.2">First, m= sections are processed. For each m= section, the following steps MUST be performed; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
+<p id="rfc.section.5.9.p.1">The following steps are performed at the media engine level to apply a local description. If an error is returned, the session MUST be restored to the state it was in before performing these steps.</p>
+<p id="rfc.section.5.9.p.2">First, m= sections are processed. For each m= section, the following steps MUST be performed; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
 
 <ul>
 <li>If this m= section is new, begin gathering candidates for it, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.1.1, unless it is definitively being bundled (either this is an offer and the m= section is marked bundle-only, or it is an answer and the m= section is bundled into into another m= section.)</li>
@@ -1596,20 +1602,20 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 </li>
 </ul>
-<p id="rfc.section.5.8.p.3">Finally, if this description is of type "pranswer" or "answer", follow the processing defined in <a href="#sec.applying-an-answer" class="xref">Section 5.10</a> below.</p>
-<h2 id="rfc.section.5.9">
-<a href="#rfc.section.5.9">5.9.</a> <a href="#sec.applying-a-remote-desc" id="sec.applying-a-remote-desc">Applying a Remote Description</a>
+<p id="rfc.section.5.9.p.3">Finally, if this description is of type "pranswer" or "answer", follow the processing defined in <a href="#sec.applying-an-answer" class="xref">Section 5.11</a> below.</p>
+<h2 id="rfc.section.5.10">
+<a href="#rfc.section.5.10">5.10.</a> <a href="#sec.applying-a-remote-desc" id="sec.applying-a-remote-desc">Applying a Remote Description</a>
 </h2>
-<p id="rfc.section.5.9.p.1">The following steps are performed to apply a remote description. If an error is returned, the session MUST be restored to the state it was in before performing these steps.</p>
-<p id="rfc.section.5.9.p.2">If the answer contains any "a=ice-options" attributes where "trickle" is listed as an attribute, update the PeerConnection canTrickle property to be true. Otherwise, set this property to false.</p>
-<p id="rfc.section.5.9.p.3">The following steps MUST be performed for attributes at the session level; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
+<p id="rfc.section.5.10.p.1">The following steps are performed to apply a remote description. If an error is returned, the session MUST be restored to the state it was in before performing these steps.</p>
+<p id="rfc.section.5.10.p.2">If the answer contains any "a=ice-options" attributes where "trickle" is listed as an attribute, update the PeerConnection canTrickle property to be true. Otherwise, set this property to false.</p>
+<p id="rfc.section.5.10.p.3">The following steps MUST be performed for attributes at the session level; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
 
 <ul>
 <li>For any specified "CT" bandwidth value, set this as the limit for the maximum total bitrate for all m= sections, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.8. Within this overall limit, the implementation can dynamically decide how to best allocate the available bandwidth between m= sections, respecting any specific limits that have been specified for individual m= sections.</li>
 <li>For any specified "RR" or "RS" bandwidth values, handle as specified in <a href="#RFC3556" class="xref">[RFC3556]</a>, Section 2.</li>
 <li>Any "AS" bandwidth value MUST be ignored, as the meaning of this construct at the session level is not well defined.</li>
 </ul>
-<p id="rfc.section.5.9.p.4">For each m= section, the following steps MUST be performed; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
+<p id="rfc.section.5.10.p.4">For each m= section, the following steps MUST be performed; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
 
 <ul>
 <li>If the ICE ufrag or password changed from the previous remote description: <a href="#RFC5245" class="xref">[RFC5245]</a>.  <ul>
@@ -1653,12 +1659,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 </li>
 </ul>
-<p id="rfc.section.5.9.p.5">Finally, if this description is of type "pranswer" or "answer", follow the processing defined in <a href="#sec.applying-an-answer" class="xref">Section 5.10</a> below.</p>
-<h2 id="rfc.section.5.10">
-<a href="#rfc.section.5.10">5.10.</a> <a href="#sec.applying-an-answer" id="sec.applying-an-answer">Applying an Answer</a>
+<p id="rfc.section.5.10.p.5">Finally, if this description is of type "pranswer" or "answer", follow the processing defined in <a href="#sec.applying-an-answer" class="xref">Section 5.11</a> below.</p>
+<h2 id="rfc.section.5.11">
+<a href="#rfc.section.5.11">5.11.</a> <a href="#sec.applying-an-answer" id="sec.applying-an-answer">Applying an Answer</a>
 </h2>
-<p id="rfc.section.5.10.p.1">In addition to the steps mentioned above for processing a local or remote description, the following steps are performed when processing a description of type "pranswer" or "answer".</p>
-<p id="rfc.section.5.10.p.2">For each m= section, the following steps MUST be performed: </p>
+<p id="rfc.section.5.11.p.1">In addition to the steps mentioned above for processing a local or remote description, the following steps are performed when processing a description of type "pranswer" or "answer".</p>
+<p id="rfc.section.5.11.p.2">For each m= section, the following steps MUST be performed: </p>
 
 <ul>
 <li>If the m= section has been rejected (i.e. port is set to zero in the answer), stop any reception or transmission of media for this section, and, unless a non-rejected m= section is bundled with this m= section, discard any associated ICE components, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.2.1.3.</li>
@@ -1684,8 +1690,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 </li>
 </ul>
-<p id="rfc.section.5.10.p.3">If the answer contains valid bundle groups, discard any ICE components for the m= sections that will be bundled onto the primary ICE components in each bundle, and begin muxing these m= sections accordingly, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 8.2.</p>
-<p id="rfc.section.5.10.p.4">If the description is of type "answer", and there are still remaining candidates in the ICE candidate pool, discard them.</p>
+<p id="rfc.section.5.11.p.3">If the answer contains valid bundle groups, discard any ICE components for the m= sections that will be bundled onto the primary ICE components in each bundle, and begin muxing these m= sections accordingly, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 8.2.</p>
+<p id="rfc.section.5.11.p.4">If the description is of type "answer", and there are still remaining candidates in the ICE candidate pool, discard them.</p>
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> <a href="#sec.rtp.demux" id="sec.rtp.demux">Processing RTP/RTCP</a>
 </h1>
@@ -2696,7 +2702,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</b></td>
 <td class="top">
-<a>Holmberg, C.</a> and <a>R. Shpount</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-dtls-sdp-28">Using the SDP Offer/Answer Mechanism for DTLS</a>", Internet-Draft draft-ietf-mmusic-dtls-sdp-28, August 2017.</td>
+<a>Holmberg, C.</a> and <a>R. Shpount</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-dtls-sdp-29">Session Description Protocol (SDP) Offer/Answer Considerations for Datagram Transport Layer Security (DTLS) and Transport Layer Security (TLS)</a>", Internet-Draft draft-ietf-mmusic-dtls-sdp-29, August 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</b></td>
@@ -2721,7 +2727,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-sdp-bundle-negotiation">[I-D.ietf-mmusic-sdp-bundle-negotiation]</b></td>
 <td class="top">
-<a>Holmberg, C.</a>, <a>Alvestrand, H.</a> and <a>C. Jennings</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-sdp-bundle-negotiation-38">Negotiating Media Multiplexing Using the Session Description Protocol (SDP)</a>", Internet-Draft draft-ietf-mmusic-sdp-bundle-negotiation-38, April 2017.</td>
+<a>Holmberg, C.</a>, <a>Alvestrand, H.</a> and <a>C. Jennings</a>, "<a href="http://tools.ietf.org/html/draft-ietf-mmusic-sdp-bundle-negotiation-39">Negotiating Media Multiplexing Using the Session Description Protocol (SDP)</a>", Internet-Draft draft-ietf-mmusic-sdp-bundle-negotiation-39, August 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-sdp-mux-attributes">[I-D.ietf-mmusic-sdp-mux-attributes]</b></td>
@@ -2976,7 +2982,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <h1 id="rfc.appendix.A">
 <a href="#rfc.appendix.A">Appendix A.</a> <a href="#sec.appendix-a" id="sec.appendix-a">Appendix A</a>
 </h1>
-<p id="rfc.section.A.p.1">For the syntax validation performed in <a href="#sec.parsing-a-desc" class="xref">Section 5.7</a>, the following list of ABNF definitions is used:</p>
+<p id="rfc.section.A.p.1">For the syntax validation performed in <a href="#sec.parsing-a-desc" class="xref">Section 5.8</a>, the following list of ABNF definitions is used:</p>
 <div id="rfc.table.1"></div>
 <div id="sdp-abnf"></div>
 <table cellpadding="3" cellspacing="0" class="tt full center">
