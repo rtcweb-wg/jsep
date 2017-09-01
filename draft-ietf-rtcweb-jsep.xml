@@ -3184,10 +3184,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
       <section title="Processing a Rollback" anchor="sec.processing-a-rollback">
         <t>A rollback may be performed if the PeerConnection is in any
         state except for "stable". This means that both offers and provisional
-        answers can be rolled back. If a rollback is attempted in the "stable"
-        state, processing MUST stop and an error MUST be returned.The effect
-        MUST be the same regardless of whether setLocalDescription or
-        setRemoteDescription is called.</t>
+        answers can be rolled back. Rollback can only be used to
+        cancel proposed changes; there is no support for rolling
+        back from a stable state to a previous stable state.
+        If a rollback is attempted in the "stable"
+        state, processing MUST stop and an error MUST be returned.
+        Note that this implies that once the answerer has performed
+        setLocalDescription with his answer, this cannot be rolled
+        back.</t>
+
+        <t>The effect of rollback MUST be the same regardless of
+        whether setLocalDescription or setRemoteDescription is called.</t>
         
         <t>In order to process rollback, a JSEP implementation
         abandons the current offer/answer transaction, sets the signaling
@@ -3196,15 +3203,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
         <xref target="sec.pendingremotedescription" />) to null.
         Any resources or candidates that were allocated by the
         abandoned local description are discarded; any media that
-        is received will be processed according to the previous
-        local and remote descriptions. Rollback can only be used to
-        cancel proposed changes; there is no support for rolling
-        back from a stable state to a previous stable state. Note
-        that this implies that once the answerer has performed
-        setLocalDescription with his answer, this cannot be rolled
-        back.</t>
+        is received is processed according to the previous
+        local and remote descriptions.</t>
 
-        <t>A rollback will disassociate any RtpTransceivers that
+        <t>A rollback disassociates any RtpTransceivers that
         were associated with m= sections by the application of the
         rolled-back session description (see
         <xref target="sec.applying-a-remote-desc" /> and
