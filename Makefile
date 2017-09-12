@@ -1,51 +1,11 @@
-xml2rfc ?= xml2rfc -v
-kramdown-rfc2629 ?= kramdown-rfc2629
-idnits ?= idnits
+PUSH_GHPAGES_BRANCHES = false
 
-draft := draft-ietf-rtcweb-jsep
+include lib/main.mk
 
-current_ver := $(shell git tag | grep "$(draft)" | tail -1 | sed -e"s/.*-//")
-ifeq "${current_ver}" ""
-next_ver ?= 00
+lib/main.mk:
+ifneq (,$(shell git submodule status lib 2>/dev/null))
+	git submodule sync
+	git submodule update --init
 else
-next_ver ?= $(shell printf "%.2d" $$((1$(current_ver)-99)))
+	git clone --depth 10 -b master https://github.com/ekr/i-d-template.git lib
 endif
-next := $(draft)-$(next_ver)
-
-.PHONY: latest submit clean
-
-latest: $(draft).txt $(draft).html
-
-submit: $(next).txt
-
-idnits: $(next).txt
-	$(idnits) $<
-
-diff:  $(draft).diff.html
-
-clean:
-	-rm -f $(draft).txt $(draft).raw $(draft).old.raw $(draft).html $(draft).diff.html
-	-rm -f $(next).txt $(next).raw $(next).html
-	-rm -f $(draft)-[0-9][0-9].xml
-
-
-$(next).xml: $(draft).xml
-	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
-
-#%.xml: %.md
-#	$(kramdown-rfc2629) $< > $@
-
-%.txt: %.xml
-	$(xml2rfc) $< --text --out $@
-
-%.raw: %.xml
-	$(xml2rfc) $< --raw --out $@
-
-%.html: %.xml
-	$(xml2rfc) $< --html --out $@
-
-$(draft).diff.html: $(draft).old.raw $(draft).raw 
-	htmlwdiff  $^ >  $@
-
-upload: $(draft).html $(draft).txt
-	python upload-draft.py $(draft).html

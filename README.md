@@ -6,7 +6,11 @@ Group](http://trac.tools.ietf.org/wg/rtcweb/trac/wiki) draft of [JSEP](http://to
 
 JSEP specification:
 * [Editor's copy](http://rtcweb-wg.github.io/jsep/)
-* [Working Group Draft] (http://tools.ietf.org/html/draft-ietf-rtcweb-jsep)
+* [Working Group Draft](http://tools.ietf.org/html/draft-ietf-rtcweb-jsep)
+
+Status Into:
+
+[Status Info](http://waffle.io/rtcweb-wg/jsep)
 
 
 Contributing
@@ -83,3 +87,19 @@ process, as documented in Best Current Practices RFCs and IESG Statements.
 
 A participant in any IETF activity acknowledges that written, audio and video
 records of meetings may be made and may be available to the public.
+
+Build Information
+-------------
+
+Examples are generated with
+
+```
+python tools/gen_examples.py --replace draft-ietf-rtcweb-jsep.xml
+```
+
+The document can be reflowed with
+
+```
+tools/reflow.sh
+```
+
