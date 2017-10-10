@@ -368,7 +368,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-9-29" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-10-10" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -392,7 +392,7 @@ li, p {
 <td class="right">C. Jennings</td>
 </tr>
 <tr>
-<td class="left">Expires: April 2, 2018</td>
+<td class="left">Expires: April 13, 2018</td>
 <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ li, p {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">September 29, 2017</td>
+<td class="right">October 10, 2017</td>
 </tr>
 
     	
@@ -421,7 +421,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 2, 2018.</p>
+<p>This Internet-Draft will expire on April 13, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1408,6 +1408,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>The "s=" and "t=" lines MUST stay the same.</li>
 <li>Each "m=" and c=" line MUST be filled in with the port and address of the default candidate for the m= section, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.3. Note, however, that the m= line protocol need not match the default candidate, because this protocol value must instead match what was supplied in the offer, as described above.</li>
 <li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the m= section is restarting, in which case new ICE credentials must be created as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.2.1.1. If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.</li>
+<li>Each "a=tls-id" line MUST stay the same unless the offerer's "a=tls-id" line changed, in which case a new "a=tls-id" value MUST be created, as described in <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a>, Section 5.2.</li>
 <li>Each "a=setup" line MUST use an "active" or "passive" role value consistent with the existing DTLS association, if the association is being continued by the offerer.</li>
 <li>RTCP multiplexing must be used, and an "a=rtcp-mux" line inserted if and only if the m= section previously used RTCP multiplexing.</li>
 <li>If the m= section is not bundled into another m= section and RTCP multiplexing is not active, an "a=rtcp" attribute line MUST be filled in with the port and address of the default RTCP candidate. If no RTCP candidates have yet been gathered, dummy values MUST be used, as described in the initial answer section above.</li>
@@ -1564,7 +1565,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
 <li>For each m= section, valid values for each of the mandatory-to-use features enumerated in <a href="#sec.usage-requirements" class="xref">Section 5.1.1</a> MUST be present.  These values MAY either be present at the media level, or inherited from the session level.  <ul>
 <li>ICE ufrag and password values, which MUST comply with the size limits specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4.</li>
-<li>tls-id value, which MUST be set according to <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a>, Section 5. If this is a re-offer and the tls-id value is different from that presently in use, the DTLS connection is not being continued and the remote description MUST be part of an ICE restart, together with new ufrag and password values. If this is an answer, the tls-id value, if present, MUST be the same as in the offer.</li>
+<li>tls-id value, which MUST be set according to <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a>, Section 5. If this is a re-offer or a response to a re-offer and the tls-id value is different from that presently in use, the DTLS connection is not being continued and the remote description MUST be part of an ICE restart, together with new ufrag and password values.  </li>
 <li>DTLS setup value, which MUST be set according to the rules specified in <a href="#RFC5763" class="xref">[RFC5763]</a>, Section 5 and MUST be consistent with the selected role of the current DTLS connection, if one exists and is being continued.</li>
 <li>DTLS fingerprint values, where at least one fingerprint MUST be present.</li>
 </ul>
@@ -1671,7 +1672,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
 <li>If the m= section has been rejected (i.e. port is set to zero in the answer), stop any reception or transmission of media for this section, and, unless a non-rejected m= section is bundled with this m= section, discard any associated ICE components, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.2.1.3.</li>
-<li>If the remote DTLS fingerprint has been changed or the tls-id has changed, tear down the DTLS connection. This includes the case when the PeerConnection state is "have-remote-pranswer". If a DTLS connection needs to be torn down but the answer does not indicate an ICE restart or, in the case of "have-remote-pranswer", new ICE credentials, an error MUST be generated. If an ICE restart is performed without a change in tls-id or fingerprint, then the same DTLS connection is continued over the new ICE channel.</li>
+<li>If the remote DTLS fingerprint has been changed or the tls-id has changed, tear down the DTLS connection. This includes the case when the PeerConnection state is "have-remote-pranswer". If a DTLS connection needs to be torn down but the answer does not indicate an ICE restart or, in the case of "have-remote-pranswer", new ICE credentials, an error MUST be generated. If an ICE restart is performed without a change in tls-id or fingerprint, then the same DTLS connection is continued over the new ICE channel.  Note that although JSEP requires that answerers change the tls-id value if and only if the offerer does, non-JSEP answerers are permitted to change the tls-id as long as the offer contained an ICE restart.  Thus, JSEP implementations which process DTLS data prior to receiving an answer MUST be prepared to receive either a ClientHello or data from the previous DTLS connection.  </li>
 <li>If no valid DTLS connection exists, prepare to start a DTLS connection, using the specified roles and fingerprints, on any underlying ICE components, once they are active.</li>
 <li>If the m= section proto value indicates use of RTP: <ul>
 <li>If the m= section references RTCP feedback mechanisms that were not present in the corresponding m= section in the offer, this indicates a negotiation problem and MUST result in an error. However, new media formats and new RTP header extension values are permitted in the answer, as described in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 7, and <a href="#RFC5285" class="xref">[RFC5285]</a>, Section 6.</li>
@@ -1789,7 +1790,7 @@ a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-a=tls-id:1
+a=tls-id:91bbf309c0990a6bec11e38ba2933cee
 a=rtcp:10101 IN IP4 203.0.113.100
 a=rtcp-mux
 a=rtcp-rsize
@@ -1821,7 +1822,7 @@ a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-a=tls-id:1
+a=tls-id:91bbf309c0990a6bec11e38ba2933cee
 a=rtcp:10103 IN IP4 203.0.113.100
 a=rtcp-mux
 a=rtcp-rsize
@@ -1864,7 +1865,7 @@ a=fingerprint:sha-256
               6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
               DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
-a=tls-id:1
+a=tls-id:eec3392ab83e11ceb6a0990c903fbb19
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
@@ -2024,7 +2025,7 @@ a=fingerprint:sha-256
               29:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-a=tls-id:1
+a=tls-id:17f0f4ba8a5f1213faca591b58ba52a7
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2102,7 +2103,7 @@ a=fingerprint:sha-256
               7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
               DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
-a=tls-id:1
+a=tls-id:7a25ab85b195acaf3121f5a8ab4f0f71
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2180,7 +2181,7 @@ a=fingerprint:sha-256
               7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
               DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:actpass
-a=tls-id:1
+a=tls-id:7a25ab85b195acaf3121f5a8ab4f0f71
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2276,7 +2277,7 @@ a=fingerprint:sha-256
               29:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:passive
-a=tls-id:1
+a=tls-id:17f0f4ba8a5f1213faca591b58ba52a7
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2441,7 +2442,7 @@ a=fingerprint:sha-256
               C4:68:F8:77:6A:44:F1:98:6D:7C:9F:47:EB:E3:34:A4:
               0A:AA:2D:49:08:28:70:2E:1F:AE:18:7D:4E:3E:66:BF
 a=setup:actpass
-a=tls-id:1
+a=tls-id:9e5b948ade9c3d41de6617b68f769e55
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2512,7 +2513,7 @@ a=fingerprint:sha-256
               A2:F3:A5:6D:4C:8C:1E:B2:62:10:4A:F6:70:61:C4:FC:
               3C:E0:01:D6:F3:24:80:74:DA:7C:3E:50:18:7B:CE:4D
 a=setup:active
-a=tls-id:1
+a=tls-id:55e967f86b7166ed14d3c9eda849b5e9
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2582,7 +2583,7 @@ a=fingerprint:sha-256
               A2:F3:A5:6D:4C:8C:1E:B2:62:10:4A:F6:70:61:C4:FC:
               3C:E0:01:D6:F3:24:80:74:DA:7C:3E:50:18:7B:CE:4D
 a=setup:actpass
-a=tls-id:1
+a=tls-id:55e967f86b7166ed14d3c9eda849b5e9
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2644,7 +2645,7 @@ a=fingerprint:sha-256
               C4:68:F8:77:6A:44:F1:98:6D:7C:9F:47:EB:E3:34:A4:
               0A:AA:2D:49:08:28:70:2E:1F:AE:18:7D:4E:3E:66:BF
 a=setup:passive
-a=tls-id:1
+a=tls-id:9e5b948ade9c3d41de6617b68f769e55
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -2705,7 +2706,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-dtls-sdp">[I-D.ietf-mmusic-dtls-sdp]</b></td>
 <td class="top">
-<a>Holmberg, C.</a> and <a>R. Shpount</a>, "<a href="https://tools.ietf.org/html/draft-ietf-mmusic-dtls-sdp-30">Session Description Protocol (SDP) Offer/Answer Considerations for Datagram Transport Layer Security (DTLS) and Transport Layer Security (TLS)</a>", Internet-Draft draft-ietf-mmusic-dtls-sdp-30, September 2017.</td>
+<a>Holmberg, C.</a> and <a>R. Shpount</a>, "<a href="https://tools.ietf.org/html/draft-ietf-mmusic-dtls-sdp-31">Session Description Protocol (SDP) Offer/Answer Considerations for Datagram Transport Layer Security (DTLS) and Transport Layer Security (TLS)</a>", Internet-Draft draft-ietf-mmusic-dtls-sdp-31, October 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</b></td>
