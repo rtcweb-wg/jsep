@@ -633,7 +633,7 @@ li, p {
 <p id="rfc.section.1.1.p.3">In this document, the use of JSEP is described as if it always occurs between two JSEP endpoints. Note though in many cases it will actually be between a JSEP endpoint and some kind of server, such as a gateway or MCU. This distinction is invisible to the JSEP endpoint; it just follows the instructions it is given via the API.</p>
 <p id="rfc.section.1.1.p.4">JSEP's handling of session descriptions is simple and straightforward. Whenever an offer/answer exchange is needed, the initiating side creates an offer by calling a createOffer() API. The application then uses that offer to set up its local config via the setLocalDescription() API. The offer is finally sent off to the remote side over its preferred signaling mechanism (e.g., WebSockets); upon receipt of that offer, the remote party installs it using the setRemoteDescription() API.</p>
 <p id="rfc.section.1.1.p.5">To complete the offer/answer exchange, the remote party uses the createAnswer() API to generate an appropriate answer, applies it using the setLocalDescription() API, and sends the answer back to the initiator over the signaling channel. When the initiator gets that answer, it installs it using the setRemoteDescription() API, and initial setup is complete. This process can be repeated for additional offer/answer exchanges.</p>
-<p id="rfc.section.1.1.p.6">Regarding ICE <a href="#RFC5245" class="xref">[RFC5245]</a>, JSEP decouples the ICE state machine from the overall signaling state machine, as the ICE state machine must remain in the JSEP implementation, because only the implementation has the necessary knowledge of candidates and other transport information. Performing this separation provides additional flexibility in protocols that decouple session descriptions from transport. For instance, in traditional SIP, each offer or answer is self-contained, including both the session descriptions and the transport information. However, <a href="#I-D.ietf-mmusic-trickle-ice-sip" class="xref">[I-D.ietf-mmusic-trickle-ice-sip]</a> allows SIP to be used with trickle ICE <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, in which the session description can be sent immediately and the transport information can be sent when available.  Sending transport information separately can allow for faster ICE and DTLS startup, since ICE checks can start as soon as any transport information is available rather than waiting for all of it. JSEP's decoupling of the ICE and signaling state machines allows it to accommodate either model.</p>
+<p id="rfc.section.1.1.p.6">Regarding ICE <a href="#RFC5245" class="xref">[RFC5245]</a>, JSEP decouples the ICE state machine from the overall signaling state machine, as the ICE state machine must remain in the JSEP implementation, because only the implementation has the necessary knowledge of candidates and other transport information. Performing this separation provides additional flexibility in protocols that decouple session descriptions from transport. For instance, in traditional SIP, each offer or answer is self-contained, including both the session descriptions and the transport information. However, <a href="#I-D.ietf-mmusic-trickle-ice-sip" class="xref">[I-D.ietf-mmusic-trickle-ice-sip]</a> allows SIP to be used with trickle ICE <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, in which the session description can be sent immediately and the transport information can be sent when available. Sending transport information separately can allow for faster ICE and DTLS startup, since ICE checks can start as soon as any transport information is available rather than waiting for all of it.  JSEP's decoupling of the ICE and signaling state machines allows it to accommodate either model.</p>
 <p id="rfc.section.1.1.p.7">Through its abstraction of signaling, the JSEP approach does require the application to be aware of the signaling process.  While the application does not need to understand the contents of session descriptions to set up a call, the application must call the right APIs at the right times, convert the session descriptions and ICE information into the defined messages of its chosen signaling protocol, and perform the reverse conversion on the messages it receives from the other side.</p>
 <p id="rfc.section.1.1.p.8">One way to make life easier for the application is to provide a JavaScript library that hides this complexity from the developer; said library would implement a given signaling protocol along with its state machine and serialization code, presenting a higher level call-oriented interface to the application developer. For example, libraries exist to adapt the JSEP API into an API suitable for a SIP or XMPP. Thus, JSEP provides greater control for the experienced developer without forcing any additional complexity on the novice developer.</p>
 <h2 id="rfc.section.1.2">
@@ -673,7 +673,7 @@ li, p {
 <h2 id="rfc.section.3.2">
 <a href="#rfc.section.3.2">3.2.</a> <a href="#sec.session-descriptions-and-state-machine" id="sec.session-descriptions-and-state-machine">Session Descriptions and State Machine</a>
 </h2>
-<p id="rfc.section.3.2.p.1">In order to establish the media plane, the JSEP implementation needs specific parameters to indicate what to transmit to the remote side, as well as how to handle the media that is received.  These parameters are determined by the exchange of session descriptions in offers and answers, and there are certain details to this process that must be handled in the JSEP APIs.</p>
+<p id="rfc.section.3.2.p.1">In order to establish the media plane, the JSEP implementation needs specific parameters to indicate what to transmit to the remote side, as well as how to handle the media that is received. These parameters are determined by the exchange of session descriptions in offers and answers, and there are certain details to this process that must be handled in the JSEP APIs.</p>
 <p id="rfc.section.3.2.p.2">Whether a session description applies to the local side or the remote side affects the meaning of that description. For example, the list of codecs sent to a remote party indicates what the local side is willing to receive, which, when intersected with the set of codecs the remote side supports, specifies what the remote side should send. However, not all parameters follow this rule; some parameters are declarative and the remote side MUST either accept them or reject them altogether. An example of such a parameter is the DTLS fingerprints <a href="#RFC8122" class="xref">[RFC8122]</a>, which are calculated based on the local certificate(s) offered, and are not subject to negotiation.</p>
 <p id="rfc.section.3.2.p.3">In addition, various RFCs put different conditions on the format of offers versus answers. For example, an offer may propose an arbitrary number of m= sections (i.e., media descriptions as described in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.14), but an answer must contain the exact same number as the offer.</p>
 <p id="rfc.section.3.2.p.4">Lastly, while the exact media parameters are only known only after an offer and an answer have been exchanged, the offerer may receive ICE checks, and possibly media (e.g., in the case of a re-offer after a connection has been established) before it receives an answer. To properly process incoming media in this case, the offerer's media handler must be aware of the details of the offer before the answer arrives.</p>
@@ -686,7 +686,7 @@ li, p {
 </ol>
 
 <p>JSEP addresses this by adding both setLocalDescription and setRemoteDescription methods and having session description objects contain a type field indicating the type of session description being supplied. This satisfies the requirements listed above for both the offerer, who first calls setLocalDescription(sdp [offer]) and then later setRemoteDescription(sdp [answer]), as well as for the answerer, who first calls setRemoteDescription(sdp [offer]) and then later setLocalDescription(sdp [answer]).</p>
-<p id="rfc.section.3.2.p.6">During the offer/answer exchange, the outstanding offer is considered to be "pending" at the offerer and the answerer, as it may either be accepted or rejected. If this is a re-offer, each side will also have "current" local and remote descriptions, which reflect the result of the last offer/answer exchange. Sections <a href="#sec.pendinglocaldescription" class="xref">Section 4.1.12</a>, <a href="#sec.pendingremotedescription" class="xref">Section 4.1.14</a>, <a href="#sec.currentlocaldescription" class="xref">Section 4.1.11</a>, and <a href="#sec.currentremotedescription" class="xref">Section 4.1.13</a>, provide more detail on pending and current descriptions.  </p>
+<p id="rfc.section.3.2.p.6">During the offer/answer exchange, the outstanding offer is considered to be "pending" at the offerer and the answerer, as it may either be accepted or rejected. If this is a re-offer, each side will also have "current" local and remote descriptions, which reflect the result of the last offer/answer exchange. Sections <a href="#sec.pendinglocaldescription" class="xref">Section 4.1.12</a>, <a href="#sec.pendingremotedescription" class="xref">Section 4.1.14</a>, <a href="#sec.currentlocaldescription" class="xref">Section 4.1.11</a>, and <a href="#sec.currentremotedescription" class="xref">Section 4.1.13</a>, provide more detail on pending and current descriptions.</p>
 <p id="rfc.section.3.2.p.7">JSEP also allows for an answer to be treated as provisional by the application. Provisional answers provide a way for an answerer to communicate initial session parameters back to the offerer, in order to allow the session to begin, while allowing a final answer to be specified later. This concept of a final answer is important to the offer/answer model; when such an answer is received, any extra resources allocated by the caller can be released, now that the exact session configuration is known. These "resources" can include things like extra ICE components, TURN candidates, or video decoders. Provisional answers, on the other hand, do no such deallocation; as a result, multiple dissimilar provisional answers, with their own codec choices, transport parameters, etc., can be received and applied during call setup. Note that the final answer itself may be different than any received provisional answers.</p>
 <p id="rfc.section.3.2.p.8">In <a href="#RFC3264" class="xref">[RFC3264]</a>, the constraint at the signaling level is that only one offer can be outstanding for a given session, but at the media stack level, a new offer can be generated at any point. For example, when using SIP for signaling, if one offer is sent, then cancelled using a SIP CANCEL, another offer can be generated even though no answer was received for the first offer. To support this, the JSEP media layer can provide an offer via the createOffer() method whenever the JavaScript application needs one for the signaling. The answerer can send back zero or more provisional answers, and finally end the offer-answer exchange by sending a final answer. The state machine for this is as follows:</p>
 <div id="rfc.figure.2"></div>
@@ -751,7 +751,7 @@ setRemote(ANSWER) |                                   |
 </h3>
 <p id="rfc.section.3.4.1.p.1">RtpTransceivers allow the application to control the RTP media associated with one m= section. Each RtpTransceiver has an RtpSender and an RtpReceiver, which an application can use to control the sending and receiving of RTP media. The application may also modify the RtpTransceiver directly, for instance, by stopping it.</p>
 <p id="rfc.section.3.4.1.p.2">RtpTransceivers generally have a 1:1 mapping with m= sections, although there may be more RtpTransceivers than m= sections when RtpTransceivers are created but not yet associated with a m= section, or if RtpTransceivers have been stopped and disassociated from m= sections. An RtpTransceiver is said to be associated with an m= section if its mid property is non-null; otherwise it is said to be disassociated. The associated m= section is determined using a mapping between transceivers and m= section indices, formed when creating an offer or applying a remote offer.</p>
-<p id="rfc.section.3.4.1.p.3">An RtpTransceiver is never associated with more than one m= section, and once a session description is applied, a m= section is always associated with exactly one RtpTransceiver. However, in certain cases where a m= section has been rejected, as discussed in <a href="#sec.subsequent-offers" class="xref">Section 5.2.2</a> below, that m= section will be "recycled" and associated with a new RtpTransceiver with a new mid value.</p>
+<p id="rfc.section.3.4.1.p.3">An RtpTransceiver is never associated with more than one m= section, and once a session description is applied, a m= section is always associated with exactly one RtpTransceiver.  However, in certain cases where a m= section has been rejected, as discussed in <a href="#sec.subsequent-offers" class="xref">Section 5.2.2</a> below, that m= section will be "recycled" and associated with a new RtpTransceiver with a new mid value.</p>
 <p id="rfc.section.3.4.1.p.4">RtpTransceivers can be created explicitly by the application or implicitly by calling setRemoteDescription with an offer that adds new m= sections.</p>
 <h3 id="rfc.section.3.4.2">
 <a href="#rfc.section.3.4.2">3.4.2.</a> <a href="#sec.rtpsenders" id="sec.rtpsenders">RtpSenders</a>
@@ -770,7 +770,7 @@ setRemote(ANSWER) |                                   |
 <p id="rfc.section.3.5.1.p.1">JSEP gathers ICE candidates as needed by the application.  Collection of ICE candidates is referred to as a gathering phase, and this is triggered either by the addition of a new or recycled m= section to the local session description, or new ICE credentials in the description, indicating an ICE restart. Use of new ICE credentials can be triggered explicitly by the application, or implicitly by the JSEP implementation in response to changes in the ICE configuration.</p>
 <p id="rfc.section.3.5.1.p.2">When the ICE configuration changes in a way that requires a new gathering phase, a 'needs-ice-restart' bit is set. When this bit is set, calls to the createOffer API will generate new ICE credentials. This bit is cleared by a call to the setLocalDescription API with new ICE credentials from either an offer or an answer, i.e., from either a local- or remote-initiated ICE restart.</p>
 <p id="rfc.section.3.5.1.p.3">When a new gathering phase starts, the ICE agent will notify the application that gathering is occurring through an event. Then, when each new ICE candidate becomes available, the ICE agent will supply it to the application via an additional event; these candidates will also automatically be added to the current and/or pending local session description. Finally, when all candidates have been gathered, an event will be dispatched to signal that the gathering process is complete.</p>
-<p id="rfc.section.3.5.1.p.4">Note that gathering phases only gather the candidates needed by new/recycled/restarting m= sections; other m= sections continue to use their existing candidates. Also, if an m= section is bundled (either by a successful bundle negotiation or by being marked as bundle-only), then candidates will be gathered and exchanged for that m= section if and only if its MID is a BUNDLE-tag, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>.  </p>
+<p id="rfc.section.3.5.1.p.4">Note that gathering phases only gather the candidates needed by new/recycled/restarting m= sections; other m= sections continue to use their existing candidates. Also, if an m= section is bundled (either by a successful bundle negotiation or by being marked as bundle-only), then candidates will be gathered and exchanged for that m= section if and only if its MID is a BUNDLE-tag, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>.</p>
 <h3 id="rfc.section.3.5.2">
 <a href="#rfc.section.3.5.2">3.5.2.</a> <a href="#sec.ice-candidate-trickling" id="sec.ice-candidate-trickling">ICE Candidate Trickling</a>
 </h3>
@@ -789,7 +789,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </pre>
 <p id="rfc.section.3.5.2.1.p.3">The IceCandidate object contains a field to indicate which ICE ufrag it is associated with, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4. This value is used to determine which session description (and thereby which gathering phase) this IceCandidate belongs to, which helps resolve ambiguities during ICE restarts. If this field is absent in a received IceCandidate (perhaps when communicating with a non-JSEP endpoint), the most recently received session description is assumed.</p>
 <p id="rfc.section.3.5.2.1.p.4">The IceCandidate object also contains fields to indicate which m= section it is associated with, which can be identified in one of two ways, either by a m= section index, or a MID. The m= section index is a zero-based index, with index N referring to the N+1th m= section in the session description referenced by this IceCandidate.  The MID is a "media stream identification" value, as defined in <a href="#RFC5888" class="xref">[RFC5888]</a>, Section 4, which provides a more robust way to identify the m= section in the session description, using the MID of the associated RtpTransceiver object (which may have been locally generated by the answerer when interacting with a non-JSEP endpoint that does not support the MID attribute, as discussed in <a href="#sec.applying-a-remote-desc" class="xref">Section 5.10</a> below). If the MID field is present in a received IceCandidate, it MUST be used for identification; otherwise, the m= section index is used instead.</p>
-<p id="rfc.section.3.5.2.1.p.5">When creating an IceCandidate object, JSEP implementations MUST populate each of the candidate, ufrag, m= section index, and MID fields.  Implementations MUST also be prepared to receive objects with some fields missing, as mentioned above.</p>
+<p id="rfc.section.3.5.2.1.p.5">When creating an IceCandidate object, JSEP implementations MUST populate each of the candidate, ufrag, m= section index, and MID fields. Implementations MUST also be prepared to receive objects with some fields missing, as mentioned above.</p>
 <h3 id="rfc.section.3.5.3">
 <a href="#rfc.section.3.5.3">3.5.3.</a> <a href="#sec.ice-candidate-policy" id="sec.ice-candidate-policy">ICE Candidate Policy</a>
 </h3>
@@ -821,20 +821,18 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <a href="#rfc.section.3.6.2">3.6.2.</a> <a href="#sec.interpreting-imageattr" id="sec.interpreting-imageattr">Interpreting imageattr Attributes</a>
 </h3>
 <p><a href="#RFC6236" class="xref">[RFC6236]</a> defines "a=imageattr" to be an advisory field. This means that it does not absolutely constrain the video formats that the sender can use, but gives an indication of the preferred values.</p>
-<p id="rfc.section.3.6.2.p.2">This specification prescribes more specific behavior.  When a MediaStreamTrack, which is producing video of a certain resolution (the "track resolution"), is attached to a RtpSender, which is encoding the track video at the same or lower resolution(s) (the "encoder resolutions"), and a remote description is applied that references the sender and contains valid "a=imageattr recv" attributes, it MUST follow the rules below to ensure the sender does not transmit a resolution that would exceed the size criteria specified in the attributes. These rules MUST be followed as long as the attributes remain present in the remote description, including cases in which the track changes its resolution, or is replaced with a different track.  </p>
-<p id="rfc.section.3.6.2.p.3">Depending on how the RtpSender is configured, it may be producing a single encoding at a certain resolution, or, if simulcast <a href="#sec.simulcast" class="xref">Section 3.7</a> has been negotiated, multiple encodings, each at their own specific resolution. In addition, depending on the configuration, each encoding may have the flexibility to reduce resolution when needed, or may be locked to a specific output resolution.  </p>
+<p id="rfc.section.3.6.2.p.2">This specification prescribes more specific behavior. When a MediaStreamTrack, which is producing video of a certain resolution (the "track resolution"), is attached to a RtpSender, which is encoding the track video at the same or lower resolution(s) (the "encoder resolutions"), and a remote description is applied that references the sender and contains valid "a=imageattr recv" attributes, it MUST follow the rules below to ensure the sender does not transmit a resolution that would exceed the size criteria specified in the attributes. These rules MUST be followed as long as the attributes remain present in the remote description, including cases in which the track changes its resolution, or is replaced with a different track.</p>
+<p id="rfc.section.3.6.2.p.3">Depending on how the RtpSender is configured, it may be producing a single encoding at a certain resolution, or, if simulcast <a href="#sec.simulcast" class="xref">Section 3.7</a> has been negotiated, multiple encodings, each at their own specific resolution. In addition, depending on the configuration, each encoding may have the flexibility to reduce resolution when needed, or may be locked to a specific output resolution.</p>
 <p id="rfc.section.3.6.2.p.4">For each encoding being produced by the RtpSender, the set of "a=imageattr recv" attributes in the corresponding m= section of the remote description is processed to determine what should be transmitted. Only attributes that reference the media format selected for the encoding are considered; each such attribute is evaluated individually, starting with the attribute with the highest "q=" value. If multiple attributes have the same "q=" value, they are evaluated in the order they appear in their containing m= section. Note that while JSEP endpoints will include at most one "a=imageattr recv" attribute per media format, JSEP endpoints may receive session descriptions from non-JSEP endpoints with m= sections that contain multiple such attributes.</p>
-<p id="rfc.section.3.6.2.p.5">For each "a=imageattr recv" attribute, the following rules are applied. If this processing is successful, the encoding is transmitted accordingly, and no further attributes are considered for that encoding.  Otherwise, the next attribute is evaluated, in the aforementioned order. If none of the supplied attributes can be processed successfully, the encoding MUST NOT be transmitted, and an error SHOULD be raised to the application.  </p>
+<p id="rfc.section.3.6.2.p.5">For each "a=imageattr recv" attribute, the following rules are applied. If this processing is successful, the encoding is transmitted accordingly, and no further attributes are considered for that encoding. Otherwise, the next attribute is evaluated, in the aforementioned order. If none of the supplied attributes can be processed successfully, the encoding MUST NOT be transmitted, and an error SHOULD be raised to the application.  </p>
 
 <ul>
-<li>The limits from the attribute are compared to the encoder resolution. Only the specific limits mentioned below are considered; any other values, such as picture aspect ratio, MUST be ignored.  When considering a MediaStreamTrack that is producing rotated video, the unrotated resolution MUST be used for the checks. This is required regardless of whether the receiver supports performing receive-side rotation (e.g., through CVO <a href="#TS26.114" class="xref">[TS26.114]</a>), as it significantly simplifies the matching logic.</li>
+<li>The limits from the attribute are compared to the encoder resolution. Only the specific limits mentioned below are considered; any other values, such as picture aspect ratio, MUST be ignored. When considering a MediaStreamTrack that is producing rotated video, the unrotated resolution MUST be used for the checks. This is required regardless of whether the receiver supports performing receive-side rotation (e.g., through CVO <a href="#TS26.114" class="xref">[TS26.114]</a>), as it significantly simplifies the matching logic.</li>
 <li>If the attribute includes a "sar=" (sample aspect ratio) value set to something other than "1.0", indicating the receiver wants to receive non-square pixels, this cannot be satisfied and the attribute MUST NOT be used.</li>
-<li>If the encoder resolution exceeds the maximum size permitted by the attribute, and the encoder is allowed to adjust its resolution, the encoder SHOULD apply downscaling in order to satisfy the limits.  Downscaling MUST NOT change the picture aspect ratio of the encoding, ignoring any trivial differences due to rounding.  For example, if the encoder resolution is 1280x720, and the attribute specified a maximum of 640x480, the expected output resolution would be 640x360.  If downscaling cannot be applied, the attribute MUST NOT be used.</li>
+<li>If the encoder resolution exceeds the maximum size permitted by the attribute, and the encoder is allowed to adjust its resolution, the encoder SHOULD apply downscaling in order to satisfy the limits. Downscaling MUST NOT change the picture aspect ratio of the encoding, ignoring any trivial differences due to rounding. For example, if the encoder resolution is 1280x720, and the attribute specified a maximum of 640x480, the expected output resolution would be 640x360. If downscaling cannot be applied, the attribute MUST NOT be used.</li>
 <li>If the encoder resolution is less than the minimum size permitted by the attribute, the attribute MUST NOT be used; the encoder MUST NOT apply upscaling. JSEP implementations SHOULD avoid this situation by allowing receipt of arbitrarily small resolutions, perhaps via fallback to a software decoder.</li>
 <li>If the encoder resolution is within the maximum and minimum sizes, no action is needed.</li>
 </ul>
-
-<p> </p>
 <h2 id="rfc.section.3.7">
 <a href="#rfc.section.3.7">3.7.</a> <a href="#sec.simulcast" id="sec.simulcast">Simulcast</a>
 </h2>
@@ -863,7 +861,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h3 id="rfc.section.3.8.2">
 <a href="#rfc.section.3.8.2">3.8.2.</a> <a href="#sec.parallel-forking" id="sec.parallel-forking">Parallel Forking</a>
 </h3>
-<p id="rfc.section.3.8.2.p.1">Parallel forking involves a call being dispatched to multiple remote callees, where each callee can accept the call, and multiple simultaneous active signaling sessions can be established as a result. If multiple callees send media at the same time, the possibilities for handling this are described in <a href="#RFC3960" class="xref">[RFC3960]</a>, Section 3.1.  Most SIP devices today only support exchanging media with a single device at a time, and do not try to mix multiple early media audio sources, as that could result in a confusing situation. For example, consider having a European ringback tone mixed together with the North American ringback tone - the resulting sound would not be like either tone, and would confuse the user. If the signaling application wishes to only exchange media with one of the remote endpoints at a time, then from a media engine point of view, this is exactly like the sequential forking case.</p>
+<p id="rfc.section.3.8.2.p.1">Parallel forking involves a call being dispatched to multiple remote callees, where each callee can accept the call, and multiple simultaneous active signaling sessions can be established as a result. If multiple callees send media at the same time, the possibilities for handling this are described in <a href="#RFC3960" class="xref">[RFC3960]</a>, Section 3.1. Most SIP devices today only support exchanging media with a single device at a time, and do not try to mix multiple early media audio sources, as that could result in a confusing situation. For example, consider having a European ringback tone mixed together with the North American ringback tone - the resulting sound would not be like either tone, and would confuse the user. If the signaling application wishes to only exchange media with one of the remote endpoints at a time, then from a media engine point of view, this is exactly like the sequential forking case.</p>
 <p id="rfc.section.3.8.2.p.2">In the parallel forking case where the JavaScript application wishes to simultaneously exchange media with multiple peers, the flow is slightly more complex, but the JavaScript application can follow the strategy that <a href="#RFC3960" class="xref">[RFC3960]</a> describes using UPDATE. The UPDATE approach allows the signaling to set up a separate media flow for each peer that it wishes to exchange media with. In JSEP, this offer used in the UPDATE would be formed by simply creating a new PeerConnection (see <a href="#sec.peerconnection" class="xref">Section 4.1</a>) and making sure that the same local media streams have been added into this new PeerConnection. Then the new PeerConnection object would produce a SDP offer that could be used by the signaling to perform the UPDATE strategy discussed in <a href="#RFC3960" class="xref">[RFC3960]</a>.</p>
 <p id="rfc.section.3.8.2.p.3">As a result of sharing the media streams, the application will end up with N parallel PeerConnection sessions, each with a local and remote description and their own local and remote addresses. The media flow from these sessions can be managed using setDirection (see <a href="#sec.transceiver-set-direction" class="xref">Section 4.2.3</a>), or the application can choose to play out the media from all sessions mixed together. Of course, if the application wants to only keep a single session, it can simply terminate the sessions that it no longer needs.</p>
 <h1 id="rfc.section.4">
@@ -917,7 +915,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h3 id="rfc.section.4.1.2">
 <a href="#rfc.section.4.1.2">4.1.2.</a> <a href="#sec.addTrack" id="sec.addTrack">addTrack</a>
 </h3>
-<p id="rfc.section.4.1.2.p.1">The addTrack method adds a MediaStreamTrack to the PeerConnection, using the MediaStream argument to associate the track with other tracks in the same MediaStream, so that they can be added to the same "LS" group when creating an offer or answer.  Adding tracks to the same "LS" group indicates that the playback of these tracks should be synchronized for proper lip sync, as described in <a href="#RFC5888" class="xref">[RFC5888]</a>, Section 7.  addTrack attempts to minimize the number of transceivers as follows: If the PeerConnection is in the "have-remote-offer" state, the track will be attached to the first compatible transceiver that was created by the most recent call to setRemoteDescription() and does not have a local track. Otherwise, a new transceiver will be created, as described in <a href="#sec.addTransceiver" class="xref">Section 4.1.4</a>.</p>
+<p id="rfc.section.4.1.2.p.1">The addTrack method adds a MediaStreamTrack to the PeerConnection, using the MediaStream argument to associate the track with other tracks in the same MediaStream, so that they can be added to the same "LS" group when creating an offer or answer. Adding tracks to the same "LS" group indicates that the playback of these tracks should be synchronized for proper lip sync, as described in <a href="#RFC5888" class="xref">[RFC5888]</a>, Section 7. addTrack attempts to minimize the number of transceivers as follows: If the PeerConnection is in the "have-remote-offer" state, the track will be attached to the first compatible transceiver that was created by the most recent call to setRemoteDescription() and does not have a local track. Otherwise, a new transceiver will be created, as described in <a href="#sec.addTransceiver" class="xref">Section 4.1.4</a>.</p>
 <h3 id="rfc.section.4.1.3">
 <a href="#rfc.section.4.1.3">4.1.3.</a> <a href="#sec.removeTrack" id="sec.removeTrack">removeTrack</a>
 </h3>
@@ -965,7 +963,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h4 id="rfc.section.4.1.8.2">
 <a href="#rfc.section.4.1.8.2">4.1.8.2.</a> <a href="#sec.rollback" id="sec.rollback">Rollback</a>
 </h4>
-<p id="rfc.section.4.1.8.2.p.1">In certain situations it may be desirable to "undo" a change made to setLocalDescription or setRemoteDescription.  Consider a case where a call is ongoing, and one side wants to change some of the session parameters; that side generates an updated offer and then calls setLocalDescription. However, the remote side, either before or after setRemoteDescription, decides it does not want to accept the new parameters, and sends a reject message back to the offerer. Now, the offerer, and possibly the answerer as well, need to return to a stable state and the previous local/remote description. To support this, we introduce the concept of "rollback", which discards any proposed changes to the session, returning the state machine to the stable state.  A rollback is performed by supplying a session description of type "rollback" with empty contents to either setLocalDescription or setRemoteDescription.  </p>
+<p id="rfc.section.4.1.8.2.p.1">In certain situations it may be desirable to "undo" a change made to setLocalDescription or setRemoteDescription.  Consider a case where a call is ongoing, and one side wants to change some of the session parameters; that side generates an updated offer and then calls setLocalDescription. However, the remote side, either before or after setRemoteDescription, decides it does not want to accept the new parameters, and sends a reject message back to the offerer. Now, the offerer, and possibly the answerer as well, need to return to a stable state and the previous local/remote description. To support this, we introduce the concept of "rollback", which discards any proposed changes to the session, returning the state machine to the stable state. A rollback is performed by supplying a session description of type "rollback" with empty contents to either setLocalDescription or setRemoteDescription.</p>
 <h3 id="rfc.section.4.1.9">
 <a href="#rfc.section.4.1.9">4.1.9.</a> <a href="#sec.setlocaldescription" id="sec.setlocaldescription">setLocalDescription</a>
 </h3>
@@ -1032,7 +1030,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <a href="#rfc.section.4.1.17">4.1.17.</a> <a href="#sec.addicecandidate" id="sec.addicecandidate">addIceCandidate</a>
 </h3>
 <p id="rfc.section.4.1.17.p.1">The addIceCandidate method provides an update to the ICE agent via an IceCandidate object <a href="#sec.ice-candidate-format" class="xref">Section 3.5.2.1</a>. If the IceCandidate's candidate field is filled in, the IceCandidate is treated as a new remote ICE candidate, which will be added to the current and/or pending remote description according to the rules defined for Trickle ICE. Otherwise, the IceCandidate is treated as an end-of-candidates indication, as defined in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>.</p>
-<p id="rfc.section.4.1.17.p.2">In either case, the m= section index, MID, and ufrag fields from the supplied IceCandidate are used to determine which m= section and ICE candidate generation the IceCandidate belongs to, as described in <a href="#sec.ice-candidate-format" class="xref">Section 3.5.2.1</a> above. In the case of an end-of-candidates indication, the absence of both the m= section index and MID fields is interpreted to mean that the indication applies to all m= sections in the specified ICE candidate generation. However, if both fields are absent for a new remote candidate, this MUST be treated as an invalid condition, as specified below.  </p>
+<p id="rfc.section.4.1.17.p.2">In either case, the m= section index, MID, and ufrag fields from the supplied IceCandidate are used to determine which m= section and ICE candidate generation the IceCandidate belongs to, as described in <a href="#sec.ice-candidate-format" class="xref">Section 3.5.2.1</a> above. In the case of an end-of-candidates indication, the absence of both the m= section index and MID fields is interpreted to mean that the indication applies to all m= sections in the specified ICE candidate generation. However, if both fields are absent for a new remote candidate, this MUST be treated as an invalid condition, as specified below.</p>
 <p id="rfc.section.4.1.17.p.3">If any IceCandidate fields contain invalid values, or an error occurs during the processing of the IceCandidate object, the supplied IceCandidate MUST be ignored and an error MUST be returned.</p>
 <p id="rfc.section.4.1.17.p.4">Otherwise, the new remote candidate or end-of-candidates indication is supplied to the ICE agent. In the case of a new remote candidate, connectivity checks will be sent to the new candidate.</p>
 <h2 id="rfc.section.4.2">
@@ -1050,9 +1048,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h3 id="rfc.section.4.2.3">
 <a href="#rfc.section.4.2.3">4.2.3.</a> <a href="#sec.transceiver-set-direction" id="sec.transceiver-set-direction">setDirection</a>
 </h3>
-<p id="rfc.section.4.2.3.p.1">The setDirection method sets the direction of a transceiver, which affects the direction property of the associated m= section on future calls to createOffer and createAnswer.  The permitted values for direction are "recvonly", "sendrecv", "sendonly", and "inactive", mirroring the identically-named directional attributes defined in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 6.  </p>
+<p id="rfc.section.4.2.3.p.1">The setDirection method sets the direction of a transceiver, which affects the direction property of the associated m= section on future calls to createOffer and createAnswer. The permitted values for direction are "recvonly", "sendrecv", "sendonly", and "inactive", mirroring the identically-named directional attributes defined in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 6.</p>
 <p id="rfc.section.4.2.3.p.2">When creating offers, the transceiver direction is directly reflected in the output, even for re-offers. When creating answers, the transceiver direction is intersected with the offered direction, as explained in <a href="#sec.generating-an-answer" class="xref">Section 5.3</a> below.</p>
-<p id="rfc.section.4.2.3.p.3">Note that while setDirection sets the direction property of the transceiver immediately (<a href="#sec.transceiver-direction" class="xref">Section 4.2.4</a>), this property does not immediately affect whether the transceiver's RtpSender will send or its RtpReceiver will receive. The direction in effect is represented by the currentDirection property, which is only updated when an answer is applied.</p>
+<p id="rfc.section.4.2.3.p.3">Note that while setDirection sets the direction property of the transceiver immediately ( <a href="#sec.transceiver-direction" class="xref">Section 4.2.4</a>), this property does not immediately affect whether the transceiver's RtpSender will send or its RtpReceiver will receive. The direction in effect is represented by the currentDirection property, which is only updated when an answer is applied.</p>
 <h3 id="rfc.section.4.2.4">
 <a href="#rfc.section.4.2.4">4.2.4.</a> <a href="#sec.transceiver-direction" id="sec.transceiver-direction">direction</a>
 </h3>
@@ -1105,9 +1103,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>"UDP/TLS/RTP/SAVP" (Defined in <a href="#RFC5764" class="xref">[RFC5764]</a>, Section 9)</li>
 <li>"UDP/TLS/RTP/SAVPF" (Defined in <a href="#RFC5764" class="xref">[RFC5764]</a>, Section 9)</li>
 </ul>
-<p> </p>
 </li>
-<li>The profile in any "m=" line in any generated answer MUST exactly match the profile provided in the offer.  </li>
+<li>The profile in any "m=" line in any generated answer MUST exactly match the profile provided in the offer.</li>
 <li>Because DTLS-SRTP is REQUIRED, the choice of SAVP or AVP has no effect; support for DTLS-SRTP is determined by the presence of one or more "a=fingerprint" attribute.  Note that lack of an "a=fingerprint" attribute will lead to negotiation failure.</li>
 <li>The use of AVPF or AVP simply controls the timing rules used for RTCP feedback. If AVPF is provided, or an "a=rtcp-fb" attribute is present, assume AVPF timing, i.e., a default value of "trr-int=0". Otherwise, assume that AVPF is being used in an AVP compatible mode and use a value of "trr-int=4000".</li>
 <li>For data m= sections, implementations MUST support receiving the "UDP/DTLS/SCTP", "TCP/DTLS/SCTP", or "DTLS/SCTP" (for backwards compatibility) profiles.</li>
@@ -1127,7 +1124,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
 <li>The first SDP line MUST be "v=0", as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.1</li>
-<li>The second SDP line MUST be an "o=" line, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.2. The value of the &lt;username&gt; field SHOULD be "-".  The sess-id MUST be representable by a 64-bit signed integer, and the initial value MUST be less than (2**62)-1, as required by <a href="#RFC3264" class="xref">[RFC3264]</a>. It is RECOMMENDED that the sess-id be constructed by generating a 64-bit quantity with the two highest bits being set to zero and the remaining 62 bits being cryptographically random. The value of the &lt;nettype&gt; &lt;addrtype&gt; &lt;unicast-address&gt; tuple SHOULD be set to a non-meaningful address, such as IN IP4 0.0.0.0, to prevent leaking the local address in this field. As mentioned in <a href="#RFC4566" class="xref">[RFC4566]</a>, the entire o= line needs to be unique, but selecting a random number for &lt;sess-id&gt; is sufficient to accomplish this.</li>
+<li>The second SDP line MUST be an "o=" line, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.2. The value of the &lt;username&gt; field SHOULD be "-". The sess-id MUST be representable by a 64-bit signed integer, and the initial value MUST be less than (2**62)-1, as required by <a href="#RFC3264" class="xref">[RFC3264]</a>. It is RECOMMENDED that the sess-id be constructed by generating a 64-bit quantity with the two highest bits being set to zero and the remaining 62 bits being cryptographically random. The value of the &lt;nettype&gt; &lt;addrtype&gt; &lt;unicast-address&gt; tuple SHOULD be set to a non-meaningful address, such as IN IP4 0.0.0.0, to prevent leaking the local address in this field. As mentioned in <a href="#RFC4566" class="xref">[RFC4566]</a>, the entire o= line needs to be unique, but selecting a random number for &lt;sess-id&gt; is sufficient to accomplish this.</li>
 <li>The third SDP line MUST be a "s=" line, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.3; to match the "o=" line, a single dash SHOULD be used as the session name, e.g. "s=-". Note that this differs from the advice in <a href="#RFC4566" class="xref">[RFC4566]</a> which proposes a single space, but as both "o=" and "s=" are meaningless in JSEP, having the same meaningless value seems clearer.</li>
 <li>Session Information ("i="), URI ("u="), Email Address ("e="), Phone Number ("p="), Repeat Times ("r="), and Time Zones ("z=") lines are not useful in this context and SHOULD NOT be included.</li>
 <li>Encryption Keys ("k=") lines do not provide sufficient security and MUST NOT be included.</li>
@@ -1148,7 +1145,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>Unless excluded by the above restrictions, the media formats MUST include the mandatory audio/video codecs as specified in <a href="#RFC7874" class="xref">[RFC7874]</a>, Section 3, and <a href="#RFC7742" class="xref">[RFC7742]</a>, Section 5.</li>
 </ul>
 <p id="rfc.section.5.2.1.p.8">The m= line MUST be followed immediately by a "c=" line, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.7. Again, as no candidates are available yet, the "c=" line must contain the "dummy" value "IN IP4 0.0.0.0", as defined in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 5.1.</p>
-<p><a href="#I-D.ietf-mmusic-sdp-mux-attributes" class="xref">[I-D.ietf-mmusic-sdp-mux-attributes]</a> groups SDP attributes into different categories.  To avoid unnecessary duplication when bundling, attributes of category IDENTICAL or TRANSPORT MUST NOT be repeated in bundled m= sections, repeating the guidance from <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 8.1.  This includes m= sections for which bundling has been negotiated and is still desired, as well as m= sections marked as bundle-only.  </p>
+<p><a href="#I-D.ietf-mmusic-sdp-mux-attributes" class="xref">[I-D.ietf-mmusic-sdp-mux-attributes]</a> groups SDP attributes into different categories. To avoid unnecessary duplication when bundling, attributes of category IDENTICAL or TRANSPORT MUST NOT be repeated in bundled m= sections, repeating the guidance from <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 8.1. This includes m= sections for which bundling has been negotiated and is still desired, as well as m= sections marked as bundle-only.</p>
 <p id="rfc.section.5.2.1.p.10">The following attributes, which are of a category other than IDENTICAL or TRANSPORT, MUST be included in each m= section:</p>
 <p></p>
 
@@ -1265,7 +1262,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </h4>
 <p id="rfc.section.5.2.3.2.p.1">Silence suppression, also known as discontinuous transmission ("DTX"), can reduce the bandwidth used for audio by switching to a special encoding when voice activity is not detected, at the cost of some fidelity.</p>
 <p id="rfc.section.5.2.3.2.p.2">If the "VoiceActivityDetection" option is specified, with a value of "true", the offer MUST indicate support for silence suppression in the audio it receives by including comfort noise ("CN") codecs for each offered audio codec, as specified in <a href="#RFC3389" class="xref">[RFC3389]</a>, Section 5.1, except for codecs that have their own internal silence suppression support. For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is desired. For example, when using the Opus codec <a href="#RFC6716" class="xref">[RFC6716]</a>, the "usedtx=1" parameter, specified in <a href="#RFC7587" class="xref">[RFC7587]</a>, would be used in the offer.</p>
-<p id="rfc.section.5.2.3.2.p.3">If the "VoiceActivityDetection" option is specified, with a value of "false", the JSEP implementation MUST NOT emit "CN" codecs. For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is not desired.  For example, when using the Opus codec, the "usedtx=0" parameter would be specified in the offer. In addition, the implementation MUST NOT use silence suppression for media it generates, regardless of whether the "CN" codecs or related fmtp parameters appear in the peer's description. The impact of these rules is that silence suppression in JSEP depends on mutual agreement of both sides, which ensures consistent handling regardless of which codec is used.  </p>
+<p id="rfc.section.5.2.3.2.p.3">If the "VoiceActivityDetection" option is specified, with a value of "false", the JSEP implementation MUST NOT emit "CN" codecs. For codecs that have their own internal silence suppression support, the appropriate fmtp parameters for that codec MUST be specified to indicate that silence suppression for received audio is not desired.  For example, when using the Opus codec, the "usedtx=0" parameter would be specified in the offer. In addition, the implementation MUST NOT use silence suppression for media it generates, regardless of whether the "CN" codecs or related fmtp parameters appear in the peer's description.  The impact of these rules is that silence suppression in JSEP depends on mutual agreement of both sides, which ensures consistent handling regardless of which codec is used.</p>
 <p id="rfc.section.5.2.3.2.p.4">The "VoiceActivityDetection" option does not have any impact on the setting of the "vad" value in the signaling of the client to mixer audio level header extension described in <a href="#RFC6464" class="xref">[RFC6464]</a>, Section 4.</p>
 <h2 id="rfc.section.5.3">
 <a href="#rfc.section.5.3">5.3.</a> <a href="#sec.generating-an-answer" id="sec.generating-an-answer">Generating an Answer</a>
@@ -1330,7 +1327,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </pre>
 <p></p>
 <p id="rfc.section.5.3.1.p.13">The <a href="#sec.detailed-example" class="xref">Section 7.2</a> example later in this document shows a more involved case of "LS" group generation.</p>
-<p id="rfc.section.5.3.1.p.14">The next step is to generate m= sections for each m= section that is present in the remote offer, as specified in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6. For the purposes of this discussion, any session-level attributes in the offer that are also valid as media-level attributes are considered to be present in each m= section.  Each offered m= section will have an associated RtpTransceiver, as described in <a href="#sec.applying-a-remote-desc" class="xref">Section 5.10</a>. If there are more RtpTransceivers than there are m= sections, the unmatched RtpTransceivers will need to be associated in a subsequent offer.</p>
+<p id="rfc.section.5.3.1.p.14">The next step is to generate m= sections for each m= section that is present in the remote offer, as specified in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6. For the purposes of this discussion, any session-level attributes in the offer that are also valid as media-level attributes are considered to be present in each m= section. Each offered m= section will have an associated RtpTransceiver, as described in <a href="#sec.applying-a-remote-desc" class="xref">Section 5.10</a>. If there are more RtpTransceivers than there are m= sections, the unmatched RtpTransceivers will need to be associated in a subsequent offer.</p>
 <p id="rfc.section.5.3.1.p.15">For each offered m= section, if any of the following conditions are true, the corresponding m= section in the answer MUST be marked as rejected by setting the port in the m= line to zero, as indicated in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6, and further processing for this m= section can be skipped: </p>
 
 <ul>
@@ -1346,7 +1343,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>The &lt;proto&gt; field MUST be set to exactly match the &lt;proto&gt; field for the corresponding m= line in the offer.</li>
 <li>If codec preferences have been set for the associated transceiver, media formats MUST be generated in the corresponding order, regardless of what was offered, and MUST exclude any codecs not present in the codec preferences.</li>
 <li>Otherwise, the media formats on the m= line MUST be generated in the same order as those offered in the current remote description, excluding any currently unsupported formats. Any currently available media formats that are not present in the current remote description MUST be added after all existing formats.</li>
-<li>In either case, the media formats in the answer MUST include at least one format that is present in the offer, but MAY include formats that are locally supported but not present in the offer, as mentioned in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6.1. If no common format exists, the m= section is rejected as described above.  </li>
+<li>In either case, the media formats in the answer MUST include at least one format that is present in the offer, but MAY include formats that are locally supported but not present in the offer, as mentioned in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6.1. If no common format exists, the m= section is rejected as described above.</li>
 </ul>
 <p id="rfc.section.5.3.1.p.17">The m= line MUST be followed immediately by a "c=" line, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.7. Again, as no candidates are available yet, the "c=" line must contain the "dummy" value "IN IP4 0.0.0.0", as defined in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 5.1.</p>
 <p id="rfc.section.5.3.1.p.18">If the offer supports bundle, all m= sections to be bundled must use the same ICE credentials and candidates; all m= sections not being bundled must use unique ICE credentials and candidates. Each m= section MUST contain the following attributes (which are of attribute types other than IDENTICAL and TRANSPORT): </p>
@@ -1373,7 +1370,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
 <li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4.</li>
 <li>For each desired digest algorithm, one or more "a=fingerprint" lines for each of the endpoint's certificates, as specified in <a href="#RFC8122" class="xref">[RFC8122]</a>, Section 5.</li>
-<li>An "a=setup" line, as specified in <a href="#RFC4145" class="xref">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763" class="xref">[RFC5763]</a>, Section 5. The role value in the answer MUST be "active" or "passive". When the offer contains the "actpass" value, as will always be the case with JSEP endpoints, the answerer SHOULD use the "active" role.  Offers from non-JSEP endpoints MAY send other values for "a=setup", in which case the answer MUST use a value consistent with the value in the offer.</li>
+<li>An "a=setup" line, as specified in <a href="#RFC4145" class="xref">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763" class="xref">[RFC5763]</a>, Section 5. The role value in the answer MUST be "active" or "passive". When the offer contains the "actpass" value, as will always be the case with JSEP endpoints, the answerer SHOULD use the "active" role. Offers from non-JSEP endpoints MAY send other values for "a=setup", in which case the answer MUST use a value consistent with the value in the offer.</li>
 <li>An "a=tls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a>, Section 5.3.</li>
 <li>If present in the offer, an "a=rtcp-mux" line, as specified in <a href="#RFC5761" class="xref">[RFC5761]</a>, Section 5.1.3. Otherwise, an "a=rtcp" line, as specified in <a href="#RFC3605" class="xref">[RFC3605]</a>, Section 2.1, containing the dummy value "9 IN IP4 0.0.0.0" (because no candidates have yet been gathered).</li>
 <li>If present in the offer, an "a=rtcp-rsize" line, as specified in <a href="#RFC5506" class="xref">[RFC5506]</a>, Section 5.</li>
@@ -1444,7 +1441,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </li>
 <li>If the type is not correct for the current state, processing MUST stop and an error MUST be returned.</li>
 <li>The SessionDescription is then checked to ensure that its contents are identical to those generated in the last call to createOffer/createAnswer, and thus have not been altered, as discussed in <a href="#sec.modifying-sdp" class="xref">Section 5.4</a>; otherwise, processing MUST stop and an error MUST be returned.</li>
-<li>Next, the SessionDescription is parsed into a data structure, as described in <a href="#sec.parsing-a-desc" class="xref">Section 5.8</a> below. </li>
+<li>Next, the SessionDescription is parsed into a data structure, as described in <a href="#sec.parsing-a-desc" class="xref">Section 5.8</a> below.</li>
 <li>Finally, the parsed SessionDescription is applied as described in <a href="#sec.applying-a-local-desc" class="xref">Section 5.9</a> below.</li>
 </ul>
 <h2 id="rfc.section.5.6">
@@ -1466,9 +1463,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h2 id="rfc.section.5.7">
 <a href="#rfc.section.5.7">5.7.</a> <a href="#sec.processing-a-rollback" id="sec.processing-a-rollback">Processing a Rollback</a>
 </h2>
-<p id="rfc.section.5.7.p.1">A rollback may be performed if the PeerConnection is in any state except for "stable". This means that both offers and provisional answers can be rolled back. Rollback can only be used to cancel proposed changes; there is no support for rolling back from a stable state to a previous stable state.  If a rollback is attempted in the "stable" state, processing MUST stop and an error MUST be returned.  Note that this implies that once the answerer has performed setLocalDescription with his answer, this cannot be rolled back.</p>
+<p id="rfc.section.5.7.p.1">A rollback may be performed if the PeerConnection is in any state except for "stable". This means that both offers and provisional answers can be rolled back. Rollback can only be used to cancel proposed changes; there is no support for rolling back from a stable state to a previous stable state. If a rollback is attempted in the "stable" state, processing MUST stop and an error MUST be returned. Note that this implies that once the answerer has performed setLocalDescription with his answer, this cannot be rolled back.</p>
 <p id="rfc.section.5.7.p.2">The effect of rollback MUST be the same regardless of whether setLocalDescription or setRemoteDescription is called.</p>
-<p id="rfc.section.5.7.p.3">In order to process rollback, a JSEP implementation abandons the current offer/answer transaction, sets the signaling state to "stable", and sets the pending local and/or remote description (see <a href="#sec.pendinglocaldescription" class="xref">Section 4.1.12</a> and <a href="#sec.pendingremotedescription" class="xref">Section 4.1.14</a>) to null.  Any resources or candidates that were allocated by the abandoned local description are discarded; any media that is received is processed according to the previous local and remote descriptions.</p>
+<p id="rfc.section.5.7.p.3">In order to process rollback, a JSEP implementation abandons the current offer/answer transaction, sets the signaling state to "stable", and sets the pending local and/or remote description (see <a href="#sec.pendinglocaldescription" class="xref">Section 4.1.12</a> and <a href="#sec.pendingremotedescription" class="xref">Section 4.1.14</a>) to null. Any resources or candidates that were allocated by the abandoned local description are discarded; any media that is received is processed according to the previous local and remote descriptions.</p>
 <p id="rfc.section.5.7.p.4">A rollback disassociates any RtpTransceivers that were associated with m= sections by the application of the rolled-back session description (see <a href="#sec.applying-a-remote-desc" class="xref">Section 5.10</a> and <a href="#sec.applying-a-local-desc" class="xref">Section 5.9</a>). This means that some RtpTransceivers that were previously associated will no longer be associated with any m= section; in such cases, the value of the RtpTransceiver's mid property MUST be set to null, and the mapping between the transceiver and its m= section index MUST be discarded. RtpTransceivers that were created by applying a remote offer that was subsequently rolled back MUST be stopped and removed from the PeerConnection. However, a RtpTransceiver MUST NOT be removed if a track was attached to the RtpTransceiver via the addTrack method. This is so that an application may call addTrack, then call setRemoteDescription with an offer, then roll back that offer, then call createOffer and have a m= section for the added track appear in the generated offer.</p>
 <h2 id="rfc.section.5.8">
 <a href="#rfc.section.5.8">5.8.</a> <a href="#sec.parsing-a-desc" id="sec.parsing-a-desc">Parsing a Session Description</a>
@@ -1565,7 +1562,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <ul>
 <li>For each m= section, valid values for each of the mandatory-to-use features enumerated in <a href="#sec.usage-requirements" class="xref">Section 5.1.1</a> MUST be present.  These values MAY either be present at the media level, or inherited from the session level.  <ul>
 <li>ICE ufrag and password values, which MUST comply with the size limits specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4.</li>
-<li>tls-id value, which MUST be set according to <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a>, Section 5. If this is a re-offer or a response to a re-offer and the tls-id value is different from that presently in use, the DTLS connection is not being continued and the remote description MUST be part of an ICE restart, together with new ufrag and password values.  </li>
+<li>tls-id value, which MUST be set according to <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a>, Section 5. If this is a re-offer or a response to a re-offer and the tls-id value is different from that presently in use, the DTLS connection is not being continued and the remote description MUST be part of an ICE restart, together with new ufrag and password values.</li>
 <li>DTLS setup value, which MUST be set according to the rules specified in <a href="#RFC5763" class="xref">[RFC5763]</a>, Section 5 and MUST be consistent with the selected role of the current DTLS connection, if one exists and is being continued.</li>
 <li>DTLS fingerprint values, where at least one fingerprint MUST be present.</li>
 </ul>
@@ -1592,7 +1589,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>If this m= section is new, begin gathering candidates for it, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.1.1, unless it is definitively being bundled (either this is an offer and the m= section is marked bundle-only, or it is an answer and the m= section is bundled into into another m= section.)</li>
 <li>Or, if the ICE ufrag and password values have changed, trigger the ICE agent to start an ICE restart, and begin gathering new candidates for the m= section as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.1.1.1. If this description is an answer, also start checks on that media section as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.3.1.1.</li>
 <li>If the m= section proto value indicates use of RTP: <ul>
-<li>If there is no RtpTransceiver associated with this m= section, find one and associate it with this m= section according to the following steps.  Note that this situation will only occur when applying an offer.  <ul>
+<li>If there is no RtpTransceiver associated with this m= section, find one and associate it with this m= section according to the following steps. Note that this situation will only occur when applying an offer.  <ul>
 <li>Find the RtpTransceiver that corresponds to this m= section, using the mapping between transceivers and m= section indices established when creating the offer.</li>
 <li>Set the value of this RtpTransceiver's mid property to the MID of the m= section.</li>
 </ul>
@@ -1623,10 +1620,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
 <li>If the ICE ufrag or password changed from the previous remote description: <a href="#RFC5245" class="xref">[RFC5245]</a>.  <ul>
-<li>If the description is of type "offer", the implementation MUST note that an ICE restart is needed, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.1.1.1.  </li>
-<li>If the description is of type "answer" or "pranswer", then check to see if the current local description is an ICE restart, and if not, generate an error.  If the PeerConnection state is "have-remote-pranswer", and the ICE ufrag or password changed from the previous provisional answer, then signal the ICE agent to discard any previous ICE check list state for the m= section.  Finally, signal the ICE agent to begin checks as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.3.1.1.  </li>
+<li>If the description is of type "offer", the implementation MUST note that an ICE restart is needed, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.1.1.1.</li>
+<li>If the description is of type "answer" or "pranswer", then check to see if the current local description is an ICE restart, and if not, generate an error. If the PeerConnection state is "have-remote-pranswer", and the ICE ufrag or password changed from the previous provisional answer, then signal the ICE agent to discard any previous ICE check list state for the m= section. Finally, signal the ICE agent to begin checks as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.3.1.1.</li>
 </ul>
-<p> </p>
 </li>
 <li>If the current local description indicates an ICE restart, and either the ICE ufrag or password has not changed from the previous remote description, as prescribed by <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.2.1.1, generate an error.</li>
 <li>Configure the ICE components associated with this media section to use the supplied ICE remote ufrag and password for their connectivity checks.</li>
@@ -1641,7 +1637,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </ul>
 </li>
 <li>For each specified media format that is also supported by the local implementation, establish a mapping between the specified payload type and the media format, as described in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6.1. Specifically, this means that the implementation records the payload type to be used in outgoing RTP packets when sending each specified media format, as well as the relative preference for each format that is indicated in their ordering. If any indicated media format is not supported by the local implementation, it MUST be ignored.</li>
-<li>For each specified "rtx" media format, establish a mapping between the RTX payload type and its associated primary payload type, as described in <a href="#RFC4588" class="xref">[RFC4588]</a>, Section 4. If any referenced primary payload types are not present, this MUST result in an error. Note that RTX payload types may refer to primary payload types which are not supported by the local media implementation, in which case, the RTX payload type MUST also be ignored.  </li>
+<li>For each specified "rtx" media format, establish a mapping between the RTX payload type and its associated primary payload type, as described in <a href="#RFC4588" class="xref">[RFC4588]</a>, Section 4. If any referenced primary payload types are not present, this MUST result in an error. Note that RTX payload types may refer to primary payload types which are not supported by the local media implementation, in which case, the RTX payload type MUST also be ignored.</li>
 <li>For each specified fmtp parameter that is supported by the local implementation, enable them on the associated media formats.</li>
 <li>For each specified SSRC that is signaled in the m= section, prepare to demux RTP streams intended for this m= section using that SSRC, as described in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 10.2.</li>
 <li>For each specified RTP header extension that is also supported by the local implementation, establish a mapping between the extension ID and URI, as described in <a href="#RFC5285" class="xref">[RFC5285]</a>, Section 5. Specifically, this means that the implementation records the extension ID to be used in outgoing RTP packets when sending each specified header extension. If any indicated RTP header extension is not supported by the local implementation, it MUST be ignored.</li>
@@ -1655,8 +1651,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>For any "RR" or "RS" bandwidth values, handle as specified in <a href="#RFC3556" class="xref">[RFC3556]</a>, Section 2.</li>
 <li>Any specified "CT" bandwidth value MUST be ignored, as the meaning of this construct at the media level is not well defined.</li>
 <li>If the m= section is of type audio: <ul>
-<li>For each specified "CN" media format, configure silence suppression for all supported media formats with the same clockrate, as described in <a href="#RFC3389" class="xref">[RFC3389]</a>, Section 5, except for formats that have their own internal silence suppression mechanisms.  Silence suppression for such formats (e.g., Opus) is controlled via fmtp parameters, as discussed in <a href="#sec.voiceactivitydetection1" class="xref">Section 5.2.3.2</a>.</li>
-<li>For each specified "telephone-event" media format, enable DTMF transmission for all supported media formats with the same clockrate, as described in <a href="#RFC4733" class="xref">[RFC4733]</a>, Section 2.5.1.2.  If there are any supported media formats that do not have a corresponding telephone-event format, disable DTMF transmission for those formats.</li>
+<li>For each specified "CN" media format, configure silence suppression for all supported media formats with the same clockrate, as described in <a href="#RFC3389" class="xref">[RFC3389]</a>, Section 5, except for formats that have their own internal silence suppression mechanisms. Silence suppression for such formats (e.g., Opus) is controlled via fmtp parameters, as discussed in <a href="#sec.voiceactivitydetection1" class="xref">Section 5.2.3.2</a>.</li>
+<li>For each specified "telephone-event" media format, enable DTMF transmission for all supported media formats with the same clockrate, as described in <a href="#RFC4733" class="xref">[RFC4733]</a>, Section 2.5.1.2. If there are any supported media formats that do not have a corresponding telephone-event format, disable DTMF transmission for those formats.</li>
 <li>For any specified "ptime" value, configure the available media formats to use the specified packet size when sending. If the specified size is not supported for a media format, use the next closest value instead.</li>
 </ul>
 </li>
@@ -1672,13 +1668,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
 <li>If the m= section has been rejected (i.e. port is set to zero in the answer), stop any reception or transmission of media for this section, and, unless a non-rejected m= section is bundled with this m= section, discard any associated ICE components, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.2.1.3.</li>
-<li>If the remote DTLS fingerprint has been changed or the tls-id has changed, tear down the DTLS connection. This includes the case when the PeerConnection state is "have-remote-pranswer". If a DTLS connection needs to be torn down but the answer does not indicate an ICE restart or, in the case of "have-remote-pranswer", new ICE credentials, an error MUST be generated. If an ICE restart is performed without a change in tls-id or fingerprint, then the same DTLS connection is continued over the new ICE channel.  Note that although JSEP requires that answerers change the tls-id value if and only if the offerer does, non-JSEP answerers are permitted to change the tls-id as long as the offer contained an ICE restart.  Thus, JSEP implementations which process DTLS data prior to receiving an answer MUST be prepared to receive either a ClientHello or data from the previous DTLS connection.  </li>
+<li>If the remote DTLS fingerprint has been changed or the tls-id has changed, tear down the DTLS connection. This includes the case when the PeerConnection state is "have-remote-pranswer". If a DTLS connection needs to be torn down but the answer does not indicate an ICE restart or, in the case of "have-remote-pranswer", new ICE credentials, an error MUST be generated. If an ICE restart is performed without a change in tls-id or fingerprint, then the same DTLS connection is continued over the new ICE channel. Note that although JSEP requires that answerers change the tls-id value if and only if the offerer does, non-JSEP answerers are permitted to change the tls-id as long as the offer contained an ICE restart. Thus, JSEP implementations which process DTLS data prior to receiving an answer MUST be prepared to receive either a ClientHello or data from the previous DTLS connection.</li>
 <li>If no valid DTLS connection exists, prepare to start a DTLS connection, using the specified roles and fingerprints, on any underlying ICE components, once they are active.</li>
 <li>If the m= section proto value indicates use of RTP: <ul>
 <li>If the m= section references RTCP feedback mechanisms that were not present in the corresponding m= section in the offer, this indicates a negotiation problem and MUST result in an error. However, new media formats and new RTP header extension values are permitted in the answer, as described in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 7, and <a href="#RFC5285" class="xref">[RFC5285]</a>, Section 6.</li>
 <li>If the m= section has RTCP mux enabled, discard the RTCP ICE component, if one exists, and begin or continue muxing RTCP over the RTP ICE component, as specified in <a href="#RFC5761" class="xref">[RFC5761]</a>, Section 5.1.3. Otherwise, prepare to transmit RTCP over the RTCP ICE component; if no RTCP ICE component exists, because RTCP mux was previously enabled, this MUST result in an error.</li>
 <li>If the m= section has reduced-size RTCP enabled, configure the RTCP transmission for this m= section to use reduced-size RTCP, as specified in <a href="#RFC5506" class="xref">[RFC5506]</a>.</li>
-<li>If the directional attribute in the answer indicates that the JSEP implementation should be sending media ("sendonly" for local answers, "recvonly" for remote answers, or "sendrecv" for either type of answer), choose the media format to send as the most preferred media format from the remote description that is also locally supported, as discussed in <a href="#RFC3264" class="xref">[RFC3264]</a>, Sections 6.1 and 7, and start transmitting RTP media using that format once the underlying transport layers have been established.  If an SSRC has not already been chosen for this outgoing RTP stream, choose a random one.  If media is already being transmitted, the same SSRC SHOULD be used unless the clockrate of the new codec is different, in which case a new SSRC MUST be chosen, as specified in <a href="#RFC7160" class="xref">[RFC7160]</a>, Section 3.1.</li>
+<li>If the directional attribute in the answer indicates that the JSEP implementation should be sending media ("sendonly" for local answers, "recvonly" for remote answers, or "sendrecv" for either type of answer), choose the media format to send as the most preferred media format from the remote description that is also locally supported, as discussed in <a href="#RFC3264" class="xref">[RFC3264]</a>, Sections 6.1 and 7, and start transmitting RTP media using that format once the underlying transport layers have been established. If an SSRC has not already been chosen for this outgoing RTP stream, choose a random one. If media is already being transmitted, the same SSRC SHOULD be used unless the clockrate of the new codec is different, in which case a new SSRC MUST be chosen, as specified in <a href="#RFC7160" class="xref">[RFC7160]</a>, Section 3.1.</li>
 <li>The payload type mapping from the remote description is used to determine payload types for the outgoing RTP streams, including the payload type for the send media format chosen above. Any RTP header extensions that were negotiated should be included in the outgoing RTP streams, using the extension mapping from the remote description; if the RID header extension has been negotiated, and RID values are specified, include the RID header extension in the outgoing RTP streams, as indicated in <a href="#I-D.ietf-mmusic-rid" class="xref">[I-D.ietf-mmusic-rid]</a>, Section 4.</li>
 <li>If the m= section is of type audio, and silence suppression was configured for the send media format as a result of processing the remote description, and is also enabled for that format in the local description, use silence suppression for outgoing media, in accordance with the guidance in <a href="#sec.voiceactivitydetection1" class="xref">Section 5.2.3.2</a>. If these conditions are not met, silence suppression MUST NOT be used for outgoing media.</li>
 <li>If simulcast has been negotiated, send the number of Source RTP Streams as specified in <a href="#I-D.ietf-mmusic-sdp-simulcast" class="xref">[I-D.ietf-mmusic-sdp-simulcast]</a>, Section 6.2.2.</li>
@@ -1710,7 +1706,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <a href="#rfc.section.7.1">7.1.</a> <a href="#sec.simple-examples" id="sec.simple-examples">Simple Example</a>
 </h2>
 <p id="rfc.section.7.1.p.1">This section shows a very simple example that sets up a minimal audio / video call between two JSEP endpoints without using trickle ICE. The example in the following section provides a more detailed example of what could happen in a JSEP session.</p>
-<p id="rfc.section.7.1.p.2">The code flow below shows Alice's endpoint initiating the session to Bob's endpoint. The messages from the JavaScript application in Alice's browser to the JavaScript in Bob's browser, abbreviated as AliceJS and BobJS respectively, are assumed to flow over some signaling protocol via a web server. The JavaScript on both Alice's side and Bob's side waits for all candidates before sending the offer or answer, so the offers and answers are complete; trickle ICE is not used. The user agents (JSEP implementations) in Alice and Bob's browsers, abbreviated as AliceUA and BobUA respectively, are using the default bundle policy of "balanced", and the default RTCP mux policy of "require".</p>
+<p id="rfc.section.7.1.p.2">The code flow below shows Alice's endpoint initiating the session to Bob's endpoint. The messages from the JavaScript application in Alice's browser to the JavaScript in Bob's browser, abbreviated as AliceJS and BobJS respectively, are assumed to flow over some signaling protocol via a web server.  The JavaScript on both Alice's side and Bob's side waits for all candidates before sending the offer or answer, so the offers and answers are complete; trickle ICE is not used. The user agents (JSEP implementations) in Alice and Bob's browsers, abbreviated as AliceUA and BobUA respectively, are using the default bundle policy of "balanced", and the default RTCP mux policy of "require".</p>
 <pre>
               
 //                  set up local media state
@@ -1759,7 +1755,7 @@ AliceUA-&gt;BobUA:     media sent from Alice to Bob
 <p></p>
 <p id="rfc.section.7.1.p.4">The SDP for |offer-A1| looks like:</p>
 <pre>
-
+              
 v=0
 o=- 4962303333179871722 1 IN IP4 0.0.0.0
 s=-
@@ -1834,7 +1830,7 @@ a=end-of-candidates
 <p></p>
 <p id="rfc.section.7.1.p.6">The SDP for |answer-A1| looks like:</p>
 <pre>
-
+              
 v=0
 o=- 6729291447651054566 1 IN IP4 0.0.0.0
 s=-
@@ -1995,7 +1991,7 @@ AliceUA-&gt;BobUA:     audio+video+data sent from Alice to Bob
 <p></p>
 <p id="rfc.section.7.2.p.3">The SDP for |offer-B1| looks like:</p>
 <pre>
-
+              
 v=0
 o=- 4962303333179871723 1 IN IP4 0.0.0.0
 s=-
@@ -2041,7 +2037,7 @@ a=bundle-only
 <p></p>
 <p id="rfc.section.7.2.p.5">|offer-B1-candidate-1| looks like:</p>
 <pre>
-
+              
 ufrag ATEn
 index 0
 mid   a1
@@ -2051,7 +2047,7 @@ attr  candidate:1 1 udp 2113929471 203.0.113.100 10100 typ host
 <p></p>
 <p id="rfc.section.7.2.p.7">|offer-B1-candidate-2| looks like:</p>
 <pre>
-
+              
 ufrag ATEn
 index 0
 mid   a1
@@ -2062,7 +2058,7 @@ attr  candidate:1 1 udp 1845494015 198.51.100.100 11100 typ srflx
 <p></p>
 <p id="rfc.section.7.2.p.9">|offer-B1-candidate-3| looks like:</p>
 <pre>
-
+              
 ufrag ATEn
 index 0
 mid   a1
@@ -2073,7 +2069,7 @@ attr  candidate:1 1 udp 255 192.0.2.100 12100 typ relay
 <p></p>
 <p id="rfc.section.7.2.p.11">The SDP for |answer-B1| looks like:</p>
 <pre>
-
+              
 v=0
 o=- 7729291447651054566 1 IN IP4 0.0.0.0
 s=-
@@ -2118,7 +2114,7 @@ a=max-message-size:65536
 <p></p>
 <p id="rfc.section.7.2.p.13">|answer-B1-candidate-1| looks like:</p>
 <pre>
-
+              
 ufrag 7sFv
 index 0
 mid   a1
@@ -2128,7 +2124,7 @@ attr  candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
 <p></p>
 <p id="rfc.section.7.2.p.15">|answer-B1-candidate-2| looks like:</p>
 <pre>
-
+              
 ufrag 7sFv
 index 0
 mid   a1
@@ -2139,7 +2135,7 @@ attr  candidate:1 1 udp 1845494015 198.51.100.200 11200 typ srflx
 <p></p>
 <p id="rfc.section.7.2.p.17">|answer-B1-candidate-3| looks like:</p>
 <pre>
-
+              
 ufrag 7sFv
 index 0
 mid   a1
@@ -2150,7 +2146,7 @@ attr  candidate:1 1 udp 255 192.0.2.200 12200 typ relay
 <p></p>
 <p id="rfc.section.7.2.p.19">The SDP for |offer-B2| is shown below. In addition to the new m= sections for video, both of which are offering FEC, and one of which is offering simulcast, note the increment of the version number in the o= line, changes to the c= line, indicating the local candidate that was selected, and the inclusion of gathered candidates as a=candidate lines.</p>
 <pre>
-
+              
 v=0
 o=- 7729291447651054566 2 IN IP4 0.0.0.0
 s=-
@@ -2246,7 +2242,7 @@ a=msid:81317484-2ed4-49d7-9eb7-1414322a7aae
 <p></p>
 <p id="rfc.section.7.2.p.21">The SDP for |answer-B2| is shown below. In addition to the acceptance of the video m= sections, the use of a=recvonly to indicate one-way video, and the use of a=imageattr to limit the received resolution, note the use of setup:passive to maintain the existing DTLS roles.</p>
 <pre>
-
+              
 v=0
 o=- 4962303333179871723 2 IN IP4 0.0.0.0
 s=-
@@ -2411,7 +2407,7 @@ BobJS-&gt;BobUA:       setRemoteDescription with |answer-C2|
 <p></p>
 <p id="rfc.section.7.3.p.4">The SDP for |offer-C1| looks like:</p>
 <pre>
-
+              
 v=0
 o=- 1070771854436052752 1 IN IP4 0.0.0.0
 s=-
@@ -2471,7 +2467,7 @@ a=bundle-only
 <p></p>
 <p id="rfc.section.7.3.p.6">|offer-C1-candidate-1| looks like:</p>
 <pre>
-
+              
 ufrag 4ZcD
 index 0
 mid   a1
@@ -2482,7 +2478,7 @@ attr  candidate:1 1 udp 255 192.0.2.100 12100 typ relay
 <p></p>
 <p id="rfc.section.7.3.p.8">The SDP for |answer-C1| looks like:</p>
 <pre>
-
+              
 v=0
 o=- 6386516489780559513 1 IN IP4 0.0.0.0
 s=-
@@ -2541,7 +2537,7 @@ a=msid:751f239e-4ae0-c549-aa3d-890de772998b
 <p></p>
 <p id="rfc.section.7.3.p.10">|answer-C1-candidate-1| looks like:</p>
 <pre>
-
+              
 ufrag TpaA
 index 0
 mid   a1
@@ -2552,7 +2548,7 @@ attr  candidate:1 1 udp 255 192.0.2.200 12200 typ relay
 <p></p>
 <p id="rfc.section.7.3.p.12">The SDP for |offer-C2| looks like:</p>
 <pre>
-
+              
 v=0
 o=- 6386516489780559513 2 IN IP4 0.0.0.0
 s=-
@@ -2614,7 +2610,7 @@ a=msid:751f239e-4ae0-c549-aa3d-890de772998b
 <p></p>
 <p id="rfc.section.7.3.p.14">The SDP for |answer-C2| looks like:</p>
 <pre>
-
+              
 v=0
 o=- 1070771854436052752 2 IN IP4 0.0.0.0
 s=-
@@ -2678,8 +2674,8 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <a href="#rfc.section.8">8.</a> <a href="#sec.security-considerations" id="sec.security-considerations">Security Considerations</a>
 </h1>
 <p id="rfc.section.8.p.1">The IETF has published separate documents <a href="#I-D.ietf-rtcweb-security-arch" class="xref">[I-D.ietf-rtcweb-security-arch]</a> <a href="#I-D.ietf-rtcweb-security" class="xref">[I-D.ietf-rtcweb-security]</a> describing the security architecture for WebRTC as a whole. The remainder of this section describes security considerations for this document.</p>
-<p id="rfc.section.8.p.2">While formally the JSEP interface is an API, it is better to think of it is an Internet protocol, with the application JavaScript being untrustworthy from the perspective of the JSEP implementation. Thus, the threat model of <a href="#RFC3552" class="xref">[RFC3552]</a> applies. In particular, JavaScript can call the API in any order and with any inputs, including malicious ones.  This is particularly relevant when we consider the SDP which is passed to setLocalDescription(). While correct API usage requires that the application pass in SDP which was derived from createOffer() or createAnswer(), there is no guarantee that applications do so. The JSEP implementation MUST be prepared for the JavaScript to pass in bogus data instead.</p>
-<p id="rfc.section.8.p.3">Conversely, the application programmer needs to be aware that the JavaScript does not have complete control of endpoint behavior. One case that bears particular mention is that editing ICE candidates out of the SDP or suppressing trickled candidates does not have the expected behavior: implementations will still perform checks from those candidates even if they are not sent to the other side.  Thus, for instance, it is not possible to prevent the remote peer from learning your public IP address by removing server reflexive candidates. Applications which wish to conceal their public IP address should instead configure the ICE agent to use only relay candidates.</p>
+<p id="rfc.section.8.p.2">While formally the JSEP interface is an API, it is better to think of it is an Internet protocol, with the application JavaScript being untrustworthy from the perspective of the JSEP implementation. Thus, the threat model of <a href="#RFC3552" class="xref">[RFC3552]</a> applies. In particular, JavaScript can call the API in any order and with any inputs, including malicious ones. This is particularly relevant when we consider the SDP which is passed to setLocalDescription(). While correct API usage requires that the application pass in SDP which was derived from createOffer() or createAnswer(), there is no guarantee that applications do so. The JSEP implementation MUST be prepared for the JavaScript to pass in bogus data instead.</p>
+<p id="rfc.section.8.p.3">Conversely, the application programmer needs to be aware that the JavaScript does not have complete control of endpoint behavior. One case that bears particular mention is that editing ICE candidates out of the SDP or suppressing trickled candidates does not have the expected behavior: implementations will still perform checks from those candidates even if they are not sent to the other side. Thus, for instance, it is not possible to prevent the remote peer from learning your public IP address by removing server reflexive candidates. Applications which wish to conceal their public IP address should instead configure the ICE agent to use only relay candidates.</p>
 <h1 id="rfc.section.9">
 <a href="#rfc.section.9">9.</a> <a href="#sec.iana-considerations" id="sec.iana-considerations">IANA Considerations</a>
 </h1>
@@ -3158,7 +3154,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <ul>
 <li>Clarify rollback handling, and treat it similarly to other setLocal/setRemote usages.</li>
 <li>Adopt a first-fit policy for handling multiple remote a=imageattr attributes.</li>
-<li>Clarify that a session description with zero m= sections is legal.  </li>
+<li>Clarify that a session description with zero m= sections is legal.</li>
 </ul>
 
 <p> </p>
