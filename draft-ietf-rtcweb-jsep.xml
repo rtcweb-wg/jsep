@@ -3009,6 +3009,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             section is bundled into another m= section, it still MUST
             NOT contain any ICE credentials.</t>
 
+            <t>Each "a=tls-id" line MUST stay the same unless the
+            offerer's "a=tls-id" line changed, in which case a new
+            "a=tls-id" value MUST be created, as described in
+            <xref target="I-D.ietf-mmusic-dtls-sdp" />, Section
+            5.2.</t>
+
             <t>Each "a=setup" line MUST use an "active" or "passive"
             role value consistent with the existing DTLS association,
             if the association is being continued by the offerer.</t>
@@ -3553,12 +3559,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>tls-id value, which MUST be set according to
               <xref target="I-D.ietf-mmusic-dtls-sdp" />, Section 5. If
-              this is a re-offer and the tls-id value is different
+              this is a re-offer or a response to a re-offer
+              and the tls-id value is different
               from that presently in use, the DTLS connection is not
               being continued and the remote description MUST be part
               of an ICE restart, together with new ufrag and password
-              values. If this is an answer, the tls-id value, if
-              present, MUST be the same as in the offer.</t>
+              values.
+              </t>
 
               <t>DTLS setup value, which MUST be set according to the
               rules specified in
@@ -3947,7 +3954,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           the case of "have-remote-pranswer", new ICE credentials, an
           error MUST be generated. If an ICE restart is performed
           without a change in tls-id or fingerprint, then the same
-          DTLS connection is continued over the new ICE channel.</t>
+          DTLS connection is continued over the new ICE channel.
+          Note that although JSEP requires that answerers
+          change the tls-id value if and only if the offerer does,
+          non-JSEP answerers are permitted to change the
+          tls-id as long as the offer contained an ICE restart.
+          Thus, JSEP implementations which process DTLS data prior
+          to receiving an answer MUST be prepared to receive either
+          a ClientHello or data from the previous DTLS connection.
+          </t>
 
           <t>If no valid DTLS connection exists, prepare to start a
           DTLS connection, using the specified roles and fingerprints,
@@ -4219,7 +4234,7 @@ a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-a=tls-id:1
+a=tls-id:91bbf309c0990a6bec11e38ba2933cee
 a=rtcp:10101 IN IP4 203.0.113.100
 a=rtcp-mux
 a=rtcp-rsize
@@ -4251,7 +4266,7 @@ a=fingerprint:sha-256
               19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-a=tls-id:1
+a=tls-id:91bbf309c0990a6bec11e38ba2933cee
 a=rtcp:10103 IN IP4 203.0.113.100
 a=rtcp-mux
 a=rtcp-rsize
@@ -4299,7 +4314,7 @@ a=fingerprint:sha-256
               6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
               DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
-a=tls-id:1
+a=tls-id:eec3392ab83e11ceb6a0990c903fbb19
 a=rtcp-mux
 a=rtcp-rsize
 a=candidate:1 1 udp 2113929471 203.0.113.200 10200 typ host
@@ -4478,7 +4493,7 @@ a=fingerprint:sha-256
               29:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:actpass
-a=tls-id:1
+a=tls-id:17f0f4ba8a5f1213faca591b58ba52a7
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -4576,7 +4591,7 @@ a=fingerprint:sha-256
               7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
               DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:active
-a=tls-id:1
+a=tls-id:7a25ab85b195acaf3121f5a8ab4f0f71
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -4679,7 +4694,7 @@ a=fingerprint:sha-256
               7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:
               DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08
 a=setup:actpass
-a=tls-id:1
+a=tls-id:7a25ab85b195acaf3121f5a8ab4f0f71
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -4784,7 +4799,7 @@ a=fingerprint:sha-256
               29:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:
               BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2
 a=setup:passive
-a=tls-id:1
+a=tls-id:17f0f4ba8a5f1213faca591b58ba52a7
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -4982,7 +4997,7 @@ a=fingerprint:sha-256
               C4:68:F8:77:6A:44:F1:98:6D:7C:9F:47:EB:E3:34:A4:
               0A:AA:2D:49:08:28:70:2E:1F:AE:18:7D:4E:3E:66:BF
 a=setup:actpass
-a=tls-id:1
+a=tls-id:9e5b948ade9c3d41de6617b68f769e55
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -5063,7 +5078,7 @@ a=fingerprint:sha-256
               A2:F3:A5:6D:4C:8C:1E:B2:62:10:4A:F6:70:61:C4:FC:
               3C:E0:01:D6:F3:24:80:74:DA:7C:3E:50:18:7B:CE:4D
 a=setup:active
-a=tls-id:1
+a=tls-id:55e967f86b7166ed14d3c9eda849b5e9
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -5143,7 +5158,7 @@ a=fingerprint:sha-256
               A2:F3:A5:6D:4C:8C:1E:B2:62:10:4A:F6:70:61:C4:FC:
               3C:E0:01:D6:F3:24:80:74:DA:7C:3E:50:18:7B:CE:4D
 a=setup:actpass
-a=tls-id:1
+a=tls-id:55e967f86b7166ed14d3c9eda849b5e9
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
@@ -5210,7 +5225,7 @@ a=fingerprint:sha-256
               C4:68:F8:77:6A:44:F1:98:6D:7C:9F:47:EB:E3:34:A4:
               0A:AA:2D:49:08:28:70:2E:1F:AE:18:7D:4E:3E:66:BF
 a=setup:passive
-a=tls-id:1
+a=tls-id:9e5b948ade9c3d41de6617b68f769e55
 a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize

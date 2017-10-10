@@ -73,7 +73,7 @@ class PeerConnection:
     a=ice-pwd:{0[ice_pwd]}
     a=fingerprint:sha-256 {0[dtls_fingerprint]}
     a=setup:{0[dtls_dir]}
-    a=tls-id:1
+    a=tls-id:{0[tls_id]}
     a=rtcp:{0[default_rtcp]} IN IP4 {0[default_ip]}
     a=rtcp-mux
     a=rtcp-mux-only
@@ -88,12 +88,13 @@ class PeerConnection:
   END_OF_CANDIDATES_SDP = 'a=end-of-candidates\n'
 
   def __init__(self, session_id, trickle, bundle_policy, mux_policy,
-               ip_last_quad, fingerprint, m_sections):
+               ip_last_quad, fingerprint, tls_id, m_sections):
     self.session_id = session_id
     self.trickle = trickle
     self.bundle_policy = bundle_policy
     self.mux_policy = mux_policy
     self.fingerprint = fingerprint
+    self.tls_id = tls_id
     self.m_sections = m_sections
     # IETF-approved example IPs
     self.host_ip = '203.0.113.' + str(ip_last_quad)
@@ -223,6 +224,7 @@ class PeerConnection:
     copy = m_section.copy()
     self.select_default_candidates(copy, bundle_only, num_components)
     copy['dtls_fingerprint'] = self.fingerprint
+    copy['tls_id'] = self.tls_id
     # always use actpass in offers
     if stype == 'offer':
       copy['dtls_dir'] = 'actpass'
@@ -412,9 +414,11 @@ def simple_example(draft):
       'ice_pwd': 'mqyWsAjvtKwTGnvhPztQ9mIf', 'dtls_dir': 'passive' }
   ]
   fp1 = '19:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2'
+  tid1 = '91bbf309c0990a6bec11e38ba2933cee'
   pc1 = PeerConnection(session_id = '4962303333179871722', trickle = False,
                        bundle_policy = 'balanced', mux_policy = 'negotiate',
-                       ip_last_quad = 100, fingerprint = fp1, m_sections = ms1)
+                       ip_last_quad = 100, fingerprint = fp1, tls_id = tid1,
+                       m_sections = ms1)
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
@@ -428,9 +432,11 @@ def simple_example(draft):
       'host_port': 10200 }
   ]
   fp2 = '6B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08'
+  tid2 = 'eec3392ab83e11ceb6a0990c903fbb19'
   pc2 = PeerConnection(session_id = '6729291447651054566', trickle = False,
                        bundle_policy = 'balanced', mux_policy = 'negotiate',
-                       ip_last_quad = 200, fingerprint = fp2, m_sections = ms2)
+                       ip_last_quad = 200, fingerprint = fp2, tls_id = tid2,
+                       m_sections = ms2)
 
   o = pc1.create_offer()
   output_desc('offer-A1', o, draft)
@@ -448,9 +454,11 @@ def complex_example(draft):
     { 'type': 'application', 'mid': 'd1' }
   ]
   fp1 = '29:E2:1C:3B:4B:9F:81:E6:B8:5C:F4:A5:A8:D8:73:04:BB:05:2F:70:9F:04:A9:0E:05:E9:26:33:E8:70:88:A2'
+  tid1 = '17f0f4ba8a5f1213faca591b58ba52a7'
   pc1 = PeerConnection(session_id = '4962303333179871723', trickle = True,
                        bundle_policy = 'max-bundle', mux_policy = 'require',
-                       ip_last_quad = 100, fingerprint = fp1, m_sections = ms1)
+                       ip_last_quad = 100, fingerprint = fp1, tls_id = tid1,
+                       m_sections = ms1)
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
@@ -462,9 +470,11 @@ def complex_example(draft):
     { 'type': 'application', 'mid': 'd1' }
   ]
   fp2 = '7B:8B:F0:65:5F:78:E2:51:3B:AC:6F:F3:3F:46:1B:35:DC:B8:5F:64:1A:24:C2:43:F0:A1:58:D0:A1:2C:19:08'
+  tid2 = '7a25ab85b195acaf3121f5a8ab4f0f71'
   pc2 = PeerConnection(session_id = '7729291447651054566', trickle = True,
                        bundle_policy = 'max-bundle', mux_policy = 'require',
-                       ip_last_quad = 200, fingerprint = fp2, m_sections = ms2)
+                       ip_last_quad = 200, fingerprint = fp2, tls_id = tid2,
+                       m_sections = ms2)
 
   o = pc1.create_offer()
   output_desc('offer-B1', o, draft)
@@ -508,9 +518,11 @@ def warmup_example(draft):
       'mst': 'ac701365-eb06-42df-cc93-7f22bc308789' }
   ]
   fp1  = 'C4:68:F8:77:6A:44:F1:98:6D:7C:9F:47:EB:E3:34:A4:0A:AA:2D:49:08:28:70:2E:1F:AE:18:7D:4E:3E:66:BF'
+  tid1 = '9e5b948ade9c3d41de6617b68f769e55'
   pc1  = PeerConnection(session_id = '1070771854436052752', trickle = True,
                        bundle_policy = 'max-bundle', mux_policy = 'require',
-                       ip_last_quad = 100, fingerprint = fp1, m_sections = ms1)
+                       ip_last_quad = 100, fingerprint = fp1, tls_id = tid1,
+                       m_sections = ms1)
 
   ms2 = [
     { 'type': 'audio', 'mid': 'a1',
@@ -526,9 +538,11 @@ def warmup_example(draft):
       'direction': 'sendonly' }
   ]
   fp2  = 'A2:F3:A5:6D:4C:8C:1E:B2:62:10:4A:F6:70:61:C4:FC:3C:E0:01:D6:F3:24:80:74:DA:7C:3E:50:18:7B:CE:4D'
+  tid2 = '55e967f86b7166ed14d3c9eda849b5e9'
   pc2  = PeerConnection(session_id = '6386516489780559513', trickle = True,
                        bundle_policy = 'max-bundle', mux_policy = 'require',
-                       ip_last_quad = 200, fingerprint = fp2, m_sections = ms2)
+                       ip_last_quad = 200, fingerprint = fp2, tls_id = tid2,
+                       m_sections = ms2)
 
   o = pc1.create_offer()
   output_desc('offer-C1', o, draft)
