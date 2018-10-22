@@ -286,6 +286,7 @@ li, p {
 <link href="#rfc.section.3.5.2.1" rel="Chapter" title="3.5.2.1 ICE Candidate Format">
 <link href="#rfc.section.3.5.3" rel="Chapter" title="3.5.3 ICE Candidate Policy">
 <link href="#rfc.section.3.5.4" rel="Chapter" title="3.5.4 ICE Candidate Pool">
+<link href="#rfc.section.3.5.5" rel="Chapter" title="3.5.5 ICE Versions">
 <link href="#rfc.section.3.6" rel="Chapter" title="3.6 Video Size Negotiation">
 <link href="#rfc.section.3.6.1" rel="Chapter" title="3.6.1 Creating an imageattr Attribute">
 <link href="#rfc.section.3.6.2" rel="Chapter" title="3.6.2 Interpreting imageattr Attributes">
@@ -368,7 +369,7 @@ li, p {
 
   <meta name="dct.creator" content="Uberti, J., Jennings, C., and E. Rescorla, Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-rtcweb-jsep-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-13" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-22" />
   <meta name="dct.abstract" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
   <meta name="description" content="This document describes the mechanisms for allowing a JavaScript application to control the signaling plane of a multimedia session via the interface specified in the W3C RTCPeerConnection API, and discusses how this relates to existing signaling protocols." />
 
@@ -392,7 +393,7 @@ li, p {
 <td class="right">C. Jennings</td>
 </tr>
 <tr>
-<td class="left">Expires: April 16, 2019</td>
+<td class="left">Expires: April 25, 2019</td>
 <td class="right">Cisco</td>
 </tr>
 <tr>
@@ -405,7 +406,7 @@ li, p {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">October 13, 2018</td>
+<td class="right">October 22, 2018</td>
 </tr>
 
     	
@@ -421,7 +422,7 @@ li, p {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 16, 2019.</p>
+<p>This Internet-Draft will expire on April 25, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -466,6 +467,8 @@ li, p {
 </ul><li>3.5.3.   <a href="#rfc.section.3.5.3">ICE Candidate Policy</a>
 </li>
 <li>3.5.4.   <a href="#rfc.section.3.5.4">ICE Candidate Pool</a>
+</li>
+<li>3.5.5.   <a href="#rfc.section.3.5.5">ICE Versions</a>
 </li>
 </ul><li>3.6.   <a href="#rfc.section.3.6">Video Size Negotiation</a>
 </li>
@@ -633,7 +636,7 @@ li, p {
 <p id="rfc.section.1.1.p.3">In this document, the use of JSEP is described as if it always occurs between two JSEP endpoints. Note though in many cases it will actually be between a JSEP endpoint and some kind of server, such as a gateway or MCU. This distinction is invisible to the JSEP endpoint; it just follows the instructions it is given via the API.</p>
 <p id="rfc.section.1.1.p.4">JSEP's handling of session descriptions is simple and straightforward. Whenever an offer/answer exchange is needed, the initiating side creates an offer by calling a createOffer() API. The application then uses that offer to set up its local config via the setLocalDescription() API. The offer is finally sent off to the remote side over its preferred signaling mechanism (e.g., WebSockets); upon receipt of that offer, the remote party installs it using the setRemoteDescription() API.</p>
 <p id="rfc.section.1.1.p.5">To complete the offer/answer exchange, the remote party uses the createAnswer() API to generate an appropriate answer, applies it using the setLocalDescription() API, and sends the answer back to the initiator over the signaling channel. When the initiator gets that answer, it installs it using the setRemoteDescription() API, and initial setup is complete. This process can be repeated for additional offer/answer exchanges.</p>
-<p id="rfc.section.1.1.p.6">Regarding ICE <a href="#RFC5245" class="xref">[RFC5245]</a>, JSEP decouples the ICE state machine from the overall signaling state machine, as the ICE state machine must remain in the JSEP implementation, because only the implementation has the necessary knowledge of candidates and other transport information. Performing this separation provides additional flexibility in protocols that decouple session descriptions from transport. For instance, in traditional SIP, each offer or answer is self-contained, including both the session descriptions and the transport information. However, <a href="#I-D.ietf-mmusic-trickle-ice-sip" class="xref">[I-D.ietf-mmusic-trickle-ice-sip]</a> allows SIP to be used with trickle ICE <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, in which the session description can be sent immediately and the transport information can be sent when available. Sending transport information separately can allow for faster ICE and DTLS startup, since ICE checks can start as soon as any transport information is available rather than waiting for all of it.  JSEP's decoupling of the ICE and signaling state machines allows it to accommodate either model.</p>
+<p id="rfc.section.1.1.p.6">Regarding ICE <a href="#RFC8445" class="xref">[RFC8445]</a>, JSEP decouples the ICE state machine from the overall signaling state machine, as the ICE state machine must remain in the JSEP implementation, because only the implementation has the necessary knowledge of candidates and other transport information. Performing this separation provides additional flexibility in protocols that decouple session descriptions from transport. For instance, in traditional SIP, each offer or answer is self-contained, including both the session descriptions and the transport information. However, <a href="#I-D.ietf-mmusic-trickle-ice-sip" class="xref">[I-D.ietf-mmusic-trickle-ice-sip]</a> allows SIP to be used with trickle ICE <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, in which the session description can be sent immediately and the transport information can be sent when available. Sending transport information separately can allow for faster ICE and DTLS startup, since ICE checks can start as soon as any transport information is available rather than waiting for all of it.  JSEP's decoupling of the ICE and signaling state machines allows it to accommodate either model.</p>
 <p id="rfc.section.1.1.p.7">Through its abstraction of signaling, the JSEP approach does require the application to be aware of the signaling process.  While the application does not need to understand the contents of session descriptions to set up a call, the application must call the right APIs at the right times, convert the session descriptions and ICE information into the defined messages of its chosen signaling protocol, and perform the reverse conversion on the messages it receives from the other side.</p>
 <p id="rfc.section.1.1.p.8">One way to make life easier for the application is to provide a JavaScript library that hides this complexity from the developer; said library would implement a given signaling protocol along with its state machine and serialization code, presenting a higher level call-oriented interface to the application developer. For example, libraries exist to adapt the JSEP API into an API suitable for a SIP or XMPP. Thus, JSEP provides greater control for the experienced developer without forcing any additional complexity on the novice developer.</p>
 <h2 id="rfc.section.1.2">
@@ -781,13 +784,13 @@ setRemote(ANSWER) |                                   |
 <a href="#rfc.section.3.5.2.1">3.5.2.1.</a> <a href="#sec.ice-candidate-format" id="sec.ice-candidate-format">ICE Candidate Format</a>
 </h4>
 <p id="rfc.section.3.5.2.1.p.1">In JSEP, ICE candidates are abstracted by an IceCandidate object, and as with session descriptions, SDP syntax is used for the internal representation.</p>
-<p id="rfc.section.3.5.2.1.p.2">The candidate details are specified in an IceCandidate field, using the same SDP syntax as the "candidate-attribute" field defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.1. Note that this field does not contain an "a=" prefix, as indicated in the following example:</p>
+<p id="rfc.section.3.5.2.1.p.2">The candidate details are specified in an IceCandidate field, using the same SDP syntax as the "candidate-attribute" field defined in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.1. Note that this field does not contain an "a=" prefix, as indicated in the following example:</p>
 <pre>
                 
 candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 </pre>
-<p id="rfc.section.3.5.2.1.p.3">The IceCandidate object contains a field to indicate which ICE ufrag it is associated with, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4. This value is used to determine which session description (and thereby which gathering phase) this IceCandidate belongs to, which helps resolve ambiguities during ICE restarts. If this field is absent in a received IceCandidate (perhaps when communicating with a non-JSEP endpoint), the most recently received session description is assumed.</p>
+<p id="rfc.section.3.5.2.1.p.3">The IceCandidate object contains a field to indicate which ICE ufrag it is associated with, as defined in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.4. This value is used to determine which session description (and thereby which gathering phase) this IceCandidate belongs to, which helps resolve ambiguities during ICE restarts. If this field is absent in a received IceCandidate (perhaps when communicating with a non-JSEP endpoint), the most recently received session description is assumed.</p>
 <p id="rfc.section.3.5.2.1.p.4">The IceCandidate object also contains fields to indicate which m= section it is associated with, which can be identified in one of two ways, either by a m= section index, or a MID. The m= section index is a zero-based index, with index N referring to the N+1th m= section in the session description referenced by this IceCandidate.  The MID is a "media stream identification" value, as defined in <a href="#RFC5888" class="xref">[RFC5888]</a>, Section 4, which provides a more robust way to identify the m= section in the session description, using the MID of the associated RtpTransceiver object (which may have been locally generated by the answerer when interacting with a non-JSEP endpoint that does not support the MID attribute, as discussed in <a href="#sec.applying-a-remote-desc" class="xref">Section 5.10</a> below). If the MID field is present in a received IceCandidate, it MUST be used for identification; otherwise, the m= section index is used instead.</p>
 <p id="rfc.section.3.5.2.1.p.5">When creating an IceCandidate object, JSEP implementations MUST populate each of the candidate, ufrag, m= section index, and MID fields. Implementations MUST also be prepared to receive objects with some fields missing, as mentioned above.</p>
 <h3 id="rfc.section.3.5.3">
@@ -802,6 +805,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.3.5.4.p.1">JSEP applications typically inform the JSEP implementation to begin ICE gathering via the information supplied to setLocalDescription, as the local description indicates the number of ICE components which will be needed and for which candidates must be gathered. However, to accelerate cases where the application knows the number of ICE components to use ahead of time, it may ask the implementation to gather a pool of potential ICE candidates to help ensure rapid media setup.</p>
 <p id="rfc.section.3.5.4.p.2">When setLocalDescription is eventually called, and the JSEP implementation goes to gather the needed ICE candidates, it SHOULD start by checking if any candidates are available in the pool. If there are candidates in the pool, they SHOULD be handed to the application immediately via the ICE candidate event. If the pool becomes depleted, either because a larger-than-expected number of ICE components is used, or because the pool has not had enough time to gather candidates, the remaining candidates are gathered as usual.  This only occurs for the first offer/answer exchange, after which the candidate pool is emptied and no longer used.</p>
 <p id="rfc.section.3.5.4.p.3">One example of where this concept is useful is an application that expects an incoming call at some point in the future, and wants to minimize the time it takes to establish connectivity, to avoid clipping of initial media.  By pre-gathering candidates into the pool, it can exchange and start sending connectivity checks from these candidates almost immediately upon receipt of a call. Note though that by holding on to these pre-gathered candidates, which will be kept alive as long as they may be needed, the application will consume resources on the STUN/TURN servers it is using.</p>
+<h3 id="rfc.section.3.5.5">
+<a href="#rfc.section.3.5.5">3.5.5.</a> ICE Versions</h3>
+<p id="rfc.section.3.5.5.p.1">While this specification formally relies on <a href="#RFC8445" class="xref">[RFC8445]</a>, at the time of its publication, the majority of WebRTC implementations support the version of ICE described in <a href="#RFC5245" class="xref">[RFC5245]</a>. The use of the "ice2" attribute defined in <a href="#RFC8445" class="xref">[RFC8445]</a> can be used to detect the version in use by a remote endpoint and to provide a smooth transition from the older specification to the newer one.  Implementations MUST be able to accept remote descriptions that do not have the "ice2" attribute.</p>
 <h2 id="rfc.section.3.6">
 <a href="#rfc.section.3.6">3.6.</a> <a href="#sec.imageattr" id="sec.imageattr">Video Size Negotiation</a>
 </h2>
@@ -1080,7 +1086,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.1.1.p.1">All session descriptions handled by JSEP implementations, both local and remote, MUST indicate support for the following specifications. If any of these are absent, this omission MUST be treated as an error.  </p>
 
 <ul>
-<li>ICE, as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, MUST be used. Note that the remote endpoint may use a Lite implementation; implementations MUST properly handle remote endpoints which do ICE-Lite.</li>
+<li>ICE, as specified in <a href="#RFC8445" class="xref">[RFC8445]</a>, MUST be used. Note that the remote endpoint may use a Lite implementation; implementations MUST properly handle remote endpoints which do ICE-Lite.</li>
 <li>DTLS <a href="#RFC6347" class="xref">[RFC6347]</a> or DTLS-SRTP <a href="#RFC5763" class="xref">[RFC5763]</a>, MUST be used, as appropriate for the media type, as specified in <a href="#I-D.ietf-rtcweb-security-arch" class="xref">[I-D.ietf-rtcweb-security-arch]</a>
 </li>
 </ul>
@@ -1088,7 +1094,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h3 id="rfc.section.5.1.2">
 <a href="#rfc.section.5.1.2">5.1.2.</a> <a href="#sec.profile-names" id="sec.profile-names">Profile Names and Interoperability</a>
 </h3>
-<p id="rfc.section.5.1.2.p.1">For media m= sections, JSEP implementations MUST support the "UDP/TLS/RTP/SAVPF" profile specified in <a href="#RFC5764" class="xref">[RFC5764]</a>, and MUST indicate this profile for each media m= line they produce in an offer. For data m= sections, implementations MUST support the "UDP/DTLS/SCTP" profile and MUST indicate this profile for each data m= line they produce in an offer. Although these profiles are formally associated with UDP, ICE can select either UDP <a href="#RFC5245" class="xref">[RFC5245]</a> or TCP <a href="#RFC6544" class="xref">[RFC6544]</a> transport depending on network conditions, even when advertising a UDP profile.</p>
+<p id="rfc.section.5.1.2.p.1">For media m= sections, JSEP implementations MUST support the "UDP/TLS/RTP/SAVPF" profile specified in <a href="#RFC5764" class="xref">[RFC5764]</a>, and MUST indicate this profile for each media m= line they produce in an offer. For data m= sections, implementations MUST support the "UDP/DTLS/SCTP" profile and MUST indicate this profile for each data m= line they produce in an offer. Although these profiles are formally associated with UDP, ICE can select either UDP <a href="#RFC8445" class="xref">[RFC8445]</a> or TCP <a href="#RFC6544" class="xref">[RFC6544]</a> transport depending on network conditions, even when advertising a UDP profile.</p>
 <p id="rfc.section.5.1.2.p.2">Unfortunately, in an attempt at compatibility, some endpoints generate other profile strings even when they mean to support one of these profiles. For instance, an endpoint might generate "RTP/AVP" but supply "a=fingerprint" and "a=rtcp-fb" attributes, indicating its willingness to support "UDP/TLS/RTP/SAVPF" or "TCP/TLS/RTP/SAVPF". In order to simplify compatibility with such endpoints, JSEP implementations MUST follow the following rules when processing the media m= sections in a received offer:</p>
 <p></p>
 
@@ -1129,7 +1135,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>Session Information ("i="), URI ("u="), Email Address ("e="), Phone Number ("p="), Repeat Times ("r="), and Time Zones ("z=") lines are not useful in this context and SHOULD NOT be included.</li>
 <li>Encryption Keys ("k=") lines do not provide sufficient security and MUST NOT be included.</li>
 <li>A "t=" line MUST be added, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.9; both &lt;start-time&gt; and &lt;stop-time&gt; SHOULD be set to zero, e.g. "t=0 0".</li>
-<li>An "a=ice-options" line with the "trickle" option MUST be added, as specified in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 4.</li>
+<li>An "a=ice-options" line with the "trickle" and "ice2" options MUST be added, as specified in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 3 and <a href="#RFC8445" class="xref">[RFC8445]</a>, Section 10.</li>
 <li>If WebRTC identity is being used, an "a=identity" line as described in <a href="#I-D.ietf-rtcweb-security-arch" class="xref">[I-D.ietf-rtcweb-security-arch]</a>, Section 5.</li>
 </ul>
 <p id="rfc.section.5.2.1.p.3">The next step is to generate m= sections, as specified in <a href="#RFC4566" class="xref">[RFC4566]</a>, Section 5.14. An m= section is generated for each RtpTransceiver that has been added to the PeerConnection, excluding any stopped RtpTransceivers; this is done in the order the RtpTransceivers were added to the PeerConnection. If there are no such RtpTransceivers, no m= sections are generated; more can be added later, as discussed in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 5.</p>
@@ -1171,7 +1177,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p></p>
 
 <ul>
-<li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4.</li>
+<li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.4.</li>
 <li>For each desired digest algorithm, one or more "a=fingerprint" lines for each of the endpoint's certificates, as specified in <a href="#RFC8122" class="xref">[RFC8122]</a>, Section 5.</li>
 <li>An "a=setup" line, as specified in <a href="#RFC4145" class="xref">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763" class="xref">[RFC5763]</a>, Section 5. The role value in the offer MUST be "actpass".</li>
 <li>An "a=tls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a>, Section 5.2.</li>
@@ -1221,11 +1227,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>If an RtpTransceiver is stopped and is not associated with an m= section, an m= section MUST NOT be generated for it. This prevents adding back RtpTransceivers whose m= sections were recycled and used for a new RtpTransceiver in a previous offer/ answer exchange, as described above.</li>
 <li>If an RtpTransceiver has been stopped and is associated with an m= section, and the m= section is not being recycled as described above, an m= section MUST be generated for it with the port set to zero and all "a=msid" lines removed.</li>
 <li>For RtpTransceivers that are not stopped, the "a=msid" line(s) MUST stay the same if they are present in the current description, regardless of changes to the transceiver's direction or track. If no "a=msid" line is present in the current description, "a=msid" line(s) MUST be generated according to the same rules as for an initial offer.</li>
-<li>Each "m=" and c=" line MUST be filled in with the port, protocol, and address of the default candidate for the m= section, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.3. If ICE checking has already completed for one or more candidate pairs and a candidate pair is in active use, then that pair MUST be used, even if ICE has not yet completed. Note that this differs from the guidance in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.1.2.2, which only refers to offers created when ICE has completed. In each case, if no RTP candidates have yet been gathered, dummy values MUST be used, as described above.</li>
+<li>Each "m=" and c=" line MUST be filled in with the port, protocol, and address of the default candidate for the m= section, as described in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 3.2.1.2. If ICE checking has already completed for one or more candidate pairs and a candidate pair is in active use, then that pair MUST be used, even if ICE has not yet completed. Note that this differs from the guidance in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 3.3.4, which only refers to offers created when ICE has completed. In each case, if no RTP candidates have yet been gathered, dummy values MUST be used, as described above.</li>
 <li>Each "a=mid" line MUST stay the same.</li>
 <li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the ICE configuration has changed (either changes to the supported STUN/TURN servers, or the ICE candidate policy), or the "IceRestart" option ( <a href="#sec.icerestart" class="xref">Section 5.2.3.1</a> was specified. If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.</li>
 <li>If the m= section is not bundled into another m= section, its "a=rtcp" attribute line MUST be filled in with the port and address of the default RTCP candidate, as indicated in <a href="#RFC5761" class="xref">[RFC5761]</a>, Section 5.1.3. If no RTCP candidates have yet been gathered, dummy values MUST be used, as described in the initial offer section above.</li>
-<li>If the m= section is not bundled into another m= section, for each candidate that has been gathered during the most recent gathering phase (see <a href="#sec.ice-gather-overview" class="xref">Section 3.5.1</a>), an "a=candidate" line MUST be added, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.3., paragraph 3.  If candidate gathering for the section has completed, an "a=end-of-candidates" attribute MUST be added, as described in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 9.3.  If the m= section is bundled into another m= section, both "a=candidate" and "a=end-of-candidates" MUST be omitted.</li>
+<li>If the m= section is not bundled into another m= section, for each candidate that has been gathered during the most recent gathering phase (see <a href="#sec.ice-gather-overview" class="xref">Section 3.5.1</a>), an "a=candidate" line MUST be added, as defined in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.1.  If candidate gathering for the section has completed, an "a=end-of-candidates" attribute MUST be added, as described in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 9.3.  If the m= section is bundled into another m= section, both "a=candidate" and "a=end-of-candidates" MUST be omitted.</li>
 <li>For RtpTransceivers that are still present, the "a=rid" lines MUST stay the same.</li>
 <li>For RtpTransceivers that are still present, any "a=simulcast" line MUST stay the same.</li>
 </ul>
@@ -1253,7 +1259,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <h4 id="rfc.section.5.2.3.1">
 <a href="#rfc.section.5.2.3.1">5.2.3.1.</a> <a href="#sec.icerestart" id="sec.icerestart">IceRestart</a>
 </h4>
-<p id="rfc.section.5.2.3.1.p.1">If the "IceRestart" option is specified, with a value of "true", the offer MUST indicate an ICE restart by generating new ICE ufrag and pwd attributes, as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.1.1.1. If this option is specified on an initial offer, it has no effect (since a new ICE ufrag and pwd are already generated).  Similarly, if the ICE configuration has changed, this option has no effect, since new ufrag and pwd attributes will be generated automatically. This option is primarily useful for reestablishing connectivity in cases where failures are detected by the application.</p>
+<p id="rfc.section.5.2.3.1.p.1">If the "IceRestart" option is specified, with a value of "true", the offer MUST indicate an ICE restart by generating new ICE ufrag and pwd attributes, as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 3.4.1.1.1. If this option is specified on an initial offer, it has no effect (since a new ICE ufrag and pwd are already generated).  Similarly, if the ICE configuration has changed, this option has no effect, since new ufrag and pwd attributes will be generated automatically. This option is primarily useful for reestablishing connectivity in cases where failures are detected by the application.</p>
 <h4 id="rfc.section.5.2.3.2">
 <a href="#rfc.section.5.2.3.2">5.2.3.2.</a> <a href="#sec.voiceactivitydetection1" id="sec.voiceactivitydetection1">VoiceActivityDetection</a>
 </h4>
@@ -1270,7 +1276,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 </h3>
 <p id="rfc.section.5.3.1.p.1">When createAnswer is called for the first time after a remote description has been provided, the result is known as the initial answer. If no remote description has been installed, an answer cannot be generated, and an error MUST be returned.</p>
 <p id="rfc.section.5.3.1.p.2">Note that the remote description SDP may not have been created by a JSEP endpoint and may not conform to all the requirements listed in <a href="#sec-create-offer" class="xref">Section 5.2</a>. For many cases, this is not a problem. However, if any mandatory SDP attributes are missing, or functionality listed as mandatory-to-use above is not present, this MUST be treated as an error, and MUST cause the affected m= sections to be marked as rejected.</p>
-<p id="rfc.section.5.3.1.p.3">The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the initial offers section above, except that the "a=ice-options" line, with the "trickle" option as specified in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 4, is only included if such an option was present in the offer.</p>
+<p id="rfc.section.5.3.1.p.3">The first step in generating an initial answer is to generate session-level attributes. The process here is identical to that indicated in the initial offers section above, except that the "a=ice-options" line, with the "trickle" option as specified in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 3, and the "ice2" option as specified in <a href="#RFC8445" class="xref">[RFC8445]</a>, Section 10, is only included if such an option was present in the offer.</p>
 <p id="rfc.section.5.3.1.p.4">The next step is to generate session-level lip sync groups, as defined in <a href="#RFC5888" class="xref">[RFC5888]</a>, Section 7. For each group of type "LS" present in the offer, select the local RtpTransceivers that are referenced by the MID values in the specified group, and determine which of them either reference a common local MediaStream (specified in the calls to addTrack/addTransceiver used to create them), or have no MediaStream to reference because they were not created by addTrack/addTransceiver. If at least two such RtpTransceivers exist, a group of type "LS" with the mid values of these RtpTransceivers MUST be added. Otherwise the offered "LS" group MUST be ignored and no corresponding group generated in the answer.</p>
 <p id="rfc.section.5.3.1.p.5">As a simple example, consider the following offer of a single audio and single video track contained in the same MediaStream. SDP lines not relevant to this example have been removed for clarity. As explained in <a href="#sec-create-offer" class="xref">Section 5.2</a>, a group of type "LS" has been added that references each track's RtpTransceiver.</p>
 <pre>
@@ -1332,6 +1338,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <li>None of the offered media formats are supported and, if applicable, allowed by codec preferences.</li>
 <li>The bundle policy is "max-bundle", and this is not the first m= section or in the same bundle group as the first m= section.</li>
 <li>The bundle policy is "balanced", and this is not the first m= section for this media type or in the same bundle group as the first m= section for this media type.</li>
+<li>This m= section is in a bundle group, and the group's offerer tagged m= section is being rejected due to one of the above reasons. This requires all m= sections in the bundle group to be rejected, as specified in <a href="#I-D.ietf-mmusic-sdp-bundle-negotiation" class="xref">[I-D.ietf-mmusic-sdp-bundle-negotiation]</a>, Section 7.3.3.</li>
 </ul>
 <p id="rfc.section.5.3.1.p.16">Otherwise, each m= section in the answer should then be generated as specified in <a href="#RFC3264" class="xref">[RFC3264]</a>, Section 6.1. For the m= line itself, the following rules must be followed: </p>
 
@@ -1362,7 +1369,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p></p>
 
 <ul>
-<li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4.</li>
+<li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.4.</li>
 <li>For each desired digest algorithm, one or more "a=fingerprint" lines for each of the endpoint's certificates, as specified in <a href="#RFC8122" class="xref">[RFC8122]</a>, Section 5.</li>
 <li>An "a=setup" line, as specified in <a href="#RFC4145" class="xref">[RFC4145]</a>, Section 4, and clarified for use in DTLS-SRTP scenarios in <a href="#RFC5763" class="xref">[RFC5763]</a>, Section 5. The role value in the answer MUST be "active" or "passive". When the offer contains the "actpass" value, as will always be the case with JSEP endpoints, the answerer SHOULD use the "active" role. Offers from non-JSEP endpoints MAY send other values for "a=setup", in which case the answer MUST use a value consistent with the value in the offer.</li>
 <li>An "a=tls-id" line, as specified in <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a>, Section 5.3.</li>
@@ -1397,13 +1404,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
 <li>The "s=" and "t=" lines MUST stay the same.</li>
-<li>Each "m=" and c=" line MUST be filled in with the port and address of the default candidate for the m= section, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.3. Note, however, that the m= line protocol need not match the default candidate, because this protocol value must instead match what was supplied in the offer, as described above.</li>
-<li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the m= section is restarting, in which case new ICE credentials must be created as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.2.1.1. If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.</li>
+<li>Each "m=" and c=" line MUST be filled in with the port and address of the default candidate for the m= section, as described in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 3.2.1.2. Note, however, that the m= line protocol need not match the default candidate, because this protocol value must instead match what was supplied in the offer, as described above.</li>
+<li>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the same, unless the m= section is restarting, in which case new ICE credentials must be created as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 3.4.1.1.1. If the m= section is bundled into another m= section, it still MUST NOT contain any ICE credentials.</li>
 <li>Each "a=tls-id" line MUST stay the same unless the offerer's "a=tls-id" line changed, in which case a new "a=tls-id" value MUST be created, as described in <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a>, Section 5.2.</li>
 <li>Each "a=setup" line MUST use an "active" or "passive" role value consistent with the existing DTLS association, if the association is being continued by the offerer.</li>
 <li>RTCP multiplexing must be used, and an "a=rtcp-mux" line inserted if and only if the m= section previously used RTCP multiplexing.</li>
 <li>If the m= section is not bundled into another m= section and RTCP multiplexing is not active, an "a=rtcp" attribute line MUST be filled in with the port and address of the default RTCP candidate. If no RTCP candidates have yet been gathered, dummy values MUST be used, as described in the initial answer section above.</li>
-<li>If the m= section is not bundled into another m= section, for each candidate that has been gathered during the most recent gathering phase (see <a href="#sec.ice-gather-overview" class="xref">Section 3.5.1</a>), an "a=candidate" line MUST be added, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.3., paragraph 3.  If candidate gathering for the section has completed, an "a=end-of-candidates" attribute MUST be added, as described in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 9.3.  If the m= section is bundled into another m= section, both "a=candidate" and "a=end-of-candidates" MUST be omitted.</li>
+<li>If the m= section is not bundled into another m= section, for each candidate that has been gathered during the most recent gathering phase (see <a href="#sec.ice-gather-overview" class="xref">Section 3.5.1</a>), an "a=candidate" line MUST be added, as defined in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.1.  If candidate gathering for the section has completed, an "a=end-of-candidates" attribute MUST be added, as described in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 9.3.  If the m= section is bundled into another m= section, both "a=candidate" and "a=end-of-candidates" MUST be omitted.</li>
 <li>For RtpTransceivers that are not stopped, the "a=msid" line(s) MUST stay the same, regardless of changes to the transceiver's direction or track. If no "a=msid" line is present in the current description, "a=msid" line(s) MUST be generated according to the same rules as for an initial answer.</li>
 </ul>
 <h3 id="rfc.section.5.3.3">
@@ -1473,7 +1480,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.8.1.p.2">The following non-attribute lines are not meaningful in the JSEP context and MAY be discarded once they have been checked.  </p>
 
 <ul class="empty">
-<li>The "c=" line MUST be checked for syntax but its value is only used for ICE mismatch detection, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 6.1. Note that JSEP implementations should never encounter this condition because ICE is required for WebRTC.</li>
+<li>The "c=" line MUST be checked for syntax but its value is only used for ICE mismatch detection, as defined in <a href="#RFC8445" class="xref">[RFC8445]</a>, Section 5.4. Note that JSEP implementations should never encounter this condition because ICE is required for WebRTC.</li>
 <li>The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are not used by this specification; they MUST be checked for syntax but their values are not used.</li>
 </ul>
 <p id="rfc.section.5.8.1.p.3">The remaining non-attribute lines are processed as follows: </p>
@@ -1487,10 +1494,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
 <li>Any "a=group" lines are parsed as specified in <a href="#RFC5888" class="xref">[RFC5888]</a>, Section 5, and the group's semantics and mids are stored.</li>
-<li>If present, a single "a=ice-lite" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.3, and a value indicating the presence of ice-lite is stored.</li>
-<li>If present, a single "a=ice-ufrag" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4, and the ufrag value is stored.</li>
-<li>If present, a single "a=ice-pwd" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4, and the password value is stored.</li>
-<li>If present, a single "a=ice-options" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.5, and the set of specified options is stored.</li>
+<li>If present, a single "a=ice-lite" line is parsed as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.3, and a value indicating the presence of ice-lite is stored.</li>
+<li>If present, a single "a=ice-ufrag" line is parsed as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.4, and the ufrag value is stored.</li>
+<li>If present, a single "a=ice-pwd" line is parsed as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.4, and the password value is stored.</li>
+<li>If present, a single "a=ice-options" line is parsed as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.6, and the set of specified options is stored.</li>
 <li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC8122" class="xref">[RFC8122]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
 <li>If present, a single "a=setup" line is parsed as specified in <a href="#RFC4145" class="xref">[RFC4145]</a>, Section 4, and the setup value is stored.</li>
 <li>If present, a single "a=tls-id" line is parsed as specified in <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a> Section 5, and the tls-id value is stored.</li>
@@ -1513,11 +1520,11 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.8.2.p.4">Specific processing MUST also be applied for the following attribute lines: </p>
 
 <ul>
-<li>If present, a single "a=ice-ufrag" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4, and the ufrag value is stored.</li>
-<li>If present, a single "a=ice-pwd" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4, and the password value is stored.</li>
-<li>If present, a single "a=ice-options" line is parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.5, and the set of specified options is stored.</li>
-<li>Any "a=candidate" attributes MUST be parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.1, and their values stored.</li>
-<li>Any "a=remote-candidates" attributes MUST be parsed as specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.2, but their values are ignored.</li>
+<li>If present, a single "a=ice-ufrag" line is parsed as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.4, and the ufrag value is stored.</li>
+<li>If present, a single "a=ice-pwd" line is parsed as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.4, and the password value is stored.</li>
+<li>If present, a single "a=ice-options" line is parsed as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.6, and the set of specified options is stored.</li>
+<li>Any "a=candidate" attributes MUST be parsed as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.1, and their values stored.</li>
+<li>Any "a=remote-candidates" attributes MUST be parsed as specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.2, but their values are ignored.</li>
 <li>If present, a single "a=end-of-candidates" attribute MUST be parsed as specified in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 8.2, and its presence or absence flagged and stored.</li>
 <li>Any "a=fingerprint" lines are parsed as specified in <a href="#RFC8122" class="xref">[RFC8122]</a>, Section 5, and the set of fingerprint and algorithm values is stored.</li>
 </ul>
@@ -1555,7 +1562,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
 <ul>
 <li>For each m= section, valid values for each of the mandatory-to-use features enumerated in <a href="#sec.usage-requirements" class="xref">Section 5.1.1</a> MUST be present.  These values MAY either be present at the media level, or inherited from the session level.  <ul>
-<li>ICE ufrag and password values, which MUST comply with the size limits specified in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 15.4.</li>
+<li>ICE ufrag and password values, which MUST comply with the size limits specified in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 4.4.</li>
 <li>tls-id value, which MUST be set according to <a href="#I-D.ietf-mmusic-dtls-sdp" class="xref">[I-D.ietf-mmusic-dtls-sdp]</a>, Section 5. If this is a re-offer or a response to a re-offer and the tls-id value is different from that presently in use, the DTLS connection is not being continued and the remote description MUST be part of an ICE restart, together with new ufrag and password values.</li>
 <li>DTLS setup value, which MUST be set according to the rules specified in <a href="#RFC5763" class="xref">[RFC5763]</a>, Section 5 and MUST be consistent with the selected role of the current DTLS connection, if one exists and is being continued.</li>
 <li>DTLS fingerprint values, where at least one fingerprint MUST be present.</li>
@@ -1580,8 +1587,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.9.p.2">First, m= sections are processed. For each m= section, the following steps MUST be performed; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
 
 <ul>
-<li>If this m= section is new, begin gathering candidates for it, as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 4.1.1, unless it is definitively being bundled (either this is an offer and the m= section is marked bundle-only, or it is an answer and the m= section is bundled into into another m= section.)</li>
-<li>Or, if the ICE ufrag and password values have changed, trigger the ICE agent to start an ICE restart, and begin gathering new candidates for the m= section as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.1.1.1. If this description is an answer, also start checks on that media section as defined in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.3.1.1.</li>
+<li>If this m= section is new, begin gathering candidates for it, as defined in <a href="#RFC8445" class="xref">[RFC8445]</a>, Section 5.1.1, unless it is definitively being bundled (either this is an offer and the m= section is marked bundle-only, or it is an answer and the m= section is bundled into into another m= section.)</li>
+<li>Or, if the ICE ufrag and password values have changed, trigger the ICE agent to start an ICE restart as described in <a href="#RFC8445" class="xref">[RFC8445]</a>, Section 9, and begin gathering new candidates for the m= section. If this description is an answer, also start checks on that media section.</li>
 <li>If the m= section proto value indicates use of RTP: <ul>
 <li>If there is no RtpTransceiver associated with this m= section, find one and associate it with this m= section according to the following steps. Note that this situation will only occur when applying an offer.  <ul>
 <li>Find the RtpTransceiver that corresponds to this m= section, using the mapping between transceivers and m= section indices established when creating the offer.</li>
@@ -1613,14 +1620,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.10.p.4">For each m= section, the following steps MUST be performed; if any parameters are out of bounds, or cannot be applied, processing MUST stop and an error MUST be returned.  </p>
 
 <ul>
-<li>If the ICE ufrag or password changed from the previous remote description: <a href="#RFC5245" class="xref">[RFC5245]</a>.  <ul>
-<li>If the description is of type "offer", the implementation MUST note that an ICE restart is needed, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.1.1.1.</li>
-<li>If the description is of type "answer" or "pranswer", then check to see if the current local description is an ICE restart, and if not, generate an error. If the PeerConnection state is "have-remote-pranswer", and the ICE ufrag or password changed from the previous provisional answer, then signal the ICE agent to discard any previous ICE check list state for the m= section. Finally, signal the ICE agent to begin checks as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.3.1.1.</li>
+<li>If the ICE ufrag or password changed from the previous remote description: <ul>
+<li>If the description is of type "offer", the implementation MUST note that an ICE restart is needed, as described in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 3.4.1.1.1</li>
+<li>If the description is of type "answer" or "pranswer", then check to see if the current local description is an ICE restart, and if not, generate an error. If the PeerConnection state is "have-remote-pranswer", and the ICE ufrag or password changed from the previous provisional answer, then signal the ICE agent to discard any previous ICE check list state for the m= section. Finally, signal the ICE agent to begin checks.</li>
 </ul>
 </li>
-<li>If the current local description indicates an ICE restart, and either the ICE ufrag or password has not changed from the previous remote description, as prescribed by <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.2.1.1, generate an error.</li>
+<li>If the current local description indicates an ICE restart, and either the ICE ufrag or password has not changed from the previous remote description, as prescribed by <a href="#RFC8445" class="xref">[RFC8445]</a>, Section 9, generate an error.</li>
 <li>Configure the ICE components associated with this media section to use the supplied ICE remote ufrag and password for their connectivity checks.</li>
-<li>Pair any supplied ICE candidates with any gathered local candidates, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 5.7, and start connectivity checks with the appropriate credentials.</li>
+<li>Pair any supplied ICE candidates with any gathered local candidates, as described in <a href="#RFC8445" class="xref">[RFC8445]</a>, Section 6.1.2, and start connectivity checks with the appropriate credentials.</li>
 <li>If an "a=end-of-candidates" attribute is present, process the end-of-candidates indication as described in <a href="#I-D.ietf-ice-trickle" class="xref">[I-D.ietf-ice-trickle]</a>, Section 11.</li>
 <li>If the m= section proto value indicates use of RTP: <ul>
 <li>If the m= section is being recycled (see <a href="#sec.subsequent-offers" class="xref">Section 5.2.2</a>), dissociate the currently associated RtpTransceiver by setting its mid property to null, and discard the mapping between the transceiver and its m= section index.</li>
@@ -1661,7 +1668,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 <p id="rfc.section.5.11.p.2">For each m= section, the following steps MUST be performed: </p>
 
 <ul>
-<li>If the m= section has been rejected (i.e. port is set to zero in the answer), stop any reception or transmission of media for this section, and, unless a non-rejected m= section is bundled with this m= section, discard any associated ICE components, as described in <a href="#RFC5245" class="xref">[RFC5245]</a>, Section 9.2.1.3.</li>
+<li>If the m= section has been rejected (i.e. port is set to zero in the answer), stop any reception or transmission of media for this section, and, unless a non-rejected m= section is bundled with this m= section, discard any associated ICE components, as described in <a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a>, Section 3.4.3.1.</li>
 <li>If the remote DTLS fingerprint has been changed or the tls-id has changed, tear down the DTLS connection. This includes the case when the PeerConnection state is "have-remote-pranswer". If a DTLS connection needs to be torn down but the answer does not indicate an ICE restart or, in the case of "have-remote-pranswer", new ICE credentials, an error MUST be generated. If an ICE restart is performed without a change in tls-id or fingerprint, then the same DTLS connection is continued over the new ICE channel. Note that although JSEP requires that answerers change the tls-id value if and only if the offerer does, non-JSEP answerers are permitted to change the tls-id as long as the offer contained an ICE restart. Thus, JSEP implementations which process DTLS data prior to receiving an answer MUST be prepared to receive either a ClientHello or data from the previous DTLS connection.</li>
 <li>If no valid DTLS connection exists, prepare to start a DTLS connection, using the specified roles and fingerprints, on any underlying ICE components, once they are active.</li>
 <li>If the m= section proto value indicates use of RTP: <ul>
@@ -1754,7 +1761,7 @@ v=0
 o=- 4962303333179871722 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -1827,7 +1834,7 @@ v=0
 o=- 6729291447651054566 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -1986,7 +1993,7 @@ v=0
 o=- 4962303333179871723 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 d1
 
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
@@ -2063,7 +2070,7 @@ v=0
 o=- 7729291447651054566 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 d1
 
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
@@ -2139,7 +2146,7 @@ v=0
 o=- 7729291447651054566 2 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 d1 v1 v2
 a=group:LS a1 v1
 
@@ -2232,7 +2239,7 @@ v=0
 o=- 4962303333179871723 2 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 d1 v1 v2
 a=group:LS a1 v1
 
@@ -2396,7 +2403,7 @@ v=0
 o=- 1070771854436052752 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -2465,7 +2472,7 @@ v=0
 o=- 6386516489780559513 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -2533,7 +2540,7 @@ v=0
 o=- 6386516489780559513 2 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -2593,7 +2600,7 @@ v=0
 o=- 1070771854436052752 2 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -2681,6 +2688,11 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <a>Holmberg, C.</a> and <a>R. Shpount</a>, "<a href="https://tools.ietf.org/html/draft-ietf-mmusic-dtls-sdp-32">Session Description Protocol (SDP) Offer/Answer Considerations for Datagram Transport Layer Security (DTLS) and Transport Layer Security (TLS)</a>", Internet-Draft draft-ietf-mmusic-dtls-sdp-32, October 2017.</td>
 </tr>
 <tr>
+<td class="reference"><b id="I-D.ietf-mmusic-ice-sip-sdp">[I-D.ietf-mmusic-ice-sip-sdp]</b></td>
+<td class="top">
+<a>Petit-Huguenin, M.</a>, <a>Nandakumar, S.</a> and <a>A. Keranen</a>, "<a href="https://tools.ietf.org/html/draft-ietf-mmusic-ice-sip-sdp-23">Session Description Protocol (SDP) Offer/Answer procedures for Interactive Connectivity Establishment (ICE)</a>", Internet-Draft draft-ietf-mmusic-ice-sip-sdp-23, October 2018.</td>
+</tr>
+<tr>
 <td class="reference"><b id="I-D.ietf-mmusic-msid">[I-D.ietf-mmusic-msid]</b></td>
 <td class="top">
 <a>Alvestrand, H.</a>, "<a href="https://tools.ietf.org/html/draft-ietf-mmusic-msid-16">WebRTC MediaStream Identification in the Session Description Protocol</a>", Internet-Draft draft-ietf-mmusic-msid-16, February 2017.</td>
@@ -2733,7 +2745,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <tr>
 <td class="reference"><b id="I-D.ietf-rtcweb-security-arch">[I-D.ietf-rtcweb-security-arch]</b></td>
 <td class="top">
-<a>Rescorla, E.</a>, "<a href="https://tools.ietf.org/html/draft-ietf-rtcweb-security-arch-15">WebRTC Security Architecture</a>", Internet-Draft draft-ietf-rtcweb-security-arch-15, July 2018.</td>
+<a>Rescorla, E.</a>, "<a href="https://tools.ietf.org/html/draft-ietf-rtcweb-security-arch-16">WebRTC Security Architecture</a>", Internet-Draft draft-ietf-rtcweb-security-arch-16, October 2018.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC2119">[RFC2119]</b></td>
@@ -2789,11 +2801,6 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <td class="reference"><b id="RFC5124">[RFC5124]</b></td>
 <td class="top">
 <a>Ott, J.</a> and <a>E. Carrara</a>, "<a href="https://tools.ietf.org/html/rfc5124">Extended Secure RTP Profile for Real-time Transport Control Protocol (RTCP)-Based Feedback (RTP/SAVPF)</a>", RFC 5124, DOI 10.17487/RFC5124, February 2008.</td>
-</tr>
-<tr>
-<td class="reference"><b id="RFC5245">[RFC5245]</b></td>
-<td class="top">
-<a>Rosenberg, J.</a>, "<a href="https://tools.ietf.org/html/rfc5245">Interactive Connectivity Establishment (ICE): A Protocol for Network Address Translator (NAT) Traversal for Offer/Answer Protocols</a>", RFC 5245, DOI 10.17487/RFC5245, April 2010.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5285">[RFC5285]</b></td>
@@ -2865,6 +2872,11 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <td class="top">
 <a>Lennox, J.</a> and <a>C. Holmberg</a>, "<a href="https://tools.ietf.org/html/rfc8122">Connection-Oriented Media Transport over the Transport Layer Security (TLS) Protocol in the Session Description Protocol (SDP)</a>", RFC 8122, DOI 10.17487/RFC8122, March 2017.</td>
 </tr>
+<tr>
+<td class="reference"><b id="RFC8445">[RFC8445]</b></td>
+<td class="top">
+<a>Keranen, A.</a>, <a>Holmberg, C.</a> and <a>J. Rosenberg</a>, "<a href="https://tools.ietf.org/html/rfc8445">Interactive Connectivity Establishment (ICE): A Protocol for Network Address Translator (NAT) Traversal</a>", RFC 8445, DOI 10.17487/RFC8445, July 2018.</td>
+</tr>
 </tbody></table>
 <h2 id="rfc.references.2">
 <a href="#rfc.references.2">11.2.</a> Informative References</h2>
@@ -2913,6 +2925,11 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <td class="reference"><b id="RFC4733">[RFC4733]</b></td>
 <td class="top">
 <a>Schulzrinne, H.</a> and <a>T. Taylor</a>, "<a href="https://tools.ietf.org/html/rfc4733">RTP Payload for DTMF Digits, Telephony Tones, and Telephony Signals</a>", RFC 4733, DOI 10.17487/RFC4733, December 2006.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC5245">[RFC5245]</b></td>
+<td class="top">
+<a>Rosenberg, J.</a>, "<a href="https://tools.ietf.org/html/rfc5245">Interactive Connectivity Establishment (ICE): A Protocol for Network Address Translator (NAT) Traversal for Offer/Answer Protocols</a>", RFC 5245, DOI 10.17487/RFC5245, April 2010.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC5506">[RFC5506]</b></td>
@@ -3044,36 +3061,6 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <a href="#RFC4585" class="xref">[RFC4585]</a> Section 4.2</td>
 </tr>
 <tr>
-<td class="left">candidate</td>
-<td class="left">
-<a href="#RFC5245" class="xref">[RFC5245]</a> Section 15.1</td>
-</tr>
-<tr>
-<td class="left">remote-candidates</td>
-<td class="left">
-<a href="#RFC5245" class="xref">[RFC5245]</a> Section 15.2</td>
-</tr>
-<tr>
-<td class="left">ice-lite</td>
-<td class="left">
-<a href="#RFC5245" class="xref">[RFC5245]</a> Section 15.3</td>
-</tr>
-<tr>
-<td class="left">ice-ufrag</td>
-<td class="left">
-<a href="#RFC5245" class="xref">[RFC5245]</a> Section 15.4</td>
-</tr>
-<tr>
-<td class="left">ice-pwd</td>
-<td class="left">
-<a href="#RFC5245" class="xref">[RFC5245]</a> Section 15.4</td>
-</tr>
-<tr>
-<td class="left">ice-options</td>
-<td class="left">
-<a href="#RFC5245" class="xref">[RFC5245]</a> Section 15.5</td>
-</tr>
-<tr>
 <td class="left">extmap</td>
 <td class="left">
 <a href="#RFC5285" class="xref">[RFC5285]</a> Section 7</td>
@@ -3097,6 +3084,36 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
 <td class="left">extmap (encrypt option)</td>
 <td class="left">
 <a href="#RFC6904" class="xref">[RFC6904]</a> Section 4</td>
+</tr>
+<tr>
+<td class="left">candidate</td>
+<td class="left">
+<a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a> Section 4.1</td>
+</tr>
+<tr>
+<td class="left">remote-candidates</td>
+<td class="left">
+<a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a> Section 4.2</td>
+</tr>
+<tr>
+<td class="left">ice-lite</td>
+<td class="left">
+<a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a> Section 4.3</td>
+</tr>
+<tr>
+<td class="left">ice-ufrag</td>
+<td class="left">
+<a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a> Section 4.4</td>
+</tr>
+<tr>
+<td class="left">ice-pwd</td>
+<td class="left">
+<a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a> Section 4.4</td>
+</tr>
+<tr>
+<td class="left">ice-options</td>
+<td class="left">
+<a href="#I-D.ietf-mmusic-ice-sip-sdp" class="xref">[I-D.ietf-mmusic-ice-sip-sdp]</a> Section 4.6</td>
 </tr>
 <tr>
 <td class="left">msid</td>
