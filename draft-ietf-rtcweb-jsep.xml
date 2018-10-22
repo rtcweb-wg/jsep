@@ -129,7 +129,7 @@ ipr="trust200902">
         exchanges.</t>
 
         <t>Regarding ICE
-        <xref target="RFC5245"></xref>, JSEP decouples the ICE state
+        <xref target="RFC8445"></xref>, JSEP decouples the ICE state
         machine from the overall signaling state machine, as the ICE
         state machine must remain in the JSEP implementation, because
         only the implementation has the necessary knowledge of
@@ -578,7 +578,8 @@ setRemote(ANSWER) |                                   |
             <t>The candidate details are specified in an IceCandidate
             field, using the same SDP syntax as the
             "candidate-attribute" field defined in
-            <xref target="RFC5245" />, Section 15.1. Note that this
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 4.1. Note that this
             field does not contain an "a=" prefix, as indicated in the
             following example:</t>
             <figure>
@@ -591,7 +592,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>The IceCandidate object contains a field to indicate
             which ICE ufrag it is associated with, as defined in
-            <xref target="RFC5245" />, Section 15.4. This value is used
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 4.4. This value is used
             to determine which session description (and thereby which
             gathering phase) this IceCandidate belongs to, which helps
             resolve ambiguities during ICE restarts. If this field is
@@ -702,6 +704,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           kept alive as long as they may be needed, the application
           will consume resources on the STUN/TURN servers it is
           using.</t>
+        </section>
+        <section title="ICE Versions">       
+          <t>While this specification formally relies on <xref
+          target="RFC8445"></xref>, at the time of its publication, the
+          majority of WebRTC implementations support the version
+          of ICE described in <xref target="RFC5245"></xref>. The use of
+          the "ice2" attribute defined in <xref target="RFC8445"></xref>
+          can be used to detect the version in use by a remote endpoint
+          and to provide a smooth transition from the older specification
+          to the newer one.  Implementations MUST be able to accept remote
+          descriptions that do not have the "ice2" attribute.</t>
         </section>
       </section>
       <section anchor="sec.imageattr" title="Video Size Negotiation">
@@ -1765,7 +1778,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           <list style="symbols">
 
             <t>ICE, as specified in
-            <xref target="RFC5245"></xref>, MUST be used. Note that the
+            <xref target="RFC8445"></xref>, MUST be used. Note that the
             remote endpoint may use a Lite implementation;
             implementations MUST properly handle remote endpoints which
             do ICE-Lite.</t>
@@ -1793,7 +1806,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           each data m= line they produce in an offer. Although these
           profiles are formally associated with UDP, ICE can select
           either UDP
-          <xref target="RFC5245" /> or TCP
+          <xref target="RFC8445" /> or TCP
           <xref target='RFC6544' /> transport depending on network
           conditions, even when advertising a UDP profile.</t>
 
@@ -1928,9 +1941,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             &lt;start-time&gt; and &lt;stop-time&gt; SHOULD be set to
             zero, e.g. "t=0 0".</t>
 
-            <t>An "a=ice-options" line with the "trickle" option MUST
-            be added, as specified in
-            <xref target="I-D.ietf-ice-trickle"></xref>, Section 4.</t>
+            <t>An "a=ice-options" line with the "trickle" and "ice2"
+            options MUST be added, as specified in <xref
+            target="I-D.ietf-ice-trickle"></xref>, Section 3 and
+            <xref target="RFC8445"></xref>, Section 10.</t>
 
             <t>If WebRTC identity is being used, an "a=identity" line
             as described in
@@ -2144,7 +2158,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <list style="symbols">
 
               <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in
-              <xref target="RFC5245"></xref>, Section 15.4.</t>
+              <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>,
+              Section 4.4.</t>
 
               <t>For each desired digest algorithm, one or more
               "a=fingerprint" lines for each of the endpoint's
@@ -2347,12 +2362,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Each "m=" and c=" line MUST be filled in with the port,
             protocol, and address of the default candidate for the m=
             section, as described in
-            <xref target="RFC5245"></xref>, Section 4.3. If ICE
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>,
+            Section 3.2.1.2. If ICE
             checking has already completed for one or more candidate
             pairs and a candidate pair is in active use, then that pair
             MUST be used, even if ICE has not yet completed. Note that
             this differs from the guidance in
-            <xref target="RFC5245" />, Section 9.1.2.2, which only
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />, Section 3.3.4,
+            which only
             refers to offers created when ICE has completed. In each
             case, if no RTP candidates have yet been gathered, dummy
             values MUST be used, as described above.</t>
@@ -2380,7 +2397,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the most recent gathering phase (see
             <xref target="sec.ice-gather-overview"></xref>), an
             "a=candidate" line MUST be added, as defined in
-            <xref target="RFC5245"></xref>, Section 4.3., paragraph 3.
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>, Section 4.1.
             If candidate gathering for the section has completed, an
             "a=end-of-candidates" attribute MUST be added, as described
             in
@@ -2496,7 +2513,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             "true", the offer MUST indicate an ICE restart by
             generating new ICE ufrag and pwd attributes, as specified
             in
-            <xref target="RFC5245"></xref>, Section 9.1.1.1. If this
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>,
+            Section 3.4.1.1.1. If this
             option is specified on an initial offer, it has no effect
             (since a new ICE ufrag and pwd are already generated).
             Similarly, if the ICE configuration has changed, this
@@ -2584,7 +2602,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           identical to that indicated in the initial offers section
           above, except that the "a=ice-options" line, with the
           "trickle" option as specified in
-          <xref target="I-D.ietf-ice-trickle"></xref>, Section 4, is
+          <xref target="I-D.ietf-ice-trickle"></xref>, Section 3,
+          and the "ice2" option as specified in
+          <xref target="RFC8445"></xref>, Section 10, is
           only included if such an option was present in the offer.</t>
 
           <t>The next step is to generate session-level lip sync
@@ -2868,7 +2888,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <list style="symbols">
 
               <t>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in
-              <xref target="RFC5245"></xref>, Section 15.4.</t>
+              <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>,
+              Section 4.4.</t>
 
               <t>For each desired digest algorithm, one or more
               "a=fingerprint" lines for each of the endpoint's
@@ -2991,7 +3012,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Each "m=" and c=" line MUST be filled in with the port
             and address of the default candidate for the m= section, as
             described in
-            <xref target="RFC5245"></xref>, Section 4.3. Note, however,
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>,
+            Section 3.2.1.2. Note, however,
             that the m= line protocol need not match the default
             candidate, because this protocol value must instead match
             what was supplied in the offer, as described above.</t>
@@ -2999,7 +3021,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
             same, unless the m= section is restarting, in which case
             new ICE credentials must be created as specified in
-            <xref target="RFC5245"></xref>, Section 9.2.1.1. If the m=
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>,
+            Section 3.4.1.1.1. If the m=
             section is bundled into another m= section, it still MUST
             NOT contain any ICE credentials.</t>
 
@@ -3029,7 +3052,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             the most recent gathering phase (see
             <xref target="sec.ice-gather-overview"></xref>), an
             "a=candidate" line MUST be added, as defined in
-            <xref target="RFC5245"></xref>, Section 4.3., paragraph 3.
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>,
+            Section 4.1.
             If candidate gathering for the section has completed, an
             "a=end-of-candidates" attribute MUST be added, as described
             in
@@ -3273,7 +3297,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>The "c=" line MUST be checked for syntax but its value
             is only used for ICE mismatch detection, as defined in
-            <xref target="RFC5245" />, Section 6.1. Note that JSEP
+            <xref target="RFC8445" />, Section 5.4. Note that JSEP
             implementations should never encounter this condition
             because ICE is required for WebRTC.</t>
 
@@ -3309,23 +3333,24 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>If present, a single "a=ice-lite" line is parsed as
             specified in
-            <xref target="RFC5245" />, Section 15.3, and a value
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 4.3, and a value
             indicating the presence of ice-lite is stored.</t>
 
             <t>If present, a single "a=ice-ufrag" line is parsed as
             specified in
-            <xref target="RFC5245" />, Section 15.4, and the ufrag
-            value is stored.</t>
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 4.4, and the ufrag value is stored.</t>
 
             <t>If present, a single "a=ice-pwd" line is parsed as
             specified in
-            <xref target="RFC5245" />, Section 15.4, and the password
-            value is stored.</t>
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 4.4, and the password value is stored.</t>
 
             <t>If present, a single "a=ice-options" line is parsed as
             specified in
-            <xref target="RFC5245" />, Section 15.5, and the set of
-            specified options is stored.</t>
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 4.6, and the set of specified options is stored.</t>
 
             <t>Any "a=fingerprint" lines are parsed as specified in
             <xref target="RFC8122" />, Section 5, and the set of
@@ -3393,28 +3418,28 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
             <t>If present, a single "a=ice-ufrag" line is parsed as
             specified in
-            <xref target="RFC5245" />, Section 15.4, and the ufrag
-            value is stored.</t>
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 4.4, and the ufrag value is stored.</t>
 
             <t>If present, a single "a=ice-pwd" line is parsed as
             specified in
-            <xref target="RFC5245" />, Section 15.4, and the password
-            value is stored.</t>
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 4.4, and the password value is stored.</t>
 
             <t>If present, a single "a=ice-options" line is parsed as
             specified in
-            <xref target="RFC5245" />, Section 15.5, and the set of
-            specified options is stored.</t>
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />, Section 4.6,
+            and the set of specified options is stored.</t>
 
             <t>Any "a=candidate" attributes MUST be parsed as specified
             in
-            <xref target="RFC5245" />, Section 15.1, and their values
-            stored.</t>
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 4.1, and their values stored.</t>
 
             <t>Any "a=remote-candidates" attributes MUST be parsed as
             specified in
-            <xref target="RFC5245" />, Section 15.2, but their values
-            are ignored.</t>
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 4.2, but their values are ignored.</t>
 
             <t>If present, a single "a=end-of-candidates" attribute
             MUST be parsed as specified in
@@ -3553,7 +3578,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
               <t>ICE ufrag and password values, which MUST comply with
               the size limits specified in
-              <xref target="RFC5245" />, Section 15.4.</t>
+              <xref target="I-D.ietf-mmusic-ice-sip-sdp" />, Section 4.4.</t>
 
               <t>tls-id value, which MUST be set according to
               <xref target="I-D.ietf-mmusic-dtls-sdp" />, Section 5. If
@@ -3625,18 +3650,17 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>If this m= section is new, begin gathering candidates for
           it, as defined in
-          <xref target="RFC5245" />, Section 4.1.1, unless it is
+          <xref target="RFC8445" />, Section 5.1.1, unless it is
           definitively being bundled (either this is an offer and the
           m= section is marked bundle-only, or it is an answer and the
           m= section is bundled into into another m= section.)</t>
 
           <t>Or, if the ICE ufrag and password values have changed,
-          trigger the ICE agent to start an ICE restart, and begin
-          gathering new candidates for the m= section as described in
-          <xref target="RFC5245" />, Section 9.1.1.1. If this
+          trigger the ICE agent to start an ICE restart as described in
+          <xref target="RFC8445" />, Section 9, and begin
+          gathering new candidates for the m= section. If this
           description is an answer, also start checks on that media
-          section as defined in
-          <xref target="RFC5245" />, Section 9.3.1.1.</t>
+          section.</t>
 
           <t>If the m= section proto value indicates use of RTP:
           <list style="symbols">
@@ -3737,13 +3761,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>If the ICE ufrag or password changed from the previous
           remote description:
-          <xref target="RFC5245" />.
           <list style="symbols">
 
             <t>If the description is of type "offer", the
             implementation MUST note that an ICE restart is needed, as
             described in
-            <xref target="RFC5245" />, Section 9.1.1.1.</t>
+            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />,
+            Section 3.4.1.1.1</t>
 
             <t>If the description is of type "answer" or "pranswer",
             then check to see if the current local description is an
@@ -3752,14 +3776,13 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             ufrag or password changed from the previous provisional
             answer, then signal the ICE agent to discard any previous
             ICE check list state for the m= section. Finally, signal
-            the ICE agent to begin checks as described in
-            <xref target="RFC5245" />, Section 9.3.1.1.</t>
+            the ICE agent to begin checks.</t>
           </list></t>
 
           <t>If the current local description indicates an ICE restart,
           and either the ICE ufrag or password has not changed from the
           previous remote description, as prescribed by
-          <xref target="RFC5245" />, Section 9.2.1.1, generate an
+          <xref target="RFC8445" />, Section 9, generate an
           error.</t>
 
           <t>Configure the ICE components associated with this media
@@ -3768,7 +3791,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>Pair any supplied ICE candidates with any gathered local
           candidates, as described in
-          <xref target="RFC5245" />, Section 5.7, and start
+          <xref target="RFC8445" />, Section 6.1.2, and start
           connectivity checks with the appropriate credentials.</t>
 
           <t>If an "a=end-of-candidates" attribute is present, process
@@ -3930,7 +3953,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           media for this section, and, unless a non-rejected m= section
           is bundled with this m= section, discard any associated ICE
           components, as described in
-          <xref target="RFC5245" />, Section 9.2.1.3.</t>
+          <xref target="I-D.ietf-mmusic-ice-sip-sdp" />, Section 3.4.3.1.</t>
 
           <t>If the remote DTLS fingerprint has been changed or the
           tls-id has changed, tear down the DTLS connection. This
@@ -4194,7 +4217,7 @@ v=0
 o=- 4962303333179871722 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -4272,7 +4295,7 @@ v=0
 o=- 6729291447651054566 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -4450,7 +4473,7 @@ v=0
 o=- 4962303333179871723 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 d1
 
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
@@ -4547,7 +4570,7 @@ v=0
 o=- 7729291447651054566 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 d1
 
 m=audio 9 UDP/TLS/RTP/SAVPF 96 0 8 97 98
@@ -4648,7 +4671,7 @@ v=0
 o=- 7729291447651054566 2 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 d1 v1 v2
 a=group:LS a1 v1
 
@@ -4750,7 +4773,7 @@ v=0
 o=- 4962303333179871723 2 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 d1 v1 v2
 a=group:LS a1 v1
 
@@ -4947,7 +4970,7 @@ v=0
 o=- 1070771854436052752 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -5026,7 +5049,7 @@ v=0
 o=- 6386516489780559513 1 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -5104,7 +5127,7 @@ v=0
 o=- 6386516489780559513 2 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -5169,7 +5192,7 @@ v=0
 o=- 1070771854436052752 2 IN IP4 0.0.0.0
 s=-
 t=0 0
-a=ice-options:trickle
+a=ice-options:trickle ice2
 a=group:BUNDLE a1 v1
 a=group:LS a1 v1
 
@@ -5281,6 +5304,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       <?rfc include='reference.I-D.ietf-avtext-rid'?>
       <?rfc include='reference.I-D.ietf-ice-trickle'?>
       <?rfc include='reference.I-D.ietf-mmusic-dtls-sdp'?>
+      <?rfc include='reference.I-D.ietf-mmusic-ice-sip-sdp'?>
       <?rfc include='reference.I-D.ietf-mmusic-msid'?>
       <?rfc include='reference.I-D.ietf-mmusic-mux-exclusive'?>
       <?rfc include='reference.I-D.ietf-mmusic-rid'?>
@@ -5302,7 +5326,6 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       <?rfc include='reference.RFC.4566.xml'?>
       <?rfc include='reference.RFC.4585.xml'?>
       <?rfc include='reference.RFC.5124.xml'?>
-      <?rfc include='reference.RFC.5245.xml'?>
       <?rfc include='reference.RFC.5285.xml'?>
       <?rfc include='reference.RFC.5761.xml'?>
       <?rfc include='reference.RFC.5888.xml'?>
@@ -5317,6 +5340,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       <?rfc include='reference.RFC.7874.xml'?>
       <?rfc include='reference.RFC.8108.xml'?>
       <?rfc include='reference.RFC.8122.xml'?>
+      <?rfc include='reference.RFC.8445.xml'?>
       <?rfc include='reference.RFC.3711.xml'?>
     </references>
     <references title="Informative References">
@@ -5328,6 +5352,7 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
       <?rfc include='reference.RFC.4568.xml'?>
       <?rfc include='reference.RFC.4588.xml'?>
       <?rfc include='reference.RFC.4733.xml'?>
+      <?rfc include='reference.RFC.5245.xml'?>
       <?rfc include='reference.RFC.5506.xml'?>
       <?rfc include='reference.RFC.5576.xml'?>
       <?rfc include='reference.RFC.5763.xml'?>
@@ -5438,24 +5463,6 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
         <c>rtcp-fb</c>
         <c>
         <xref target="RFC4585" /> Section 4.2</c>
-        <c>candidate</c>
-        <c>
-        <xref target="RFC5245" /> Section 15.1</c>
-        <c>remote-candidates</c>
-        <c>
-        <xref target="RFC5245" /> Section 15.2</c>
-        <c>ice-lite</c>
-        <c>
-        <xref target="RFC5245" /> Section 15.3</c>
-        <c>ice-ufrag</c>
-        <c>
-        <xref target="RFC5245" /> Section 15.4</c>
-        <c>ice-pwd</c>
-        <c>
-        <xref target="RFC5245" /> Section 15.4</c>
-        <c>ice-options</c>
-        <c>
-        <xref target="RFC5245" /> Section 15.5</c>
         <c>extmap</c>
         <c>
         <xref target="RFC5285" /> Section 7</c>
@@ -5471,6 +5478,24 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
         <c>extmap (encrypt option)</c>
         <c>
         <xref target="RFC6904" /> Section 4</c>
+        <c>candidate</c>
+        <c>
+        <xref target="I-D.ietf-mmusic-ice-sip-sdp" /> Section 4.1</c>
+        <c>remote-candidates</c>
+        <c>
+        <xref target="I-D.ietf-mmusic-ice-sip-sdp" /> Section 4.2</c>
+        <c>ice-lite</c>
+        <c>
+        <xref target="I-D.ietf-mmusic-ice-sip-sdp" /> Section 4.3</c>
+        <c>ice-ufrag</c>
+        <c>
+        <xref target="I-D.ietf-mmusic-ice-sip-sdp" /> Section 4.4</c>
+        <c>ice-pwd</c>
+        <c>
+        <xref target="I-D.ietf-mmusic-ice-sip-sdp" /> Section 4.4</c>
+        <c>ice-options</c>
+        <c>
+        <xref target="I-D.ietf-mmusic-ice-sip-sdp" /> Section 4.6</c>
         <c>msid</c>
         <c>
         <xref target="I-D.ietf-mmusic-msid" /> Section 2</c>
