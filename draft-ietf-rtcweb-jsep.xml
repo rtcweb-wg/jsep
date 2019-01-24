@@ -1799,9 +1799,27 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>For media m= sections, JSEP implementations MUST support
           the "UDP/TLS/RTP/SAVPF" profile specified in
-          <xref target="RFC5764"></xref>, and MUST indicate this
-          profile for each media m= line they produce in an offer. For
-          data m= sections, implementations MUST support the
+          <xref target="RFC5764"></xref>. Implementations MUST indicate this
+          profile for each media m= line they produce in an offer unless the
+          offer contains no UDP candidates; if all candidates use TCP as a
+          transport, implementations MUST indicate "TCP/DTLS/RTP/SAVPF," to
+          allow for compatibility with non-WebRTC implementations of
+          <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>.<t>
+          
+            <t><list style="hanging">
+              <t hangText="Note:">Current implementations of JSEP do not update m= or c= lines
+              after a candidate pair is selected.  When these facilities are
+              added, implementations should use TCP/DTLS/RTP/SAVPF as a
+              transport token when the candidate in question is using TCP, in
+              order to facilitate interactions with non-JSEP SIP/SDP
+              implementations, which assign meaning to the protcol field.
+              Note that in interactions with other JSEP implementations, the
+              use of ICE makes any syntactically valid address/port/transport
+              tuple in the m= and c= lines equivalent, as the signalling is
+              instead driven by ICE.</t>
+            </list></t>
+
+          <t>For data m= sections, implementations MUST support the
           "UDP/DTLS/SCTP" profile and MUST indicate this profile for
           each data m= line they produce in an offer. Although these
           profiles are formally associated with UDP, ICE can select
