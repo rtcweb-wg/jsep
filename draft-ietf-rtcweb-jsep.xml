@@ -1799,16 +1799,16 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
 
           <t>For media m= sections, JSEP implementations MUST support
           the "UDP/TLS/RTP/SAVPF" profile specified in
-          <xref target="RFC5764"></xref>, and MUST indicate this
-          profile for each media m= line they produce in an offer. For
-          data m= sections, implementations MUST support the
-          "UDP/DTLS/SCTP" profile and MUST indicate this profile for
-          each data m= line they produce in an offer. Although these
-          profiles are formally associated with UDP, ICE can select
-          either UDP
-          <xref target="RFC8445" /> or TCP
-          <xref target='RFC6544' /> transport depending on network
-          conditions, even when advertising a UDP profile.</t>
+          <xref target="RFC5764"></xref> as well as the "TCP/DTLS/RTP/SAVPF"
+          profile specified in <xref target="RFC7850"></xref>, and MUST indicate
+          one of these profiles for each media m= line they produce in an offer.
+          For data m= sections, implementations MUST support the
+          "UDP/DTLS/SCTP" profile as well as the "TCP/DTLS/SCTP" profile, and
+          MUST indicate one of these profiles for each data m= line they produce
+          in an offer. The exact profile to use is indicated by the current
+          default or selected ICE candidate, as described in
+          <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>, Section 3.2.1.2.
+          </t>
 
           <t>Unfortunately, in an attempt at compatibility, some
           endpoints generate other profile strings even when they mean
@@ -2359,27 +2359,22 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             be generated according to the same rules as for an initial
             offer.</t>
 
-            <t>Each "m=" and c=" line MUST be filled in with the port
+            <t>Each "m=" and c=" line MUST be filled in with the port, profile,
             and address of the default candidate for the m=
             section, as described in
             <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>,
-            Section 3.2.1.2. The profile MUST be as specified
-            in <xref target="sec.profile-names"/>.
-            Note that
-            this differs from the guidance in
-            <xref target="I-D.ietf-mmusic-ice-sip-sdp" />, Section
-            3.3.4, which requires that the profile match the
-            in-use transport protocol.
-            If ICE
+            Section 3.2.1.2, and clarified in
+            <xref target="sec.profile-names"/>.
+            However, if ICE
             checking has already completed for one or more candidate
             pairs and a candidate pair is in active use, then that pair
-            MUST be used, even if ICE has not yet completed. Note that
-            this differs from the guidance in
+            MUST be used, even if ICE has not yet completed. This differs
+            slightly from the guidance in
             <xref target="I-D.ietf-mmusic-ice-sip-sdp" />, Section 3.3.4,
             which only
-            refers to offers created when ICE has completed. In each
-            case, if no RTP candidates have yet been gathered, dummy
-            values MUST be used, as described above.</t>
+            refers to offers created when ICE has completed.
+            Finally, if no RTP candidates have yet been gathered, dummy
+            values MUST still be used, as described above.</t>
 
             <t>Each "a=mid" line MUST stay the same.</t>
 
@@ -3020,10 +3015,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             and address of the default candidate for the m= section, as
             described in
             <xref target="I-D.ietf-mmusic-ice-sip-sdp"></xref>,
-            Section 3.2.1.2. Note, however,
-            that the m= line protocol need not match the default
-            candidate, because this protocol value must instead match
-            what was supplied in the offer, as described above.</t>
+            Section 3.2.1.2. Note that in certain cases, the m= line protocol
+            may not match that of the default candidate, because the m= line
+            protocol value MUST match what was supplied in the offer, as
+            described above.</t>
 
             <t>Each "a=ice-ufrag" and "a=ice-pwd" line MUST stay the
             same, unless the m= section is restarting, in which case
