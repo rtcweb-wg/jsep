@@ -1815,7 +1815,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
           to support one of these profiles. For instance, an endpoint
           might generate "RTP/AVP" but supply "a=fingerprint" and
           "a=rtcp-fb" attributes, indicating its willingness to support
-          "UDP/TLS/RTP/SAVPF" or "TCP/TLS/RTP/SAVPF". In order to
+          "UDP/TLS/RTP/SAVPF" or "TCP/DTLS/RTP/SAVPF". In order to
           simplify compatibility with such endpoints, JSEP
           implementations MUST follow the following rules when
           processing the media m= sections in a received offer:</t>
@@ -1906,15 +1906,15 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <xref target="RFC4566"></xref>, Section 5.2. The value of
             the &lt;username&gt; field SHOULD be "-". The sess-id MUST
             be representable by a 64-bit signed integer, and the
-            initial value MUST be less than (2**62)-1, as required by
-            <xref target="RFC3264" />. It is RECOMMENDED that the
+            value MUST be less than (2**63)-1. It is RECOMMENDED that the
             sess-id be constructed by generating a 64-bit quantity with
-            the two highest bits being set to zero and the remaining 62
+            the highest bit set to zero and the remaining 63
             bits being cryptographically random. The value of the
             &lt;nettype&gt; &lt;addrtype&gt; &lt;unicast-address&gt;
             tuple SHOULD be set to a non-meaningful address, such as IN
-            IP4 0.0.0.0, to prevent leaking the local address in this
-            field. As mentioned in
+            IP4 0.0.0.0, to prevent leaking a local IP address in this
+            field; this problem is discussed in
+            <xref target="I-D.ietf-rtcweb-ip-handling" />. As mentioned in
             <xref target="RFC4566"></xref>, the entire o= line needs to
             be unique, but selecting a random number for
             &lt;sess-id&gt; is sufficient to accomplish this.</t>
@@ -3526,7 +3526,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host
             <t>If present, "a=msid" attributes MUST be parsed as
             specified in
             <xref target="I-D.ietf-mmusic-msid" />, Section 3.2, and
-            their values stored, ignoring any "appdata" field.</t>
+            their values stored, ignoring any "appdata" field. If no "a=msid"
+            attributes are present, a random msid-id value is generated for a
+            "default" MediaStream for the session, if not already present, and
+            this value is stored.</t>
 
             <t>Any "a=imageattr" attributes MUST be parsed as specified
             in
