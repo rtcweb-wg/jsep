@@ -40,7 +40,7 @@ class PeerConnection:
     a=fmtp:101 packetization-mode=1;profile-level-id=42e01f
     a=rtpmap:102 rtx/90000
     a=fmtp:102 apt=100
-    =rtpmap:103 rtx/90000
+    a=rtpmap:103 rtx/90000
     a=fmtp:103 apt=101
     a=rtpmap:104 flexfec/90000
     a=imageattr:100 recv [x=[48:1920],y=[48:1080],q=1.0]
