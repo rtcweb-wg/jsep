@@ -1483,18 +1483,7 @@ Possibly:
           processed.</t>
           <t>This API changes the local media state; among other
           things, it sets up local resources for sending and encoding
-          media.
-
-<!-- [rfced] Section 4.1.10:  Please confirm that "local media state"
-and "local resources" (as opposed to remote) are correct in the
-context of setRemoteDescription.  (We ask because we see identical
-wording in Section 4.1.9 ("setLocalDescription").)
-
-Original:
- This API changes the local media state; among other things, it sets
- up local resources for sending and encoding media. -->
-
-</t>
+          media. </t>
           <t>If setLocalDescription was previously called with an
           offer, and setRemoteDescription is called with an answer
           (provisional or final), and the media directions are
@@ -1581,22 +1570,9 @@ Original:
           <t>The setConfiguration method allows the global
           configuration of the PeerConnection, which was initially set
           by constructor parameters, to be changed during the session.
-          The effects of this method call depend on when it is invoked,
+          The effects of calling this method depend on when it is invoked,
           and they will differ, depending on which specific parameters are
-          changed:
-
-<!-- [rfced] Section 4.1.16:  Should "The effects of this method call"
-be "The effects of calling this method," and should "This call" be
-"Calling this method"?
-
-Original:
- The effects of this method call
- depend on when it is invoked, and differ depending on which specific
- parameters are changed:
-...
- This call may result in a change to the state of the ICE Agent. -->
-
-</t>
+          changed: </t>
           <ul spacing="normal">
             <li>Any changes to the STUN/TURN servers to use affect the
               next gathering phase. If an ICE gathering phase has
@@ -1628,7 +1604,7 @@ Original:
             <li>The bundle and RTCP-multiplexing policies <bcp14>MUST NOT</bcp14> be
               changed after the construction of the PeerConnection.</li>
           </ul>
-          <t>This call may result in a change to the state of the ICE
+          <t>Calling this method may result in a change to the state of the ICE
           agent.</t>
         </section>
         <section anchor="sec.addicecandidate" numbered="true" toc="default">
@@ -1675,20 +1651,8 @@ Original:
         <section anchor="sec.transceiver-stopped" numbered="true" toc="default">
           <name>stopped</name>
           <t>The stopped property indicates whether the transceiver has
-          been stopped, either by a call to stopTransceiver or by
-          applying an answer that rejects the associated "m=" section.
-
-<!-- [rfced] Section 4.2.2:  Will "stopTransceiver" be clear to
-readers?  We could not find this string elsewhere in this document,
-anywhere else in this cluster of documents, in any published RFC, or
-in google searches.
-
-Original:
- The stopped property indicates whether the transceiver has been
- stopped, either by a call to stopTransceiver or by applying an answer
- that rejects the associated m= section. -->
-
- In
+          been stopped, either by a call to stop or by
+          applying an answer that rejects the associated "m=" section. In
           either of these cases, it is set to "true" and otherwise
           will be set to "false".</t>
           <t>A stopped RtpTransceiver does not send any outgoing RTP or
@@ -1702,7 +1666,7 @@ Original:
           associated "m=" section on future calls to createOffer and
           createAnswer. The permitted values for direction are
           "recvonly", "sendrecv", "sendonly", and "inactive", mirroring
-          the identically named directional attributes defined in
+          the identically named direction attributes defined in
           <xref target="RFC4566" sectionFormat="comma" section="6"/>.</t>
           <t>When creating offers, the transceiver direction is
           directly reflected in the output, even for re-offers. When
@@ -1729,26 +1693,11 @@ Original:
           <t>The currentDirection property indicates the last
           negotiated direction for the transceiver's associated "m="
           section. More specifically, it indicates the
-          directional attribute <xref target="RFC3264" format="default"/> of the
+          direction attribute <xref target="RFC3264" format="default"/> of the
           associated "m=" section in the last applied answer (including
           provisional answers), with "send" and "recv" directions
-          reversed if it was a remote answer.
-
-<!-- [rfced] Section 4.2.5:  We see "direction attribute" but not
-"directional attribute" in RFC 3264.  Will this text be clear to
-readers?  (We ask because we also see "A direction attribute,
-determined by applying the rules regarding the offered direction
-specified in [RFC3264], Section 6.1" in Section 5.3.1 of this
-document.)
-
-Original:
- More specifically, it
- indicates the [RFC3264] directional attribute of the associated m=
- section in the last applied answer (including provisional answers),
- with "send" and "recv" directions reversed if it was a remote answer. -->
-
- For example, if the
-          directional attribute for the associated "m=" section in a
+          reversed if it was a remote answer.  For example, if the
+          direction attribute for the associated "m=" section in a
           remote answer is "recvonly", currentDirection is set to
           "sendonly".</t>
           <t>If an answer that references this transceiver has not yet
@@ -4015,7 +3964,7 @@ respectively.  Please review.
 	     sectionFormat="bare"/> of <xref target="RFC4588"/>.
 
  </li>
-	       <li>If the directional attribute is of type "sendrecv" or
+	       <li>If the direction attribute is of type "sendrecv" or
 	     "recvonly", enable receipt and decoding of media.</li>
 	     </ul>
 	   </li>
@@ -4328,7 +4277,7 @@ Original:
 	       configure the RTCP transmission for this "m=" section to use
 	       Reduced-Size RTCP, as specified in
 	       <xref target="RFC5506" format="default"/>.</li>
-		 <li>If the directional attribute in the answer indicates
+		 <li>If the direction attribute in the answer indicates
 	       that the JSEP implementation should be sending media
 	       ("sendonly" for local answers, "recvonly" for remote
 	       answers, or "sendrecv" for either type of answer), choose
@@ -4423,7 +4372,7 @@ Original:
 	       feedback, follow the rules and recommendations from
    <xref target="RFC8108" sectionFormat="comma" section="5.4.1"/> to select
 	       which SSRC to use.</li>
-		 <li>If the directional attribute in the answer indicates
+		 <li>If the direction attribute in the answer indicates
 	       that the JSEP implementation should not be sending media
 	       ("recvonly" for local answers, "sendonly" for remote
 	       answers, or "inactive" for either type of answer), stop
