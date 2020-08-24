@@ -2698,19 +2698,8 @@ Currently:
           </t>
           <ul spacing="normal">
             <li>The associated RtpTransceiver has been stopped.</li>
-            <li>None of the offered media formats are supported and, if
-            applicable, allowed by codec preferences.
-
-<!-- [rfced] Section 5.3.1:  Does this text mean that the offered
-media formats are allowed (in which case it should say "they are
-allowed") or are not allowed (in which case "and, if applicable"
-should be "or, if applicable")?
-
-Original:
- o  None of the offered media formats are supported and, if
-    applicable, allowed by codec preferences. -->
-
-</li>
+            <li>There is no offered media format that is both supported 
+            and, if applicable, allowed by codec preferences.</li>
             <li>The bundle policy is "max-bundle", and this is not the
             first "m=" section or in the same bundle group as the first
             "m=" section.</li>
@@ -3251,28 +3240,8 @@ Currently:
             implementations should never encounter this condition
             because ICE is required for WebRTC.</li>
             <li>The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k="
-            lines are not used by this specification; they <bcp14>MUST</bcp14> be
-            checked for syntax, but their values are not used.
-
-<!-- [rfced] Section 5.8.1:  We found this sentence confusing; should
-"t=" remain in this list of lines not used by this specification?
-
-Original:
- The "i=", "u=", "e=", "p=", "t=", "r=", "z=", and "k=" lines are
- not used by this specification; they MUST be checked for syntax
- but their values are not used.
-
-We ask because we see (for example):
-
-o  A "t=" line MUST be added, as specified in [RFC4566], Section 5.9;
-    both <start-time> and <stop-time> SHOULD be set to zero, e.g. "t=0
-    0".
-...
- o  The "s=" and "t=" lines MUST stay the same.
-...
- t=0 0 -->
-
-</li>
+            lines <bcp14>MUST</bcp14> be
+            checked for syntax, but their values are not otherwise used. </li>
           </ul>
           <t>The remaining non-attribute lines are processed as
           follows:
@@ -3707,23 +3676,10 @@ respectively.  Please review.
 	     </ul>
 	   </li>
 	   <li>If the current local description indicates an ICE restart
-	   and either the ICE ufrag or password has not changed from the
-	   previous remote description, as prescribed by
-	   <xref target="RFC8445" sectionFormat="comma" section="9"/>, generate an
-	   error.
-
-<!-- [rfced] Section 5.10:  We found this sentence confusing, as we
-could not tell what "as prescribed by [RFC8445], Section 9" and
-"generate an error" refer to.  Please confirm that the citation is
-correct and will be clear to readers.
-
-Original:
- o  If the current local description indicates an ICE restart, and
-    either the ICE ufrag or password has not changed from the previous
-    remote description, as prescribed by [RFC8445], Section 9,
-    generate an error. -->
-
- </li>
+	   but neither the ICE ufrag nor the password has changed from the
+	   previous remote description (as prescribed by
+	   <xref target="RFC8445" sectionFormat="comma" section="9"/>), generate an
+	   error.</li>
 	   <li>Configure the ICE components associated with this media
 	   section to use the supplied ICE remote ufrag and password for
 	   their connectivity checks.</li>
@@ -3953,34 +3909,14 @@ Original:
 	       values are specified, include the RID header extension in
 	       the outgoing RTP streams, as indicated in
 	       <xref target="RFC8851" sectionFormat="comma" section="4"/>.</li>
-		 <li>If (1) the "m=" section is of type "audio" and (2)&nbsp;silence
-	       suppression was configured for the send media format as a
-	       result of processing the remote description and is also
+		 <li>If the "m=" section is of type "audio", and silence
+	       suppression was (1) configured for the send media format as a
+	       result of processing the remote description and (2) also
 	       enabled for that format in the local description, use
 	       silence suppression for outgoing media, in accordance with
 	       the guidance in
 	       <xref target="sec.voiceactivitydetection1" format="default"/>.
-
-<!-- [rfced] Section 5.11:  As it appears that "is also enabled"
-refers to silence suppression, we updated this sentence as follows.
-Please let us know if this is incorrect.
-
-Original:
- *  If the m= section is of type audio, and silence suppression was
-    configured for the send media format as a result of processing
-    the remote description, and is also enabled for that format in
-    the local description, use silence suppression for outgoing
-    media, in accordance with the guidance in Section 5.2.3.2.
-
-Currently:
- -  If (1) the "m=" section is of type "audio" and (2) silence
-    suppression was configured for the send media format as a
-    result of processing the remote description and is also enabled
-    for that format in the local description, use silence
-    suppression for outgoing media, in accordance with the guidance
-    in Section 5.2.3.2. -->
-
-    If these
+               If these
 	       conditions are not met, silence suppression <bcp14>MUST NOT</bcp14> be
 	       used for outgoing media.</li>
 		 <li>If simulcast has been negotiated, send the appropriate number of
