@@ -1990,7 +1990,7 @@ Currently:
             port value <bcp14>MUST</bcp14> be set to 0. Otherwise, the port value is
             set to the port of the default ICE candidate for this "m="
             section, but given that no candidates are available yet,
-            the "dummy" port value of 9 (Discard) <bcp14>MUST</bcp14> be used, as
+            the default port value of 9 (Discard) <bcp14>MUST</bcp14> be used, as
             indicated in
             <xref target="RFC8840" sectionFormat="comma" section="4.1.1"/>.</li>
 <!-- This instance of ", as specified in" is OK. -->
@@ -2012,7 +2012,7 @@ Currently:
           as specified in
           <xref target="RFC4566" sectionFormat="comma" section="5.7"/>. Again, as no
           candidates are available yet, the "c=" line must contain the
-          "dummy" value "IN IP4 0.0.0.0", as defined in
+          default value "IN IP4 0.0.0.0", as defined in
           <xref target="RFC8840" sectionFormat="comma" section="4.1.1"/>.</t>
           <t>
           <xref target="RFC8859" format="default"/> groups
@@ -2168,23 +2168,8 @@ Original:
               <xref target="RFC8842" sectionFormat="comma" section="5.2"/>.</li>
             <li>An "a=rtcp" line, as specified in
               <xref target="RFC3605" sectionFormat="comma" section="2.1"/>, containing
-              the dummy value "9 IN IP4 0.0.0.0", because no candidates
-              have yet been gathered.
-
-<!-- [rfced] Sections 5.2.1 and 5.3.1:  Please confirm that
-"9 IN IP4 0.0.0.0" (and not "IN IP4 0.0.0.0") is correct in these
-two items.
-
-Original:
- o  An "a=rtcp" line, as specified in [RFC3605], Section 2.1,
-    containing the dummy value "9 IN IP4 0.0.0.0", because no
-    candidates have yet been gathered.
-...
- Otherwise, an "a=rtcp" line, as
- specified in [RFC3605], Section 2.1, containing the dummy value "9
- IN IP4 0.0.0.0" (because no candidates have yet been gathered). -->
-
-</li>
+              the default value "9 IN IP4 0.0.0.0", because no candidates
+              have yet been gathered.</li>
             <li>An "a=rtcp-mux" line, as specified in
               <xref target="RFC5761" sectionFormat="comma" section="5.1.3"/>.</li>
             <li>If the RTP/RTCP multiplexing policy is "require", an
@@ -2349,7 +2334,7 @@ Original:
             "m=" section, as described in
             <xref target="RFC8839" sectionFormat="comma" section="4.2.1.2"/> and clarified in
             <xref target="sec.profile-names" format="default"/>.
-            If no RTP candidates have yet been gathered, dummy
+            If no RTP candidates have yet been gathered, default 
             values <bcp14>MUST</bcp14> still be used, as described above.</li>
             <li>Each "a=mid" line <bcp14>MUST</bcp14> stay the same.</li>
             <li>Each "a=ice-ufrag" and "a=ice-pwd" line <bcp14>MUST</bcp14> stay the
@@ -2365,7 +2350,7 @@ Original:
             the port and address of the default RTCP candidate, as
             indicated in
             <xref target="RFC5761" sectionFormat="comma" section="5.1.3"/>. If no RTCP
-            candidates have yet been gathered, dummy values <bcp14>MUST</bcp14> be
+            candidates have yet been gathered, default values <bcp14>MUST</bcp14> be
             used, as described in <xref target="sec.initial-offers"/> above.</li>
 
             <li>If the "m=" section is not bundled into another "m="
@@ -2719,7 +2704,7 @@ Currently:
           <ul spacing="normal">
             <li>The port value would normally be set to the port of the
             default ICE candidate for this "m=" section, but given that
-            no candidates are available yet, the "dummy" port value of
+            no candidates are available yet, the default port value of
             9 (Discard) <bcp14>MUST</bcp14> be used, as indicated in
             <xref target="RFC8840" sectionFormat="comma" section="4.1.1"/>.</li>
             <li>The &lt;proto&gt; field <bcp14>MUST</bcp14> be set to exactly match the
@@ -2748,7 +2733,7 @@ Currently:
           as specified in
           <xref target="RFC4566" sectionFormat="comma" section="5.7"/>. Again, as no
           candidates are available yet, the "c=" line must contain the
-          "dummy" value "IN IP4 0.0.0.0", as defined in
+          default value "IN IP4 0.0.0.0", as defined in
           <xref target="RFC8840" sectionFormat="comma" section="4.1.3"/>.</t>
           <t>If the offer supports bundle, all "m=" sections to be
           bundled must use the same ICE credentials and candidates; all
@@ -2849,7 +2834,7 @@ Currently:
               <xref target="RFC5761" sectionFormat="comma" section="5.1.3"/>. Otherwise,
               an "a=rtcp" line, as specified in
               <xref target="RFC3605" sectionFormat="comma" section="2.1"/>, containing
-              the dummy value "9 IN IP4 0.0.0.0" (because no candidates
+              the default value "9 IN IP4 0.0.0.0" (because no candidates
               have yet been gathered).</li>
             <li>If present in the offer, an "a=rtcp-rsize" line, as
               specified in
@@ -2951,7 +2936,7 @@ Currently:
             and RTCP multiplexing is not active, an "a=rtcp" attribute
             line <bcp14>MUST</bcp14> be filled in with the port and address of the
             default RTCP candidate. If no RTCP candidates have yet been
-            gathered, dummy values <bcp14>MUST</bcp14> be used, as described in
+            gathered, default values <bcp14>MUST</bcp14> be used, as described in
             <xref target="sec.initial-answers"/> above.</li>
 
             <li>If the "m=" section is not bundled into another "m="
@@ -3781,11 +3766,11 @@ respectively.  Please review.
 		  <t>
               The 1000 changes the unit from kbps to bps (as required 
               by TIAS), and the 0.95 is to allocate 5% to RTCP. 
-              Header overhead is then subtracted out, in which the 50 is 
-              based on 50 packets per second, the 40 is based on an 
-              estimate of total header size, and the 8 converts bytes to bits.
-              "TIAS" is used in
-	      preference to "AS" because it provides more accurate
+              An estimate of header overhead is then subtracted out, in which
+              the 50 is based on 50 packets per second, the 40 is based on 
+              typical header size (in bytes), and the 8 converts bytes to bits.
+              Note that "TIAS" is preferred over
+	      "AS" because it provides more accurate
 	      control of bandwidth.</t>
 		</li>
 		<li>For any "RR" or "RS" bandwidth values, handle as
@@ -3912,7 +3897,7 @@ respectively.  Please review.
 		 <li>If the "m=" section is of type "audio", and silence
 	       suppression was (1) configured for the send media format as a
 	       result of processing the remote description and (2) also
-	       enabled for that format in the local description, then use
+	       enabled for that format in the local description, use
 	       silence suppression for outgoing media, in accordance with
 	       the guidance in
 	       <xref target="sec.voiceactivitydetection1" format="default"/>.
@@ -5758,9 +5743,7 @@ document.  Please let us know which form is preferred.
  sess-id / <sess-id> (Section 5.2.1, second bullet item)
 
  set to zero / set to 0  (May we use the latter, because of
-   '"dummy" port value of 9' in Sections 5.2.1 and 5.3.1?)
-
- dummy value / "dummy" value
+   default port value of 9' in Sections 5.2.1 and 5.3.1?)
 
  fmt value / "fmt" value
 
