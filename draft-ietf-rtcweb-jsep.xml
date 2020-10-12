@@ -119,19 +119,19 @@ know if any updates are needed.
         instructions it is given via the API.</t>
         <t>JSEP's handling of session descriptions is simple and
         straightforward. Whenever an offer/answer exchange is needed,
-        the initiating side creates an offer by calling a createOffer()
+        the initiating side creates an offer by calling a createOffer
         API. The application then uses that offer to set up its local
-        config via the setLocalDescription() API. The offer is finally
+        config via the setLocalDescription API. The offer is finally
         sent off to the remote side over its preferred signaling
         mechanism (e.g., WebSockets); upon receipt of that offer, the
-        remote party installs it using the setRemoteDescription()
+        remote party installs it using the setRemoteDescription
         API.</t>
         <t>To complete the offer/answer exchange, the remote party uses
-        the createAnswer() API to generate an appropriate answer,
-        applies it using the setLocalDescription() API, and sends the
+        the createAnswer API to generate an appropriate answer,
+        applies it using the setLocalDescription API, and sends the
         answer back to the initiator over the signaling channel. When
         the initiator gets that answer, it installs it using the
-        setRemoteDescription() API, and initial setup is complete. This
+        setRemoteDescription API, and initial setup is complete. This
         process can be repeated for additional offer/answer
         exchanges.</t>
         <t>Regarding ICE
@@ -354,7 +354,7 @@ know if any updates are needed.
         signaling, if one offer is sent and is then canceled using a SIP
         CANCEL, another offer can be generated even though no answer
         was received for the first offer. To support this, the JSEP
-        media layer can provide an offer via the createOffer() method
+        media layer can provide an offer via the createOffer method
         whenever the JavaScript application needs one for the
         signaling. The answerer can send back zero or more provisional
         answers and then finally end the offer/answer exchange by sending a
@@ -1133,7 +1133,7 @@ Suggested:
           to minimize the number of transceivers as follows: if the
           PeerConnection is in the "have&nbhy;remote-offer" state, the track
           will be attached to the first compatible transceiver that was
-          created by the most recent call to setRemoteDescription() and
+          created by the most recent call to setRemoteDescription and
           does not have a local track. Otherwise, a new transceiver
           will be created, as described in
           <xref target="sec.addTransceiver" format="default"/>.</t>
@@ -1470,7 +1470,7 @@ Suggested:
             <dt>null:</dt>
             <dd>No SDP has been received from the other
             side, so it is not known if it can handle trickle. This is
-            the initial value before setRemoteDescription() is
+            the initial value before setRemoteDescription is
             called.</dd>
             <dt>true:</dt>
             <dd>SDP has been received from the other
@@ -4784,9 +4784,9 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce ]]></sourcecode>
 	 <xref target="RFC3552" format="default"/> applies. In particular, JavaScript can
 	 call the API in any order and with any inputs, including
 	 malicious ones. This is particularly relevant when we consider
-	 the SDP that is passed to setLocalDescription(). While correct
+	 the SDP that is passed to setLocalDescription. While correct
 	 API usage requires that the application pass in SDP that was
-	 derived from createOffer() or createAnswer(), there is no
+	 derived from createOffer or createAnswer, there is no
 	 guarantee that applications do so. The JSEP implementation <bcp14>MUST</bcp14>
 	 be prepared for the JavaScript to pass in bogus data instead.</t>
 	 <t>Conversely, the application programmer needs to be aware that
@@ -5522,17 +5522,6 @@ following:
 
 b) The following terms appear to be used inconsistently in this
 document.  Please let us know which form is preferred.
-
- createOffer API / createOffer() API (We see "createAnswer() API" but
-  not "createAnswer API"; however, we also see "getCapabilities API"
-  and "W3C RTCPeerConnection API."  In RFC 8826 (draft-ietf-rtcweb-security), 
-  we see "XMLHttpRequest() API.")
-
- setLocalDescription API / setLocalDescription() API
-   / setRemoteDescription() API
-    (We also see "whether setLocalDescription or
-     setRemoteDescription is called" and "before
-     setRemoteDescription() is called")
 
  mid identifiers / MID identifiers
   Because RFC 8843 (draft-ietf-mmusic-sdp-bundle-negotiation) and
