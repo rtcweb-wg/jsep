@@ -119,19 +119,19 @@ know if any updates are needed.
         instructions it is given via the API.</t>
         <t>JSEP's handling of session descriptions is simple and
         straightforward. Whenever an offer/answer exchange is needed,
-        the initiating side creates an offer by calling a createOffer()
+        the initiating side creates an offer by calling a createOffer
         API. The application then uses that offer to set up its local
-        config via the setLocalDescription() API. The offer is finally
+        config via the setLocalDescription API. The offer is finally
         sent off to the remote side over its preferred signaling
         mechanism (e.g., WebSockets); upon receipt of that offer, the
-        remote party installs it using the setRemoteDescription()
+        remote party installs it using the setRemoteDescription
         API.</t>
         <t>To complete the offer/answer exchange, the remote party uses
-        the createAnswer() API to generate an appropriate answer,
-        applies it using the setLocalDescription() API, and sends the
+        the createAnswer API to generate an appropriate answer,
+        applies it using the setLocalDescription API, and sends the
         answer back to the initiator over the signaling channel. When
         the initiator gets that answer, it installs it using the
-        setRemoteDescription() API, and initial setup is complete. This
+        setRemoteDescription API, and initial setup is complete. This
         process can be repeated for additional offer/answer
         exchanges.</t>
         <t>Regarding ICE
@@ -354,7 +354,7 @@ know if any updates are needed.
         signaling, if one offer is sent and is then canceled using a SIP
         CANCEL, another offer can be generated even though no answer
         was received for the first offer. To support this, the JSEP
-        media layer can provide an offer via the createOffer() method
+        media layer can provide an offer via the createOffer method
         whenever the JavaScript application needs one for the
         signaling. The answerer can send back zero or more provisional
         answers and then finally end the offer/answer exchange by sending a
@@ -1133,7 +1133,7 @@ Suggested:
           to minimize the number of transceivers as follows: if the
           PeerConnection is in the "have&nbhy;remote-offer" state, the track
           will be attached to the first compatible transceiver that was
-          created by the most recent call to setRemoteDescription() and
+          created by the most recent call to setRemoteDescription and
           does not have a local track. Otherwise, a new transceiver
           will be created, as described in
           <xref target="sec.addTransceiver" format="default"/>.</t>
@@ -1269,7 +1269,7 @@ Suggested:
           <t>"offer" indicates that a description should be parsed as
           an offer; said description may include many possible media
           configurations. A description used as an "offer" may be
-          applied any time the PeerConnection is in a stable state or
+          applied any time the PeerConnection is in a "stable" state or
           applied as an update to a previously supplied but unanswered
           "offer".</t>
           <t>"pranswer" indicates that a description should be parsed
@@ -1299,7 +1299,7 @@ Suggested:
           live user instead of voicemail).</t>
           <t>"rollback" is a special session description type implying
           that the state machine should be rolled back to the previous
-          stable state, as described in
+          "stable" state, as described in
           <xref target="sec.rollback" format="default"/>. The contents <bcp14>MUST</bcp14> be
           empty.</t>
           <section anchor="sec.use-of-provisional-answer" numbered="true" toc="default">
@@ -1356,11 +1356,11 @@ Suggested:
             before or after setRemoteDescription, decides it does not
             want to accept the new parameters and sends a reject
             message back to the offerer. Now, the offerer, and possibly
-            the answerer as well, needs to return to a stable state and
+            the answerer as well, needs to return to a "stable" state and
             the previous local/remote description. To support this, we
             introduce the concept of "rollback", which discards any
             proposed changes to the session, returning the state
-            machine to the stable state. A rollback is performed by
+            machine to the "stable" state. A rollback is performed by
             supplying a session description of type "rollback" with
             empty contents to either setLocalDescription or
             setRemoteDescription.</t>
@@ -1470,7 +1470,7 @@ Suggested:
             <dt>null:</dt>
             <dd>No SDP has been received from the other
             side, so it is not known if it can handle trickle. This is
-            the initial value before setRemoteDescription() is
+            the initial value before setRemoteDescription is
             called.</dd>
             <dt>true:</dt>
             <dd>SDP has been received from the other
@@ -1817,12 +1817,12 @@ Examples from original:
  specified in [RFC7160], Section 3.1. -->
 
  The value of
-            the &lt;username&gt; field <bcp14>SHOULD</bcp14> be "-". The sess-id <bcp14>MUST</bcp14>
+            the &lt;username&gt; field <bcp14>SHOULD</bcp14> be "-". The &lt;sess-id&gt; <bcp14>MUST</bcp14>
             be representable by a 64-bit signed integer, and the
            value <bcp14>MUST</bcp14> be less than
 	    2<sup>63</sup>-1.
             It is <bcp14>RECOMMENDED</bcp14> that the
-            sess-id be constructed by generating a 64-bit quantity with
+            &lt;sess-id&gt; be constructed by generating a 64-bit quantity with
             the highest bit set to zero and the remaining 63
             bits being cryptographically random. The value of the
             &lt;nettype&gt; &lt;addrtype&gt; &lt;unicast-address&gt;
@@ -2231,7 +2231,7 @@ Original:
             <li>Each "a=ice-ufrag" and "a=ice-pwd" line <bcp14>MUST</bcp14> stay the
             same, unless the ICE configuration has changed (e.g., changes to
             either the supported STUN/TURN servers or the ICE
-            candidate policy) or the "IceRestart" option
+            candidate policy) or the IceRestart option
             (<xref target="sec.icerestart" format="default"/>) was specified.
             If the "m="
             section is bundled into another "m=" section, it still <bcp14>MUST
@@ -2400,7 +2400,7 @@ Currently:
           present.</t>
           <section anchor="sec.icerestart" numbered="true" toc="default">
             <name>IceRestart</name>
-            <t>If the "IceRestart" option is specified, with a value of
+            <t>If the IceRestart option is specified, with a value of
             "true", the offer <bcp14>MUST</bcp14> indicate an ICE restart by
             generating new ICE ufrag and pwd attributes, as specified
             in
@@ -2815,7 +2815,7 @@ Currently:
             NOT</bcp14> contain any ICE credentials.</li>
             <li>Each "a=tls-id" line <bcp14>MUST</bcp14> stay the same, unless the
             offerer's "a=tls-id" line changed, in which case a new
-            "a=tls-id" value <bcp14>MUST</bcp14> be created, as described in
+            tls-id value <bcp14>MUST</bcp14> be created, as described in
             <xref target="RFC8842" sectionFormat="comma" section="5.2"/>.</li>
             <li>Each "a=setup" line <bcp14>MUST</bcp14> use an "active" or "passive"
             role value consistent with the existing DTLS association,
@@ -2983,7 +2983,7 @@ Currently:
         state except for "stable". This means that both offers and
         provisional answers can be rolled back. Rollback can only be
         used to cancel proposed changes; there is no support for
-        rolling back from a stable state to a previous stable state. If
+        rolling back from a "stable" state to a previous "stable" state. If
         a rollback is attempted in the "stable" state, processing <bcp14>MUST</bcp14>
         stop and an error <bcp14>MUST</bcp14> be returned. Note that this implies that
         once the answerer has performed setLocalDescription with its
@@ -3107,7 +3107,7 @@ Currently:
             is stored.</li>
             <li>If present, a single "a=tls-id" line is parsed as
             specified in <xref target="RFC8842" sectionFormat="comma" section="5"/>, and
-            the tls-id value is stored.</li>
+            the attribute value is stored.</li>
             <li>Any "a=identity" lines are parsed and the identity
             values stored for subsequent verification, as specified in
             <xref target="RFC8827" sectionFormat="comma" section="5"/>.</li>
@@ -3663,17 +3663,17 @@ respectively.  Please review.
 	    components, as described in
 	    <xref target="RFC8839" sectionFormat="comma" section="4.4.3.1"/>.</li>
 	     <li>If the remote DTLS fingerprint has been changed or the
-	     tls-id has changed, tear down the DTLS connection. This
+	     value of the "a=tls-id" attribute has changed, tear down the DTLS connection. This
 	     includes the case when the PeerConnection state is
 	     "have-remote-pranswer". If a DTLS connection needs to be torn
 	     down but the answer does not indicate an ICE restart or, in
 	     the case of "have-remote-pranswer", new ICE credentials, an
 	     error <bcp14>MUST</bcp14> be generated. If an ICE restart is performed
-	     without a change in tls-id or fingerprint, then the same DTLS
+	     without a change in the tls-id value or fingerprint, then the same DTLS
 	     connection is continued over the new ICE channel. Note that
 	     although JSEP requires that answerers change the tls-id value
 	     if and only if the offerer does, non-JSEP answerers are
-	     permitted to change the tls-id as long as the offer contained
+	     permitted to change the tls-id value as long as the offer contained
 	     an ICE restart. Thus, JSEP implementations that process DTLS
 	     data prior to receiving an answer <bcp14>MUST</bcp14> be prepared to receive
 	     either a ClientHello or data from the previous DTLS
@@ -4784,9 +4784,9 @@ a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce ]]></sourcecode>
 	 <xref target="RFC3552" format="default"/> applies. In particular, JavaScript can
 	 call the API in any order and with any inputs, including
 	 malicious ones. This is particularly relevant when we consider
-	 the SDP that is passed to setLocalDescription(). While correct
+	 the SDP that is passed to setLocalDescription. While correct
 	 API usage requires that the application pass in SDP that was
-	 derived from createOffer() or createAnswer(), there is no
+	 derived from createOffer or createAnswer, there is no
 	 guarantee that applications do so. The JSEP implementation <bcp14>MUST</bcp14>
 	 be prepared for the JavaScript to pass in bogus data instead.</t>
 	 <t>Conversely, the application programmer needs to be aware that
@@ -5523,17 +5523,6 @@ following:
 b) The following terms appear to be used inconsistently in this
 document.  Please let us know which form is preferred.
 
- createOffer API / createOffer() API (We see "createAnswer() API" but
-  not "createAnswer API"; however, we also see "getCapabilities API"
-  and "W3C RTCPeerConnection API."  In RFC 8826 (draft-ietf-rtcweb-security), 
-  we see "XMLHttpRequest() API.")
-
- setLocalDescription API / setLocalDescription() API
-   / setRemoteDescription() API
-    (We also see "whether setLocalDescription or
-     setRemoteDescription is called" and "before
-     setRemoteDescription() is called")
-
  mid identifiers / MID identifiers
   Because RFC 8843 (draft-ietf-mmusic-sdp-bundle-negotiation) and
   RFC 8852 (draft-ietf-avtext-rid) define "MID" as "Media Identification," 
@@ -5549,22 +5538,12 @@ document.  Please let us know which form is preferred.
    identifiers" and "rid-identifier" be "rid-ids" and "rid-id"
    per RFC 8851 (draft-ietf-mmusic-rid), to avoid "identifier identifier(s)"? 
 
- the stable state (1 instance) / the "stable" state (3 instances)
-   (Also, should 'the previous stable state' be 'a previous stable
-   state' (per Section 5.7) or 'the previous "stable" state'?)
-
- sess-id / <sess-id> (Section 5.2.1, second bullet item)
-
  set to zero / set to 0  (May we use the latter, because of
    default port value of 9' in Sections 5.2.1 and 5.3.1?)
 
  fmt value / "fmt" value
 
  mid value / "mid" value
-
- tls-id value / "a=tls-id" value
-
- "IceRestart" option / IceRestart option
 
 -->
 
