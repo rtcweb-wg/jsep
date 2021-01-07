@@ -10,9 +10,6 @@
     <title abbrev="JSEP">JavaScript Session Establishment Protocol (JSEP)</title>
     <seriesInfo name="RFC" value="8829"/>
 
-<!-- [rfced] Please insert any keywords (beyond those that appear in the
-title) for use on https://www.rfc-editor.org/search -->
-
     <author fullname="Justin Uberti" initials="J." surname="Uberti">
       <organization>Google</organization>
       <address>
@@ -60,6 +57,17 @@ know if any updates are needed.
 
     <date month="July" year="2020"/>
 
+    <keyword>webrtc</keyword>
+    <keyword>sdp</keyword>
+    <keyword>negotiation</keyword>
+    <keyword>signaling</keyword>
+    <keyword>peerconnection</keyword>
+    <keyword>api</keyword>
+    <keyword>ice</keyword>
+    <keyword>rtp</keyword>
+    <keyword>offer</keyword>
+    <keyword>answer</keyword>
+
     <abstract>
       <t>This document describes the mechanisms for allowing a
       JavaScript application to control the signaling plane of a
@@ -69,15 +77,6 @@ know if any updates are needed.
     </abstract>
   </front>
   <middle>
-
-<!-- [rfced] Adam Roach previously requested that "All other documents in 
-Cluster 238 that currently reference RFC 5245 should be updated to
-reference RFC 8445. ... any other references to RFC 5245 that I may
-have overlooked should also be updated."
-
-We believe this document intentionally refers to both RFCs.  Please let us
-know if any updates are needed.  
--->
 
     <section anchor="sec.introduction" numbered="true" toc="default">
       <name>Introduction</name>
@@ -250,7 +249,7 @@ know if any updates are needed.
         answers get handed to the implementation, and when.</t>
         <figure anchor="fig-sigModel">
           <name>JSEP Signaling Model</name>
-          <artwork name="" type="" align="left" alt=""><![CDATA[
+          <artwork name="" type="ascii-art" align="left" alt=""><![CDATA[
       +-----------+                               +-----------+
       |  Web App  |<--- App-Specific Signaling -->|  Web App  |
       +-----------+                               +-----------+
@@ -361,7 +360,7 @@ know if any updates are needed.
         final answer. The state machine for this is as follows:</t>
         <figure anchor="fig-state-machine">
           <name>JSEP State Machine</name>
-          <artwork name="" type="" align="left" alt=""><![CDATA[
+          <artwork name="" type="ascii-art" align="left" alt=""><![CDATA[
                     setRemote(OFFER)               setLocal(PRANSWER)
                         /-----\                               /-----\
                         |     |                               |     |
@@ -459,7 +458,7 @@ setRemote(ANSWER) |                                   |
           rejected, as discussed in
           <xref target="sec.subsequent-offers" format="default"/> below, that "m=" section
           will be "recycled" and associated with a new RtpTransceiver
-          with a new mid value.</t>
+          with a new MID value.</t>
           <t>RtpTransceivers can be created explicitly by the
           application or implicitly by calling setRemoteDescription
           with an offer that adds new "m=" sections.</t>
@@ -1680,7 +1679,9 @@ Suggested:
             <xref target="RFC8445" format="default"/>, <bcp14>MUST</bcp14> be used. Note that the
             remote endpoint may use a lite implementation;
             implementations <bcp14>MUST</bcp14> properly handle remote endpoints that
-            do ICE-lite.</li>
+            use ICE-lite. The remote endpoint may also use
+an older version of ICE; implementations <bcp14>MUST</bcp14> properly handle remote endpoints that use ICE
+as specified in <xref target="RFC5245" format="default"/>.</li>
             <li>DTLS
             <xref target="RFC6347" format="default"/> or DTLS-SRTP
             <xref target="RFC5763" format="default"/> <bcp14>MUST</bcp14> be used, as
@@ -1936,20 +1937,7 @@ Examples from original:
               information, e.g., randomly or using a per-PeerConnection
               counter, and <bcp14>SHOULD</bcp14> be 3 bytes or less, to allow them to
               efficiently fit into the RTP header extension defined in
-              <xref target="RFC8843" sectionFormat="comma" section="14"/>.
-
-<!-- [rfced] Section 5.2.1:  Please confirm that this citation is
-correct; we could not see a relationship between Section 14 of
-RFC 8843 [I-D.ietf-mmusic-sdp-bundle-negotiation] and the RTP header extension.
-
-Original:
- All MID
- values MUST be generated in a fashion that does not leak user
- information, e.g., randomly or using a per-PeerConnection counter,
- and SHOULD be 3 bytes or less, to allow them to efficiently fit
- into the RTP header extension defined in
- [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 14. -->
-
+              <xref target="RFC8843" sectionFormat="comma" section="15.2"/>.
               Note that this does not set the
               RtpTransceiver mid property, as that only occurs when the
               description is applied. The generated MID value can be
@@ -2121,7 +2109,7 @@ Original:
           referenced by more than one RtpTransceiver (by passing those
           MediaStreams as arguments to the addTrack and addTransceiver
           methods), a group of type "LS" <bcp14>MUST</bcp14> be added that contains
-          the mid values for each RtpTransceiver.</t>
+          the MID values for each RtpTransceiver.</t>
           <t>Attributes that SDP permits to be at either the session
           level or the media level <bcp14>SHOULD</bcp14> generally be at the media
           level even if they are identical. This assists development
@@ -2257,61 +2245,6 @@ Original:
             If the "m=" section is bundled into another "m=" section, both
             "a=candidate" and "a=end-of-candidates" <bcp14>MUST</bcp14> be
             omitted.
-
-<!-- [rfced] Section 5.2.2:  We found this RFC Editor Note on
-<https://datatracker.ietf.org/doc/draft-ietf-rtcweb-jsep/writeup/>:
-
-"OLD:
-   o  If the m= section is not bundled into another m= section, for each
-      candidate that has been gathered during the most recent gathering
-      phase (see Section 3.5.1), an "a=candidate" line MUST be added, as
-      defined in [RFC5245], Section 4.3., paragraph 3.  If candidate
-      gathering for the section has completed, an "a=end-of-candidates"
-      attribute MUST be added, as described in [I-D.ietf-ice-trickle],
-      Section 9.3.  If the m= section is bundled into another m=
-      section, both "a=candidate" and "a=end-of-candidates" MUST be
-      omitted.
-
-NEW:
-   o  If the m= section is not bundled into another m= section, for each
-      candidate that has been gathered during the most recent gathering
-      phase (see Section 3.5.1), an "a=candidate" line MUST be added, as
-      defined in [RFC5245], Section 4.3., paragraph 3.  If candidate
-      gathering for the section has completed, an "a=end-of-candidates"
-      attribute MUST be added, as described in
-      [I-D.ietf-mmusic-trickle-ice-sip], Section 8.2.  If the m= section is
-      bundled into another m= section, both "a=candidate" and
-      "a=end-of-candidates" MUST be omitted."
-
-Please note that the "OLD" text does not match what we found in the
-provided draft (i.e., "[RFC5245], Section 4.3., paragraph 3" versus
-"[I-D.ietf-mmusic-ice-sip-sdp], Section 4.1"):
-
- o  If the m= section is not bundled into another m= section, for each
-    candidate that has been gathered during the most recent gathering
-    phase (see Section 3.5.1), an "a=candidate" line MUST be added, as
-    defined in [I-D.ietf-mmusic-ice-sip-sdp], Section 4.1.  If
-    candidate gathering for the section has completed, an "a=end-of-
-    candidates" attribute MUST be added, as described in
-    [I-D.ietf-ice-trickle], Section 9.3.  If the m= section is bundled
-    into another m= section, both "a=candidate" and "a=end-of-
-    candidates" MUST be omitted.
-
-Please review, and let us know if further changes are needed.
-(Note:  "[RFC8839]" and "[RFC8840]" are the RFC numbers assigned to
-[I-D.ietf-mmusic-ice-sip-sdp] and [I-D.ietf-mmusic-trickle-ice-sip],
-respectively.)
-
-Currently:
- *  If the "m=" section is not bundled into another "m=" section, for each
-    candidate that has been gathered during the most recent gathering
-    phase (see Section 3.5.1), an "a=candidate" line MUST be added, as
-    defined in [RFC8839], Section 5.1.  If candidate gathering for the
-    section has completed, an "a=end-of-candidates" attribute MUST be
-    added, as described in [RFC8840], Section 8.2.  If the "m=" section
-    is bundled into another "m=" section, both "a=candidate" and "a=end-
-    of-candidates" MUST be omitted. -->
-
 </li>
             <li>For RtpTransceivers that are still present, the "a=rid"
             lines <bcp14>MUST</bcp14> stay the same.</li>
@@ -2499,7 +2432,7 @@ Currently:
           addTrack/addTransceiver used to create them) or have no
           MediaStream to reference because they were not created by
           addTrack/addTransceiver. If at least two such RtpTransceivers
-          exist, a group of type "LS" with the mid values of these
+          exist, a group of type "LS" with the MID values of these
           RtpTransceivers <bcp14>MUST</bcp14> be added. Otherwise, the offered "LS"
           group <bcp14>MUST</bcp14> be ignored and no corresponding group generated in
           the answer.</t>
@@ -2636,7 +2569,7 @@ Currently:
           <ul spacing="normal">
             <li>If and only if present in the offer, an "a=mid" line, as
             specified in
-            <xref target="RFC5888" sectionFormat="comma" section="9.1"/>. The "mid"
+            <xref target="RFC5888" sectionFormat="comma" section="9.1"/>. The MID 
             value <bcp14>MUST</bcp14> match that specified in the offer.</li>
             <li>A direction attribute, determined by applying the rules
             regarding the offered direction specified in
@@ -3394,33 +3327,6 @@ Currently:
 	     based on the media formats supported by this "m=" section, as
 	     described in
 	     <xref target="RFC8843" sectionFormat="comma" section="9.2"/>.
-
-<!-- [rfced] Sections 5.9, 5.10, 5.11, and 6:
-RFC 8843 [I-D.ietf-mmusic-sdp-bundle-negotiation] does not have a Section 8.2
-or a Section 10.2.  We have updated these to refer to 7.2 and 9.2,
-respectively.  Please review.
-
- Original:
-  In addition, prepare to demux RTP
-  streams intended for this m= section based on the media formats
-  supported by this m= section, as described in
-  [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 10.2.
- ...
-  *  For each specified SSRC that is signaled in the m= section,
-     prepare to demux RTP streams intended for this m= section using
-     that SSRC, as described in
-     [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 10.2.
- ...
-  If the answer contains valid bundle groups, discard any ICE
-  components for the m= sections that will be bundled onto the primary
-  ICE components in each bundle, and begin muxing these m= sections
-  accordingly, as described in
-  [I-D.ietf-mmusic-sdp-bundle-negotiation], Section 8.2.
- ...
-  When bundling, associating incoming RTP/RTCP with the proper m=
-  section is defined in [I-D.ietf-mmusic-sdp-bundle-negotiation],
-  Section 10.2. -->
-
  </li>
 	       <li>For each specified "rtx" media format, establish a
 	     mapping between the RTX payload type and its associated
@@ -3795,7 +3701,7 @@ respectively.  Please review.
 	   components for the "m=" sections that will be bundled onto the
 	   primary ICE components in each bundle, and begin muxing these
 	   "m=" sections accordingly, as described in
-	   <xref target="RFC8843" sectionFormat="comma" section="7.2"/>.</t>
+	   <xref target="RFC8843" sectionFormat="comma" section="7.4"/>.</t>
 	   <t>If the description is of type "answer" and there are still
 	   remaining candidates in the ICE candidate pool, discard
 	   them.</t>
@@ -3845,12 +3751,7 @@ respectively.  Please review.
 	   abbreviated as "AliceUA" and "BobUA", respectively, are both using the
 	   default bundle policy of "balanced" and the default RTCP mux
 	   policy of "require".</t>
-<!-- [rfced] Throughout: <artwork> has been converted to <sourcecode> as
-applicable and we set the "type" attribute.  Please review and let us know
-corrections are needed. 
--->
-
-	   <sourcecode name="" type="pseudocode"><![CDATA[
+	   <artwork name="" type="ascii-art" align="left" alt=""><![CDATA[
 //                  set up local media state
 AliceJS->AliceUA:   create new PeerConnection
 AliceJS->AliceUA:   addTrack with two tracks: audio and video
@@ -3892,7 +3793,7 @@ AliceUA->AliceJS:   ontrack events for audio and video tracks
 
 //                  media flows
 BobUA->AliceUA:     media sent from Bob to Alice
-AliceUA->BobUA:     media sent from Alice to Bob ]]></sourcecode>
+AliceUA->BobUA:     media sent from Alice to Bob ]]></artwork>
 
 	   <t>The SDP for |offer-A1| looks like:</t>
 	   <sourcecode name="offer-A1" type="sdp"><![CDATA[
@@ -4033,7 +3934,7 @@ a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae ]]></sourcecode>
 	   recvonly. Alice also specifies a maximum video decoder
 	   resolution.</t>
 
-	   <sourcecode name="" type="pseudocode"><![CDATA[
+	   <artwork name="" type="ascii-art" align="left" alt=""><![CDATA[
 //                  set up local media state
 AliceJS->AliceUA:   create new PeerConnection
 AliceJS->AliceUA:   addTrack with an audio track
@@ -4126,7 +4027,7 @@ BobJS->BobUA:       setRemoteDescription with |answer-B2|
 
 //                  media is flowing between endpoints
 BobUA->AliceUA:     audio+video+data sent from Bob to Alice
-AliceUA->BobUA:     audio+video+data sent from Alice to Bob ]]></sourcecode>
+AliceUA->BobUA:     audio+video+data sent from Alice to Bob ]]></artwork>
 
 	   <t>The SDP for |offer-B1| looks like:</t>
 	   <sourcecode name="offer-B1" type="sdp"><![CDATA[
@@ -4462,7 +4363,7 @@ a=rtcp-fb:100 nack pli ]]></sourcecode>
 	   <xref target="sec.ice-candidate-policy" format="default"/> to minimize the ICE
 	   gathering and checking needed.</t>
 
-	   <sourcecode name="" type="pseudocode"><![CDATA[
+	   <artwork name="" type="ascii-art" align="left" alt=""><![CDATA[
 //                  set up local media state
 AliceJS->AliceUA:   create new PeerConnection with "relay" ICE policy
 AliceJS->AliceUA:   addTrack with two tracks: audio and video
@@ -4534,7 +4435,7 @@ AliceUA->BobUA:     media sent from Alice to Bob
 //                  to Bob
 AliceJS->WebServer: signaling with |answer-C2|
 WebServer->BobJS:   signaling with |answer-C2|
-BobJS->BobUA:       setRemoteDescription with |answer-C2| ]]></sourcecode>
+BobJS->BobUA:       setRemoteDescription with |answer-C2| ]]></artwork>
 	   <t>The SDP for |offer-C1| looks like:</t>
 	   <sourcecode name="offer-C1" type="sdp"><![CDATA[
 v=0
@@ -5416,22 +5317,10 @@ following:
 b) The following terms appear to be used inconsistently in this
 document.  Please let us know which form is preferred.
 
- mid identifiers / MID identifiers
-  Because RFC 8843 (draft-ietf-mmusic-sdp-bundle-negotiation) and
-  RFC 8852 (draft-ietf-avtext-rid) define "MID" as "Media Identification," 
-  would it be appropriate to use "mid values" (or "MID values"*)
-  and "MIDs" instead of "mid identifiers" and "MID identifiers"?
-
-  * We see inconsistent capitalization in this cluster of documents;
-    a separate question regarding which form to use will be sent
-    separately.
-
  "RID identifiers" and "rid-identifier":  RFC 8851 (draft-ietf-mmusic-rid) 
    defines "RID" as "restriction identifier."  Should "RID
    identifiers" and "rid-identifier" be "rid-ids" and "rid-id"
    per RFC 8851 (draft-ietf-mmusic-rid), to avoid "identifier identifier(s)"? 
-
- mid value / "mid" value
 
 -->
 
