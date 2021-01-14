@@ -120,7 +120,7 @@ know if any updates are needed.
         straightforward. Whenever an offer/answer exchange is needed,
         the initiating side creates an offer by calling a createOffer
         API. The application then uses that offer to set up its local
-        config via the setLocalDescription API. The offer is finally
+        configuration via the setLocalDescription API. The offer is finally
         sent off to the remote side over its preferred signaling
         mechanism (e.g., WebSockets); upon receipt of that offer, the
         remote party installs it using the setRemoteDescription
@@ -154,8 +154,8 @@ know if any updates are needed.
         information is available rather than waiting for all of it.
         JSEP's decoupling of the ICE and signaling state machines
         allows it to accommodate either model.</t>
-        <t>Through its abstraction of signaling, the JSEP approach does
-        require the application to be aware of the signaling process.
+        <t>Although it abstracts signaling, the JSEP approach
+        requires that the application be aware of the signaling process.
         While the application does not need to understand the contents
         of session descriptions to set up a call, the application must
         call the right APIs at the right times, convert the session
@@ -278,7 +278,7 @@ know if any updates are needed.
         intersected with the set of codecs the remote side supports,
         specifies what the remote side should send. However, not all
         parameters follow this rule; some parameters are declarative,
-        and the remote side <bcp14>MUST</bcp14> either accept them or reject them
+        and the remote side must either accept them or reject them
         altogether. An example of such a parameter is the TLS
         fingerprints <xref target="RFC8122" format="default"/>
         as used in the context of DTLS <xref target="RFC6347" format="default"/>;
@@ -561,7 +561,7 @@ setRemote(ANSWER) |                                   |
             <sourcecode name="" type="sdp"><![CDATA[
 candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
             <t>The IceCandidate object contains a field to indicate
-            which ICE ufrag it is associated with, as defined in
+            which ICE username fragment (ufrag) it is associated with, as defined in
             <xref target="RFC8839" sectionFormat="comma" section="5.4"/>. This value is used
             to determine which session description (and thereby which
             gathering phase) this IceCandidate belongs to, which helps
@@ -701,8 +701,8 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
         pixels, whether square or not.</t>
         <section anchor="sec.creating-imageattr" numbered="true" toc="default">
           <name>Creating an imageattr Attribute</name>
-          <t>The receiver will first intersect any known local limits
-          (e.g., hardware decoder capabilities, local policy) to
+          <t>The receiver will first combine any known local limits
+          (e.g., hardware decoder capabilities or local policy) to
           determine the absolute minimum and maximum sizes it can
           receive. If there are no known local limits, the
           "a=imageattr" attribute <bcp14>SHOULD</bcp14> be omitted. If these local
@@ -1183,7 +1183,7 @@ Suggested:
           <t>The createOffer method generates a blob of SDP that
           contains an offer per <xref target="RFC3264" format="default"/> with the supported
           configurations for the session, including descriptions of the
-          media added to this PeerConnection, the codec/RTP/RTCP
+          media added to this PeerConnection, the codec, RTP, and RTCP
           options supported by this implementation, and any candidates
           that have been gathered by the ICE agent. An options
           parameter may be supplied to provide additional control over
@@ -1195,7 +1195,7 @@ Suggested:
           supported but not desired by default may be omitted); for
           each SDP line, the generation of the SDP will follow the
           process defined for generating an initial offer from the
-          document that specifies the given SDP line. The exact
+          specification that defines the given SDP line. The exact
           handling of initial offer generation is detailed in
           <xref target="sec.initial-offers" format="default"/> below.</t>
           <t>In the event createOffer is called after the session is
@@ -1243,7 +1243,7 @@ Suggested:
           configuration that specifies how the media plane should be
           established; for each SDP line, the generation of the SDP
           <bcp14>MUST</bcp14> follow the process defined for generating an answer from
-          the document that specifies the given SDP line. The exact
+          the specification that defines the given SDP line. The exact
           handling of answer generation is detailed in
           <xref target="sec.generating-an-answer" format="default"/> below.</t>
           <t>Session descriptions generated by createAnswer <bcp14>MUST</bcp14> be
@@ -5069,13 +5069,15 @@ Datagram Transport Layer Security (DTLS) and Transport Layer Security (TLS)</tit
     <author initials="J" surname="Uberti" fullname="Justin Uberti">
       <organization />
     </author>
+    <author initials="G" surname="Shieh" fullname="Guo-wei Shieh">
+      <organization />
+    </author>
 
     <date month="January" year="2021" />
   </front>
   <seriesInfo name="RFC" value="8828" />
   <seriesInfo name="DOI" value="10.17487/RFC8828"/>
 </reference>
-
 
 <!-- 7/6/2020: IESG eval -->
 <xi:include href="https://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-rtcweb-sdp.xml"/>
