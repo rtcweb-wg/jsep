@@ -1568,7 +1568,7 @@ Suggested:
           IceCandidate belongs to, as described in
           <xref target="sec.ice-candidate-format" format="default"/> above. In the case
           of an end-of-candidates indication, null values for the
-          "m=" section index and MID fields is interpreted to mean that
+          "m=" section index and MID fields are interpreted to mean that
           the indication applies to all "m=" sections in the specified
           ICE candidate generation. However, if both fields are null
           for a new remote candidate, this <bcp14>MUST</bcp14> be treated as an
@@ -1585,21 +1585,21 @@ Suggested:
         <section anchor="sec.onicecandidate" numbered="true" toc="default">
           <name>onicecandidate Event</name>
           <t>The onicecandidate event is dispatched to the application in two 
-          situations: 1) when the ICE agent has discovered a new allowed local
+          situations: (1) when the ICE agent has discovered a new allowed local
           ICE candidate during ICE gathering, as outlined in
           <xref target="sec.ice-gather-overview" format="default"></xref> and 
           subject to the restrictions discussed in 
-          <xref target="sec.ice-candidate-policy" format="default"></xref>, and
-          2) when an ICE gathering phase completes. The event contains a single
+          <xref target="sec.ice-candidate-policy" format="default"></xref>, or
+          (2) when an ICE gathering phase completes. The event contains a single
           IceCandidate object, as defined in 
           <xref target="sec.ice-candidate-format" format="default"/>.
           </t>
-          <t>For the first case, the newly discovered candidate is reflected
+          <t>In the first case, the newly discovered candidate is reflected
           in the IceCandidate object, and all of its fields <bcp14>MUST</bcp14> be non-null.
           This candidate will also be added to the current and/or pending local
           description according to the rules defined for Trickle ICE.</t>
           </t>
-          <t>For the second case, the event's IceCandidate object 
+          <t>In the second case, the event's IceCandidate object 
           <bcp14>MUST</bcp14> have its candidate field set to null to indicate
           the current gathering phase is complete, i.e., there will be no
           further onicecandidate events in this phase. However, the
@@ -1608,8 +1608,8 @@ Suggested:
           "m=" section index and MID fields may be specified to indicate that
           the event applies to a specific "m=" section, or set to null to 
           indicate it applies to all "m=" sections in the current ICE candidate
-          generation. This event can be used to generate an end-of-candidates
-          indication, as defined in 
+          generation. This event can be used by the application to generate an
+          end-of-candidates indication, as defined in 
           <xref target="RFC8838" sectionFormat="comma" section="13"/>. 
           </t>
         </section>
