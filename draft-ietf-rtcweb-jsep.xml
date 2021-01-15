@@ -511,7 +511,7 @@ setRemote(ANSWER) |                                   |
           onicecandidate event; these candidates will also automatically be
           added to the current and/or pending local session
           description. Finally, when all candidates have been gathered,
-          a final state change event will be dispatched to signal that the
+          a final onicecandidate event will be dispatched to signal that the
           gathering process is complete.</t>
           <t>Note that gathering phases only gather the candidates
           needed by new/recycled/restarting "m=" sections; other "m="
@@ -588,9 +588,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
             MID field is present in a received IceCandidate, it <bcp14>MUST</bcp14> be
             used for identification; otherwise, the "m=" section index is
             used instead.</t>
-            <t>When creating an IceCandidate object, JSEP
-            implementations <bcp14>MUST</bcp14> populate each of the candidate, ufrag,
-            "m=" section index, and MID fields. Implementations <bcp14>MUST</bcp14> also
+            <t>Implementations <bcp14>MUST</bcp14> 
             be prepared to receive objects with some fields missing, as
             mentioned above.</t>
           </section>
@@ -1557,22 +1555,22 @@ Suggested:
           <t>The addIceCandidate method provides an update to the ICE
           agent via an IceCandidate object
           (<xref target="sec.ice-candidate-format" format="default"/>). If the
-          IceCandidate's candidate field is filled in, the IceCandidate
+          IceCandidate's candidate field is non-null, the IceCandidate
           is treated as a new remote ICE candidate, which will be added
           to the current and/or pending remote description according to
           the rules defined for Trickle ICE. Otherwise, the
           IceCandidate is treated as an end-of-candidates indication,
           as defined in
-          <xref target="RFC8838" format="default"/>.</t>
+          <xref target="RFC8838" sectionFormat="comma" section="14"/>.</t>
           <t>In either case, the "m=" section index, MID, and ufrag
           fields from the supplied IceCandidate are used to determine
           which "m=" section and ICE candidate generation the
           IceCandidate belongs to, as described in
           <xref target="sec.ice-candidate-format" format="default"/> above. In the case
-          of an end-of-candidates indication, the absence of both the
+          of an end-of-candidates indication, null values for the
           "m=" section index and MID fields is interpreted to mean that
           the indication applies to all "m=" sections in the specified
-          ICE candidate generation. However, if both fields are absent
+          ICE candidate generation. However, if both fields are null
           for a new remote candidate, this <bcp14>MUST</bcp14> be treated as an
           invalid condition, as specified below.</t>
           <t>If any IceCandidate fields contain invalid values or an
@@ -1586,24 +1584,33 @@ Suggested:
         </section>
         <section anchor="sec.onicecandidate" numbered="true" toc="default">
           <name>onicecandidate Event</name>
-          <t>The onicecandidate event is dispatched to the application when the
-          ICE agent has discovered a new allowed local ICE candidate during ICE
-          gathering, as outlined in
+          <t>The onicecandidate event is dispatched to the application in two 
+          situations: 1) when the ICE agent has discovered a new allowed local
+          ICE candidate during ICE gathering, as outlined in
           <xref target="sec.ice-gather-overview" format="default"></xref> and 
           subject to the restrictions discussed in 
-          <xref target="sec.ice-candidate-policy" format="default"></xref>.
-          The new candidate is supplied as an IceCandidate object 
-          (<xref target="sec.ice-candidate-format" format="default"/>) in 
-          the event, and all of its fields <bcp14>MUST</bcp14> be filled in. 
+          <xref target="sec.ice-candidate-policy" format="default"></xref>, and
+          2) when an ICE gathering phase completes. The event contains a single
+          IceCandidate object, as defined in 
+          <xref target="sec.ice-candidate-format" format="default"/>.
+          </t>
+          <t>For the first case, the newly discovered candidate is reflected
+          in the IceCandidate object, and all of its fields <bcp14>MUST</bcp14> be non-null.
           This candidate will also be added to the current and/or pending local
           description according to the rules defined for Trickle ICE.</t>
-          <t>The onicecandidate event will also be dispatched to indicate
-          end-of-candidates conditions, as defined in 
-          <xref target="RFC8838" format="default"/>. For these indications,
-          the IceCandidate's candidate field <bcp14>MUST</bcp14> be omitted.
-          The "m=" section index and MID fields may be set to signify whether
-          the indication applies to a specific "m=" section or to all 
-          "m=" sections in the current ICE candidate generation.
+          </t>
+          <t>For the second case, the event's IceCandidate object 
+          <bcp14>MUST</bcp14> have its candidate field set to null to indicate
+          the current gathering phase is complete, i.e., there will be no
+          further onicecandidate events in this phase. However, the
+          IceCandidate's ufrag field <bcp14>MUST</bcp14> be specified to
+          indicate which ICE candidate generation is ending. The IceCandidate's 
+          "m=" section index and MID fields may be specified to indicate that
+          the event applies to a specific "m=" section, or set to null to 
+          indicate it applies to all "m=" sections in the current ICE candidate
+          generation. This event can be used to generate an end-of-candidates
+          indication, as defined in 
+          <xref target="RFC8838" sectionFormat="comma" section="13"/>. 
           </t>
         </section>
       </section>
