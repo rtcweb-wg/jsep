@@ -499,14 +499,14 @@ setRemote(ANSWER) |                                   |
           an offer or an answer, i.e., from either a locally or
           remotely initiated ICE restart.</t>
           <t>When a new gathering phase starts, the ICE agent will
-          notify the application that gathering is occurring through an
-          event. Then, when each new ICE candidate becomes available,
+          notify the application that gathering is occurring through a state
+          change event. Then, when each new ICE candidate becomes available,
           the ICE agent will supply it to the application via an
-          additional event; these candidates will also automatically be
+          onicecandidate event; these candidates will also automatically be
           added to the current and/or pending local session
           description. Finally, when all candidates have been gathered,
-          an event will be dispatched to signal that the gathering
-          process is complete.</t>
+          a final onicecandidate event will be dispatched to signal that the
+          gathering process is complete.</t>
           <t>Note that gathering phases only gather the candidates
           needed by new/recycled/restarting "m=" sections; other "m="
           sections continue to use their existing candidates. Also, if
@@ -582,9 +582,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
             MID field is present in a received IceCandidate, it <bcp14>MUST</bcp14> be
             used for identification; otherwise, the "m=" section index is
             used instead.</t>
-            <t>When creating an IceCandidate object, JSEP
-            implementations <bcp14>MUST</bcp14> populate each of the candidate, ufrag,
-            "m=" section index, and MID fields. Implementations <bcp14>MUST</bcp14> also
+            <t>Implementations <bcp14>MUST</bcp14> 
             be prepared to receive objects with some fields missing, as
             mentioned above.</t>
           </section>
@@ -1158,6 +1156,14 @@ Suggested:
           simulcast as described in
           <xref target="sec.simulcast" format="default"/>).</t>
         </section>
+        <section anchor="sec.onaddtrack" numbered="true" toc="default">
+          <name>onaddtrack Event</name>
+          <t>The onaddtrack event is dispatched to the application when a new
+          remote track has been signaled as a result of a setRemoteDescription
+          call. The new track is supplied as a MediaStreamTrack object in the
+          event, along with the MediaStream(s) the track is part of.
+          </t>
+        </section>
         <section anchor="sec.createDataChannel" numbered="true" toc="default">
           <name>createDataChannel</name>
           <t>The createDataChannel method creates a new data channel
@@ -1172,6 +1178,14 @@ Suggested:
           arguments that are used by the PeerConnection (e.g.,
           maxPacketLifetime) but are not reflected in the SDP and do
           not affect the JSEP state.</t>
+        </section>
+        <section anchor="sec.ondatachannel" numbered="true" toc="default">
+          <name>ondatachannel Event</name>
+          <t>The ondatachannel event is dispatched to the application when a
+          new data channel has been negotiated by the remote side, which can
+          occur at any time after the underlying SCTP/DTLS association has been
+          established. The new data channel object is supplied in the event.
+          </t>
         </section>
         <section anchor="sec.createoffer" numbered="true" toc="default">
           <name>createOffer</name>
@@ -1534,7 +1548,7 @@ Suggested:
           <t>The addIceCandidate method provides an update to the ICE
           agent via an IceCandidate object
           (<xref target="sec.ice-candidate-format" format="default"/>). If the
-          IceCandidate's candidate field is filled in, the IceCandidate
+          IceCandidate's candidate field is non-null, the IceCandidate
           is treated as a new remote ICE candidate, which will be added
           to the current and/or pending remote description according to
           the rules defined for Trickle ICE. Otherwise, the
@@ -1546,10 +1560,10 @@ Suggested:
           which "m=" section and ICE candidate generation the
           IceCandidate belongs to, as described in
           <xref target="sec.ice-candidate-format" format="default"/> above. In the case
-          of an end-of-candidates indication, the absence of both the
-          "m=" section index and MID fields is interpreted to mean that
+          of an end-of-candidates indication, null values for the
+          "m=" section index and MID fields are interpreted to mean that
           the indication applies to all "m=" sections in the specified
-          ICE candidate generation. However, if both fields are absent
+          ICE candidate generation. However, if both fields are null
           for a new remote candidate, this <bcp14>MUST</bcp14> be treated as an
           invalid condition, as specified below.</t>
           <t>If any IceCandidate fields contain invalid values or an
@@ -1560,6 +1574,34 @@ Suggested:
           indication is supplied to the ICE agent. In the case of a new
           remote candidate, connectivity checks will be sent to the new
           candidate.</t>
+        </section>
+        <section anchor="sec.onicecandidate" numbered="true" toc="default">
+          <name>onicecandidate Event</name>
+          <t>The onicecandidate event is dispatched to the application in two 
+          situations: (1) when the ICE agent has discovered a new allowed local
+          ICE candidate during ICE gathering, as outlined in
+          <xref target="sec.ice-gather-overview" format="default"></xref> and 
+          subject to the restrictions discussed in 
+          <xref target="sec.ice-candidate-policy" format="default"></xref>, or
+          (2) when an ICE gathering phase completes. The event contains a single
+          IceCandidate object, as defined in 
+          <xref target="sec.ice-candidate-format" format="default"/>.</t>
+          <t>In the first case, the newly discovered candidate is reflected
+          in the IceCandidate object, and all of its fields <bcp14>MUST</bcp14> be non-null.
+          This candidate will also be added to the current and/or pending local
+          description according to the rules defined for Trickle ICE.</t>
+          <t>In the second case, the event's IceCandidate object 
+          <bcp14>MUST</bcp14> have its candidate field set to null to indicate
+          that the current gathering phase is complete, i.e., there will be no
+          further onicecandidate events in this phase. However, the
+          IceCandidate's ufrag field <bcp14>MUST</bcp14> be specified to
+          indicate which ICE candidate generation is ending. The IceCandidate's 
+          "m=" section index and MID fields <bcp14>MAY</bcp14> be specified to indicate that
+          the event applies to a specific "m=" section, or set to null to 
+          indicate it applies to all "m=" sections in the current ICE candidate
+          generation. This event can be used by the application to generate an
+          end-of-candidates indication, as defined in 
+          <xref target="RFC8838" sectionFormat="comma" section="13"/>.</t>
         </section>
       </section>
       <section anchor="sec.transceiver" numbered="true" toc="default">
