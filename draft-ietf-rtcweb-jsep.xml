@@ -511,7 +511,8 @@ setRemote(ANSWER) |                                   |
           needed by new/recycled/restarting "m=" sections; other "m="
           sections continue to use their existing candidates. Also, if
           an "m=" section is bundled (either by a successful bundle
-          negotiation or by being marked as bundle-only), then
+          negotiation or by being marked as bundle-only,
+          i.e., that bundling is required for the section), then
           candidates will be gathered and exchanged for that "m=" section
           if and only if its MID item is a BUNDLE-tag, as described in
           <xref target="RFC8843" format="default"/>.</t>
@@ -1026,7 +1027,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
           which affects how it will interoperate with a
           non-bundle-aware endpoint. When negotiating with a
           non-bundle-aware endpoint, only the streams not marked as
-          bundle-only streams will be established.</t>
+          bundle-only will be established.</t>
           <t>The set of available policies is as follows:
           </t>
           <dl newline="false" spacing="normal">
@@ -1035,7 +1036,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
             (audio, video, or application) will contain transport
             parameters, which will allow an answerer to unbundle that
             section. The second and any subsequent "m=" sections of each
-            type will be marked bundle-only. The result is that if
+            type will be marked as bundle-only. The result is that if
             there are N distinct media types, then candidates will be
             gathered for N media streams. This policy balances
             desire to multiplex with the need to ensure that basic audio and
@@ -1867,8 +1868,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
           itself, the following rules <bcp14>MUST</bcp14> be followed:
           </t>
           <ul spacing="normal">
-            <li>If the "m=" section is marked as bundle-only, then the
-            &lt;port&gt; value <bcp14>MUST</bcp14> be set to zero. Otherwise, the &lt;port&gt; value is
+            <li>As usual, the &lt;port&gt; value is
             set to the port of the default ICE candidate for this "m="
             section, but given that no candidates are available yet,
             the default port value of 9 (Discard) <bcp14>MUST</bcp14> be used, as
@@ -2005,18 +2005,12 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
               section="5.1"/>. The associated set of rid-ids <bcp14>MUST</bcp14>
               include all of the rid-ids used in the "a=rid" lines for this "m="
               section.</li>
-            <li>If (1) the bundle policy for this PeerConnection is set to
-              "max-bundle" and this is not the first "m=" section or (2)
-              the bundle policy is set to "balanced" and this is not
-              the first "m=" section for this media type, an
-              "a=bundle-only" line.</li>
           </ul>
           <t>The following attributes, which are of category IDENTICAL
           or TRANSPORT, <bcp14>MUST</bcp14> appear only in "m=" sections that either
           have a unique address or are associated with the
           BUNDLE-tag. (In initial offers, this means those "m="
-          sections that do not contain an "a=bundle-only"
-          attribute.)</t>
+          sections that are not marked as bundle-only).</t>
           <ul spacing="normal">
             <li>"a=ice-ufrag" and "a=ice-pwd" lines, as specified in
               <xref target="RFC8839" sectionFormat="comma" section="5.4"/>.</li>
@@ -2265,12 +2259,8 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
             <li>The "a=rtcp-mux-only" line <bcp14>MUST NOT</bcp14> be added.</li>
             <li>The "a=rtcp-rsize" line <bcp14>MUST NOT</bcp14> be added unless present
             in the most recent answer.</li>
-            <li>An "a=bundle-only" line, as defined in
-            <xref target="RFC8843" sectionFormat="comma" section="6"/>,
-            <bcp14>MUST NOT</bcp14> be added.
-            Instead, JSEP implementations <bcp14>MUST</bcp14> simply omit
-            parameters in the IDENTICAL and TRANSPORT categories for
-            bundled "m=" sections, as described in
+            <li>For any bundled "m=" sections, any attributes in the IDENTICAL and
+            TRANSPORT categories <bcp14>MUST NOT</bcp14> be added, as described in 
             <xref target="RFC8843" sectionFormat="comma" section="7.1.3"/>.</li>
             <li>Note that if media "m=" sections are bundled into a data
             "m=" section, then certain TRANSPORT and IDENTICAL attributes
@@ -2279,9 +2269,9 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
             "a=rtcp-mux"). This cannot happen in initial offers because
             in the initial offer JSEP implementations always list media
             "m=" sections (if any) before the data "m=" section (if any),
-            and at least one of those media "m=" sections will not have
-            the "a=bundle-only" attribute. Therefore, in initial
-            offers, any "a=bundle-only" "m=" sections will be bundled
+            and at least one of those media "m=" sections will not be marked
+            as bundle-only. Therefore, in initial
+            offers, any bundle-only" "m=" sections will be bundled
             into a preceding non-bundle-only media "m=" section.</li>
           </ul>
           <t>The "a=group:BUNDLE" attribute <bcp14>MUST</bcp14> include the MID
@@ -3258,7 +3248,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 	   it, as defined in
 	   <xref target="RFC8445" sectionFormat="comma" section="5.1.1"/>, unless it is
 	   definitively being bundled (either (1) this is an offer and the
-	   "m=" section is marked bundle-only or (2)&nbsp;it is an answer and the
+	   "m=" section has been marked as bundle-only or (2)&nbsp;it is an answer and the
 	   "m=" section is bundled into another "m=" section).</li>
 	   <li>Or, if the ICE ufrag and password values have changed,
 	   trigger the ICE agent to start an ICE restart as described in
@@ -4043,12 +4033,11 @@ a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
 
-m=application 0 UDP/DTLS/SCTP webrtc-datachannel
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel
 c=IN IP4 0.0.0.0
 a=mid:d1
 a=sctp-port:5000
-a=max-message-size:65536
-a=bundle-only ]]></sourcecode>
+a=max-message-size:65536]]></sourcecode>
 
 	   <t>|offer-B1-candidate-1| looks like:</t>
 
@@ -4451,7 +4440,7 @@ a=rtcp-mux
 a=rtcp-mux-only
 a=rtcp-rsize
 
-m=video 0 UDP/TLS/RTP/SAVPF 100 101 102 103
+m=video 9 UDP/TLS/RTP/SAVPF 100 101 102 103
 c=IN IP4 0.0.0.0
 a=mid:v1
 a=sendrecv
@@ -4467,8 +4456,7 @@ a=extmap:3 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id
 a=rtcp-fb:100 ccm fir
 a=rtcp-fb:100 nack
 a=rtcp-fb:100 nack pli
-a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce
-a=bundle-only ]]></sourcecode>
+a=msid:bbce3ba6-abfc-ac63-d00a-e15b286f8fce ]]></sourcecode>
 	   <t>|offer-C1-candidate-1| looks like:</t>
 	   <sourcecode name="offer-C1-candidate-1" type="sdp"><![CDATA[
 ufrag 4ZcD
