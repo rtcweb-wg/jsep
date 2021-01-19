@@ -39,13 +39,6 @@
     <author fullname="Eric Rescorla" initials="E." surname="Rescorla" role="editor">
       <organization>Mozilla</organization>
       <address>
-        <postal>
-          <street>331 E. Evelyn Ave.</street>
-          <city>Mountain View</city>
-          <region>CA</region>
-          <code>94041</code>
-          <country>United States of America</country>
-        </postal>
         <email>ekr@rtfm.com</email>
       </address>
     </author>
@@ -130,8 +123,8 @@
         exchanges.</t>
         <t>Regarding ICE
         <xref target="RFC8445" format="default"/>, JSEP decouples the ICE state
-        machine from the overall signaling state machine, as the ICE
-        state machine must remain in the JSEP implementation, because
+        machine from the overall signaling state machine. The ICE
+        state machine must remain in the JSEP implementation because
         only the implementation has the necessary knowledge of
         candidates and other transport information. Performing this
         separation provides additional flexibility in protocols that
@@ -162,9 +155,9 @@
         the developer; said library would implement a given signaling
         protocol along with its state machine and serialization code,
         presenting a higher-level call-oriented interface to the
-        application developer. For example, libraries exist to provide 
+        application developer. For example, libraries exist to provide
         implementations of the SIP <xref target="RFC3261"/> and Extensible Messaging
-	and Presence Protocol (XMPP) <xref target="RFC6120"/> signaling
+        and Presence Protocol (XMPP) <xref target="RFC6120"/> signaling
         protocols atop the JSEP API.
         Thus, JSEP
         provides greater control for the experienced developer without
@@ -343,7 +336,7 @@
         <t>In
         <xref target="RFC3264" format="default"/>, the constraint at the signaling
         level is that only one offer can be outstanding for a given
-        session, but at the media stack level, a new offer can be
+        session, but at the JSEP level, a new offer can be
         generated at any point. For example, when using SIP for
         signaling, if one offer is sent and is then canceled using a SIP
         CANCEL, another offer can be generated even though no answer
@@ -582,7 +575,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
             MID field is present in a received IceCandidate, it <bcp14>MUST</bcp14> be
             used for identification; otherwise, the "m=" section index is
             used instead.</t>
-            <t>Implementations <bcp14>MUST</bcp14> 
+            <t>Implementations <bcp14>MUST</bcp14>
             be prepared to receive objects with some fields missing, as
             mentioned above.</t>
           </section>
@@ -1217,7 +1210,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
           contains an SDP answer per <xref target="RFC3264" format="default"/> with the supported
           configuration for the session that is compatible with the
           parameters supplied in the most recent call to
-          setRemoteDescription, which <bcp14>MUST</bcp14> have been called prior to
+          setRemoteDescription; setRemoteDescription <bcp14>MUST</bcp14> have been called prior to
           calling createAnswer. Like createOffer, the returned blob
           contains descriptions of the media added to this
           PeerConnection, the codec/RTP/RTCP options negotiated for
@@ -1299,10 +1292,10 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
             callee actually accepts the call, the application can plug
             in the real MediaStreamTrack and create a new "sendrecv"
             offer to update the previous offer/answer pair and start
-            bidirectional media flow.  While this could also be done 
-            with a "sendonly" pranswer followed by a "sendrecv" 
-            answer, the initial pranswer leaves the offer/answer 
-            exchange open, which means that the caller cannot send an 
+            bidirectional media flow.  While this could also be done
+            with a "sendonly" pranswer followed by a "sendrecv"
+            answer, the initial pranswer leaves the offer/answer
+            exchange open, which means that the caller cannot send an
             updated offer during this time.  </t>
             <t>As an example, consider a typical JSEP application that
             wants to set up audio and video as quickly as possible.
@@ -1554,30 +1547,30 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
         </section>
         <section anchor="sec.onicecandidate" numbered="true" toc="default">
           <name>onicecandidate Event</name>
-          <t>The onicecandidate event is dispatched to the application in two 
+          <t>The onicecandidate event is dispatched to the application in two
           situations: (1) when the ICE agent has discovered a new allowed local
           ICE candidate during ICE gathering, as outlined in
-          <xref target="sec.ice-gather-overview" format="default"></xref> and 
-          subject to the restrictions discussed in 
+          <xref target="sec.ice-gather-overview" format="default"></xref> and
+          subject to the restrictions discussed in
           <xref target="sec.ice-candidate-policy" format="default"></xref>, or
           (2) when an ICE gathering phase completes. The event contains a single
-          IceCandidate object, as defined in 
+          IceCandidate object, as defined in
           <xref target="sec.ice-candidate-format" format="default"/>.</t>
           <t>In the first case, the newly discovered candidate is reflected
           in the IceCandidate object, and all of its fields <bcp14>MUST</bcp14> be non-null.
           This candidate will also be added to the current and/or pending local
           description according to the rules defined for Trickle ICE.</t>
-          <t>In the second case, the event's IceCandidate object 
+          <t>In the second case, the event's IceCandidate object
           <bcp14>MUST</bcp14> have its candidate field set to null to indicate
           that the current gathering phase is complete, i.e., there will be no
           further onicecandidate events in this phase. However, the
           IceCandidate's ufrag field <bcp14>MUST</bcp14> be specified to
-          indicate which ICE candidate generation is ending. The IceCandidate's 
+          indicate which ICE candidate generation is ending. The IceCandidate's
           "m=" section index and MID fields <bcp14>MAY</bcp14> be specified to indicate that
-          the event applies to a specific "m=" section, or set to null to 
+          the event applies to a specific "m=" section, or set to null to
           indicate it applies to all "m=" sections in the current ICE candidate
           generation. This event can be used by the application to generate an
-          end-of-candidates indication, as defined in 
+          end-of-candidates indication, as defined in
           <xref target="RFC8838" sectionFormat="comma" section="13"/>.</t>
         </section>
       </section>
@@ -1837,8 +1830,8 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
             target="RFC8840" sectionFormat="comma" section="4.1.1"/> and
             <xref target="RFC8445" sectionFormat="comma" section="10"/>.
 </li>
-            <li>If WebRTC identity is being used, an "a=identity" line 
-            <bcp14>MUST</bcp14> be added, as described in 
+            <li>If WebRTC identity is being used, an "a=identity" line
+            <bcp14>MUST</bcp14> be added, as described in
             <xref target="RFC8827" sectionFormat="comma" section="5"/>.</li>
           </ul>
           <t>The next step is to generate "m=" sections, as specified in
@@ -1854,8 +1847,8 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
           establish a mapping between the transceiver and the index of
           the generated "m=" section.</t>
           <t>Each "m=" section, provided it is not marked as bundle-only,
-          <bcp14>MUST</bcp14> generate a unique set of ICE credentials and gather its
-          own unique set of ICE candidates. Bundle-only "m=" sections
+          <bcp14>MUST</bcp14> contain a unique set of ICE credentials and 
+          a unique set of ICE candidates. Bundle-only "m=" sections
           <bcp14>MUST NOT</bcp14> contain any ICE credentials and <bcp14>MUST NOT</bcp14> gather any
           candidates.</t>
           <t>For DTLS, all "m=" sections <bcp14>MUST</bcp14> use any and all certificates
@@ -2190,7 +2183,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
             "m=" section, as described in
             <xref target="RFC8839" sectionFormat="comma" section="4.2.1.2"/> and clarified in
             <xref target="sec.profile-names" format="default"/>.
-            If no RTP candidates have yet been gathered, default 
+            If no RTP candidates have yet been gathered, default
             values <bcp14>MUST</bcp14> still be used, as described above.</li>
             <li>Each "a=mid" line <bcp14>MUST</bcp14> stay the same.</li>
             <li>Each "a=ice-ufrag" and "a=ice-pwd" line <bcp14>MUST</bcp14> stay the
@@ -2464,7 +2457,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
           a=recvonly ]]></sourcecode>
           <t>The example in <xref target="sec.detailed-example" format="default"/> shows a more involved case of "LS" group
           generation.</t>
-          <t>The next step is to generate "m=" sections for each "m="
+          <t>The next step is to generate a "m=" section for each "m="
           section that is present in the remote offer, as specified in
           <xref target="RFC3264" sectionFormat="comma" section="6"/>. For the purposes
           of this discussion, any session-level attributes in the offer
@@ -2484,7 +2477,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
           </t>
           <ul spacing="normal">
             <li>The associated RtpTransceiver has been stopped.</li>
-            <li>There is no offered media format that is both supported 
+            <li>There is no offered media format that is both supported
             and, if applicable, allowed by codec preferences.</li>
             <li>The bundle policy is "max-bundle", and this is not the
             first "m=" section or in the same bundle group as the first
@@ -2546,7 +2539,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
           <ul spacing="normal">
             <li>If and only if present in the offer, an "a=mid" line, as
             specified in
-            <xref target="RFC5888" sectionFormat="comma" section="9.1"/>. The MID 
+            <xref target="RFC5888" sectionFormat="comma" section="9.1"/>. The MID
             value <bcp14>MUST</bcp14> match that specified in the offer.</li>
             <li>A direction attribute, determined by applying the rules
             regarding the offered direction specified in
@@ -3348,7 +3341,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 	   <li>For any specified "RR" or "RS" bandwidth values, handle as
 	   specified in
 	   <xref target="RFC3556" sectionFormat="comma" section="2"/>.</li>
-	   <li>Any "AS" bandwidth value (<xref target="RFC4566" sectionFormat="comma" section="5.8"/>) 
+	   <li>Any "AS" bandwidth value (<xref target="RFC4566" sectionFormat="comma" section="5.8"/>)
            <bcp14>MUST</bcp14> be ignored, as the meaning
 	   of this construct at the session level is not well
 	   defined. </li>
@@ -3399,7 +3392,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 	      </t>
 	      <ul spacing="normal">
 		<li>If the "m=" section is being recycled (see
-	      <xref target="sec.subsequent-offers" format="default"/>), disassociate  
+	      <xref target="sec.subsequent-offers" format="default"/>), disassociate
 	      the currently associated RtpTransceiver by setting its mid
 	      property to "null", and discard the mapping between the
 	      transceiver and its "m=" section index.</li>
@@ -3482,10 +3475,10 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 		    <li>TIAS = AS * 1000 * 0.95 - (50 * 40 * 8)</li>
 		  </ul>
 		  <t>
-              The 1000 changes the unit from kbps to bps (as required 
-              by TIAS), and the 0.95 is to allocate 5% to RTCP. 
+              The 1000 changes the unit from kbps to bps (as required
+              by TIAS), and the 0.95 is to allocate 5% to RTCP.
               An estimate of header overhead is then subtracted out, in which
-              the 50 is based on 50 packets per second, the 40 is based on 
+              the 50 is based on 50 packets per second, the 40 is based on
               typical header size (in bytes), and the 8 converts bytes to bits.
               Note that "TIAS" is preferred over
 	      "AS" because it provides more accurate
@@ -3609,7 +3602,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 	       negotiated should be included in the outgoing RTP streams,
 	       using the extension mapping from the remote description. If the MID
          header extension has been negotiated, include it in the outgoing RTP
-         streams, as indicated in 
+         streams, as indicated in
          <xref target="RFC8843" sectionFormat="comma" section="15"/>.
 	       If the RtpStreamId or RepairedRtpStreamId header extensions have been
          negotiated and rid-ids have been established, include these header
