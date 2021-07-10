@@ -199,6 +199,23 @@
         example. Providing createOffer/createAnswer avoids this
         problem.</t>
       </section>
+      <section>
+        <name>Changes from RFC 8829</name>
+        <t>
+          When [RFC8829] was published an inconsistency regarding BUNDLE
+          <xref target="RFC8843" /> operation was identified, both in terms
+          of specification text as well as implementation behavior. For 
+          the latter concern, it was observed that some implementations 
+          implemented the "max-bundle" policy by assuming that bundling
+          had already been negotiated, rather than marking "m=" sections
+          as bundle-only as indicated by <xref target="RFC8829" />. 
+          In order to prevent unexpected changes to applications relying
+          on the pre-standard behavior, the decision
+          was made to deprecate the use of "max-bundle" and instead
+          introduce a new "must-bundle" policy that, when selected, provides
+          the correct behavior.
+        </t>
+      </section>
     </section>
     <section anchor="sec.terminology" numbered="true" toc="default">
       <name>Terminology</name>
@@ -1052,11 +1069,12 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
           compatibility with legacy endpoints, the default bundle
           policy <bcp14>MUST</bcp14> be set to "balanced".</t>
           <t><xref target="RFC8829" format="default"/> defined a policy
-          known as "max-bundle", which, while
-          defined identically to "must-bundle" above, was implemented
-          differently by some implementations (for example, no "m=" sections were
-          marked as bundle-only). This policy is considered deprecated
-          as a result, and applications should use "must-bundle" instead.
+          known as "max-bundle", which, while defined identically to the
+          "must-bundle" policy described above, was implemented
+          according to an earlier, pre-standard definition by some implementations
+          (in which, for example, no "m=" sections were marked as bundle-only).
+          As a result, this policy is considered deprecated, and new
+          applications should use the "must-bundle" policy instead.
           </t>
           <t>The application can specify its preferred policy regarding
           use of RTP/RTCP multiplexing
