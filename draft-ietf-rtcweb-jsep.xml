@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!DOCTYPE rfc SYSTEM "rfc2629-xhtml.ent">
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std"
-     docName="draft-ietf-rtcweb-rfc8829" number="8829" consensus="true"
-     ipr="trust200902" obsoletes="" updates="" submissionType="IETF"
+     docName="draft-uberti-rtcweb-rfc8829bis-00" number="8829" consensus="true"
+     ipr="trust200902" obsoletes="8829" updates="" submissionType="IETF"
      xml:lang="en" tocInclude="true" symRefs="true" sortRefs="true"
      tocDepth="4" version="3">
   <!-- xml2rfc v2v3 conversion 2.34.0 -->
@@ -11,15 +11,8 @@
     <seriesInfo name="RFC" value="8829"/>
 
     <author fullname="Justin Uberti" initials="J." surname="Uberti">
-      <organization>Google</organization>
+      <organization>Clubhouse</organization>
       <address>
-        <postal>
-          <street>747 6th Street South</street>
-          <city>Kirkland</city>
-          <region>WA</region>
-          <code>98033</code>
-          <country>United States of America</country>
-        </postal>
         <email>justin@uberti.name</email>
       </address>
     </author>
@@ -43,7 +36,7 @@
       </address>
     </author>
 
-    <date month="January" year="2021"/>
+    <date day="10" month="July" year="2021"/>
 
     <keyword>webrtc</keyword>
     <keyword>sdp</keyword>
@@ -62,6 +55,7 @@
       multimedia session via the interface specified in the W3C
       RTCPeerConnection API and discusses how this relates to existing
       signaling protocols.</t>
+      <t>This specification obsoletes RFC 8829.</t>
     </abstract>
   </front>
   <middle>
@@ -204,17 +198,6 @@
         basically forces the use of said library even for a simple
         example. Providing createOffer/createAnswer avoids this
         problem.</t>
-      </section>
-      <section>
-        <name>Contradiction regarding bundle-only "m=" sections</name>
-        <t>Since the approval of the WebRTC specification documents, the IETF has become 
-aware of an inconsistency between the document specifying JSEP and the document specifying BUNDLE (this RFC and <xref target="RFC8843" format="default" sectionFormat="of" derivedContent="RFC8843"/>, respectively).  Rather than delaying publication further to come to a resolution, the documents are being published as they were originally approved.  The IETF intends to restart work on these technologies, and revised versions of these documents will be published as soon as a resolution becomes available.</t>
-        <t>The specific issue involves the handling of "m=" sections that are designated as bundle-only, as discussed in <xref target="sec.pc-constructor" format="default" sectionFormat="of" derivedContent="Section 4.1.1"/> of this RFC. Currently, there is divergence between JSEP and BUNDLE, as well as between these specifications and existing browser implementations:</t>
-        <ul>
-          <li>JSEP prescribes that said "m=" sections should use port zero and add an "a=bundle-only" attribute in initial offers, but not in answers or subsequent offers.</li>
-          <li>BUNDLE prescribes that these "m=" sections should be marked as described in the previous point, but in all offers and answers.</li>
-          <li>Most current browsers do not mark any "m=" sections with port zero and instead use the same port for all bundled "m=" sections; some others follow the JSEP behavior.</li>
-        </ul>
       </section>
     </section>
     <section anchor="sec.terminology" numbered="true" toc="default">
@@ -1039,9 +1022,9 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
             (audio, video, or application) will contain transport
             parameters, which will allow an answerer to unbundle that
             section. The second and any subsequent "m=" sections of each
-            type will be marked bundle-only. The result is that if
+            type will be marked as bundle-only. The result is that if
             there are N distinct media types, then candidates will be
-            gathered for N media streams. This policy balances
+            gathered for N media streams. This policy balances the
             desire to multiplex with the need to ensure that basic audio and
             video can still be negotiated in legacy cases. When acting
             as answerer, if there is no bundle group in the offer, the
@@ -1050,22 +1033,31 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
             <dt>max-compat:</dt>
             <dd>All "m=" sections will contain
             transport parameters; none will be marked as bundle-only.
-            This policy will allow all streams to be received by
-            non-bundle-aware endpoints but will require separate candidates
-            to be gathered for each media stream.</dd>
-            <dt>max-bundle:</dt>
+            This policy makes no assumptions about the remote endpoint and
+            as such will allow all streams to be received by
+            non-bundle-aware endpoints, but as a result requires separate
+            candidates to be gathered for each media stream.</dd>
+            <dt>must-bundle:</dt>
             <dd>Only the first "m=" section will
             contain transport parameters; all streams other than the
-            first will be marked as bundle-only. This policy aims to
-            minimize candidate gathering and maximize multiplexing, at
+            first will be marked as bundle-only. This policy presumes
+            the remote endpoint supports multiplexing and accordingly aims to
+            minimize candidate gathering, at
             the cost of less compatibility with legacy endpoints. When
             acting as answerer, the implementation will reject any "m="
             sections other than the first "m=" section, unless they are
             in the same bundle group as that "m=" section.</dd>
-          </dl>
+          </dl>         
           <t>As it provides the best trade-off between performance and
           compatibility with legacy endpoints, the default bundle
           policy <bcp14>MUST</bcp14> be set to "balanced".</t>
+          <t><xref target="RFC8829" format="default"/> defined a policy
+          known as "max-bundle", which, while
+          defined identically to "must-bundle" above, was implemented
+          differently by some implementations (for example, no "m=" sections were
+          marked as bundle-only). This policy is considered deprecated
+          as a result, and applications should use "must-bundle" instead.
+          </t>
           <t>The application can specify its preferred policy regarding
           use of RTP/RTCP multiplexing
           <xref target="RFC5761" format="default"/> using one of the following
@@ -2011,7 +2003,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
               include all of the rid-ids used in the "a=rid" lines for this "m="
               section.</li>
             <li>If (1) the bundle policy for this PeerConnection is set to
-              "max-bundle" and this is not the first "m=" section or (2)
+              "must-bundle" and this is not the first "m=" section or (2)
               the bundle policy is set to "balanced" and this is not
               the first "m=" section for this media type, an
               "a=bundle-only" line.</li>
@@ -2490,7 +2482,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
             <li>The associated RtpTransceiver has been stopped.</li>
             <li>There is no offered media format that is both supported
             and, if applicable, allowed by codec preferences.</li>
-            <li>The bundle policy is "max-bundle", and this is not the
+            <li>The bundle policy is "must-bundle", and this is not the
             first "m=" section or in the same bundle group as the first
             "m=" section.</li>
             <li>The bundle policy is "balanced", and this is not the
@@ -3263,7 +3255,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 	   it, as defined in
 	   <xref target="RFC8445" sectionFormat="comma" section="5.1.1"/>, unless it is
 	   definitively being bundled (either (1) this is an offer and the
-	   "m=" section is marked bundle-only or (2)&nbsp;it is an answer and the
+	   "m=" section is marked as bundle-only or (2)&nbsp;it is an answer and the
 	   "m=" section is bundled into another "m=" section).</li>
 	   <li>Or, if the ICE ufrag and password values have changed,
 	   trigger the ICE agent to start an ICE restart as described in
@@ -3908,7 +3900,7 @@ a=msid:61317484-2ed4-49d7-9eb7-1414322a7aae ]]></sourcecode>
 	   <name>Detailed Example</name>
 	   <t>This section shows a more involved example of a session
 	   between two JSEP endpoints. Trickle ICE is used in full trickle
-	   mode, with a bundle policy of "max-bundle", an RTCP mux policy
+	   mode, with a bundle policy of "must-bundle", an RTCP mux policy
 	   of "require", and a single TURN server. Initially, both Alice
 	   and Bob establish an audio channel and a data channel. Later,
 	   Bob adds two video flows -- one for his video feed and one for
