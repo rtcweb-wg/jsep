@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!DOCTYPE rfc SYSTEM "rfc2629-xhtml.ent">
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std"
-     docName="draft-ietf-rtcweb-jsep-26" number="8829" consensus="true"
+     docName="draft-ietf-rtcweb-rfc8829" number="8829" consensus="true"
      ipr="trust200902" obsoletes="" updates="" submissionType="IETF"
      xml:lang="en" tocInclude="true" symRefs="true" sortRefs="true"
      tocDepth="4" version="3">
@@ -204,6 +204,17 @@
         basically forces the use of said library even for a simple
         example. Providing createOffer/createAnswer avoids this
         problem.</t>
+      </section>
+      <section>
+        <name>Contradiction regarding bundle-only "m=" sections</name>
+        <t>Since the approval of the WebRTC specification documents, the IETF has become 
+aware of an inconsistency between the document specifying JSEP and the document specifying BUNDLE (this RFC and <xref target="RFC8843" format="default" sectionFormat="of" derivedContent="RFC8843"/>, respectively).  Rather than delaying publication further to come to a resolution, the documents are being published as they were originally approved.  The IETF intends to restart work on these technologies, and revised versions of these documents will be published as soon as a resolution becomes available.</t>
+        <t>The specific issue involves the handling of "m=" sections that are designated as bundle-only, as discussed in <xref target="sec.pc-constructor" format="default" sectionFormat="of" derivedContent="Section 4.1.1"/> of this RFC. Currently, there is divergence between JSEP and BUNDLE, as well as between these specifications and existing browser implementations:</t>
+        <ul>
+          <li>JSEP prescribes that said "m=" sections should use port zero and add an "a=bundle-only" attribute in initial offers, but not in answers or subsequent offers.</li>
+          <li>BUNDLE prescribes that these "m=" sections should be marked as described in the previous point, but in all offers and answers.</li>
+          <li>Most current browsers do not mark any "m=" sections with port zero and instead use the same port for all bundled "m=" sections; some others follow the JSEP behavior.</li>
+        </ul>
       </section>
     </section>
     <section anchor="sec.terminology" numbered="true" toc="default">
