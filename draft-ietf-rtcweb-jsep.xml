@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!DOCTYPE rfc SYSTEM "rfc2629-xhtml.ent">
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std"
-     docName="draft-uberti-rtcweb-rfc8829bis-00" number="8829" consensus="true"
+     docName="draft-uberti-rtcweb-rfc8829bis-01" number="8829" consensus="true"
      ipr="trust200902" obsoletes="8829" updates="" submissionType="IETF"
      xml:lang="en" tocInclude="true" symRefs="true" sortRefs="true"
      tocDepth="4" version="3">
@@ -36,7 +36,7 @@
       </address>
     </author>
 
-    <date day="10" month="July" year="2021"/>
+    <date day="25" month="Oct" year="2021"/>
 
     <keyword>webrtc</keyword>
     <keyword>sdp</keyword>
@@ -202,19 +202,19 @@
       <section>
         <name>Changes from RFC 8829</name>
         <t>
-          When [RFC8829] was published, an inconsistency regarding BUNDLE
-          <xref target="RFC8843"/> operation was identified concerning
+          When <xref target="RFC8829"/> was published, inconsistencies regarding BUNDLE
+          <xref target="RFC8843"/> operation were identified with regard to
           both the specification text as well as implementation behavior. The
           former concern was addressed via an update to <xref target="RFC8843"/>.
           For the latter concern, it was observed that some implementations 
-          implemented the "max-bundle" bundle policy by assuming that bundling
-          had already been negotiated, rather than marking "m=" sections
-          as bundle-only as indicated by <xref target="RFC8829"/>. 
+          implemented the "max-bundle" bundle policy defined in <xref target="RFC8829"/>
+          by assuming that bundling had already been negotiated, rather than marking "m=" sections
+          as bundle-only as indicated by the specification.
           In order to prevent unexpected changes to applications relying
           on the pre-standard behavior, the decision
-          was made to deprecate the use of "max-bundle" and instead
-          introduce a new "must-bundle" policy that, when selected, provides
-          the correct behavior.
+          was made to deprecate "max-bundle" and instead
+          introduce an identically defined "must-bundle" policy that, when selected,
+          provides the behavior originally specified by <xref target="RFC8829"/>.
         </t>
       </section>
     </section>
@@ -2307,6 +2307,11 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
           other words, the bundle attribute <bcp14>MUST</bcp14> contain all "m="
           sections that were previously bundled, as long as they are
           still alive, as well as any new "m=" sections.</t>
+          <t>Note that if bundling has been negotiated, unbundling is no longer
+          possible, and media sections will not be marked as bundle-only. This is
+          by design, but could cause issues in the rare case of sending a 
+          subsequent offer as an initial offer to a non-bundle-aware endpoint
+          via Third Party Call Control (TPCC).</t>
           <t>"a=group:LS" attributes are generated in the same way as
           for initial offers, with the additional stipulation that any
           lip sync groups that were present in the most recent answer
