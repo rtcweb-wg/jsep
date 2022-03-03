@@ -203,10 +203,10 @@
         <name>Changes from RFC 8829</name>
         <t>
           When <xref target="RFC8829"/> was published, inconsistencies regarding BUNDLE
-          <xref target="I-D.ietf-mmusic-rfc8843-bis"/> operation were identified with regard to
+          <xref target="RFC9143"/> operation were identified with regard to
           both the specification text as well as implementation behavior. The
-          former concern was addressed via an update to <xref target="I-D.ietf-mmusic-rfc8843-bis"/>.
-          For the latter concern, it was observed that some implementations 
+          former concern was addressed via an update to <xref target="RFC9143"/>.
+          For the latter concern, it was observed that some implementations
           implemented the "max-bundle" bundle policy defined in <xref target="RFC8829"/>
           by assuming that bundling had already been negotiated, rather than marking "m=" sections
           as bundle-only as indicated by the specification.
@@ -519,7 +519,7 @@ setRemote(ANSWER) |                                   |
           negotiation or by being marked as bundle-only), then
           candidates will be gathered and exchanged for that "m=" section
           if and only if its MID item is a BUNDLE-tag, as described in
-          <xref target="I-D.ietf-mmusic-rfc8843-bis" format="default"/>.</t>
+          <xref target="RFC9143" format="default"/>.</t>
         </section>
         <section anchor="sec.ice-candidate-trickling" numbered="true" toc="default">
           <name>ICE Candidate Trickling</name>
@@ -1020,7 +1020,7 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
           therefore the default candidate pool size <bcp14>MUST</bcp14> be zero.</t>
           <t>The application can specify its preferred policy regarding
           the use of BUNDLE, the multiplexing mechanism defined in
-          <xref target="I-D.ietf-mmusic-rfc8843-bis" format="default">
+          <xref target="RFC9143" format="default">
             </xref>. Regardless of policy, the application will always
           try to negotiate bundle onto a single transport and will
           offer a single bundle group across all "m=" sections; use of
@@ -1065,14 +1065,14 @@ candidate:1 1 UDP 1694498815 192.0.2.33 10000 typ host ]]></sourcecode>
             acting as answerer, the implementation will reject any "m="
             sections other than the first "m=" section, unless they are
             in the same bundle group as that "m=" section.</dd>
-          </dl>         
+          </dl>
           <t>As it provides the best trade-off between performance and
           compatibility with legacy endpoints, the default bundle
           policy <bcp14>MUST</bcp14> be set to "balanced".</t>
           <t><xref target="RFC8829" format="default"/> defined a policy
           known as "max-bundle", which, while defined identically to the
           "must-bundle" policy described above, was implemented
-          by some implementations according to an earlier, pre-standard definition 
+          by some implementations according to an earlier, pre-standard definition
           (in which, for example, no "m=" sections were marked as bundle-only).
           As a result, "max-bundle" is considered deprecated, and new
           applications should use the "must-bundle" policy instead.
@@ -1916,7 +1916,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
           unnecessary duplication when bundling, attributes of category
           IDENTICAL or TRANSPORT <bcp14>MUST NOT</bcp14> be repeated in bundled "m="
           sections, repeating the guidance from
-          <xref target="I-D.ietf-mmusic-rfc8843-bis"
+          <xref target="RFC9143"
           sectionFormat="comma" section="7.1.3"/>.
           This includes "m=" sections for which bundling has
           been negotiated and is still desired, as well as "m=" sections
@@ -1931,7 +1931,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
               information, e.g., randomly or using a per-PeerConnection
               counter, and <bcp14>SHOULD</bcp14> be 3 bytes or less, to allow them to
               efficiently fit into the RTP header extension defined in
-              <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="15.2"/>.
+              <xref target="RFC9143" sectionFormat="comma" section="15.2"/>.
               Note that this does not set the
               RtpTransceiver mid property, as that only occurs when the
               description is applied. The generated MID value can be
@@ -2282,12 +2282,12 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
             <li>The "a=rtcp-rsize" line <bcp14>MUST NOT</bcp14> be added unless present
             in the most recent answer.</li>
             <li>An "a=bundle-only" line, as defined in
-            <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="6"/>,
+            <xref target="RFC9143" sectionFormat="comma" section="6"/>,
             <bcp14>MUST NOT</bcp14> be added.
             Instead, JSEP implementations <bcp14>MUST</bcp14> simply omit
             parameters in the IDENTICAL and TRANSPORT categories for
             bundled "m=" sections, as described in
-            <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="7.1.3"/>.</li>
+            <xref target="RFC9143" sectionFormat="comma" section="7.1.3"/>.</li>
             <li>Note that if media "m=" sections are bundled into a data
             "m=" section, then certain TRANSPORT and IDENTICAL attributes
             may appear in the data "m=" section even if they would
@@ -2309,9 +2309,9 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
           still alive, as well as any new "m=" sections.</t>
           <t>Note that if bundling has been negotiated, unbundling is no longer
           possible, and media sections will not be marked as bundle-only. This is
-          by design, but could cause issues in the rare case of sending a 
+          by design, but could cause issues in the rare case of sending a
           subsequent offer as an initial offer to a non-bundle-aware endpoint
-          via Third Party Call Control (3PCC), as discussed in <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="7.6"/>.</t>
+          via Third Party Call Control (3PCC), as discussed in <xref target="RFC9143" sectionFormat="comma" section="7.6"/>.</t>
           <t>"a=group:LS" attributes are generated in the same way as
           for initial offers, with the additional stipulation that any
           lip sync groups that were present in the most recent answer
@@ -2516,7 +2516,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
             offerer tagged "m=" section is being rejected due to one of
             the above reasons. This requires all "m=" sections in the
             bundle group to be rejected, as specified in
-            <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="7.3.3"/>.</li>
+            <xref target="RFC9143" sectionFormat="comma" section="7.3.3"/>.</li>
           </ul>
           <t>Otherwise, each "m=" section in the answer <bcp14>MUST</bcp14> then be
           generated as specified in
@@ -3314,7 +3314,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 	       <li>If the MID header extension is supported, prepare to
 	     demux RTP streams intended for this "m=" section based on the
 	     MID header extension, as described in
-	     <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="15"/>.</li>
+	     <xref target="RFC9143" sectionFormat="comma" section="15"/>.</li>
 	       <li>For each specified media format, establish a mapping
 	     between the payload type and the actual media format, as
 	     described in
@@ -3322,7 +3322,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 	     prepare to demux RTP streams intended for this "m=" section
 	     based on the media formats supported by this "m=" section, as
 	     described in
-	     <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="9.2"/>.
+	     <xref target="RFC9143" sectionFormat="comma" section="9.2"/>.
  </li>
 	       <li>For each specified "rtx" media format, establish a
 	     mapping between the RTX payload type and its associated
@@ -3476,7 +3476,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 		<li>For each specified Synchronization Source (SSRC) that is signaled in the "m="
 	      section, prepare to demux RTP streams intended for this "m="
 	      section using that SSRC, as described in
-	      <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="9.2"/>.</li>
+	      <xref target="RFC9143" sectionFormat="comma" section="9.2"/>.</li>
 		<li>For each specified RTP header extension that is also
 	      supported by the local implementation, establish a mapping
 	      between the extension ID and URI, as described in
@@ -3630,7 +3630,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 	       using the extension mapping from the remote description. If the MID
          header extension has been negotiated, include it in the outgoing RTP
          streams, as indicated in
-         <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="15"/>.
+         <xref target="RFC9143" sectionFormat="comma" section="15"/>.
 	       If the RtpStreamId or RepairedRtpStreamId header extensions have been
          negotiated and rid-ids have been established, include these header
          extensions in the outgoing RTP streams, as indicated in
@@ -3700,7 +3700,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 	   components for the "m=" sections that will be bundled onto the
 	   primary ICE components in each bundle, and begin muxing these
 	   "m=" sections accordingly, as described in
-	   <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="7.4"/>.</t>
+	   <xref target="RFC9143" sectionFormat="comma" section="7.4"/>.</t>
 	   <t>If the description is of type "answer" and there are still
 	   remaining candidates in the ICE candidate pool, discard
 	   them.</t>
@@ -3710,7 +3710,7 @@ as specified in <xref target="RFC5245" format="default"/>.</li>
 	 <name>Processing RTP/RTCP</name>
 	 <t>When bundling, associating incoming RTP/RTCP with the proper
 	 "m=" section is defined in
-	 <xref target="I-D.ietf-mmusic-rfc8843-bis" sectionFormat="comma" section="9.2"/>. When not bundling, the proper "m=" section is clear from the
+	 <xref target="RFC9143" sectionFormat="comma" section="9.2"/>. When not bundling, the proper "m=" section is clear from the
 	 ICE component over which the RTP/RTCP is received.</t>
 	 <t>Once the proper "m=" section or sections are known, RTP/RTCP is delivered
 	 to the RtpTransceiver(s) associated with the "m=" section(s) and
@@ -4903,22 +4903,6 @@ Datagram Transport Layer Security (DTLS) and Transport Layer Security (TLS)</tit
 </reference>
 
 
-    <reference anchor="I-D.ietf-mmusic-rfc8843-bis" target="https://datatracker.ietf.org/doc/draft-ietf-mmusic-rfc8843bis">
-      <front>
-        <title>Negotiating Media Multiplexing Using the Session Description Protocol (SDP)</title>
-        <author initials="C" surname="Holmberg" fullname="Christer Holmberg">
-          <organization/>
-        </author>
-        <author initials="H" surname="Alvestrand" fullname="Harald Alvestrand">
-          <organization/>
-        </author>
-        <author initials="C" surname="Jennings" fullname="Cullen Jennings">
-          <organization/>
-        </author>
-        <date month="December" year="2021"/>
-      </front>
-    </reference>
-
 <reference anchor="RFC8859" target="https://www.rfc-editor.org/info/rfc8859">
   <front>
     <title>A Framework for Session Description Protocol (SDP)
@@ -5042,6 +5026,7 @@ Datagram Transport Layer Security (DTLS) and Transport Layer Security (TLS)</tit
 <xi:include href="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8445.xml"/>
 <xi:include href="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3711.xml"/>
 <xi:include href="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8829.xml"/>
+<xi:include href="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.9143.xml"/>
       </references>
       <references>
         <name>Informative References</name>
